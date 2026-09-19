@@ -1,0 +1,6 @@
+{
+  "name": "منصة تنازل | Tanazul - بديل عقار إكزيت",
+  "description": "المنصة الأولى للتنازل العقاري والخروج الآمن من عبء الأقساط واسترداد المدفوع كاش، وشراء وحدات بسعر التعاقد القديم بدون أوفر برايس.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
