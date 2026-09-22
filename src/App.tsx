@@ -18,6 +18,7 @@ import { ContactPage } from './pages/ContactPage';
 import { InvestorsPage } from './pages/InvestorsPage';
 import { SellUnitPage } from './pages/SellUnitPage';
 import { OpportunitiesPage } from './pages/OpportunitiesPage';
+import { AdminPlatform } from './components/admin/AdminPlatform';
 import { BRAND_SUGGESTIONS } from './data/mockData';
 import { BrandSuggestion, PageId, RealEstateUnit } from './types';
 import { useUnits } from './context/UnitsContext';
@@ -61,7 +62,7 @@ export default function App() {
   useEffect(() => {
     const handleHash = () => {
       const hash = window.location.hash.replace('#', '');
-      if (['story', 'how-it-works', 'contact', 'investors', 'sell', 'opportunities'].includes(hash)) {
+      if (['story', 'how-it-works', 'contact', 'investors', 'sell', 'opportunities', 'admin'].includes(hash)) {
         setActivePage(hash as PageId);
       } else if (hash === 'listings') {
         setActivePage('opportunities');
@@ -223,14 +224,24 @@ export default function App() {
             onNavigate={handleNavigate}
           />
         )}
+
+        {/* 7. لوحة تحكم الإدارة والتدقيق الفني */}
+        {activePage === 'admin' && (
+          <AdminPlatform
+            onBackToApp={() => handleNavigate('home')}
+            language={language}
+          />
+        )}
       </main>
 
-      {/* Footer */}
-      <Footer
-        currentBrand={currentBrand}
-        onNavigate={handleNavigate}
-        onOpenAddUnit={() => setIsAddUnitOpen(true)}
-      />
+      {/* Footer (hidden inside Admin Platform for full viewport immersion) */}
+      {activePage !== 'admin' && (
+        <Footer
+          currentBrand={currentBrand}
+          onNavigate={handleNavigate}
+          onOpenAddUnit={() => setIsAddUnitOpen(true)}
+        />
+      )}
 
       {/* Unit Detail Modal */}
       <UnitDetailModal

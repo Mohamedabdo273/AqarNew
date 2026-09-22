@@ -5,7 +5,27 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [
+      react(), 
+      tailwindcss(),
+      {
+        name: 'admin-api-endpoints',
+        configureServer(server) {
+          server.middlewares.use(async (req, res, next) => {
+            if (req.url && req.url.startsWith('/api/admin')) {
+              try {
+                const { handleAdminApiRequest } = await import('./src/server/mockBackendState');
+                const handled = await handleAdminApiRequest(req, res);
+                if (handled) return;
+              } catch (err) {
+                console.error('API middleware error:', err);
+              }
+            }
+            next();
+          });
+        },
+      }
+    ],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

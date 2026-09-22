@@ -76,6 +76,21 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 text-[11px] shrink-0">
+            {/* Admin Platform Quick Access */}
+            <button
+              onClick={() => onNavigate('admin')}
+              className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded font-bold transition-all cursor-pointer text-[11px] ${
+                activePage === 'admin'
+                  ? 'bg-[#0f766e] text-white shadow-xs'
+                  : 'text-slate-300 hover:text-[#2dd4bf] bg-slate-800/80 hover:bg-slate-700'
+              }`}
+              title={language === 'ar' ? 'لوحة تحكم الإدارة والتدقيق' : 'Admin Operations Suite'}
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-[#2dd4bf]" />
+              <span>{language === 'ar' ? 'لوحة الإدارة' : 'Admin'}</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+            </button>
+
             {/* Language Switcher in Topbar */}
             <button
               onClick={toggleLanguage}
@@ -148,6 +163,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
             <button onClick={() => onNavigate('contact')} className={navItemClass('contact')}>
               {t('contactUs')}
+            </button>
+            <button onClick={() => onNavigate('admin')} className={navItemClass('admin')}>
+              <span className="flex items-center gap-1">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#0f766e]" />
+                <span>{language === 'ar' ? 'الإدارة' : 'Admin'}</span>
+              </span>
             </button>
           </nav>
 
@@ -311,6 +332,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               className={`w-full ${isRTL ? 'text-right' : 'text-left'} p-2.5 rounded-lg transition-colors cursor-pointer ${activePage === 'contact' ? 'bg-[#0f766e]/10 text-[#0f766e] font-black' : 'hover:bg-slate-50'}`}
             >
               {t('contactUs')}
+            </button>
+            <button 
+              onClick={() => { onNavigate('admin'); setMobileMenuOpen(false); }}
+              className={`w-full ${isRTL ? 'text-right' : 'text-left'} p-2.5 rounded-lg transition-colors cursor-pointer flex items-center justify-between ${activePage === 'admin' ? 'bg-[#0f766e] text-white font-black' : 'bg-teal-50 text-teal-900 border border-teal-200'}`}
+            >
+              <span className="flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-[#0f766e]" />
+                <span>{language === 'ar' ? 'لوحة تحكم الإدارة والتدقيق' : 'Admin Operations Platform'}</span>
+              </span>
+              <span className="text-[10px] bg-[#0f766e] text-white font-bold px-2 py-0.5 rounded">Admin</span>
             </button>
           </div>
 

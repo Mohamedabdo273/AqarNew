@@ -62,7 +62,8 @@ export type PageId =
   | 'contact' 
   | 'investors' 
   | 'sell' 
-  | 'opportunities';
+  | 'opportunities'
+  | 'admin';
 
 export interface RealEstateUnit {
   id: string;
