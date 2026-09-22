@@ -35,7 +35,7 @@ export const UnitDetailModal: React.FC<UnitDetailModalProps> = ({
   if (!unit) return null;
 
   const saved = isUnitSaved(unit.id);
-  const savings = unit.currentMarketPrice - unit.originalContractPrice;
+  const savings = unit.buyerGain ?? 0;
 
   const formatEGP = (num: number) => {
     return (

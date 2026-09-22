@@ -36,7 +36,7 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   onOpenAddUnit,
   onNavigate
 }) => {
-  const { toggleSaveUnit, isUnitSaved, savedUnitIds } = useUnits();
+  const { toggleSaveUnit, isUnitSaved, savedUnitIds, regions } = useUnits();
   const { language, t, isRTL } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRegion, setSelectedRegion] = useState('ALL');
@@ -84,8 +84,8 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
       })
       .sort((a, b) => {
         if (sortBy === 'savings') {
-          const savingsA = a.currentMarketPrice - a.originalContractPrice;
-          const savingsB = b.currentMarketPrice - b.originalContractPrice;
+          const savingsA = a.buyerGain ?? 0;
+          const savingsB = b.buyerGain ?? 0;
           return savingsB - savingsA;
         }
         if (sortBy === 'cashLow') {
@@ -99,7 +99,7 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   }, [units, searchQuery, selectedRegion, selectedType, selectedDelivery, maxCash, sortBy, onlySaved, savedUnitIds]);
 
   const formatEGP = (num: number) => {
-    return num.toLocaleString() + ' ' + t('egp');
+    return Math.round(num).toLocaleString('en-US') + ' ' + t('egp');
   };
 
   return (
@@ -175,12 +175,12 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
                 className="w-full px-2.5 py-2 bg-slate-50 border border-[#cbd2d9] rounded-lg"
               >
                 <option value="ALL">{language === 'ar' ? 'كل المناطق' : 'All Regions'}</option>
-                <option value={language === 'ar' ? 'القاهرة الجديدة' : 'New Cairo'}>{language === 'ar' ? 'القاهرة الجديدة' : 'New Cairo'}</option>
-                <option value={language === 'ar' ? 'الشيخ زايد وأكتوبر' : 'Sheikh Zayed & 6th of October'}>{language === 'ar' ? 'الشيخ زايد وأكتوبر' : 'Sheikh Zayed & 6th of October'}</option>
-                <option value={language === 'ar' ? 'العاصمة الإدارية' : 'New Administrative Capital'}>{language === 'ar' ? 'العاصمة الإدارية' : 'New Administrative Capital'}</option>
-                <option value={language === 'ar' ? 'الساحل الشمالي' : 'North Coast'}>{language === 'ar' ? 'الساحل الشمالي' : 'North Coast'}</option>
-                <option value={language === 'ar' ? 'المستقبل والشروق' : 'Mostakbal & Shorouk'}>{language === 'ar' ? 'المستقبل والشروق' : 'Mostakbal & Shorouk'}</option>
-                <option value={language === 'ar' ? 'البحر الأحمر' : 'Red Sea'}>{language === 'ar' ? 'البحر الأحمر' : 'Red Sea'}</option>
+                {regions.map((r) => (
+                  <option key={r.id} value={language === 'ar' ? r.nameAr : r.nameEn}>
+                    {language === 'ar' ? r.nameAr : r.nameEn}
+                    {r.unitsCount > 0 ? ` (${r.unitsCount})` : ''}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -194,11 +194,14 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
                 <option value="ALL">{language === 'ar' ? 'كل الأنواع' : 'All Types'}</option>
                 <option value={language === 'ar' ? 'شقة' : 'Apartment'}>{language === 'ar' ? 'شقة' : 'Apartment'}</option>
                 <option value={language === 'ar' ? 'تاون هاوس' : 'Townhouse'}>{language === 'ar' ? 'تاون هاوس' : 'Townhouse'}</option>
-                <option value={language === 'ar' ? 'فيلا مستقلة' : 'Standalone Villa'}>{language === 'ar' ? 'فيلا مستقلة' : 'Standalone Villa'}</option>
+                <option value={language === 'ar' ? 'فيلا مستقلة' : 'Villa'}>{language === 'ar' ? 'فيلا مستقلة' : 'Villa'}</option>
                 <option value={language === 'ar' ? 'دوبلكس' : 'Duplex'}>{language === 'ar' ? 'دوبلكس' : 'Duplex'}</option>
-                <option value={language === 'ar' ? 'تجاري / محل' : 'Retail Shop'}>{language === 'ar' ? 'تجاري / محل' : 'Retail Shop'}</option>
-                <option value={language === 'ar' ? 'عيادة / إداري' : 'Commercial Office'}>{language === 'ar' ? 'عيادة / إداري' : 'Commercial Office'}</option>
-                <option value={language === 'ar' ? 'شاليه ساحلي' : 'Coastal Chalet'}>{language === 'ar' ? 'شاليه ساحلي' : 'Coastal Chalet'}</option>
+                <option value={language === 'ar' ? 'تجاري / محل' : 'Retail'}>{language === 'ar' ? 'تجاري / محل' : 'Retail'}</option>
+                <option value={language === 'ar' ? 'عيادة / إداري' : 'Office'}>{language === 'ar' ? 'عيادة / إداري' : 'Office'}</option>
+                <option value={language === 'ar' ? 'شاليه ساحلي' : 'Chalet'}>{language === 'ar' ? 'شاليه ساحلي' : 'Chalet'}</option>
+                <option value={language === 'ar' ? 'توين هاوس' : 'Twin house'}>{language === 'ar' ? 'توين هاوس' : 'Twin house'}</option>
+                <option value={language === 'ar' ? 'بنتهاوس' : 'Penthouse'}>{language === 'ar' ? 'بنتهاوس' : 'Penthouse'}</option>
+                <option value={language === 'ar' ? 'أرض' : 'Land'}>{language === 'ar' ? 'أرض' : 'Land'}</option>
               </select>
             </div>
 
@@ -302,7 +305,7 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {filteredUnits.map((unit) => {
-              const savings = unit.currentMarketPrice - unit.originalContractPrice;
+              const savings = unit.buyerGain ?? 0;
               const displayTitle = (language === 'en' && unit.titleEn) ? unit.titleEn : unit.title;
               const displayDev = (language === 'en' && unit.developerEn) ? unit.developerEn : unit.developer;
               const displayCompound = (language === 'en' && unit.compoundEn) ? unit.compoundEn : unit.compound;

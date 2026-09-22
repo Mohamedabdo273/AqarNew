@@ -30,21 +30,27 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({
   onNavigate,
   onOpenAddUnitModal
 }) => {
-  const { addUnit } = useUnits();
+  const { createUnit, developers, compounds, regions, loadCompounds } = useUnits();
   const { language, t, isRTL } = useLanguage();
   // Direct form submission state
-  const [developer, setDeveloper] = useState('');
-  const [compound, setCompound] = useState('');
-  const [propertyType, setPropertyType] = useState<PropertyType>('شقة');
-  const [region, setRegion] = useState<'القاهرة الجديدة' | 'الشيخ زايد وأكتوبر' | 'العاصمة الإدارية' | 'الساحل الشمالي' | 'المستقبل والشروق' | 'البحر الأحمر'>('القاهرة الجديدة');
+  const [developerId, setDeveloperId] = useState<number>(0);
+  const [compoundId, setCompoundId] = useState<number>(0);
+  const [propertyType, setPropertyType] = useState<number>(1);
   const [areaM2, setAreaM2] = useState<number>(160);
   const [contractPrice, setContractPrice] = useState<number>(5000000);
   const [paidAmount, setPaidAmount] = useState<number>(2000000);
   const [ownerName, setOwnerName] = useState('');
   const [ownerPhone, setOwnerPhone] = useState('');
-  const [fileName, setFileName] = useState<string | null>(null);
+  const [contractFile, setContractFile] = useState<File | null>(null);
   const [submitted, setSubmitted] = useState(false);
-  const [newlyCreatedUnit, setNewlyCreatedUnit] = useState<RealEstateUnit | null>(null);
+  const [newUnitCode, setNewUnitCode] = useState<string>('');
+  const [saving, setSaving] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+
+  const selectedCompound = compounds.find((c) => c.id === compoundId);
+  const developerName = developers.find((d) => d.id === developerId)?.nameAr ?? '';
+  const compoundName = selectedCompound?.nameAr ?? '';
+  const regionName = regions.find((r) => r.id === selectedCompound?.regionId)?.nameAr ?? '';
 
   const formatEGP = (num: number) => {
     return num.toLocaleString() + ' ' + t('egp');
@@ -52,23 +58,44 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({
 
   const remaining = Math.max(0, contractPrice - paidAmount);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const created = addUnit({
-      developer: developer || (language === 'ar' ? 'مطور عقاري معتمد' : 'Verified Developer'),
-      compound: compound || (language === 'ar' ? `كمبوند ${developer}` : `Compound ${developer}`),
-      propertyType,
-      region,
-      areaM2: Number(areaM2) || 160,
-      originalContractPrice: Number(contractPrice),
-      paidCashAmount: Number(paidAmount),
-      installmentValue: Math.round(remaining / 20),
-      ownerName,
-      ownerPhone,
-      uploadedFileName: fileName || undefined
-    });
-    setNewlyCreatedUnit(created);
-    setSubmitted(true);
+    setSubmitError('');
+
+    if (!developerId || !compoundId) {
+      setSubmitError(language === 'ar' ? 'اختار المطور والمشروع من القايمة' : 'Select developer and project');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const unitId = await createUnit(
+        {
+          developerId,
+          compoundId,
+          propertyType,
+          areaM2: Number(areaM2) || 160,
+          originalContractPrice: Number(contractPrice),
+          paidCashAmount: Number(paidAmount),
+          remainingAmount: remaining,
+          installmentValue: Math.round(remaining / 20),
+          installmentFrequency: 2,
+        },
+        contractFile ? [{ docType: 1, file: contractFile }] : undefined
+      );
+      setNewUnitCode(`U-${10000 + unitId}`);
+      setSubmitted(true);
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error
+          ? err.message
+          : language === 'ar'
+            ? 'مقدرناش نحفظ الوحدة'
+            : 'Could not save the unit'
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -231,11 +258,11 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({
               <p className="text-xs text-slate-600 leading-relaxed">
                 {language === 'ar' ? (
                   <>
-                    شكراً لك يا <strong>{ownerName || 'فندم'}</strong>. استلمنا بيانات وحدتك في مشروع ({compound || developer})، ورقم الفحص التوثيقي: <span className="font-mono font-bold text-[#0f766e] bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">{newlyCreatedUnit?.verificationCode || 'TNZ-VERIFIED'}</span>.
+                    شكراً لك يا <strong>{ownerName || 'فندم'}</strong>. استلمنا بيانات وحدتك في مشروع ({compoundName || developerName})، ورقم الفحص التوثيقي: <span className="font-mono font-bold text-[#0f766e] bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">{newUnitCode || 'TNZ-VERIFIED'}</span>.
                   </>
                 ) : (
                   <>
-                    Thank you <strong>{ownerName || 'Sir/Madam'}</strong>. We received your listing in ({compound || developer}). Audit Ref: <span className="font-mono font-bold text-[#0f766e] bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">{newlyCreatedUnit?.verificationCode || 'TNZ-VERIFIED'}</span>.
+                    Thank you <strong>{ownerName || 'Sir/Madam'}</strong>. We received your listing in ({compoundName || developerName}). Audit Ref: <span className="font-mono font-bold text-[#0f766e] bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">{newUnitCode || 'TNZ-VERIFIED'}</span>.
                   </>
                 )}
               </p>
@@ -281,28 +308,48 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({
                     <label className="block font-bold text-slate-700 mb-1">
                       {language === 'ar' ? 'المطور العقاري:' : 'Developer:'} <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="text"
+                    <select
                       required
-                      placeholder={language === 'ar' ? 'مثال: بالم هيلز، سوديك، إعمار، ماونتن فيو...' : 'e.g. Palm Hills, SODIC, Emaar, Mountain View...'}
-                      value={developer}
-                      onChange={(e) => setDeveloper(e.target.value)}
+                      value={developerId}
+                      onChange={(e) => {
+                        const id = Number(e.target.value);
+                        setDeveloperId(id);
+                        setCompoundId(0);
+                        loadCompounds(id);
+                      }}
                       className="w-full px-3 py-2 bg-slate-50 border border-[#cbd2d9] rounded-lg"
-                    />
+                    >
+                      <option value={0}>{language === 'ar' ? '— اختر المطور —' : '— Select developer —'}</option>
+                      {developers.map((d) => (
+                        <option key={d.id} value={d.id}>
+                          {language === 'ar' ? d.nameAr : d.nameEn ?? d.nameAr}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   <div>
                     <label className="block font-bold text-slate-700 mb-1">
                       {language === 'ar' ? 'اسم الكمبوند / المشروع:' : 'Compound / Project:'} <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      type="text"
+                    <select
                       required
-                      placeholder={language === 'ar' ? 'مثال: بادية، فيليت، هايد بارك، مراسي...' : 'e.g. Badya, Villette, Hyde Park, Marassi...'}
-                      value={compound}
-                      onChange={(e) => setCompound(e.target.value)}
-                      className="w-full px-3 py-2 bg-slate-50 border border-[#cbd2d9] rounded-lg"
-                    />
+                      disabled={!developerId}
+                      value={compoundId}
+                      onChange={(e) => setCompoundId(Number(e.target.value))}
+                      className="w-full px-3 py-2 bg-slate-50 border border-[#cbd2d9] rounded-lg disabled:opacity-50"
+                    >
+                      <option value={0}>
+                        {developerId
+                          ? language === 'ar' ? '— اختر المشروع —' : '— Select project —'
+                          : language === 'ar' ? 'اختر المطور الأول' : 'Select a developer first'}
+                      </option>
+                      {compounds.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {language === 'ar' ? c.nameAr : c.nameEn ?? c.nameAr}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
@@ -311,31 +358,23 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({
                     <label className="block font-bold text-slate-700 mb-1">{language === 'ar' ? 'نوع الوحدة:' : 'Type:'}</label>
                     <select
                       value={propertyType}
-                      onChange={(e) => setPropertyType(e.target.value as PropertyType)}
+                      onChange={(e) => setPropertyType(Number(e.target.value))}
                       className="w-full px-3 py-2 bg-slate-50 border border-[#cbd2d9] rounded-lg"
                     >
-                      <option value="شقة">{language === 'ar' ? 'شقة' : 'Apartment'}</option>
-                      <option value="تاون هاوس">{language === 'ar' ? 'تاون هاوس' : 'Townhouse'}</option>
-                      <option value="فيلا مستقلة">{language === 'ar' ? 'فيلا مستقلة' : 'Standalone Villa'}</option>
-                      <option value="دوبلكس">{language === 'ar' ? 'دوبلكس' : 'Duplex'}</option>
-                      <option value="تجاري / محل">{language === 'ar' ? 'تجاري / محل' : 'Retail Shop'}</option>
-                      <option value="شاليه ساحلي">{language === 'ar' ? 'شاليه ساحلي' : 'Coastal Chalet'}</option>
+                      <option value={1}>{language === 'ar' ? 'شقة' : 'Apartment'}</option>
+                      <option value={3}>{language === 'ar' ? 'تاون هاوس' : 'Townhouse'}</option>
+                      <option value={2}>{language === 'ar' ? 'فيلا مستقلة' : 'Standalone Villa'}</option>
+                      <option value={5}>{language === 'ar' ? 'دوبلكس' : 'Duplex'}</option>
+                      <option value={8}>{language === 'ar' ? 'تجاري / محل' : 'Retail Shop'}</option>
+                      <option value={7}>{language === 'ar' ? 'شاليه ساحلي' : 'Coastal Chalet'}</option>
                     </select>
                   </div>
 
                   <div>
                     <label className="block font-bold text-slate-700 mb-1">{language === 'ar' ? 'المنطقة:' : 'Region:'}</label>
-                    <select
-                      value={region}
-                      onChange={(e) => setRegion(e.target.value as any)}
-                      className="w-full px-3 py-2 bg-slate-50 border border-[#cbd2d9] rounded-lg"
-                    >
-                      <option value="القاهرة الجديدة">{language === 'ar' ? 'القاهرة الجديدة' : 'New Cairo'}</option>
-                      <option value="الشيخ زايد وأكتوبر">{language === 'ar' ? 'الشيخ زايد وأكتوبر' : 'Sheikh Zayed & October'}</option>
-                      <option value="العاصمة الإدارية">{language === 'ar' ? 'العاصمة الإدارية' : 'New Capital'}</option>
-                      <option value="الساحل الشمالي">{language === 'ar' ? 'الساحل الشمالي' : 'North Coast'}</option>
-                      <option value="المستقبل والشروق">{language === 'ar' ? 'المستقبل والشروق' : 'Mostakbal & Shorouk'}</option>
-                    </select>
+                    <div className="w-full px-3 py-2 bg-slate-100 border border-[#cbd2d9] rounded-lg text-slate-500 truncate">
+                      {regionName || (language === 'ar' ? 'حسب المشروع' : 'From project')}
+                    </div>
                   </div>
 
                   <div>
@@ -450,7 +489,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({
                     className="hidden"
                     onChange={(e) => {
                       if (e.target.files && e.target.files[0]) {
-                        setFileName(e.target.files[0].name);
+                        setContractFile(e.target.files[0]);
                       }
                     }}
                   />
@@ -458,8 +497,8 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({
                     htmlFor="sell-upload"
                     className="inline-block mt-2 px-3 py-1 bg-white border border-[#cbd2d9] rounded-md text-[11px] font-bold text-slate-700 cursor-pointer hover:bg-slate-50"
                   >
-                    {fileName
-                      ? (language === 'ar' ? `تم اختيار: ${fileName}` : `Selected: ${fileName}`)
+                    {contractFile
+                      ? (language === 'ar' ? `تم اختيار: ${contractFile.name}` : `Selected: ${contractFile.name}`)
                       : (language === 'ar' ? 'اختر ملفاً من جهازك' : 'Choose file from device')}
                   </label>
                 </div>
@@ -491,7 +530,6 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({
             onStartExitRequest={(contractP, paidP, dev) => {
               setContractPrice(contractP);
               setPaidAmount(paidP);
-              setDeveloper(dev);
               const el = document.getElementById('sell-form');
               if (el) el.scrollIntoView({ behavior: 'smooth' });
             }}

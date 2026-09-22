@@ -5,35 +5,23 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
-    plugins: [
-      react(), 
-      tailwindcss(),
-      {
-        name: 'admin-api-endpoints',
-        configureServer(server) {
-          server.middlewares.use(async (req, res, next) => {
-            if (req.url && req.url.startsWith('/api/admin')) {
-              try {
-                const { handleAdminApiRequest } = await import('./src/server/mockBackendState');
-                const handled = await handleAdminApiRequest(req, res);
-                if (handled) return;
-              } catch (err) {
-                console.error('API middleware error:', err);
-              }
-            }
-            next();
-          });
-        },
-      }
-    ],
+    plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
       },
     },
     server: {
+      // كل طلبات /api بتروح للباك إند الحقيقي (.NET على 5080).
+      // كان فيه middleware بيرد على /api/admin ببيانات وهمية — اتشال بعد الربط.
+      proxy: {
+        '/api': {
+          target: process.env.VITE_API_URL ?? 'http://localhost:5080',
+          changeOrigin: true,
+        },
+      },
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
-      // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
+      // Do not modify—file watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
       watch: process.env.DISABLE_HMR === 'true' ? null : {},

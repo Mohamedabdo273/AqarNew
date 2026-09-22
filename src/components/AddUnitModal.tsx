@@ -32,15 +32,18 @@ export const AddUnitModal: React.FC<AddUnitModalProps> = ({
   prefillDeveloper = 'بالم هيلز',
   onUnitCreated
 }) => {
-  const { addUnit } = useUnits();
+  const { createUnit, developers, compounds, regions, loadCompounds } = useUnits();
   const { language, t, isRTL } = useLanguage();
   const [step, setStep] = useState<1 | 2 | 3>(1);
-  
-  const [developer, setDeveloper] = useState(prefillDeveloper);
-  const [compound, setCompound] = useState('');
-  const [propertyType, setPropertyType] = useState<PropertyType>('شقة');
-  const [region, setRegion] = useState<'القاهرة الجديدة' | 'الشيخ زايد وأكتوبر' | 'العاصمة الإدارية' | 'الساحل الشمالي' | 'المستقبل والشروق' | 'البحر الأحمر'>('القاهرة الجديدة');
+
+  const [developerId, setDeveloperId] = useState<number>(0);
+  const [compoundId, setCompoundId] = useState<number>(0);
+  const [propertyType, setPropertyType] = useState<number>(1);
   const [areaM2, setAreaM2] = useState<number>(160);
+
+  const selectedCompound = compounds.find((c) => c.id === compoundId);
+  const selectedRegionName =
+    regions.find((r) => r.id === selectedCompound?.regionId)?.nameAr ?? '';
   
   const [contractPrice, setContractPrice] = useState<number>(prefillContractPrice);
   const [paidAmount, setPaidAmount] = useState<number>(prefillPaidAmount);
@@ -49,9 +52,11 @@ export const AddUnitModal: React.FC<AddUnitModalProps> = ({
 
   const [ownerName, setOwnerName] = useState('');
   const [ownerPhone, setOwnerPhone] = useState('');
-  const [uploadedFile, setUploadedFile] = useState<string | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [createdUnit, setCreatedUnit] = useState<RealEstateUnit | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   if (!isOpen) return null;
 
@@ -65,26 +70,41 @@ export const AddUnitModal: React.FC<AddUnitModalProps> = ({
     );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newUnit = addUnit({
-      developer: developer || (language === 'ar' ? 'مطور عقاري معتمد' : 'Approved Developer'),
-      compound: compound || (language === 'ar' ? `كمبوند ${developer}` : `${developer} Compound`),
-      propertyType,
-      region,
-      areaM2: Number(areaM2) || 150,
-      originalContractPrice: Number(contractPrice),
-      paidCashAmount: Number(paidAmount),
-      installmentValue: Number(installmentValue),
-      nextInstallmentDate: nextInstallmentDate || '2026-12-01',
-      ownerName,
-      ownerPhone,
-      uploadedFileName: uploadedFile || undefined
-    });
-    setCreatedUnit(newUnit);
-    setSubmitted(true);
-    if (onUnitCreated) {
-      onUnitCreated(newUnit);
+    setSubmitError('');
+
+    if (!developerId || !compoundId) {
+      setSubmitError(language === 'ar' ? 'اختار المطور والمشروع' : 'Select developer and project');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await createUnit(
+        {
+          developerId,
+          compoundId,
+          propertyType,
+          areaM2: Number(areaM2) || 150,
+          originalContractPrice: Number(contractPrice),
+          paidCashAmount: Number(paidAmount),
+          remainingAmount: remaining,
+          installmentValue: Number(installmentValue) || undefined,
+          installmentFrequency: 2, // ربع سنوي — الأشيع في السوق
+          nextInstallmentDate: nextInstallmentDate || undefined,
+        },
+        // العقد لازم يترفع عشان الوحدة تروح للمراجعة
+        uploadedFile ? [{ docType: 1, file: uploadedFile }] : undefined
+      );
+      setSubmitted(true);
+      onUnitCreated?.(undefined as unknown as RealEstateUnit);
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error ? err.message : language === 'ar' ? 'مقدرناش نحفظ الوحدة' : 'Could not save the unit'
+      );
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -211,28 +231,55 @@ export const AddUnitModal: React.FC<AddUnitModalProps> = ({
                       <label className="block font-bold text-slate-700 mb-1">
                         {language === 'ar' ? 'المطور العقاري:' : 'Developer:'}
                       </label>
-                      <input
-                        type="text"
+                      <select
                         required
-                        placeholder={language === 'ar' ? 'بالم هيلز، سوديك...' : 'Palm Hills, SODIC...'}
-                        value={developer}
-                        onChange={(e) => setDeveloper(e.target.value)}
+                        value={developerId}
+                        onChange={(e) => {
+                          const id = Number(e.target.value);
+                          setDeveloperId(id);
+                          setCompoundId(0);
+                          loadCompounds(id);
+                        }}
                         className="w-full px-3 py-2 bg-slate-50 border border-[#e5e7eb] rounded-lg"
-                      />
+                      >
+                        <option value={0}>
+                          {language === 'ar' ? '— اختر المطور —' : '— Select developer —'}
+                        </option>
+                        {developers.map((d) => (
+                          <option key={d.id} value={d.id}>
+                            {language === 'ar' ? d.nameAr : d.nameEn ?? d.nameAr}
+                          </option>
+                        ))}
+                      </select>
                     </div>
 
                     <div>
                       <label className="block font-bold text-slate-700 mb-1">
                         {language === 'ar' ? 'اسم المشروع / الكمبوند:' : 'Project / Compound Name:'}
                       </label>
-                      <input
-                        type="text"
+                      <select
                         required
-                        placeholder={language === 'ar' ? 'فيليت، بادية...' : 'Villette, Badya...'}
-                        value={compound}
-                        onChange={(e) => setCompound(e.target.value)}
-                        className="w-full px-3 py-2 bg-slate-50 border border-[#e5e7eb] rounded-lg"
-                      />
+                        disabled={!developerId}
+                        value={compoundId}
+                        onChange={(e) => setCompoundId(Number(e.target.value))}
+                        className="w-full px-3 py-2 bg-slate-50 border border-[#e5e7eb] rounded-lg disabled:opacity-50"
+                      >
+                        <option value={0}>
+                          {developerId
+                            ? language === 'ar' ? '— اختر المشروع —' : '— Select project —'
+                            : language === 'ar' ? 'اختر المطور الأول' : 'Select a developer first'}
+                        </option>
+                        {compounds.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {language === 'ar' ? c.nameAr : c.nameEn ?? c.nameAr}
+                          </option>
+                        ))}
+                      </select>
+                      <p className="mt-1 text-[11px] text-slate-400">
+                        {language === 'ar'
+                          ? 'مشروعك مش في القايمة؟ كلّمنا ونضيفه.'
+                          : 'Project not listed? Contact us and we will add it.'}
+                      </p>
                     </div>
                   </div>
 
@@ -243,15 +290,15 @@ export const AddUnitModal: React.FC<AddUnitModalProps> = ({
                       </label>
                       <select
                         value={propertyType}
-                        onChange={(e) => setPropertyType(e.target.value as PropertyType)}
+                        onChange={(e) => setPropertyType(Number(e.target.value))}
                         className="w-full px-2.5 py-2 bg-slate-50 border border-[#e5e7eb] rounded-lg"
                       >
-                        <option value="شقة">{language === 'ar' ? 'شقة' : 'Apartment'}</option>
-                        <option value="تاون هاوس">{language === 'ar' ? 'تاون هاوس' : 'Townhouse'}</option>
-                        <option value="فيلا مستقلة">{language === 'ar' ? 'فيلا مستقلة' : 'Standalone Villa'}</option>
-                        <option value="دوبلكس">{language === 'ar' ? 'دوبلكس' : 'Duplex'}</option>
-                        <option value="تجاري / محل">{language === 'ar' ? 'تجاري / محل' : 'Commercial / Retail'}</option>
-                        <option value="شاليه ساحلي">{language === 'ar' ? 'شاليه ساحلي' : 'Coastal Chalet'}</option>
+                        <option value={1}>{language === 'ar' ? 'شقة' : 'Apartment'}</option>
+                        <option value={3}>{language === 'ar' ? 'تاون هاوس' : 'Townhouse'}</option>
+                        <option value={2}>{language === 'ar' ? 'فيلا مستقلة' : 'Standalone Villa'}</option>
+                        <option value={5}>{language === 'ar' ? 'دوبلكس' : 'Duplex'}</option>
+                        <option value={8}>{language === 'ar' ? 'تجاري / محل' : 'Commercial / Retail'}</option>
+                        <option value={7}>{language === 'ar' ? 'شاليه ساحلي' : 'Coastal Chalet'}</option>
                       </select>
                     </div>
 
@@ -259,16 +306,11 @@ export const AddUnitModal: React.FC<AddUnitModalProps> = ({
                       <label className="block font-bold text-slate-700 mb-1">
                         {language === 'ar' ? 'المنطقة:' : 'Region:'}
                       </label>
-                      <select
-                        value={region}
-                        onChange={(e) => setRegion(e.target.value as any)}
-                        className="w-full px-2.5 py-2 bg-slate-50 border border-[#e5e7eb] rounded-lg"
-                      >
-                        <option value="القاهرة الجديدة">{language === 'ar' ? 'القاهرة الجديدة' : 'New Cairo'}</option>
-                        <option value="الشيخ زايد وأكتوبر">{language === 'ar' ? 'الشيخ زايد وأكتوبر' : 'Sheikh Zayed & October'}</option>
-                        <option value="العاصمة الإدارية">{language === 'ar' ? 'العاصمة الإدارية' : 'New Administrative Capital'}</option>
-                        <option value="الساحل الشمالي">{language === 'ar' ? 'الساحل الشمالي' : 'North Coast'}</option>
-                      </select>
+                      {/* المنطقة بتتحدد من الكمبوند في الباك إند — بنعرضها للتأكيد بس */}
+                      <div className="w-full px-2.5 py-2 bg-slate-100 border border-[#e5e7eb] rounded-lg text-slate-500 truncate">
+                        {selectedRegionName ||
+                          (language === 'ar' ? 'حسب المشروع' : 'From project')}
+                      </div>
                     </div>
 
                     <div>
@@ -444,7 +486,7 @@ export const AddUnitModal: React.FC<AddUnitModalProps> = ({
                       accept=".pdf,image/*"
                       onChange={(e) => {
                         if (e.target.files && e.target.files[0]) {
-                          setUploadedFile(e.target.files[0].name);
+                          setUploadedFile(e.target.files[0]);
                         }
                       }}
                       className="hidden"
@@ -454,7 +496,7 @@ export const AddUnitModal: React.FC<AddUnitModalProps> = ({
                       htmlFor="contract-upload"
                       className="inline-block mt-2 px-3 py-1 bg-white border border-[#e5e7eb] rounded-md text-[11px] font-bold text-slate-700 cursor-pointer hover:bg-slate-50"
                     >
-                      {uploadedFile ? (language === 'ar' ? `تم الاختيار: ${uploadedFile}` : `Selected: ${uploadedFile}`) : (language === 'ar' ? 'اختر ملف' : 'Choose File')}
+                      {uploadedFile ? (language === 'ar' ? `تم الاختيار: ${uploadedFile.name}` : `Selected: ${uploadedFile.name}`) : (language === 'ar' ? 'اختر ملف' : 'Choose File')}
                     </label>
                   </div>
 

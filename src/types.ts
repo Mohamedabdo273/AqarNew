@@ -40,20 +40,15 @@ export interface User {
   joinedDate: string;
 }
 
-export type PropertyType = 
-  | 'شقة'
-  | 'فيلا مستقلة'
-  | 'تاون هاوس'
-  | 'دوبلكس'
-  | 'تجاري / محل'
-  | 'عيادة / إداري'
-  | 'شاليه ساحلي';
+// الأنواع دي بقت نصوص حرة بعد الربط بالـ API — المصدر بقى جداول المراجع
+// في الباك إند (المناطق والمطورين)، مش قائمة ثابتة في الفرونت.
+export type PropertyType = string;
 
-export type InstallmentFrequency = 'شهري' | 'ربع سنوي' | 'نصف سنوي' | 'سنوي';
+export type InstallmentFrequency = string;
 
-export type DeliveryStatus = 'استلام فوري' | 'استلام 2026' | 'استلام 2027' | 'استلام 2028' | 'استلام 2029+';
+export type DeliveryStatus = string;
 
-export type FinishingType = 'بدون تشطيب' | 'نصف تشطيب' | 'تشطيب كامل سوبر لوكس' | 'ألترا سوبر لوكس';
+export type FinishingType = string;
 
 export type PageId = 
   | 'home' 
@@ -75,7 +70,7 @@ export interface RealEstateUnit {
   compoundEn?: string;
   location: string;
   locationEn?: string;
-  region: 'القاهرة الجديدة' | 'الشيخ زايد وأكتوبر' | 'العاصمة الإدارية' | 'الساحل الشمالي' | 'المستقبل والشروق' | 'البحر الأحمر';
+  region: string;
   regionEn?: string;
   propertyType: PropertyType;
   propertyTypeEn?: string;
@@ -98,11 +93,13 @@ export interface RealEstateUnit {
   finishing: FinishingType;
   finishingEn?: string;
   maintenanceFee: number;
-  transferFeePolicy: 'على البائع' | 'على المشتري' | 'مناصفة' | 'معفي من رسوم التنازل';
+  transferFeePolicy: string;
   transferFeePolicyEn?: string;
   verifiedContract: boolean;
   verificationCode: string;
   overpriceAmount: number; // Always 0 EGP!
+  /** مكسب المشتري زي ما الباك إند حسبه (بعد خصم العمولة) — ماتحسبهوش في الفرونت */
+  buyerGain?: number | null;
   images: string[];
   features: string[];
   featuresEn?: string[];

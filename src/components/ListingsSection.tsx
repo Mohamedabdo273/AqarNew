@@ -62,8 +62,8 @@ export const ListingsSection: React.FC<ListingsSectionProps> = ({
       })
       .sort((a, b) => {
         if (sortBy === 'savings') {
-          const savingsA = a.currentMarketPrice - a.originalContractPrice;
-          const savingsB = b.currentMarketPrice - b.originalContractPrice;
+          const savingsA = a.buyerGain ?? 0;
+          const savingsB = b.buyerGain ?? 0;
           return savingsB - savingsA;
         }
         if (sortBy === 'paidCashLow') {
@@ -74,7 +74,7 @@ export const ListingsSection: React.FC<ListingsSectionProps> = ({
   }, [units, searchQuery, selectedRegion, selectedType, sortBy, language]);
 
   const formatCurrency = (num: number) => {
-    return num.toLocaleString() + ' ' + t('egp');
+    return Math.round(num).toLocaleString('en-US') + ' ' + t('egp');
   };
 
   const quickRegions = [
@@ -196,7 +196,7 @@ export const ListingsSection: React.FC<ListingsSectionProps> = ({
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredUnits.map((unit) => {
-              const savings = unit.currentMarketPrice - unit.originalContractPrice;
+              const savings = unit.buyerGain ?? 0;
               const displayTitle = language === 'en' && unit.titleEn ? unit.titleEn : unit.title;
               const displayCompound = language === 'en' && unit.compoundEn ? unit.compoundEn : unit.compound;
               const displayDeveloper = language === 'en' && unit.developerEn ? unit.developerEn : unit.developer;
