@@ -15,12 +15,12 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>(() => {
-    const saved = localStorage.getItem('aqarexit_lang');
+    const saved = localStorage.getItem('tanazul_lang');
     return saved === 'en' ? 'en' : 'ar';
   });
 
   useEffect(() => {
-    localStorage.setItem('aqarexit_lang', language);
+    localStorage.setItem('tanazul_lang', language);
     document.documentElement.lang = language;
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
   }, [language]);

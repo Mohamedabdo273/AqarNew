@@ -40,15 +40,20 @@ export interface User {
   joinedDate: string;
 }
 
-// الأنواع دي بقت نصوص حرة بعد الربط بالـ API — المصدر بقى جداول المراجع
-// في الباك إند (المناطق والمطورين)، مش قائمة ثابتة في الفرونت.
-export type PropertyType = string;
+export type PropertyType = 
+  | 'شقة'
+  | 'فيلا مستقلة'
+  | 'تاون هاوس'
+  | 'دوبلكس'
+  | 'تجاري / محل'
+  | 'عيادة / إداري'
+  | 'شاليه ساحلي';
 
-export type InstallmentFrequency = string;
+export type InstallmentFrequency = 'شهري' | 'ربع سنوي' | 'نصف سنوي' | 'سنوي';
 
-export type DeliveryStatus = string;
+export type DeliveryStatus = 'استلام فوري' | 'استلام 2026' | 'استلام 2027' | 'استلام 2028' | 'استلام 2029+';
 
-export type FinishingType = string;
+export type FinishingType = 'بدون تشطيب' | 'نصف تشطيب' | 'تشطيب كامل سوبر لوكس' | 'ألترا سوبر لوكس';
 
 export type PageId = 
   | 'home' 
@@ -71,7 +76,7 @@ export interface RealEstateUnit {
   compoundEn?: string;
   location: string;
   locationEn?: string;
-  region: string;
+  region: 'القاهرة الجديدة' | 'الشيخ زايد وأكتوبر' | 'العاصمة الإدارية' | 'الساحل الشمالي' | 'المستقبل والشروق' | 'البحر الأحمر';
   regionEn?: string;
   propertyType: PropertyType;
   propertyTypeEn?: string;
@@ -94,13 +99,11 @@ export interface RealEstateUnit {
   finishing: FinishingType;
   finishingEn?: string;
   maintenanceFee: number;
-  transferFeePolicy: string;
+  transferFeePolicy: 'على البائع' | 'على المشتري' | 'مناصفة' | 'معفي من رسوم التنازل';
   transferFeePolicyEn?: string;
   verifiedContract: boolean;
   verificationCode: string;
   overpriceAmount: number; // Always 0 EGP!
-  /** مكسب المشتري زي ما الباك إند حسبه (بعد خصم العمولة) — ماتحسبهوش في الفرونت */
-  buyerGain?: number | null;
   images: string[];
   features: string[];
   featuresEn?: string[];
@@ -112,7 +115,7 @@ export interface RealEstateUnit {
   isHotDeal?: boolean;
   urgencyBadge?: string;
   urgencyBadgeEn?: string;
-  // Unique Institutional Differentiators vs Aqarexit
+  // Unique Institutional Differentiators vs Traditional Market
   eligibleForSwap?: boolean;
   swapTargetType?: string;
   swapTargetTypeEn?: string;
@@ -121,7 +124,7 @@ export interface RealEstateUnit {
   constructionProgress?: number; // 0-100%
   exitTrack?: 'cash_exit' | 'property_swap' | 'instant_liquidity';
 
-  // Enhanced Audit & Verification Parameters (Aqarexit-Grade & Beyond)
+  // Enhanced Audit & Verification Parameters (Institutional Grade)
   unitNumber?: string; // e.g. Building 14, Unit 302
   phaseName?: string; // Phase name inside compound
   phaseNameEn?: string;

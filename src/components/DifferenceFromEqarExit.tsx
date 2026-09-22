@@ -48,9 +48,9 @@ export const DifferenceFromEqarExit: React.FC<DifferenceFromEqarExitProps> = ({
 
           <h2 className="text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-tight">
             {language === 'ar' ? (
-              <>كيف نختلف جذرياً عن <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#2dd4bf] to-[#38bdf8]">«عقار إكزيت»</span> والوسطاء التقليديين؟</>
+              <>كيف نختلف جذرياً عن <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#2dd4bf] to-[#38bdf8]">الوسطاء والمواقع التقليدية</span>؟</>
             ) : (
-              <>How We Fundamentally Differ from <span className="text-[#2dd4bf]">Aqar Exit</span> & Brokers</>
+              <>How We Fundamentally Differ from <span className="text-[#2dd4bf]">Traditional Portals & Brokers</span></>
             )}
           </h2>
 
@@ -183,8 +183,8 @@ export const DifferenceFromEqarExit: React.FC<DifferenceFromEqarExitProps> = ({
               </h3>
               <p className="text-xs text-slate-400 mt-1">
                 {language === 'ar' 
-                  ? 'مقارنة موضوعية ودقيقة بين نموذجنا المتطور ونموذج «عقار إكزيت» وسماسرة السوق التقليديين' 
-                  : 'Objective comparison between our institutional model, Aqar Exit, and standard market brokers'}
+                  ? 'مقارنة موضوعية ودقيقة بين نموذجنا المتطور ونموذج المواقع وسماسرة السوق التقليديين' 
+                  : 'Objective comparison between our institutional model and standard market portals & brokers'}
               </p>
             </div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded bg-[#0f766e]/30 text-[#2dd4bf] text-xs font-bold border border-[#0d9488]/40 self-start sm:self-auto">
@@ -201,7 +201,7 @@ export const DifferenceFromEqarExit: React.FC<DifferenceFromEqarExitProps> = ({
                     {language === 'ar' ? 'المعيار / الخاصية' : 'Feature / Metric'}
                   </th>
                   <th className={`py-3.5 px-3 font-bold text-red-400 bg-red-950/20 ${isRTL ? 'text-right' : 'text-left'}`}>
-                    {language === 'ar' ? '«عقار إكزيت» (Aqar Exit)' : 'Aqar Exit'}
+                    {language === 'ar' ? 'المواقع والوسطاء التقليديون' : 'Traditional Portals & Brokers'}
                   </th>
                   <th className={`py-3.5 px-3 font-bold text-[#2dd4bf] bg-[#0f766e]/20 ${isRTL ? 'text-right' : 'text-left'}`}>
                     {language === 'ar' ? `منصتنا (${currentBrand.nameAr})` : `Our Platform (${currentBrand.nameEn})`}

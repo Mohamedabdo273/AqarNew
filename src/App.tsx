@@ -135,7 +135,7 @@ export default function App() {
       <main className="flex-1">
         {activePage === 'home' && (
           <>
-            {/* Hero Section matching Aqarexit */}
+            {/* Hero Section */}
             <HeroSection
               currentBrand={currentBrand}
               onOpenAddUnit={() => handleNavigate('sell')}
@@ -143,7 +143,7 @@ export default function App() {
               onSearchChange={handleHeroSearch}
             />
 
-            {/* Institutional Differentiation: Why We Differ from Aqar Exit (3 Tracks & Benchmarks) */}
+            {/* Institutional Differentiation: Why We Differ from Traditional Portals & Brokers */}
             <DifferenceFromEqarExit
               currentBrand={currentBrand}
               onNavigate={handleNavigate}

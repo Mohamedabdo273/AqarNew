@@ -29,7 +29,7 @@ export const BrandNameShowcase: React.FC<BrandNameShowcaseProps> = ({
         <div className="text-center max-w-3xl mx-auto mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-amber-400/10 text-amber-300 border border-amber-400/20 text-xs font-bold mb-3">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span>إجابة على طلبك: اقتراح اسم جديد وهوية تجارية بديلة لـ "عقار إكزيت"</span>
+            <span>هويات وأسماء تجارية مقترحة للمنصة</span>
           </div>
 
           <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
@@ -37,7 +37,7 @@ export const BrandNameShowcase: React.FC<BrandNameShowcaseProps> = ({
           </h2>
 
           <p className="text-slate-300 text-xs sm:text-sm mt-2 leading-relaxed">
-            حللنا 6 أسماء تجارية عربية تناسب السوق المصري والخليجي وتتفوق على اسم "عقار إكزيت".
+            حللنا 6 أسماء تجارية عربية مميزة تناسب السوق المصري والخليجي وتمنح المنصة طابعاً مؤسسياً موثوقاً.
             <br />
             <span className="text-[#2dd4bf] font-medium">اضغط على أي اسم لتطبيقه ومعاينة الموقع بالكامل به فوراً!</span>
           </p>
