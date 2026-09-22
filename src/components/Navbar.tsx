@@ -13,7 +13,8 @@ import {
   ChevronDown,
   User,
   LogIn,
-  UserPlus
+  UserPlus,
+  Repeat
 } from 'lucide-react';
 import { BrandSuggestion, PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
@@ -28,6 +29,7 @@ interface NavbarProps {
   onOpenBrandShowcase?: () => void;
   onOpenAuthModal: (tab?: 'login' | 'register') => void;
   onOpenUserProfile: () => void;
+  onOpenInvestorClub?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -37,7 +39,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenAddUnit,
   onOpenBrandShowcase,
   onOpenAuthModal,
-  onOpenUserProfile
+  onOpenUserProfile,
+  onOpenInvestorClub
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { t, language, toggleLanguage, isRTL } = useLanguage();
@@ -76,6 +79,18 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 text-[11px] shrink-0">
+            {/* VIP Investor Club Button */}
+            {onOpenInvestorClub && (
+              <button
+                onClick={onOpenInvestorClub}
+                className="hidden sm:flex items-center gap-1 px-2.5 py-0.5 rounded font-bold transition-all cursor-pointer text-[11px] bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 border border-amber-400/30"
+                title={language === 'ar' ? 'انضم لنادي المستثمرين' : 'Join VIP Investor Club'}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span>{language === 'ar' ? 'نادي المستثمرين' : 'Investor Club'}</span>
+              </button>
+            )}
+
             {/* Admin Platform Quick Access */}
             <button
               onClick={() => onNavigate('admin')}
@@ -149,6 +164,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button onClick={() => onNavigate('sell')} className={navItemClass('sell')}>
               {t('sellUnit')}
             </button>
+            <button onClick={() => onNavigate('swap')} className={navItemClass('swap')}>
+              <span className="flex items-center gap-1">
+                <Repeat className="w-3.5 h-3.5 text-amber-500" />
+                <span>{language === 'ar' ? 'المناقلة والمبادلة' : 'Property Swap'}</span>
+                <span className="text-[9px] bg-amber-100 text-amber-900 px-1 py-0.2 rounded font-bold">{language === 'ar' ? 'حصري' : 'Exclusive'}</span>
+              </span>
+            </button>
             <button onClick={() => onNavigate('opportunities')} className={navItemClass('opportunities')}>
               {t('opportunities')}
             </button>
@@ -164,26 +186,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button onClick={() => onNavigate('contact')} className={navItemClass('contact')}>
               {t('contactUs')}
             </button>
-            <button onClick={() => onNavigate('admin')} className={navItemClass('admin')}>
-              <span className="flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-[#0f766e]" />
-                <span>{language === 'ar' ? 'الإدارة' : 'Admin'}</span>
-              </span>
-            </button>
           </nav>
 
           {/* Right Actions: Clean & Adaptive */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            {/* Quick Language Toggle Button (desktop) */}
-            <button
-              onClick={toggleLanguage}
-              className="p-1.5 sm:p-2 text-xs font-bold text-slate-700 hover:text-[#0f766e] bg-slate-100 hover:bg-slate-200 rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
-              title={t('switchLangLabel')}
-            >
-              <Globe className="w-3.5 h-3.5 text-[#0f766e]" />
-              <span className="hidden xs:inline">{language === 'ar' ? 'EN' : 'عربي'}</span>
-            </button>
-
             {/* Desktop Auth Controls */}
             {isAuthenticated && user ? (
               <button
@@ -304,6 +310,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               {t('sellUnit')}
             </button>
             <button 
+              onClick={() => { onNavigate('swap'); setMobileMenuOpen(false); }}
+              className={`w-full ${isRTL ? 'text-right' : 'text-left'} p-2.5 rounded-lg transition-colors cursor-pointer flex items-center justify-between ${activePage === 'swap' ? 'bg-amber-50 text-amber-900 font-black border border-amber-200' : 'hover:bg-slate-50 text-amber-900 font-bold'}`}
+            >
+              <span className="flex items-center gap-2">
+                <Repeat className="w-4 h-4 text-amber-600" />
+                <span>{language === 'ar' ? 'المناقلة والمبادلة العقارية' : 'Property Swap & Switch'}</span>
+              </span>
+              <span className="text-[10px] bg-amber-500 text-slate-950 font-bold px-2 py-0.5 rounded">{language === 'ar' ? 'جديد' : 'New'}</span>
+            </button>
+            <button 
               onClick={() => { onNavigate('opportunities'); setMobileMenuOpen(false); }}
               className={`w-full ${isRTL ? 'text-right' : 'text-left'} p-2.5 rounded-lg transition-colors cursor-pointer ${activePage === 'opportunities' ? 'bg-[#0f766e]/10 text-[#0f766e] font-black' : 'hover:bg-slate-50'}`}
             >
@@ -321,6 +337,18 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               {t('forInvestors')}
             </button>
+            {onOpenInvestorClub && (
+              <button 
+                onClick={() => { onOpenInvestorClub(); setMobileMenuOpen(false); }}
+                className={`w-full ${isRTL ? 'text-right' : 'text-left'} p-2.5 rounded-lg transition-colors cursor-pointer flex items-center justify-between bg-amber-50 text-amber-950 border border-amber-300 font-bold`}
+              >
+                <span className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-amber-600" />
+                  <span>{language === 'ar' ? 'نادي المستثمرين (الصفقات العاجلة)' : 'VIP Investor Club'}</span>
+                </span>
+                <span className="text-[10px] bg-amber-600 text-white font-bold px-2 py-0.5 rounded">VIP</span>
+              </button>
+            )}
             <button 
               onClick={() => { onNavigate('story'); setMobileMenuOpen(false); }}
               className={`w-full ${isRTL ? 'text-right' : 'text-left'} p-2.5 rounded-lg transition-colors cursor-pointer ${activePage === 'story' ? 'bg-[#0f766e]/10 text-[#0f766e] font-black' : 'hover:bg-slate-50'}`}

@@ -58,6 +58,7 @@ export type PageId =
   | 'investors' 
   | 'sell' 
   | 'opportunities'
+  | 'swap'
   | 'admin';
 
 export interface RealEstateUnit {
@@ -111,6 +112,52 @@ export interface RealEstateUnit {
   isHotDeal?: boolean;
   urgencyBadge?: string;
   urgencyBadgeEn?: string;
+  // Unique Institutional Differentiators vs Aqarexit
+  eligibleForSwap?: boolean;
+  swapTargetType?: string;
+  swapTargetTypeEn?: string;
+  instantLiquidityEligible?: boolean;
+  auditScore?: 'A+' | 'AA' | 'AAA';
+  constructionProgress?: number; // 0-100%
+  exitTrack?: 'cash_exit' | 'property_swap' | 'instant_liquidity';
+
+  // Enhanced Audit & Verification Parameters (Aqarexit-Grade & Beyond)
+  unitNumber?: string; // e.g. Building 14, Unit 302
+  phaseName?: string; // Phase name inside compound
+  phaseNameEn?: string;
+  viewOrientation?: 'بحري صريح' | 'بحري شرقي' | 'قبلي' | 'شرقي' | 'غربي';
+  viewOrientationEn?: string;
+  gardenAreaM2?: number; // Garden area for ground units
+  roofAreaM2?: number; // Roof area for penthouses
+  parkingIncluded?: boolean; // Dedicated parking spot status
+  parkingSlotsCount?: number;
+  clubhouseIncluded?: boolean; // Club membership paid status
+  clubhouseFeePaid?: boolean;
+  hasStorageRoom?: boolean; // Storage locker in basement
+  
+  // Detailed Financial Audit & Contract Specifics
+  downPaymentOriginal?: number; // Original down payment upon signing
+  installmentsRemainingCount?: number; // Total number of remaining checks
+  remainingInstallmentsBreakdown?: {
+    equalInstallmentsCount: number;
+    annualBulletCount?: number;
+    annualBulletValue?: number;
+    deliveryPaymentAmount?: number;
+  };
+  hasMaintenanceDepositPaid?: boolean; // Was maintenance deposit settled or due upon delivery?
+  transferFeePercent?: number; // Developer's official assignment fee % (usually 5% to 10%)
+  transferFeeBearer?: 'بائع' | 'مشتري' | 'مناصفة' | 'معفي بالعقد';
+  hasLatePenalties?: boolean; // Are there overdue installment fines with developer?
+  developerAccountStatementVerified?: boolean; // Statement matched with developer records
+  checkDischargeStatus?: 'جاهزة للإلغاء بالمقر' | 'مودعة لدى البنك' | 'شيكات مقاصة مباشرة';
+
+  // Competitive Edge: Live Buyer Demand & Arbitrage Intelligence
+  activeMatchedBuyersCount?: number; // e.g. 14 verified cash buyers waiting
+  estimatedDaysToClose?: number; // e.g. 3 to 7 days
+  arbitrageYieldPercent?: number; // e.g. +68% capital arbitrage compared to today's launch prices
+  preAuditedReportUrl?: string; // Verifiable audit passport
+  isPreAudited100?: boolean; // Verified 0% legal encumbrance badge
+  swapPreferenceMatchPercent?: number; // Match score for equity swap (e.g. 96%)
 }
 
 export interface UnitFilters {

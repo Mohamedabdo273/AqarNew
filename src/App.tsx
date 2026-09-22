@@ -18,7 +18,10 @@ import { ContactPage } from './pages/ContactPage';
 import { InvestorsPage } from './pages/InvestorsPage';
 import { SellUnitPage } from './pages/SellUnitPage';
 import { OpportunitiesPage } from './pages/OpportunitiesPage';
+import { PropertySwapPage } from './pages/PropertySwapPage';
+import { DifferenceFromEqarExit } from './components/DifferenceFromEqarExit';
 import { AdminPlatform } from './components/admin/AdminPlatform';
+import { InvestorClubModal } from './components/InvestorClubModal';
 import { BRAND_SUGGESTIONS } from './data/mockData';
 import { BrandSuggestion, PageId, RealEstateUnit } from './types';
 import { useUnits } from './context/UnitsContext';
@@ -31,6 +34,7 @@ export default function App() {
   const [currentBrand, setCurrentBrand] = useState<BrandSuggestion>(BRAND_SUGGESTIONS[0]);
   const [selectedUnit, setSelectedUnit] = useState<RealEstateUnit | null>(null);
   const [isAddUnitOpen, setIsAddUnitOpen] = useState<boolean>(false);
+  const [isInvestorClubOpen, setIsInvestorClubOpen] = useState<boolean>(false);
   const [activePage, setActivePage] = useState<PageId>('home');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalTab, setAuthModalTab] = useState<'login' | 'register'>('login');
@@ -62,7 +66,7 @@ export default function App() {
   useEffect(() => {
     const handleHash = () => {
       const hash = window.location.hash.replace('#', '');
-      if (['story', 'how-it-works', 'contact', 'investors', 'sell', 'opportunities', 'admin'].includes(hash)) {
+      if (['story', 'how-it-works', 'contact', 'investors', 'sell', 'opportunities', 'admin', 'swap'].includes(hash)) {
         setActivePage(hash as PageId);
       } else if (hash === 'listings') {
         setActivePage('opportunities');
@@ -119,6 +123,7 @@ export default function App() {
         onNavigate={handleNavigate}
         onSelectBrand={setCurrentBrand}
         onOpenAddUnit={() => setIsAddUnitOpen(true)}
+        onOpenInvestorClub={() => setIsInvestorClubOpen(true)}
         onOpenAuthModal={(tab) => {
           setAuthModalTab(tab || 'login');
           setIsAuthModalOpen(true);
@@ -136,6 +141,13 @@ export default function App() {
               onOpenAddUnit={() => handleNavigate('sell')}
               onScrollToSection={scrollToSection}
               onSearchChange={handleHeroSearch}
+            />
+
+            {/* Institutional Differentiation: Why We Differ from Aqar Exit (3 Tracks & Benchmarks) */}
+            <DifferenceFromEqarExit
+              currentBrand={currentBrand}
+              onNavigate={handleNavigate}
+              onOpenAddUnit={() => handleNavigate('sell')}
             />
 
             {/* Two-sided Value Proposition & Comparison Table */}
@@ -225,7 +237,16 @@ export default function App() {
           />
         )}
 
-        {/* 7. لوحة تحكم الإدارة والتدقيق الفني */}
+        {/* 7. صفحة المناقلة والمبادلة العقارية الذكية */}
+        {activePage === 'swap' && (
+          <PropertySwapPage
+            currentBrand={currentBrand}
+            onSelectUnit={(unit) => setSelectedUnit(unit)}
+            onOpenAddUnit={() => setIsAddUnitOpen(true)}
+          />
+        )}
+
+        {/* 8. لوحة تحكم الإدارة والتدقيق الفني */}
         {activePage === 'admin' && (
           <AdminPlatform
             onBackToApp={() => handleNavigate('home')}
@@ -284,6 +305,12 @@ export default function App() {
           setIsUserProfileOpen(false);
           setIsAddUnitOpen(true);
         }}
+      />
+
+      {/* VIP Investor Club Modal */}
+      <InvestorClubModal
+        isOpen={isInvestorClubOpen}
+        onClose={() => setIsInvestorClubOpen(false)}
       />
 
       {/* Floating Action Buttons */}

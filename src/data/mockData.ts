@@ -2,6 +2,23 @@ import { RealEstateUnit, BrandSuggestion } from '../types';
 
 export const BRAND_SUGGESTIONS: BrandSuggestion[] = [
   {
+    id: 'takharoj',
+    nameAr: 'تَخارُج',
+    nameEn: 'Takharoj',
+    taglineAr: 'منظومة التخارج والمناقلة العقارية الذكية • 0% أوفر برايس',
+    taglineEn: 'Institutional Real Estate Exit, Property Swap & Capital Reallocation',
+    concept: 'المصطلح المالي والاستثماري الأرقى والأكثر دقة لإعادة توجيه الأصول والتحرر من الأقساط',
+    rationale: 'التخارج هو المفهوم الاستثماري المعتمد لدى الصناديق العقارية. يتفوق جذرياً على نموذج "عقار إكزيت" بتوفير 3 مسارات حصرية: استرداد كاش 100%، مناقلة ومبادلة أصول، وشبكة سيولة فورية خلال 72 ساعة دون وصمة تعثر.',
+    domainIdea: 'takharoj.com / takharuj.eg',
+    badge: 'البديل المؤسسي الأرقى لعقار إكزيت',
+    vibe: 'مؤسسي، مصرفي، استثماري رفيع المستوى',
+    highlights: [
+      'بلا وصمة تعثر: خطاب استثماري راقٍ لكبار الملاك والمستثمرين',
+      '3 مسارات ذكية: استرداد كاش، مناقلة ومبادلة أصول، واستحواذ فوري',
+      'تدقيق ائتماني وقانوني معتمد (Due Diligence Grade A+)'
+    ]
+  },
+  {
     id: 'tanazul',
     nameAr: 'تَنازُل',
     nameEn: 'Tanazul',
@@ -81,26 +98,9 @@ export const BRAND_SUGGESTIONS: BrandSuggestion[] = [
     badge: 'الوعد التسويقي الأكثر جاذبية',
     vibe: 'مباشر وقوي التأثير الإعلاني',
     highlights: [
-      'يجذب المتعثرين الراغبين في السيولة الفورية',
+      'يجذب الراغبين في السيولة الفورية والضمان الأكيد',
       'رسالة تسويقية واضحة لا تقبل اللبس',
       'يعارض سياسة شركات التطوير في حجز الأموال'
-    ]
-  },
-  {
-    id: 'fakkah',
-    nameAr: 'فَكَّة عقار',
-    nameEn: 'Fakka Real Estate',
-    taglineAr: 'فُك ارتباطك بالأقساط واسترد كاشك في ثواني',
-    taglineEn: 'Break Free from Installments, Liquidate Property Fast',
-    concept: 'اسم دارج ذكي ومبتكر مستوحى من لغة السوق المصري',
-    rationale: 'الفكة تعني تسييل الأموال والتحرر من الالتزامات الكبيرة. اسم ذكي، غير تقليدي، وسهل الانتشار الفيروسي على السوشيال ميديا.',
-    domainIdea: 'fakka.estate / fakkaqar.com',
-    badge: 'الأكثر ابتكاراً ورواجاً على السوشيال',
-    vibe: 'شبابي، مرن، سريع الانتشار',
-    highlights: [
-      'فكرة عبقرية تربط بين فك الأقساط وتسييل النقد',
-      'حملات إعلانية تلقائية ("فُك قسطك.. وخد كاشك")',
-      'ملفت للانتباه ويكسر جمود قطاع العقارات التقليدي'
     ]
   }
 ];
@@ -142,8 +142,20 @@ export const MOCK_UNITS: RealEstateUnit[] = [
     transferFeePolicy: 'معفي من رسوم التنازل',
     transferFeePolicyEn: 'Exempt from Transfer Fees',
     verifiedContract: true,
-    verificationCode: 'TNZ-PH-8821',
+    verificationCode: 'TKZ-PH-8821',
     overpriceAmount: 0,
+    eligibleForSwap: true,
+    swapTargetType: 'مكتب إداري أو عيادة بالتجمع / الشيخ زايد',
+    swapTargetTypeEn: 'Commercial/Administrative Office in New Cairo or Zayed',
+    instantLiquidityEligible: true,
+    auditScore: 'AAA',
+    constructionProgress: 82,
+    exitTrack: 'property_swap',
+    activeMatchedBuyersCount: 14,
+    estimatedDaysToClose: 4,
+    arbitrageYieldPercent: 93, // (8.9M - 4.6M) / 4.6M = 93%
+    isPreAudited100: true,
+    swapPreferenceMatchPercent: 96,
     images: [
       'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80',
@@ -194,8 +206,20 @@ export const MOCK_UNITS: RealEstateUnit[] = [
     transferFeePolicy: 'مناصفة',
     transferFeePolicyEn: '50/50 Split',
     verifiedContract: true,
-    verificationCode: 'TNZ-BD-9042',
+    verificationCode: 'TKZ-BD-9042',
     overpriceAmount: 0,
+    eligibleForSwap: true,
+    swapTargetType: 'شقة سكنية بالتجمع الخامس مساحة 150م - 200م',
+    swapTargetTypeEn: 'Apartment in New Cairo 150-200 sqm',
+    instantLiquidityEligible: true,
+    auditScore: 'AA',
+    constructionProgress: 91,
+    exitTrack: 'property_swap',
+    activeMatchedBuyersCount: 19,
+    estimatedDaysToClose: 3,
+    arbitrageYieldPercent: 90, // (11.8M - 6.2M) / 6.2M = 90%
+    isPreAudited100: true,
+    swapPreferenceMatchPercent: 98,
     images: [
       'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=80'
@@ -249,6 +273,11 @@ export const MOCK_UNITS: RealEstateUnit[] = [
     verifiedContract: true,
     verificationCode: 'TNZ-SD-4311',
     overpriceAmount: 0,
+    auditScore: 'AAA',
+    activeMatchedBuyersCount: 27,
+    estimatedDaysToClose: 2,
+    arbitrageYieldPercent: 115, // (12.5M - 5.8M) / 5.8M = 115%
+    isPreAudited100: true,
     images: [
       'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-160058515526-990dced4db0d?auto=format&fit=crop&w=1200&q=80'
@@ -531,7 +560,7 @@ export const TESTIMONIALS = [
     role: 'بائع - شقة في ماونتن فيو التجمع',
     roleEn: 'Seller - Apartment in Mountain View New Cairo',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
-    quote: 'كنت هخسر أكتر من 450 ألف جنيه لو لغيت العقد مع المطور وكانوا هيرجعولي الباقي على شيكات لسنة قدام! مع المنصة، جالي مشتري جاد وتم التنازل في مقر الشركة خلال 5 أيام واستلمت فلوسي كاش 100% ومن غير ما أدفع مليم عمولة.',
+    quote: 'كانت غرامة الفسخ لدى المطور ستكلفني أكثر من 450 ألف جنيه مع جدولة استرداد المتبقي على شيكات مؤجلة لسنوات. من خلال المنصة، تم توفيق مشتري معتمد وأُنجز التنازل بمقر شركة التطوير خلال 5 أيام فقط، واسترددت كامل رأس مالي بشيك مصرفي معتمد دون سداد أي عمولة.',
     quoteEn: 'I was facing a 450,000+ EGP penalty if I cancelled with the developer, with the remainder repaid across delayed checks! Through this platform, a verified buyer was matched and the transfer completed at the developer HQ in 5 days. I recovered 100% of my cash with zero commission.',
     rating: 5,
     date: 'منذ أسبوعين',
@@ -544,7 +573,7 @@ export const TESTIMONIALS = [
     role: 'مشترية - تاون هاوس في الشيخ زايد',
     roleEn: 'Buyer - Townhouse in Sheikh Zayed',
     avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80',
-    quote: 'اشتريت تاون هاوس بسعر تعاقد 2021 بدون أي أوفر برايس! السعر الحالي لدى المطور كان الضعف تقريباً. المنصة فحصت صحة الشيكات وأصل العقد وتنازلنا رسمياً مع المطور في أمان تام.',
+    quote: 'وفقت في شراء تاون هاوس بسعر تعاقد 2021 التأسيسي مع صفر أوفر برايس، محققة وفراً مالياً يناهز 50% من سعر الطرح الحالي. قامت المنصة بتدقيق الموقف المالي وكشوف الحسابات المعتمدة، وتم التنازل الرسمي بسجلات المطور في أمان قانوني تام.',
     quoteEn: 'I acquired a prime townhouse at the original 2021 contract price with zero overprice! The developer current price was almost double. The platform verified all checks and contract records, ensuring safe official assignment at developer headquarters.',
     rating: 5,
     date: 'منذ شهر',
@@ -557,7 +586,7 @@ export const TESTIMONIALS = [
     role: 'بائع - مكتب إداري بالعاصمة الإدارية',
     roleEn: 'Seller - Commercial Office in New Capital',
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
-    quote: 'فكرة المنصة عبقرية وحلت أزمة كل المتعثرين اللي مش قادرين يكملوا الأقساط بعد تعويم الجنيه وزيادة الأعباء. استرديت الـ 1.2 مليون اللي دفعتهم بالكامل وبمنتهى السرعة والاحترام.',
+    quote: 'تمثل المنصة نموذج عمل مؤسسي عالي الشفافية، حيث وفرت حلاً تعاقدياً لحماية رؤوس الأموال من تقلبات السوق وفوائد الأقساط. استرددت كامل المبلغ المسدد بقيمة 1.2 مليون جنيه بموجب مخالصة بنكية رسمية وإبراء ذمة شامل.',
     quoteEn: 'The concept is ingenious and solves the burden of mounting installments following currency devaluations. I recovered my 1.2M EGP paid cash completely, seamlessly and with absolute transparency.',
     rating: 5,
     date: 'منذ 3 أسابيع',

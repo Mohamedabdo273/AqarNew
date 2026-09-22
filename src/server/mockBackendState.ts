@@ -39,7 +39,7 @@ function sendJson(res: ServerResponse, status: number, data: any) {
 }
 
 export async function handleAdminApiRequest(req: IncomingMessage, res: ServerResponse): Promise<boolean> {
-  const url = req.url || '';
+  const url = (req as any).originalUrl || req.url || '';
   const method = req.method || 'GET';
 
   if (!url.startsWith('/api/admin')) {

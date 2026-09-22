@@ -209,7 +209,7 @@ export const SafeExitCalculator: React.FC<SafeExitCalculatorProps> = ({
                     <div className="text-xl font-black text-[#2dd4bf] font-sans">
                       {formatCurrency(calculations.tanazulNetCash)}
                     </div>
-                    <span className="text-[10px] text-slate-400">{language === 'ar' ? '100% من فلوسك كاملة' : '100% full recovery'}</span>
+                    <span className="text-[10px] text-slate-400">{language === 'ar' ? 'استرداد كامل رأس المال' : '100% full capital recovery'}</span>
                   </div>
 
                   <div className="bg-white/5 p-3 rounded-lg border border-white/10">
@@ -217,22 +217,22 @@ export const SafeExitCalculator: React.FC<SafeExitCalculatorProps> = ({
                     <div className="text-xl font-black text-white font-sans">
                       0 {t('egp')}
                     </div>
-                    <span className="text-[10px] text-slate-400">{language === 'ar' ? 'مجانًا للبائع تمامًا' : '100% free for seller'}</span>
+                    <span className="text-[10px] text-slate-400">{language === 'ar' ? 'خدمة مجانية للبائع بالكامل' : '100% free for seller'}</span>
                   </div>
 
                   <div className="bg-white/5 p-3 rounded-lg border border-white/10">
                     <span className="text-[11px] text-slate-400 block mb-1">{language === 'ar' ? 'طريقة الاستلام:' : 'Payout Method:'}</span>
                     <div className="text-base font-bold text-white mt-1">
-                      {language === 'ar' ? 'كاش فوراً' : 'Cashier Check'}
+                      {language === 'ar' ? 'شيك مصرفي معتمد' : 'Certified Cashier Check'}
                     </div>
-                    <span className="text-[10px] text-slate-400">{language === 'ar' ? 'شيك مصرفي بمقر المطور' : 'At developer HQ'}</span>
+                    <span className="text-[10px] text-slate-400">{language === 'ar' ? 'يُسلّم بمقر المطور العقاري' : 'Handed at developer HQ'}</span>
                   </div>
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
                   <span className="text-xs text-slate-300">
                     {language === 'ar' 
-                      ? 'استرد كل أموالك وأبرئ ذمتك من الشيكات المؤجلة دون أي خصم.'
+                      ? 'استرداد كامل رأس مالك المسدد مع إبراء ذمة قانوني شامل واسترجاع كافة الشيكات الآجلة.'
                       : 'Recover all funds and receive full discharge of pending checks without penalty.'}
                   </span>
                   <button
@@ -246,37 +246,48 @@ export const SafeExitCalculator: React.FC<SafeExitCalculatorProps> = ({
               </div>
 
               {/* Developer Cancellation Comparison */}
-              <div className="bg-white rounded-xl p-5 border border-red-200">
+              <div className="bg-white rounded-xl p-5 border border-red-200 shadow-xs">
                 <div className="flex items-center justify-between border-b border-red-100 pb-2.5 mb-3">
                   <div className="flex items-center gap-2 text-red-600 font-bold text-sm">
-                    <AlertTriangle className="w-4 h-4" />
-                    <span>{t('calcDevLossTitle')}</span>
+                    <AlertTriangle className="w-4 h-4 shrink-0" />
+                    <span>{language === 'ar' ? 'المسار البديل: لو اخترت فسخ العقد مع المطور' : t('calcDevLossTitle')}</span>
                   </div>
                   <span className="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-200">
-                    {language === 'ar' ? 'خسارة كبرى' : 'Heavy Loss'}
+                    {language === 'ar' ? `خسارة ${Math.round((Math.min(calculations.developerPenalty, validatedPaid) / validatedPaid) * 100)}% من أموالك` : 'Heavy Loss'}
                   </span>
                 </div>
 
-                <div className={`grid sm:grid-cols-3 gap-3 ${isRTL ? 'text-right' : 'text-left'}`}>
-                  <div className="bg-red-50/50 p-2.5 rounded-lg border border-red-100">
-                    <span className="text-[10px] text-slate-500 block">{t('calcDevLossPenalty')}</span>
-                    <div className="text-base font-bold text-red-600 font-sans">
+                <div className="grid sm:grid-cols-4 gap-2.5">
+                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                    <span className="text-[10px] text-slate-500 block">{language === 'ar' ? 'ما سددته كاش:' : 'Cash Paid:'}</span>
+                    <div className="text-sm font-bold text-slate-900 font-sans">
+                      {formatCurrency(validatedPaid)}
+                    </div>
+                    <span className="text-[9px] text-slate-400">{language === 'ar' ? 'رأس مالك المدفوع' : 'Your paid capital'}</span>
+                  </div>
+
+                  <div className="bg-red-50 p-2.5 rounded-lg border border-red-200">
+                    <span className="text-[10px] text-red-700 block font-semibold">{language === 'ar' ? 'غرامة الفسخ (المخصومة):' : t('calcDevLossPenalty')}</span>
+                    <div className="text-sm font-black text-red-600 font-sans">
                       -{formatCurrency(calculations.developerPenalty)}
                     </div>
+                    <span className="text-[9px] text-red-500">{language === 'ar' ? '15% من ثمن الوحدة' : '15% of contract'}</span>
                   </div>
 
-                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-                    <span className="text-[10px] text-slate-500 block">{language === 'ar' ? 'المتبقي الذي ستسترده:' : 'Net Developer Refund:'}</span>
-                    <div className="text-base font-bold text-slate-800 font-sans">
+                  <div className="bg-amber-50 p-2.5 rounded-lg border border-amber-200">
+                    <span className="text-[10px] text-amber-900 block font-semibold">{language === 'ar' ? 'ما يتبقى لك فعلياً:' : 'Net Refund:'}</span>
+                    <div className="text-sm font-black text-amber-900 font-sans">
                       {formatCurrency(calculations.developerNetRefund)}
                     </div>
+                    <span className="text-[9px] text-amber-700">{language === 'ar' ? 'فقط بعد الاستقطاع' : 'After penalty'}</span>
                   </div>
 
                   <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-                    <span className="text-[10px] text-slate-500 block">{language === 'ar' ? 'مدة الاسترداد لدى المطور:' : 'Developer Refund Delay:'}</span>
-                    <div className="text-base font-bold text-amber-700 font-sans">
-                      {language === 'ar' ? 'على 3 سنين' : 'Spread over 3 years'}
+                    <span className="text-[10px] text-slate-500 block">{language === 'ar' ? 'طريقة وتوقيت الصرف:' : 'Payout Schedule:'}</span>
+                    <div className="text-xs font-bold text-slate-800 font-sans mt-0.5">
+                      {language === 'ar' ? '3 سنوات شيكات آجلة' : '3-year deferred'}
                     </div>
+                    <span className="text-[9px] text-slate-400">{language === 'ar' ? 'إجراءات استرداد معقدة' : 'Delayed refund'}</span>
                   </div>
                 </div>
               </div>

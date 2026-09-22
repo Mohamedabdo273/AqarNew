@@ -1,32 +1,36 @@
 import express from 'express';
 import path from 'path';
-import { createServer as createViteServer } from 'vite';
 import { handleAdminApiRequest } from './src/server/mockBackendState';
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
   // JSON parsing middleware
   app.use(express.json());
 
-  // Mount Admin APIs
-  app.use('/api/admin', async (req, res, next) => {
-    try {
-      const handled = await handleAdminApiRequest(req, res);
-      if (!handled) next();
-    } catch (err) {
-      next(err);
-    }
-  });
-
-  // Health check
+  // Health check for Cloud Run and container readiness
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', time: new Date().toISOString() });
   });
 
-  // Vite middleware for development
+  // Mount Admin APIs
+  app.use(async (req, res, next) => {
+    const targetUrl = req.originalUrl || req.url || '';
+    if (targetUrl.startsWith('/api/admin')) {
+      try {
+        const handled = await handleAdminApiRequest(req, res);
+        if (handled) return;
+      } catch (err) {
+        return next(err);
+      }
+    }
+    next();
+  });
+
+  // Vite middleware for development; static files for production
   if (process.env.NODE_ENV !== 'production') {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: 'spa',
@@ -40,9 +44,17 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Tanazul Server running on port ${PORT}`);
+  const server = app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Tanazul Server running on http://0.0.0.0:${PORT}`);
+  });
+
+  server.on('error', (err) => {
+    console.error('Server listen error:', err);
   });
 }
 
-startServer();
+startServer().catch((err) => {
+  console.error('Failed to initialize server:', err);
+  process.exit(1);
+});
+

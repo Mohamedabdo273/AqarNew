@@ -16,38 +16,38 @@ export const HowItWorks: React.FC = () => {
   const steps = [
     {
       number: '01',
-      title: language === 'ar' ? 'قيّم عقدك' : 'Evaluate Contract',
+      title: language === 'ar' ? 'تقييم الموقف المالي' : 'Evaluate Financial Position',
       desc: language === 'ar'
-        ? 'ادخل أرقام وحدتك: اللي دفعته، والمتبقي عليك بالأقساط، واعرف موقفك في دقيقة من خلال حاسبة الخروج.'
-        : 'Input your numbers: total paid and remaining installments. Calculate your financial scenario in 60 seconds.'
+        ? 'إدخال بيانات الوحدة التعاقدية (إجمالي التعاقد، رأس المال المسدد، وجدول الأقساط) لتحديد سيناريو التخارج واسترداد المستحقات بدقة.'
+        : 'Input your numbers: total contract value, paid capital, and remaining installments. Calculate your financial scenario accurately.'
     },
     {
       number: '02',
-      title: language === 'ar' ? 'ارفع مستنداتك' : 'Upload Documents',
+      title: language === 'ar' ? 'التدقيق القانوني والمستندي' : 'Documentary & Legal Audit',
       desc: language === 'ar'
-        ? 'صوّر العقد وآخر إيصال سداد. فريقنا بيفحص الأوراق ويتأكد من صحة موقف الوحدة مع المطور بكل سرية.'
-        : 'Upload the contract & latest payment receipts. Our legal auditors verify standing with the developer in confidence.'
+        ? 'رفع صورة العقد وآخر إيصال سداد مصرفي لمطابقة المركز المالي وإجراء الاستعلام المعتمد لدى إدارة خدمة العملاء بشركة التطوير.'
+        : 'Upload the contract & latest payment receipts. Our legal auditors verify standing with the developer in strict confidence.'
     },
     {
       number: '03',
-      title: language === 'ar' ? 'بنجهّز فرصتك' : 'Prepare Listing',
+      title: language === 'ar' ? 'الاعتماد وإدراج الفرصة' : 'Audit Approval & Listing',
       desc: language === 'ar'
-        ? 'بنراجع كشف الحساب ونحسب الأرقام بالمليم، ونعرض وحدتك بدون أوفر بالسعر اللي اتدفع فقط.'
-        : 'We reconcile developer statements to the penny and publish your unit strictly without overprice.'
+        ? 'مراجعة كشف الحساب البنكي واعتماد الوحدة رسمياً بنظام "صفر أوفر برايس" وبسعر التعاقد التأسيسي المسدد فقط.'
+        : 'We reconcile developer statements to the penny and publish your unit strictly under zero overprice policy.'
     },
     {
       number: '04',
-      title: language === 'ar' ? 'بنلاقي المشتري' : 'Match Serious Buyer',
+      title: language === 'ar' ? 'المطابقة مع المشتري المعتمد' : 'Certified Buyer Matching',
       desc: language === 'ar'
-        ? 'بنوصّلك بمشتري جاد مستعد يدفع لك كاش ما سددته، ويكمل باقي الأقساط القديمة مع المطور.'
-        : 'We connect you with a verified buyer ready to pay your paid cash upfront and resume future installments.'
+        ? 'توجيه الفرصة لمشتري استثماري جاد ملتزم بسداد كامل رأس المال المسدد فوراً واستكمال سداد باقي الأقساط للمطور.'
+        : 'We match your unit with a verified buyer committed to repaying your paid capital upfront and assuming future installments.'
     },
     {
       number: '05',
-      title: language === 'ar' ? 'نقل التعاقد' : 'Developer Assignment',
+      title: language === 'ar' ? 'التنازل الرسمي بمقر المطور' : 'Official Assignment at Developer HQ',
       desc: language === 'ar'
-        ? 'بنتقابل في مقر شركة التطوير: بتستلم فلوسك كاش بشيك مصرفي، وتسترد شيكاتك المؤجلة وإبراء ذمتك.'
-        : 'Meet at developer headquarters: collect your cashier check, retrieve all pending checks, and receive full discharge.'
+        ? 'إتمام إجراءات التنازل القانوني وسحب وإبراء ذمة الشيكات الآجلة واستلام شيك مصرفي معتمد بكامل رأس المال المسدد.'
+        : 'Complete official transfer at developer headquarters: collect your cashier check, retrieve all pending checks, and receive full discharge.'
     }
   ];
 
@@ -62,12 +62,12 @@ export const HowItWorks: React.FC = () => {
             <span>{t('howItWorks')}</span>
           </div>
           <h2 className="text-2xl sm:text-4xl font-black text-[#0f172a] tracking-tight">
-            {language === 'ar' ? 'إزاي بنشتغل؟' : 'How It Works'}
+            {language === 'ar' ? 'مراحل التنازل ونقل الملكية المعتمدة' : 'Certified Transfer & Exit Workflow'}
           </h2>
           <p className="text-slate-600 text-xs sm:text-sm mt-2">
             {language === 'ar'
-              ? 'خطوات بسيطة وموثقة قانونياً تضمن استرداد أموالك دون إرهاق ولا تأخير.'
-              : 'Simple, legally documented milestones ensuring 100% recovery without broker hassle.'}
+              ? 'إجراءات تعاقدية محكمة وموثقة قانونياً تضمن استرداد كامل رأس مالك دون تعريضك لغرامات الفسخ.'
+              : 'Simple, legally documented milestones ensuring 100% recovery without developer penalties or broker hassle.'}
           </p>
         </div>
 

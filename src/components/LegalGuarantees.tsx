@@ -48,7 +48,7 @@ export const LegalGuarantees: React.FC = () => {
             </h3>
             <p className="text-xs text-slate-400 leading-relaxed">
               {language === 'ar'
-                ? 'مفيش توكيلات في الشهر العقاري ولا أوراق عرفية خارج الشركة. كل الإجراءات بتتم بحضور الطرفين ومحامي المنصة داخل إدارة خدمة العملاء بالمقر الرئيسي للمطور.'
+                ? 'حظر قاطع للتوكيلات أو المحررات العرفية خارج المقر الرسمي لشركة التطوير. تُنجز كافة المعاملات بحضور أطراف التعاقد والمستشار القانوني للمنصة داخل إدارة علاقات العملاء بالشركة المطورة.'
                 : 'Zero risky notary powers of attorney or unofficial contracts. Every step is executed with both parties and our legal counsel at the developer\'s customer relations department.'}
             </p>
           </div>
@@ -62,7 +62,7 @@ export const LegalGuarantees: React.FC = () => {
             </h3>
             <p className="text-xs text-slate-400 leading-relaxed">
               {language === 'ar'
-                ? 'المطور بيسلم البايع كافة شيكاته المؤجلة غير المستحقة ويتم إتلافها أو تسليمها مع مخالصة مالية نهائية تفيد بنقل كافة التزامات الوحدة للمشتري الجديد.'
+                ? 'تلتزم شركة التطوير برد كامل أوراق الدفع والشيكات الآجلة غير المستحقة للبائع، مع إصدار مخالصة مالية نهائية وإبراء ذمة قانوني شامل يُسقط كافة الالتزامات التعاقدية.'
                 : 'The developer returns all future uncashed checks to the seller, issuing a final financial clearance discharging them from all liability.'}
             </p>
           </div>
@@ -76,7 +76,7 @@ export const LegalGuarantees: React.FC = () => {
             </h3>
             <p className="text-xs text-slate-400 leading-relaxed">
               {language === 'ar'
-                ? 'البايع بيستلم فلوسه اللي دفعها كاملة بشيك مصرفي معتمد (Banker\'s Draft) صادر من بنك معتمد ومسجل باسمه، لحظة توقيع التنازل لدى المطور.'
+                ? 'يسترد البائع كامل رأس ماله المسدد بموجب شيك مصرفي مقبول الدفع (Banker\'s Draft) صادر باسمه من بنك معتمد، يُسلّم تزامناً مع توقيع ملحق التنازل الرسمي لدى المطور.'
                 : 'Sellers receive 100% of their paid cash via a verified cashier\'s check (Banker\'s Draft) in their name at the moment of signing at developer HQ.'}
             </p>
           </div>
@@ -90,7 +90,7 @@ export const LegalGuarantees: React.FC = () => {
             </h3>
             <p className="text-xs text-slate-400 leading-relaxed">
               {language === 'ar'
-                ? 'فريق الفحص بيتأكد من سداد كافة الأقساط المستحقة وعدم وجود أي غرامات تأخير أو نزاعات، ومطابقة الجدول الزمني للتسليم.'
+                ? 'تتولى إدارة التدقيق المالي والقانوني مراجعة كشف الحساب المعتمد، والتأكد من انتظام سداد الأقساط وعدم وجود أي نزاعات قضائية أو غرامات تأخير قبل اعتماد ونشر الوحدة.'
                 : 'Our audit team validates all paid installments, confirms zero penalties or disputes, and reconciles delivery milestones prior to listing.'}
             </p>
           </div>

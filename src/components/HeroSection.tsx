@@ -94,7 +94,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           {/* Micro Trust Note */}
           <p className="text-[11px] sm:text-xs text-slate-400 pt-1">
             {language === 'ar' ? (
-              <>للبايع: <strong className="text-white">مجانًا تمامًا — مفيش أي عمولة عليك</strong>. للمشتري: <strong className="text-white">أرقام موثقة قبل ما تدفع جنيه</strong></>
+              <>للبائع: <strong className="text-white">خدمة مجانية بالكامل — صفر عمولة</strong>. للمشتري: <strong className="text-white">تدقيق مالي وقانوني معتمد قبل سداد أي مستحقات</strong></>
             ) : (
               <>For Sellers: <strong className="text-white">100% Free — Zero Commission</strong>. For Buyers: <strong className="text-white">Legally audited before you pay a single pound</strong></>
             )}
@@ -102,75 +102,126 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         </div>
 
         {/* The Iconic Side-by-Side Comparison Box */}
-        <div className="mt-8 sm:mt-12 max-w-3xl mx-auto bg-slate-900/90 rounded-2xl border border-white/10 p-3.5 sm:p-6 shadow-2xl backdrop-blur-md">
-          <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
+        <div className="mt-8 sm:mt-12 max-w-4xl mx-auto bg-slate-900/95 rounded-2xl border border-white/10 p-4 sm:p-7 shadow-2xl backdrop-blur-md">
+          {/* Example Context Tag */}
+          <div className="text-center mb-5 pb-3 border-b border-white/10 flex flex-wrap items-center justify-center gap-2 text-xs">
+            <span className="text-slate-400 font-medium">
+              {language === 'ar' ? 'مثال عملي لوحدة قيمتها 10 مليون ج.م:' : 'Real Example for a 10M EGP Unit:'}
+            </span>
+            <span className="bg-slate-800 text-white px-2.5 py-0.5 rounded-full font-bold border border-slate-700">
+              {language === 'ar' ? 'المبلغ الذي سددته كاش للمطور حتى الآن: 2,000,000 ج.م' : 'Cash Actually Paid to Developer: 2,000,000 EGP'}
+            </span>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
             
-            {/* Left: لو رجّع الوحدة للمطور */}
-            <div className="rounded-xl bg-white/5 border border-red-500/20 p-5 flex flex-col justify-between space-y-3">
+            {/* Left: لو فسخ العقد مع المطور */}
+            <div className="rounded-xl bg-red-950/20 border border-red-500/30 p-5 flex flex-col justify-between space-y-4">
               <div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between pb-2 border-b border-red-500/20">
                   <span className="text-xs font-bold text-red-300 flex items-center gap-1.5">
-                    <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
-                    {language === 'ar' ? 'لو رجّع الوحدة للمطور' : 'If Cancelled with Developer'}
+                    <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
+                    {language === 'ar' ? 'المسار الأول: لو فسخت العقد مع المطور' : 'Track 1: If You Cancel with Developer'}
                   </span>
-                  <span className="text-[10px] text-slate-400 bg-black/40 px-2 py-0.5 rounded">
-                    {language === 'ar' ? 'فسخ وإلغاء' : 'Cancellation'}
+                  <span className="text-[10px] text-red-400 bg-red-950/60 border border-red-800/40 px-2 py-0.5 rounded font-bold">
+                    {language === 'ar' ? 'خسارة فادحة' : 'Heavy Loss'}
                   </span>
                 </div>
 
-                <div className="mt-4 space-y-1">
-                  <span className="text-xs text-slate-400 block">
-                    {language === 'ar' ? 'خصم الإلغاء (15% من سعر الوحدة كله)' : 'Penalty (15% of total contract)'}
-                  </span>
-                  <div className="text-2xl sm:text-3xl font-black text-red-400 font-sans tracking-tight">
-                    - 1,500,000 <span className="text-sm font-normal text-red-300">{t('egp')}</span>
+                {/* Clear Breakdown */}
+                <div className="mt-3 space-y-2 text-xs">
+                  <div className="flex justify-between items-center text-slate-300">
+                    <span>{language === 'ar' ? 'المبلغ الذي دفعته كاش:' : 'Cash You Paid:'}</span>
+                    <span className="font-bold text-white font-sans">2,000,000 {t('egp')}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center text-red-400 bg-red-950/40 px-2 py-1.5 rounded border border-red-900/30">
+                    <div>
+                      <span className="block font-bold">{language === 'ar' ? 'غرامة الفسخ التي يخصمها المطور:' : 'Developer Cancellation Penalty:'}</span>
+                      <span className="text-[10px] text-red-300/80">{language === 'ar' ? '(15% من ثمن الشقة الإجمالي 10M)' : '(15% of total 10M price)'}</span>
+                    </div>
+                    <span className="font-black text-red-400 text-sm font-sans">- 1,500,000 {t('egp')}</span>
+                  </div>
+
+                  <div className="pt-2 border-t border-red-900/40 flex justify-between items-end">
+                    <div>
+                      <span className="block text-[11px] text-slate-400">{language === 'ar' ? 'صافي ما ستستلمه فقط بعد الخصم:' : 'Net Cash You Actually Recover:'}</span>
+                      <span className="text-xl sm:text-2xl font-black text-red-400 font-sans">
+                        500,000 <span className="text-xs font-normal text-slate-300">{t('egp')}</span>
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-bold text-red-300 bg-red-900/50 px-2 py-1 rounded">
+                      {language === 'ar' ? 'خسرت 1.5 مليون (75%)' : 'Lost 1.5M (75%)'}
+                    </span>
                   </div>
                 </div>
 
-                <div className="mt-3 text-xs text-slate-400 flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-slate-500" />
+                <div className="mt-3 text-[11px] text-slate-400 flex items-center gap-1.5 bg-black/20 p-2 rounded">
+                  <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                   <span>
-                    {language === 'ar' ? 'ياخدها المطور على: ' : 'Installment refund: '}
-                    <strong className="text-slate-300">{language === 'ar' ? '3 سنين شيكات مؤجلة' : '3-year deferred checks'}</strong>
+                    {language === 'ar' ? 'شروط المطور للصرف: ' : 'Developer Terms: '}
+                    <strong className="text-slate-200">{language === 'ar' ? 'الـ 500 ألف تقسط على 3 سنوات بشيكات آجلة!' : 'The 500k is refunded over 3 years in checks!'}</strong>
                   </span>
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-white/10 text-xs font-semibold text-red-400/90 bg-red-950/20 p-2 rounded">
-                {language === 'ar' ? 'خسارة 75% من فلوسه المسددة + سنين انتظار' : 'Loss of 75% of paid cash + years of waiting'}
+              <div className="pt-2 border-t border-red-900/30 text-center text-xs font-bold text-red-400 bg-red-950/40 py-2 px-3 rounded">
+                {language === 'ar' ? '❌ النتيجة: خسارة 75% من فلوسك + انتظار 3 سنين' : '❌ Result: 75% Capital Lost + 3 Years Waiting'}
               </div>
             </div>
 
             {/* Right: لو نقل تعاقده عن طريق المنصة */}
-            <div className="rounded-xl bg-[#0f766e]/20 border border-[#0d9488]/50 p-5 flex flex-col justify-between space-y-3 shadow-inner">
+            <div className="rounded-xl bg-[#0f766e]/20 border border-[#0d9488]/60 p-5 flex flex-col justify-between space-y-4 shadow-inner">
               <div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between pb-2 border-b border-[#0d9488]/30">
                   <span className="text-xs font-bold text-[#2dd4bf] flex items-center gap-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#2dd4bf]" />
-                    {language === 'ar' ? `لو نقل تعاقده عن طريق ${currentBrand.nameAr}` : `If Transferred via ${currentBrand.nameEn}`}
+                    <CheckCircle2 className="w-4 h-4 text-[#2dd4bf] shrink-0" />
+                    {language === 'ar' ? `المسار الثاني: التنازل الرسمي عبر ${currentBrand.nameAr}` : `Track 2: Transfer via ${currentBrand.nameEn}`}
                   </span>
-                  <span className="text-[10px] text-[#2dd4bf] bg-[#0d9488]/30 px-2 py-0.5 rounded font-bold">
-                    {language === 'ar' ? 'تنازل آمن' : 'Safe Exit'}
+                  <span className="text-[10px] text-[#2dd4bf] bg-[#0d9488]/40 border border-[#0d9488]/50 px-2 py-0.5 rounded font-bold">
+                    {language === 'ar' ? 'استرداد كامل 100%' : '100% Recovery'}
                   </span>
                 </div>
 
-                <div className="mt-4 space-y-1">
-                  <span className="text-xs text-slate-300 block">
-                    {language === 'ar' ? 'يسترجع اللي دفعه بالكامل' : 'Recover 100% of cash paid'}
-                  </span>
-                  <div className="text-2xl sm:text-3xl font-black text-white font-sans tracking-tight">
-                    2,000,000 <span className="text-sm font-normal text-[#2dd4bf]">{t('egp')} {language === 'ar' ? 'كاش' : 'Cash'}</span>
+                {/* Clear Breakdown */}
+                <div className="mt-3 space-y-2 text-xs">
+                  <div className="flex justify-between items-center text-slate-300">
+                    <span>{language === 'ar' ? 'المبلغ الذي دفعته كاش:' : 'Cash You Paid:'}</span>
+                    <span className="font-bold text-white font-sans">2,000,000 {t('egp')}</span>
+                  </div>
+
+                  <div className="flex justify-between items-center text-[#2dd4bf] bg-[#0f766e]/30 px-2 py-1.5 rounded border border-[#0d9488]/40">
+                    <div>
+                      <span className="block font-bold">{language === 'ar' ? 'غرامات أو استقطاعات المنصة:' : 'Platform Fees or Deductions:'}</span>
+                      <span className="text-[10px] text-slate-300">{language === 'ar' ? '(خدمة التنازل والتسويق مجانية للبائع 100%)' : '(100% Free service for seller)'}</span>
+                    </div>
+                    <span className="font-black text-[#2dd4bf] text-sm font-sans">0 {t('egp')}</span>
+                  </div>
+
+                  <div className="pt-2 border-t border-[#0d9488]/30 flex justify-between items-end">
+                    <div>
+                      <span className="block text-[11px] text-slate-300">{language === 'ar' ? 'المبلغ الذي ستسترده كاش بالكامل:' : 'Cash You Fully Recover:'}</span>
+                      <span className="text-xl sm:text-2xl font-black text-white font-sans">
+                        2,000,000 <span className="text-xs font-bold text-[#2dd4bf]">{t('egp')} {language === 'ar' ? 'كاش فوري' : 'Instant Cash'}</span>
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-bold text-emerald-300 bg-emerald-900/50 px-2 py-1 rounded">
+                      {language === 'ar' ? 'استرداد 100% (خسارة 0%)' : '0% Loss (100% Back)'}
+                    </span>
                   </div>
                 </div>
 
-                <div className="mt-3 text-xs text-slate-300 flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#2dd4bf]" />
-                  <span>{language === 'ar' ? 'كاش عند إتمام النقل بمقر المطور فوراً' : 'Certified cash at developer HQ instantly'}</span>
+                <div className="mt-3 text-[11px] text-slate-300 flex items-center gap-1.5 bg-black/20 p-2 rounded">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#2dd4bf] shrink-0" />
+                  <span>
+                    {language === 'ar' ? 'طريقة الاستلام: ' : 'Payout: '}
+                    <strong className="text-white">{language === 'ar' ? 'شيك مصرفي معتمد يُسلّم لك بمقر المطور فور التنازل' : 'Certified cashier check handed at developer HQ'}</strong>
+                  </span>
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-[#0d9488]/30 text-xs font-bold text-[#2dd4bf] bg-[#0f766e]/30 p-2 rounded">
-                {language === 'ar' ? 'فلوسه كاملة كاش، والمشتري كسب سعر قديم!' : '100% cash to seller, original past price to buyer!'}
+              <div className="pt-2 border-t border-[#0d9488]/40 text-center text-xs font-bold text-[#2dd4bf] bg-[#0f766e]/40 py-2 px-3 rounded">
+                {language === 'ar' ? '✅ النتيجة: استرداد الـ 2 مليون كاملة + إبراء ذمة واسترجاع الشيكات' : '✅ Result: Full 2 Million Recovered + Checks Returned'}
               </div>
             </div>
 

@@ -36,12 +36,12 @@ export const ValueDifferenceSection: React.FC<ValueDifferenceProps> = ({
           <div className="text-center max-w-3xl mx-auto mb-12">
             <h2 className="text-2xl sm:text-4xl font-black text-[#0f172a] tracking-tight">
               {language === 'ar' 
-                ? 'طرف محتاج يبيع، وطرف مستني الفرصة — وإحنا بنوصّلهم'
+                ? 'طرف يبحث عن التخارج الآمن، وآخر ينتظر الفرصة الاستثمارية'
                 : 'One Party Needs to Exit, One Awaits the Deal — We Bridge the Gap'}
             </h2>
             <p className="text-slate-600 text-sm sm:text-base mt-2">
               {language === 'ar'
-                ? 'ده مش ريسيل عادي: مفيش أوفر خالص. البايع بياخد اللي دفعه بالظبط، والمشتري بياخد سعر التعاقد القديم زي ما هو.'
+                ? 'منظومة تعاقدية حصرية ترتكز على مبدأ "صفر أوفر برايس": يسترد البائع كامل رأس ماله المسدد دون أي استقطاعات، ويكتسب المشتري حق الحلول التعاقدي بنفس سعر وتسهيلات الطرح الأصلي.'
                 : 'This is not traditional resale: strictly 0% overprice. Sellers claim back their exact paid cash, while buyers inherit original past pricing.'}
             </p>
           </div>
@@ -52,14 +52,14 @@ export const ValueDifferenceSection: React.FC<ValueDifferenceProps> = ({
             <div className="bg-white rounded-2xl border border-[#cbd2d9] p-7 sm:p-8 flex flex-col justify-between space-y-6 shadow-xs hover:border-[#0f766e] transition-all">
               <div className="space-y-4">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#ecfdf5] text-[#0f766e] text-xs font-bold border border-[#d1fae5]">
-                  {language === 'ar' ? 'البايع — صاحب الوحدة' : 'The Seller — Property Owner'}
+                  {language === 'ar' ? 'البائع — مالك الوحدة التعاقدية' : 'The Seller — Property Owner'}
                 </div>
                 <h3 className="text-xl sm:text-2xl font-bold text-[#0f172a]">
-                  {language === 'ar' ? 'بدون أوفر = أسرع بيع في السوق' : '0% Overprice = Fastest Exit in the Market'}
+                  {language === 'ar' ? 'صفر أوفر برايس = أعلى سرعة إنجاز للتنازل' : '0% Overprice = Fastest Exit in the Market'}
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                   {language === 'ar'
-                    ? 'لأن سعرك هو نفس اللي دفعته من غير أي زيادة، وحدتك بتبقى أحسن فرصة قدام المشترين — فبتتباع أسرع. تسترجع فلوسك كاملة كاش، بدل ما المطور يخصم منك ويقسّط لك الباقي على سنين.'
+                    ? 'بطرح وحدتك بقيمة رأس المال المدفوع فعلياً دون أي هوامش ربحية مضاربية، تكتسب الوحدة أولوية استثمارية قصوى لدى المشترين الجادين، محققة سرعة تخارج قياسية واسترداداً فورياً للسيولة دون الخضوع لغرامات الفسخ أو الجدولة الممتدة لدى المطور.'
                     : 'Because you ask only for your actual cash paid with zero markup, your property becomes the most attractive opportunity in the market — exiting in days. You claim 100% of your funds instead of developer penalties and delayed installments.'}
                 </p>
 
@@ -70,7 +70,7 @@ export const ValueDifferenceSection: React.FC<ValueDifferenceProps> = ({
                     </div>
                     <span>
                       {language === 'ar' ? (
-                        <><strong>تسترجع 100% من اللي دفعته</strong> — كاش عند إتمام التنازل الرسمي.</>
+                        <><strong>استرداد 100% من رأس المال المسدد</strong> — بشيك مصرفي معتمد فور إتمام التنازل الرسمي.</>
                       ) : (
                         <><strong>Recover 100% of your paid cash</strong> — Certified cashier check handed over at developer HQ.</>
                       )}
@@ -82,7 +82,7 @@ export const ValueDifferenceSection: React.FC<ValueDifferenceProps> = ({
                     </div>
                     <span>
                       {language === 'ar' ? (
-                        <><strong>من غير إعلانات علنية ولا تليفونات سماسرة</strong> — خصوصية مطلقة.</>
+                        <><strong>سرية تعاقدية تامة وحماية مطلقة للبيانات</strong> — دون إعلانات عامة أو وساطة عشوائية.</>
                       ) : (
                         <><strong>Zero public ads & spam broker calls</strong> — Total confidentiality of your unit info.</>
                       )}
@@ -94,7 +94,7 @@ export const ValueDifferenceSection: React.FC<ValueDifferenceProps> = ({
                     </div>
                     <span>
                       {language === 'ar' ? (
-                        <><strong>بنجهّز ملف التنازل ونتابع خطوة بخطوة</strong> لحد استرداد الشيكات.</>
+                        <><strong>إشراف قانوني كامل على ملف التنازل</strong> ومطابقة استرداد كامل الشيكات الآجلة وإبراء الذمة.</>
                       ) : (
                         <><strong>We assemble the transfer dossier</strong> and accompany you until all pending checks are returned.</>
                       )}
@@ -106,7 +106,7 @@ export const ValueDifferenceSection: React.FC<ValueDifferenceProps> = ({
                     </div>
                     <span>
                       {language === 'ar' ? (
-                        <><strong>مجانًا عليك تمامًا</strong> — {currentBrand.nameAr} مش بتاخد أي عمولة من البايع.</>
+                        <><strong>خدمة مجانية للبائع بالكامل</strong> — لا تتقاضى المنصة أي نسبة أو عمولة من البائع المتنازل.</>
                       ) : (
                         <><strong>100% Free for Sellers</strong> — {currentBrand.nameEn} takes zero commission from you.</>
                       )}
@@ -131,11 +131,11 @@ export const ValueDifferenceSection: React.FC<ValueDifferenceProps> = ({
                   {language === 'ar' ? 'المشتري' : 'The Buyer'}
                 </div>
                 <h3 className="text-xl sm:text-2xl font-bold text-[#0f172a]">
-                  {language === 'ar' ? 'وحدة بالتقسيط من غير ما تدفع أوفر لحد' : 'Installment Units with 0% Overprice'}
+                  {language === 'ar' ? 'شراء وحدات بالتقسيط بصفر أوفر برايس' : 'Installment Units with 0% Overprice'}
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                   {language === 'ar'
-                    ? 'بتاخد الوحدة بسعر تعاقدها القديم — أرخص من سعر المطور النهارده بفرق ملايين — وتكمّل الأقساط العادية. الفرق ده مكسبك من يوم ما تمضي، ومن غير جنيه أوفر.'
+                    ? 'امتلاك الوحدة بسعر تعاقدها التأسيسي الأصلي، محققاً وفراً مالياً بملايين الجنيهات مقارنة بأسعار الطروحات الحالية لدى المطور، مع استكمال سداد الأقساط المتبقية دون أي فوائد أو أوفر برايس.'
                     : 'Acquire high-demand units at previous developer pricing — saving millions compared to current developer rates — and continue standard installments with zero overprice markup.'}
                 </p>
 
@@ -146,7 +146,7 @@ export const ValueDifferenceSection: React.FC<ValueDifferenceProps> = ({
                     </div>
                     <span>
                       {language === 'ar' ? (
-                        <><strong>سعر التعاقد القديم زي ما هو</strong> — الأوفر برايس ممنوع نهائياً على المنصة.</>
+                        <><strong>سعر التعاقد التأسيسي الأصلي دون أي زيادة</strong> — حظر تام لأي مبالغ إضافية أو أوفر برايس.</>
                       ) : (
                         <><strong>Original Contract Price Intact</strong> — Overprice is strictly prohibited.</>
                       )}
@@ -158,7 +158,7 @@ export const ValueDifferenceSection: React.FC<ValueDifferenceProps> = ({
                     </div>
                     <span>
                       {language === 'ar' ? (
-                        <><strong>العقد والمدفوعات والمتبقي متحقق منهم</strong> قبل ما تشوف الفرصة.</>
+                        <><strong>تدقيق مالي وقانوني معتمد للعقود وكشوف الحسابات</strong> قبل اعتماد ونشر أي فرصة.</>
                       ) : (
                         <><strong>Contracts & bank statements audited</strong> before units are ever displayed.</>
                       )}
@@ -170,7 +170,7 @@ export const ValueDifferenceSection: React.FC<ValueDifferenceProps> = ({
                     </div>
                     <span>
                       {language === 'ar' ? (
-                        <><strong>تنازل رسمي معتمد من المطور</strong> — مش توكيلات وكلام عرفي.</>
+                        <><strong>نقل ملكية وتنازل رسمي بسجلات المطور العقاري</strong> — حظر قاطع للتوكيلات أو العقود العرفية.</>
                       ) : (
                         <><strong>Official developer assignment</strong> — strictly no precarious powers of attorney.</>
                       )}
@@ -182,9 +182,9 @@ export const ValueDifferenceSection: React.FC<ValueDifferenceProps> = ({
                     </div>
                     <span>
                       {language === 'ar' ? (
-                        <><strong>عمولة عادلة 1.25% فقط</strong> عند إتمام التنازل بنجاح في مقر المطور.</>
+                        <><strong>رسوم توثيق وتدقيق مخفضة 1.25% فقط</strong> تُستحق حصرياً عقب اكتمال التنازل الرسمي بمقر المطور.</>
                       ) : (
-                        <><strong>Fair 1.25% commission only</strong> upon successful transfer at developer headquarters.</>
+                        <><strong>Modest 1.25% audit & verification fee</strong> payable strictly upon successful transfer completion at developer HQ.</>
                       )}
                     </span>
                   </li>
