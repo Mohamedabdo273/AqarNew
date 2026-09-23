@@ -51,7 +51,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({
 
   // Distinct Stepper State
   const [currentStep, setCurrentStep] = useState<number>(1);
-  const totalSteps = 6;
+  const totalSteps = 5;
   const [understandsExactPaid, setUnderstandsExactPaid] = useState<boolean>(true);
   const [currentMarketPrice, setCurrentMarketPrice] = useState<string>('');
   const [ackIsDirectOwner, setAckIsDirectOwner] = useState<boolean>(true);
@@ -85,13 +85,20 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({
   const [installmentPeriodYears, setInstallmentPeriodYears] = useState<number>(5);
   const [nextInstallmentDate, setNextInstallmentDate] = useState('2026-11-01');
   const [maintenanceDepositPaid, setMaintenanceDepositPaid] = useState(false);
-  const [transferFeeBearer, setTransferFeeBearer] = useState<'بائع' | 'مشتري' | 'مناصفة' | 'معفي بالعقد'>('معفي بالعقد');
+  const [transferFeeBearer, setTransferFeeBearer] = useState<'بائع' | 'مشتري' | 'مناصفة' | 'معفي بالعقد'>('مشتري');
   const [transferFeePercent, setTransferFeePercent] = useState<number>(0);
   const [hasLatePenalties, setHasLatePenalties] = useState(false);
+  const [latePenaltiesAmount, setLatePenaltiesAmount] = useState<number>(0);
+  const [deductPenaltiesFromPrice, setDeductPenaltiesFromPrice] = useState(true);
 
-  // Swap and liquidity preferences
-  const [eligibleForSwap, setEligibleForSwap] = useState(true);
-  const [swapTargetType, setSwapTargetType] = useState('مكتب إداري أو عيادة أو شقة أصغر');
+  // New Seller Flexibility & Fire Sale Fields
+  const [isWillingToDiscount, setIsWillingToDiscount] = useState(false);
+  const [willingDiscountAmount, setWillingDiscountAmount] = useState<number>(100000);
+  const [acceptsCashInstallments, setAcceptsCashInstallments] = useState(false);
+  const [cashInstallmentNotes, setCashInstallmentNotes] = useState('');
+  const [taxCategory, setTaxCategory] = useState<'residential_exempt' | 'commercial_vat' | 'business_tax'>('residential_exempt');
+  const [taxBearer, setTaxBearer] = useState<'بائع' | 'مشتري' | 'حسب القانون' | 'معفى'>('حسب القانون');
+  const [ackPlatformDisclaimer, setAckPlatformDisclaimer] = useState(false);
 
   const [ownerName, setOwnerName] = useState('');
   const [ownerPhone, setOwnerPhone] = useState('');
@@ -135,14 +142,6 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({
     },
     {
       num: 4,
-      titleAr: 'المبادلة الذكية',
-      titleEn: 'Smart Asset Swap',
-      subtitleAr: 'نقل رأس المال لأصل آخر',
-      subtitleEn: 'Transfer Equity',
-      icon: Repeat,
-    },
-    {
-      num: 5,
       titleAr: 'بيانات المالك',
       titleEn: 'Owner & Verification',
       subtitleAr: 'الاسم، الموبايل، والمستند',
@@ -150,7 +149,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({
       icon: ShieldCheck,
     },
     {
-      num: 6,
+      num: 5,
       titleAr: 'الإقرار والمراجعة',
       titleEn: 'Review & Submit',
       subtitleAr: 'التأكيد النهائي بدون أوفر',
@@ -191,7 +190,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({
         setValidationError(language === 'ar' ? 'يرجى إدخال مساحة الوحدة بالمتر المربع' : 'Please enter property area in sqm');
         return false;
       }
-    } else if (step === 5) {
+    } else if (step === 4) {
       if (!ownerName.trim()) {
         setValidationError(language === 'ar' ? 'يرجى إدخال اسم المالك كما هو مدون في العقد' : 'Please enter owner name');
         return false;
@@ -200,9 +199,13 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({
         setValidationError(language === 'ar' ? 'يرجى إدخال رقم الهاتف أو الواتساب للتواصل' : 'Please enter contact phone/WhatsApp');
         return false;
       }
-    } else if (step === 6) {
+    } else if (step === 5) {
       if (!ackIsDirectOwner || !ackNoBroker) {
         setValidationError(language === 'ar' ? 'يجب الإقرار بأنك المالك المباشر للوحدة بدون وسيط' : 'You must declare that you are the direct owner');
+        return false;
+      }
+      if (!ackPlatformDisclaimer) {
+        setValidationError(language === 'ar' ? 'يرجى الموافقة على إقرار الشفافية وإخلاء مسؤولية المنصة عن صحة الورق' : 'Please accept platform legal disclaimer');
         return false;
       }
     }
@@ -257,8 +260,15 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({
       transferFeeBearer,
       transferFeePercent: Number(transferFeePercent) || 0,
       hasLatePenalties,
-      eligibleForSwap,
-      swapTargetType,
+      hasOverdueFinesDeducted: hasLatePenalties && deductPenaltiesFromPrice,
+      overdueFinesAmount: hasLatePenalties ? Number(latePenaltiesAmount) : 0,
+      sellerWillingDiscountAmount: isWillingToDiscount ? Number(willingDiscountAmount) : undefined,
+      acceptsInstallmentsForCash: acceptsCashInstallments,
+      cashInstallmentsTerms: acceptsCashInstallments ? cashInstallmentNotes : undefined,
+      taxCategory,
+      taxBearer,
+      eligibleForSwap: false,
+      swapTargetType: '',
       instantLiquidityEligible: true,
       phaseName: phaseName || undefined,
       unitNumber: unitNumber || undefined,
@@ -275,160 +285,51 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 sm:space-y-14">
         
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200 shadow-2xs">
+        <div className="text-center max-w-2xl mx-auto space-y-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold border border-emerald-200 shadow-2xs">
             <Coins className="w-3.5 h-3.5 text-emerald-600" />
             <span>{language === 'ar' ? 'منظومة التنازل المباشر • عمولة 0% على البائع' : 'Direct Assignment Portal • 0% Seller Fee'}</span>
           </div>
 
-          <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
             {language === 'ar' ? (
-              <>سجل وحدتك للتنازل واسترجع <span className="text-[#0f766e]">كامل رأس مالك كاش</span></>
+              <>سجل شقتك للتنازل واسترد <span className="text-[#0f766e]">كامل كاشك</span></>
             ) : (
               <>List For Assignment & Recover <span className="text-[#0f766e]">100% Cash In Full</span></>
             )}
           </h1>
 
-          <p className="text-slate-600 text-xs sm:text-sm md:text-base leading-relaxed">
+          <p className="text-slate-500 text-xs sm:text-sm">
             {language === 'ar'
-              ? 'تخارج آمن وقانوني 100% بمقر المطور وبإشراف المنصة. استرد ما دفعته كاملاً بشيك مصرفي مقبول الدفع، وتخلص فوراً من عبء الأقساط القادمة بدون أي خسارة.'
-              : 'Safe & 100% legal exit at developer headquarters. Recover every pound paid via cashier check and eliminate upcoming installments without loss.'}
+              ? 'خطوات سريعة وبسيطة: أدخل بيانات الوحدة، وسنقوم بالتواصل وتنسيق التنازل الرسمي بمقر المطور بشيك مصرفي معتمد.'
+              : 'Simple quick steps: Enter your unit details, and we coordinate the official transfer at developer HQ with zero fees.'}
           </p>
-        </div>
-
-        {/* 3 Exit Options Comparison */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-8 lg:p-10 shadow-xs">
-          <div className="text-center max-w-2xl mx-auto mb-6 sm:mb-8">
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900">
-              {language === 'ar' ? 'قارن بين خياراتك الثلاثة للخروج من عبء الأقساط' : 'Compare Your 3 Exit Options from Installment Burdens'}
-            </h2>
-            <p className="text-xs text-slate-500 mt-1">
-              {language === 'ar' ? 'لماذا نموذج التنازل هو الخيار الأكثر أماناً ووفراً للبائع؟' : 'Why the verified contract assignment model provides total capital recovery and peace of mind.'}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
-            {/* Option 1: Developer */}
-            <div className="p-5 rounded-2xl bg-red-50/60 border border-red-200 space-y-3">
-              <span className="text-xs font-bold text-red-700 bg-red-100 px-2.5 py-1 rounded-md inline-block">
-                {language === 'ar' ? 'الخيار 1: الفسخ مع المطور' : 'Option 1: Developer Cancellation'}
-              </span>
-              <h3 className="text-base font-bold text-red-950">
-                {language === 'ar' ? 'خسارة مالية فادحة واسترداد مؤجل' : 'Severe Penalty & Long Waiting Period'}
-              </h3>
-              <ul className="text-xs text-slate-700 space-y-2 list-disc list-inside">
-                {language === 'ar' ? (
-                  <>
-                    <li>خصم غرامة تعاقدية <strong>10% إلى 15% من إجمالي ثمن الوحدة</strong> (وليس فقط من المدفوع).</li>
-                    <li>تجميد المبلغ المتبقي واسترداده بعد إعادة بيع الوحدة أو بعد 6 - 12 شهراً.</li>
-                    <li>تجميد الشيكات القديمة لحين إتمام إجراءات الفسخ القانونية.</li>
-                  </>
-                ) : (
-                  <>
-                    <li>Deduction of 10% to 15% penalty from the total unit contract price.</li>
-                    <li>Remaining refund delayed 6 to 12 months until the developer resells.</li>
-                    <li>Bank checks kept locked until full administrative closure.</li>
-                  </>
-                )}
-              </ul>
-              <div className="pt-2 text-xs font-black text-red-700">
-                {language === 'ar' ? 'النتيجة: خسارة جزء كبير من مدخراتك.' : 'Outcome: Heavy loss of capital.'}
-              </div>
-            </div>
-
-            {/* Option 2: Market Resale with Overprice */}
-            <div className="p-5 rounded-2xl bg-amber-50/60 border border-amber-200 space-y-3">
-              <span className="text-xs font-bold text-amber-800 bg-amber-100 px-2.5 py-1 rounded-md inline-block">
-                {language === 'ar' ? 'الخيار 2: البيع في السوق بأوفر برايس' : 'Option 2: Market Resale with Overprice'}
-              </span>
-              <h3 className="text-base font-bold text-amber-950">
-                {language === 'ar' ? 'شهور من الانتظار وتراكم الأقساط' : 'Months on Hold with Accumulating Dues'}
-              </h3>
-              <ul className="text-xs text-slate-700 space-y-2 list-disc list-inside">
-                {language === 'ar' ? (
-                  <>
-                    <li>محاولة فرض أوفر برايس تؤدي لركود الوحدة لشهور بسبب انكماش السيولة.</li>
-                    <li>استمرار استحقاق الأقساط وغرامات التأخير أثناء البحث عن مشتري.</li>
-                    <li>دفع عمولة سماسرة 2.5% تقتطع من أي سيولة مستردة.</li>
-                    <li>المشتري يفضل الشراء المباشر من المطور لمدد أطول.</li>
-                  </>
-                ) : (
-                  <>
-                    <li>Overprice premiums freeze interest during high interest rate cycles.</li>
-                    <li>Installment checks continue bouncing while waiting for a buyer.</li>
-                    <li>2.5% broker commissions eaten out of your net recovery.</li>
-                    <li>Buyers bypass and go direct to developer launches.</li>
-                  </>
-                )}
-              </ul>
-              <div className="pt-2 text-xs font-black text-amber-800">
-                {language === 'ar' ? 'النتيجة: ضغط نفسي وتراكم شيكات متعثرة.' : 'Outcome: Financial anxiety & check defaults.'}
-              </div>
-            </div>
-
-            {/* Option 3: Verified Assignment (Our Model) */}
-            <div className="p-5 rounded-2xl bg-teal-50/60 border-2 border-[#0f766e] space-y-3 relative shadow-xs">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-white bg-[#0f766e] px-2.5 py-1 rounded-md">
-                  {language === 'ar' ? 'الخيار 3: التنازل الرسمي عبر المنصة' : 'Option 3: Assignment Model'}
-                </span>
-                <span className="text-[11px] font-bold text-[#0f766e]">
-                  {language === 'ar' ? 'الأسرع والأوفر' : 'Recommended'}
-                </span>
-              </div>
-              <h3 className="text-base font-bold text-[#0f766e]">
-                {language === 'ar' ? 'استرداد 100% كاش وعمولة 0% على البائع' : '100% Cash Recovery & 0% Seller Fee'}
-              </h3>
-              <ul className="text-xs text-slate-800 space-y-2 list-disc list-inside">
-                {language === 'ar' ? (
-                  <>
-                    <li>استرداد كل جنيه دفعته للمطور <strong>بالكامل بشيك مصرفي مقبول الدفع</strong>.</li>
-                    <li><strong>0% عمولة على البائع</strong> (الخدمة مجانية بالكامل لأصحاب الوحدات).</li>
-                    <li>سرعة تنفيذ خلال 3 إلى 7 أيام لأن الوحدة بسعر قديم وبدون أي أوفر.</li>
-                    <li>استرداد كافة شيكاتك البنكية المؤجلة فوراً وإلغاء مسؤوليتك القانونية.</li>
-                    <li>تنازل رسمي بمقر المطور وبإشراف قانوني موثق.</li>
-                  </>
-                ) : (
-                  <>
-                    <li>Recover 100% of every pound paid with zero deductions.</li>
-                    <li>0% seller commission (completely free for exit owners).</li>
-                    <li>Swift matched exit in 3 to 7 days due to zero overprice.</li>
-                    <li>Receive certified cashier check & retrieve all old checks.</li>
-                    <li>Official assignment at developer HQ with platform legal counsel.</li>
-                  </>
-                )}
-              </ul>
-              <div className="pt-2 text-xs font-black text-[#0f766e]">
-                {language === 'ar' ? 'النتيجة: خروج فوري بكامل رأس مالك وراحة بال تامة.' : 'Outcome: Instant clean exit, full liquidity & total peace of mind.'}
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Distinctive Sell Studio Layout: Stepper + Live Audit Sidebar */}
         <div id="sell-form" className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
           
-          {/* Top Banner: Direct Owner Badge */}
-          <div className="bg-slate-900 text-white px-5 sm:px-8 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3">
+          {/* Top Banner: Direct Owner Info */}
+          <div className="bg-slate-900 text-white px-5 sm:px-8 py-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
             <div className="flex items-center gap-3">
-              <div className="w-7 h-7 rounded-lg bg-[#0f766e] flex items-center justify-center text-white shrink-0">
+              <div className="w-7 h-7 rounded-lg bg-teal-800 flex items-center justify-center text-white shrink-0">
                 <UserCheck className="w-4 h-4" />
               </div>
-              <span className="text-xs sm:text-sm font-bold text-slate-100">
+              <span className="font-semibold text-slate-200">
                 {language === 'ar' 
-                  ? 'بنتعامل مع مالك الوحدة الأصلي المباشر فقط — الوسطاء والسماسرة مستبعدون نهائياً'
-                  : 'Direct contract owners only — 0% overprice policy strictly audited.'}
+                  ? 'التعامل مع مالك الوحدة المباشر فقط — التنازل بمقر المطور وبدون أوفر برايس'
+                  : 'Direct contract owners only — 0% overprice policy audited.'}
               </span>
             </div>
-            <div className="flex items-center gap-2 text-[11px] text-teal-300 font-bold bg-white/10 px-3 py-1 rounded-full border border-white/10">
+            <div className="flex items-center gap-2 text-slate-300">
               <ShieldCheck className="w-3.5 h-3.5 text-teal-400" />
-              <span>{language === 'ar' ? 'فحص ومطابقة خلال ساعتين' : '2-Hour Verification'}</span>
+              <span>{language === 'ar' ? 'فحص ومطابقة سريعة' : 'Fast Verification'}</span>
             </div>
           </div>
 
           {/* Stepper Header (Desktop Tabs / Mobile Cards) */}
-          <div className="border-b border-slate-200 bg-slate-50/70 p-4 sm:p-6">
-            <div className="grid grid-cols-2 md:grid-cols-6 gap-2 sm:gap-3">
+          <div className="border-b border-slate-200 bg-slate-50/70 p-4 sm:p-5">
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-2 sm:gap-2.5">
               {stepsMetadata.map((st) => {
                 const IconComponent = st.icon;
                 const isActive = st.num === currentStep;
@@ -445,29 +346,29 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({
                         setCurrentStep(st.num);
                       }
                     }}
-                    className={`relative p-3 rounded-2xl text-start transition-all cursor-pointer border ${
+                    className={`relative p-2.5 rounded-xl text-start transition-all cursor-pointer border ${
                       isActive 
-                        ? 'bg-white border-[#0f766e] shadow-sm ring-2 ring-[#0f766e]/20'
+                        ? 'bg-white border-teal-700 shadow-xs'
                         : isPassed
-                        ? 'bg-white/80 border-emerald-200 text-slate-700 hover:bg-white'
-                        : 'bg-slate-100/60 border-slate-200/80 text-slate-400 opacity-80'
+                        ? 'bg-white/80 border-slate-300 text-slate-700 hover:bg-white'
+                        : 'bg-slate-100/50 border-slate-200/80 text-slate-400 opacity-70'
                     }`}
                   >
-                    <div className="flex items-center justify-between mb-1.5">
-                      <div className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-bold ${
+                    <div className="flex items-center justify-between mb-1">
+                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold ${
                         isActive
-                          ? 'bg-[#0f766e] text-white shadow-2xs'
+                          ? 'bg-teal-700 text-white'
                           : isPassed
-                          ? 'bg-emerald-500 text-white'
+                          ? 'bg-slate-700 text-white'
                           : 'bg-slate-200 text-slate-500'
                       }`}>
-                        {isPassed ? <Check className="w-3.5 h-3.5" /> : st.num}
+                        {isPassed ? <Check className="w-3 h-3" /> : st.num}
                       </div>
-                      <IconComponent className={`w-4 h-4 ${
-                        isActive ? 'text-[#0f766e]' : isPassed ? 'text-emerald-600' : 'text-slate-400'
+                      <IconComponent className={`w-3.5 h-3.5 ${
+                        isActive ? 'text-teal-700' : isPassed ? 'text-slate-600' : 'text-slate-400'
                       }`} />
                     </div>
-                    <div className="font-black text-xs text-slate-800 line-clamp-1">
+                    <div className="font-bold text-xs text-slate-800 line-clamp-1">
                       {language === 'ar' ? st.titleAr : st.titleEn}
                     </div>
                     <div className="text-[10px] text-slate-500 line-clamp-1 mt-0.5 hidden sm:block">
@@ -549,9 +450,8 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({
                     {currentStep === 1 && (language === 'ar' ? 'بيانات المطور، المشروع، والمبالغ المالية' : 'Developer, Compound & Financial Equity')}
                     {currentStep === 2 && (language === 'ar' ? 'المواصفات الفنية والمعمارية للوحدة' : 'Architectural Specs & Area')}
                     {currentStep === 3 && (language === 'ar' ? 'جدول الأقساط المتبقية للمطور' : 'Installment Schedule & Dues')}
-                    {currentStep === 4 && (language === 'ar' ? 'المبادلة الذكية والمناقلة العقارية' : 'Smart Equity Swap Option')}
-                    {currentStep === 5 && (language === 'ar' ? 'بيانات المالك والتوثيق والسرية' : 'Owner Verification & Statement')}
-                    {currentStep === 6 && (language === 'ar' ? 'المراجعة النهائية والإقرار القانوني' : 'Legal Acknowledgment & Submission')}
+                    {currentStep === 4 && (language === 'ar' ? 'بيانات المالك والتوثيق والسرية' : 'Owner Verification & Statement')}
+                    {currentStep === 5 && (language === 'ar' ? 'المراجعة النهائية والإقرار القانوني' : 'Legal Acknowledgment & Submission')}
                   </h3>
                 </div>
 
@@ -945,19 +845,27 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-800 mb-1.5">
-                        {language === 'ar' ? 'رسوم التنازل لدى المطور (Transfer Fee):' : 'Developer Transfer Fee:'}
+                      <label className="block text-xs font-bold text-slate-800 mb-1.5 flex items-center justify-between">
+                        <span>{language === 'ar' ? 'رسوم التنازل لدى المطور (Transfer Fee):' : 'Developer Transfer Fee:'}</span>
+                        <span className="text-[11px] font-semibold text-[#0f766e] bg-teal-50 px-2 py-0.5 rounded border border-teal-200">
+                          {language === 'ar' ? 'القاعدة الأساسية: على المشتري' : 'Rule: Borne by Buyer'}
+                        </span>
                       </label>
                       <select
                         value={transferFeeBearer}
                         onChange={(e) => setTransferFeeBearer(e.target.value as any)}
-                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs"
+                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold"
                       >
-                        <option value="معفي بالعقد">{language === 'ar' ? 'معفي من رسوم التنازل بنص العقد' : 'Exempt from transfer fees by contract'}</option>
-                        <option value="على البائع">{language === 'ar' ? 'يتحملها البائع' : 'Borne by seller'}</option>
-                        <option value="على المشتري">{language === 'ar' ? 'يتحملها المشتري' : 'Borne by buyer'}</option>
-                        <option value="مناصفة">{language === 'ar' ? 'مناصفة بين الطرفين' : '50/50 Shared'}</option>
+                        <option value="على المشتري">{language === 'ar' ? 'يتحملها المشتري الجديد بالكامل (القاعدة المعتمدة)' : 'Borne by Buyer (Standard Platform Rule)'}</option>
+                        <option value="معفي بالعقد">{language === 'ar' ? 'معفي من رسوم التنازل بنص العقد الأصلي للمطور' : 'Exempt from transfer fees by contract'}</option>
+                        <option value="على البائع">{language === 'ar' ? 'يتحملها البائع (استثناء بناءً على رغبة البائع)' : 'Borne by Seller (Special exception)'}</option>
+                        <option value="مناصفة">{language === 'ar' ? 'مناصفة بين الطرفين (50% / 50%)' : '50/50 Shared'}</option>
                       </select>
+                      <p className="text-[11px] text-slate-500 mt-1">
+                        {language === 'ar'
+                          ? '💡 وفقاً لقواعد المنصة، يتحمل المشتري رسوم التنازل لشركة التطوير مقابل حصوله على الوحدة بسعر التعاقد القديم بدون أوفر برايس.'
+                          : '💡 Per platform policy, transfer fees are borne by the buyer in exchange for acquiring the property at original contract value.'}
+                      </p>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-5 pt-2">
@@ -978,57 +886,140 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({
                           onChange={(e) => setHasLatePenalties(e.target.checked)}
                           className="w-4 h-4 accent-rose-600"
                         />
-                        <span>{language === 'ar' ? 'توجد غرامات تأخير معلقة' : 'Pending Overdue Fines'}</span>
+                        <span>{language === 'ar' ? 'توجد غرامات أو متأخرات على الوحدة' : 'Pending Overdue Fines'}</span>
                       </label>
                     </div>
-                  </div>
-                )}
 
-                {/* STEP 4: المبادلة الذكية والمناقلة */}
-                {currentStep === 4 && (
-                  <div className="space-y-4 text-xs">
-                    <div className="p-5 rounded-2xl bg-teal-50/80 border border-teal-200 space-y-3">
-                      <label className="flex items-start gap-3 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={eligibleForSwap}
-                          onChange={(e) => setEligibleForSwap(e.target.checked)}
-                          className="w-5 h-5 accent-[#0f766e] mt-0.5 shrink-0"
-                        />
-                        <div className="space-y-1">
-                          <span className="text-xs font-black text-slate-900 block">
-                            {language === 'ar'
-                              ? 'أرحب أيضاً بمبادلة ومناقلة هذه الوحدة بأصل عقاري آخر'
-                              : 'Open to Smart Property Swap for another real estate asset'}
-                          </span>
-                          <span className="text-[11px] text-slate-600 leading-relaxed block">
-                            {language === 'ar'
-                              ? 'انقل مدفوعاتك السابقة بالكامل إلى عيادة، مكتب إداري، أو شقة أصغر ذات قسط شهري منخفض دون الحاجة للسيولة النقدية.'
-                              : 'Transfer your paid equity directly to a lower-installment asset like an office, clinic, or smaller unit.'}
-                          </span>
-                        </div>
-                      </label>
-
-                      {eligibleForSwap && (
-                        <div className="pt-3 border-t border-teal-200">
-                          <label className="block text-xs font-bold text-slate-800 mb-1.5">
-                            {language === 'ar' ? 'نوع الأصل المرغوب في المبادلة به:' : 'Target Asset for Swap:'}
+                    {/* حقل تفاصيل الغرامات والمتأخرات وخصمها */}
+                    {hasLatePenalties && (
+                      <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl space-y-2.5">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                          <label className="text-xs font-bold text-rose-900">
+                            {language === 'ar' ? 'قيمة المتأخرات / الغرامات المستحقة للمطور (ج.م):' : 'Overdue Fines Amount (EGP):'}
                           </label>
                           <input
-                            type="text"
-                            value={swapTargetType}
-                            onChange={(e) => setSwapTargetType(e.target.value)}
-                            placeholder={language === 'ar' ? 'مثال: عيادة في التجمع أو شقة أصغر في زايد بقسط أقل...' : 'e.g. Clinic or smaller unit with lower payments...'}
-                            className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs"
+                            type="number"
+                            value={latePenaltiesAmount || ''}
+                            onChange={(e) => setLatePenaltiesAmount(Number(e.target.value))}
+                            placeholder="مثال: 50,000"
+                            className="w-full sm:w-48 px-3 py-1.5 bg-white border border-rose-300 rounded-lg text-xs font-sans font-bold text-rose-950"
                           />
+                        </div>
+                        <label className="flex items-center gap-2 cursor-pointer text-[11px] font-semibold text-rose-800">
+                          <input
+                            type="checkbox"
+                            checked={deductPenaltiesFromPrice}
+                            onChange={(e) => setDeductPenaltiesFromPrice(e.target.checked)}
+                            className="w-3.5 h-3.5 accent-rose-600"
+                          />
+                          <span>
+                            {language === 'ar'
+                              ? 'خصم قيمة المتأخرات من الكاش المستحق لي، على أن يسددها المشتري للمطور بدلاً مني'
+                              : 'Deduct overdue fines from cash due to me, buyer settles with developer instead'}
+                          </span>
+                        </label>
+                      </div>
+                    )}
+
+                    {/* قسم العروض النارية والتخارج العاجل (Fire Sale & Promotions) */}
+                    <div className="mt-4 pt-4 border-t border-slate-200 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                          <span className="text-amber-500">🔥</span>
+                          <span>{language === 'ar' ? 'هل ترغب في تخارج فوري سريع (عرض ترويجي خاص)؟' : 'Offer Urgent Fire Sale Discount?'}</span>
+                        </span>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={isWillingToDiscount}
+                            onChange={(e) => setIsWillingToDiscount(e.target.checked)}
+                            className="sr-only peer"
+                          />
+                          <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+                        </label>
+                      </div>
+
+                      {isWillingToDiscount && (
+                        <div className="p-3.5 bg-amber-50/70 border border-amber-200 rounded-xl space-y-2">
+                          <p className="text-[11px] text-amber-900 leading-relaxed">
+                            {language === 'ar'
+                              ? 'منح خصم إضافي من قيمة ما دفعته يضع وحدتك في صدارة "عروض التخارج العاجل" بالموقع، ويجذب المستثمرين الكاش في أقل من 24 ساعة!'
+                              : 'Granting an extra discount under paid capital promotes your unit in Hot Deals, closing within 24 hours!'}
+                          </p>
+                          <div className="flex items-center gap-3">
+                            <span className="text-xs font-bold text-amber-950">{language === 'ar' ? 'مبلغ الخصم المستعد للتنازل عنه:' : 'Discount Amount:'}</span>
+                            <input
+                              type="number"
+                              value={willingDiscountAmount}
+                              onChange={(e) => setWillingDiscountAmount(Number(e.target.value))}
+                              step={10000}
+                              className="w-40 px-3 py-1.5 bg-white border border-amber-300 rounded-lg text-xs font-sans font-black text-amber-900"
+                            />
+                            <span className="text-xs text-amber-800 font-bold">{t('egp')}</span>
+                          </div>
                         </div>
                       )}
                     </div>
+
+                    {/* قسم التسهيلات في استلام الكاش */}
+                    <div className="pt-2 border-t border-slate-200 space-y-2">
+                      <label className="flex items-center gap-2 cursor-pointer font-bold text-xs text-slate-700">
+                        <input
+                          type="checkbox"
+                          checked={acceptsCashInstallments}
+                          onChange={(e) => setAcceptsCashInstallments(e.target.checked)}
+                          className="w-4 h-4 accent-[#0f766e]"
+                        />
+                        <span>{language === 'ar' ? 'هل تقبل تسهيلات في سداد الكاش (مثلاً: دفعة أولى كاش والباقي بشيك مقبول الدفع بعد شهرين)؟' : 'Accept Flexible Cash Installments (e.g. 2 tranches with certified checks)?'}</span>
+                      </label>
+                      {acceptsCashInstallments && (
+                        <input
+                          type="text"
+                          value={cashInstallmentNotes}
+                          onChange={(e) => setCashInstallmentNotes(e.target.value)}
+                          placeholder={language === 'ar' ? 'اكتب شروطك للتسهيلات (مثال: 60% عند التوقيع و40% بشيك بعد شهرين)...' : 'E.g., 60% on signing, 40% certified check in 60 days...'}
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs"
+                        />
+                      )}
+                    </div>
+
+                    {/* قسم نوع العقار والضرائب */}
+                    <div className="pt-2 border-t border-slate-200">
+                      <label className="block text-xs font-bold text-slate-800 mb-1.5">
+                        {language === 'ar' ? 'المعاملة الضريبية للوحدة:' : 'Tax & Legal Classification:'}
+                      </label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        <select
+                          value={taxCategory}
+                          onChange={(e) => setTaxCategory(e.target.value as any)}
+                          className="px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs"
+                        >
+                          <option value="residential_exempt">{language === 'ar' ? 'سكني (معفى من القيمة المضافة VAT)' : 'Residential (VAT Exempt)'}</option>
+                          <option value="commercial_vat">{language === 'ar' ? 'تجاري / إداري (خاضع لضريبة القيمة المضافة)' : 'Commercial / Retail (VAT Applicable)'}</option>
+                          <option value="business_tax">{language === 'ar' ? 'أصل مملوك لشركة (ضريبة أرباح تجارية)' : 'Corporate Owned (Business Profit Tax)'}</option>
+                        </select>
+                        <select
+                          value={taxBearer}
+                          onChange={(e) => setTaxBearer(e.target.value as any)}
+                          className="px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold"
+                        >
+                          <option value="حسب القانون">{language === 'ar' ? 'كل طرف يتحمل التزامه الضريبي قانوناً' : 'Each party bears statutory tax dues'}</option>
+                          <option value="معفى">{language === 'ar' ? 'معفاة تماماً داخل كمبوند المطور' : 'Fully Exempt at Developer Compound'}</option>
+                          <option value="بائع">{language === 'ar' ? 'يتحملها البائع' : 'Borne by Seller'}</option>
+                          <option value="مشتري">{language === 'ar' ? 'يتحملها المشتري' : 'Borne by Buyer'}</option>
+                        </select>
+                      </div>
+                      <p className="text-[10px] text-slate-500 mt-1">
+                        {language === 'ar'
+                          ? '⚖️ القاعدة المعمول بها: يتحمل كل طرف ما يفرضه القانون عليه، والوحدات السكنية العادية لا تفرض عليها ضرائب قيمة مضافة.'
+                          : '⚖️ Standard practice: each party pays statutory taxes; normal residential resales are VAT exempt.'}
+                      </p>
+                    </div>
                   </div>
                 )}
 
-                {/* STEP 5: بيانات المالك والتوثيق والسرية */}
-                {currentStep === 5 && (
+                {/* STEP 4: بيانات المالك والتوثيق والسرية */}
+                {currentStep === 4 && (
                   <div className="space-y-4 text-xs">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
@@ -1100,8 +1091,8 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({
                   </div>
                 )}
 
-                {/* STEP 6: التأكيد والإقرار النهائي */}
-                {currentStep === 6 && (
+                {/* STEP 5: التأكيد والإقرار النهائي */}
+                {currentStep === 5 && (
                   <div className="space-y-4 text-xs">
                     <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
                       <h5 className="font-bold text-slate-900 border-b border-slate-200 pb-2">
@@ -1163,6 +1154,31 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({
                           className="w-4 h-4 accent-[#0f766e] rounded cursor-pointer shrink-0"
                         />
                       </div>
+
+                      {/* بند إخلاء مسؤولية المنصة عن صحة الورق والضرائب */}
+                      <div
+                        onClick={() => setAckPlatformDisclaimer(!ackPlatformDisclaimer)}
+                        className="p-3.5 rounded-2xl border border-amber-200 bg-amber-50/50 hover:bg-amber-50 cursor-pointer flex items-center justify-between gap-3 transition-colors"
+                      >
+                        <div className="space-y-1">
+                          <span className="text-xs font-bold text-slate-900 block">
+                            {language === 'ar'
+                              ? 'إقرار الشفافية والمسؤولية القانونية وإخلاء مسؤولية المنصة:'
+                              : 'Legal Disclaimer & Statutory Responsibility:'}
+                          </span>
+                          <p className="text-[11px] text-slate-600 leading-relaxed">
+                            {language === 'ar'
+                              ? 'أقر بأن المنصة هي وسيط تقني وإعلاني للتوفيق فقط، وليست مسؤولة عن صحة المستندات أو أصل الملكية أو سلامة التوكيلات، حيث تقع المراجعة والاعتماد النهائي حصراً على عاتق الشؤون القانونية للمطور العقاري بمقره الرسمي. كما يلتزم كل طرف بما عليه من التزامات ضريبية مقررة قانوناً.'
+                              : 'Platform is a matching portal and not liable for document authenticity; final verification rests exclusively with developer legal counsel at HQ. Parties bear statutory taxes.'}
+                          </p>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={ackPlatformDisclaimer}
+                          onChange={(e) => setAckPlatformDisclaimer(e.target.checked)}
+                          className="w-4 h-4 accent-[#0f766e] rounded cursor-pointer shrink-0"
+                        />
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1212,38 +1228,38 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({
               <div className="lg:col-span-4 space-y-4">
                 
                 {/* Live Financial Breakdown Card */}
-                <div className="bg-slate-900 text-white rounded-2xl p-5 space-y-4 border border-slate-800 shadow-md">
+                <div className="bg-slate-900 text-white rounded-2xl p-5 space-y-4 border border-slate-800">
                   <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                    <span className="text-xs font-black text-slate-200">
+                    <span className="text-xs font-bold text-slate-200">
                       {language === 'ar' ? 'المطابقة المالية الفورية' : 'Live Financial Audit'}
                     </span>
-                    <span className="text-[10px] font-bold text-teal-300 bg-teal-950 px-2 py-0.5 rounded border border-teal-800">
-                      {language === 'ar' ? 'استرداد 100%' : '100% Cash'}
+                    <span className="text-[11px] text-teal-300 font-semibold">
+                      {language === 'ar' ? 'استرداد 100% كاش' : '100% Cash'}
                     </span>
                   </div>
 
                   {/* Cash Recovery Highlight */}
                   <div className="space-y-1">
-                    <span className="text-[11px] text-slate-400 block">
+                    <span className="text-xs text-slate-400 block">
                       {language === 'ar' ? 'المبلغ المسترد بالكامل لك:' : 'Net Cash Paid (To Recover):'}
                     </span>
-                    <div className="text-2xl font-black font-sans text-teal-400">
+                    <div className="text-2xl font-bold font-sans text-teal-400">
                       {formatEGP(paidAmount)}
                     </div>
-                    <span className="text-[10px] text-slate-400 block">
+                    <span className="text-[11px] text-slate-400 block">
                       {language === 'ar' ? 'بشيك مصرفي مقبول الدفع فور التنازل' : 'Paid via certified cashier check upon signing'}
                     </span>
                   </div>
 
                   {/* Visual Progress Bar of Paid vs Remaining */}
                   <div className="space-y-1.5 pt-2 border-t border-slate-800">
-                    <div className="flex justify-between text-[11px] text-slate-300">
+                    <div className="flex justify-between text-xs text-slate-300">
                       <span>{language === 'ar' ? `المدفوع (${paidPercent}%)` : `Paid (${paidPercent}%)`}</span>
                       <span>{language === 'ar' ? `المتبقي (${remainingPercent}%)` : `Remaining (${remainingPercent}%)`}</span>
                     </div>
-                    <div className="h-2 rounded-full bg-slate-800 overflow-hidden flex">
-                      <div style={{ width: `${paidPercent}%` }} className="bg-[#0f766e] h-full transition-all duration-300" />
-                      <div style={{ width: `${remainingPercent}%` }} className="bg-slate-600 h-full transition-all duration-300" />
+                    <div className="h-1.5 rounded-full bg-slate-800 overflow-hidden flex">
+                      <div style={{ width: `${paidPercent}%` }} className="bg-teal-600 h-full transition-all duration-300" />
+                      <div style={{ width: `${remainingPercent}%` }} className="bg-slate-700 h-full transition-all duration-300" />
                     </div>
                   </div>
 
@@ -1251,60 +1267,60 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({
                   <div className="space-y-2 text-xs pt-2 border-t border-slate-800 text-slate-300">
                     <div className="flex justify-between">
                       <span className="text-slate-400">{language === 'ar' ? 'سعر العقد الإجمالي:' : 'Contract Price:'}</span>
-                      <span className="font-sans font-bold text-white">{formatEGP(contractPrice)}</span>
+                      <span className="font-sans font-medium text-white">{formatEGP(contractPrice)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400">{language === 'ar' ? 'المتبقي للمطور بالأقساط:' : 'Remaining to Dev:'}</span>
-                      <span className="font-sans font-bold text-slate-300">{formatEGP(remaining)}</span>
+                      <span className="font-sans font-medium text-slate-300">{formatEGP(remaining)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-400">{language === 'ar' ? 'عمولة البائع:' : 'Seller Fee:'}</span>
-                      <span className="font-bold text-emerald-400">{language === 'ar' ? '0% مجاناً 100%' : '0% Free'}</span>
+                      <span className="font-bold text-teal-400">{language === 'ar' ? '0% مجاناً بالكامل' : '0% Free'}</span>
                     </div>
                   </div>
 
                   {/* Safe Exit Vs Cancellation Callout */}
-                  <div className="p-3 rounded-xl bg-red-950/40 border border-red-900/60 text-[11px] space-y-1">
-                    <div className="flex items-center gap-1.5 text-red-300 font-bold">
-                      <TrendingDown className="w-3.5 h-3.5" />
-                      <span>{language === 'ar' ? 'وفرت غرامة الفسخ:' : 'Penalty Saved:'}</span>
+                  <div className="p-3 rounded-xl bg-slate-800/80 border border-slate-700 text-xs space-y-1">
+                    <div className="flex items-center gap-1.5 text-slate-200 font-semibold">
+                      <TrendingDown className="w-3.5 h-3.5 text-teal-400" />
+                      <span>{language === 'ar' ? 'توفير غرامة فسخ التعاقد:' : 'Penalty Saved:'}</span>
                     </div>
-                    <p className="text-slate-300 leading-relaxed">
+                    <p className="text-slate-400 text-[11px] leading-relaxed">
                       {language === 'ar'
-                        ? `وفرت حوالي ${formatEGP(contractPrice * 0.15)} كانت ستخصم كغرامة 15% إذا قمت بفسخ العقد مع المطور.`
-                        : `Saved ~${formatEGP(contractPrice * 0.15)} (15% penalty) compared to developer contract termination.`}
+                        ? `توفر حوالي ${formatEGP(contractPrice * 0.15)} كانت ستخصم كغرامة 15% إذا قمت بفسخ العقد مع المطور.`
+                        : `Saved ~${formatEGP(contractPrice * 0.15)} compared to contract termination.`}
                     </p>
                   </div>
                 </div>
 
-                {/* Live Liquidity & Matching Index Card */}
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-950/80 to-slate-900 border border-emerald-500/40 text-white shadow-sm space-y-2.5">
+                {/* Liquidity Note */}
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-slate-700 space-y-2 text-xs">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-black text-emerald-300 flex items-center gap-1.5">
-                      <Users className="w-4 h-4 text-emerald-400 animate-pulse" />
-                      <span>{language === 'ar' ? 'مؤشر السيولة وسرعة التخارج' : 'Liquidity & Matching Index'}</span>
+                    <span className="font-bold text-slate-900 flex items-center gap-1.5">
+                      <Users className="w-4 h-4 text-teal-700" />
+                      <span>{language === 'ar' ? 'مؤشر المشترين الكاش' : 'Cash Buyers Index'}</span>
                     </span>
-                    <span className="text-[10px] font-black bg-emerald-500 text-slate-950 px-2 py-0.5 rounded">
-                      {language === 'ar' ? 'طلب فوري' : 'High Match'}
+                    <span className="text-[11px] text-teal-800 font-semibold">
+                      {language === 'ar' ? 'طلب نشط' : 'Active'}
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-300 leading-relaxed">
+                  <p className="text-[11px] text-slate-500 leading-relaxed">
                     {language === 'ar'
-                      ? `بمجرد مراجعة وتدقيق وحدتك، يتم إشعار أكثر من 18 مشتري كاش مسجل يبحثون عن ${compound || 'هذا الكمبوند'} مع متوسط إغلاق 3 أيام.`
-                      : `Once verified, your unit is instantly matched to ~18 pre-registered cash buyers with ~3 days avg. closing.`}
+                      ? `بمجرد فحص بيانات وحدتك، يتم إشعار المشترين الكاش المسجلين الباحثين عن ${compound || 'هذا الكمبوند'}.`
+                      : `Once verified, your unit is matched to pre-registered buyers seeking this compound.`}
                   </p>
                 </div>
 
                 {/* Audit Desk Assurance Card */}
-                <div className="p-4 rounded-2xl bg-teal-50/60 border border-teal-200 text-xs text-slate-700 space-y-2">
-                  <div className="flex items-center gap-2 font-black text-slate-900">
-                    <ShieldCheck className="w-4 h-4 text-[#0f766e]" />
-                    <span>{language === 'ar' ? 'ضمانات التنازل القانوني' : 'Legal Assignment Safeguards'}</span>
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-2">
+                  <div className="flex items-center gap-2 font-bold text-slate-900">
+                    <ShieldCheck className="w-4 h-4 text-teal-700" />
+                    <span>{language === 'ar' ? 'ضمانات التنازل الرسمي' : 'Assignment Safeguards'}</span>
                   </div>
                   <ul className="space-y-1 text-[11px] text-slate-600 list-disc list-inside">
-                    <li>{language === 'ar' ? 'حضور مستشار قانوني من المنصة بمقر المطور.' : 'Legal counsel attendance at developer HQ.'}</li>
-                    <li>{language === 'ar' ? 'استرداد جميع شيكاتك البنكية المؤجلة فوراً.' : 'Retrieval of all deferred checks upon signing.'}</li>
-                    <li>{language === 'ar' ? 'إبراء ذمة رسمي ونهائي من إدارة المطور.' : 'Full official clearance from developer.'}</li>
+                    <li>{language === 'ar' ? 'حضور ممثل قانوني من المنصة بمقر المطور.' : 'Legal representative attendance at developer HQ.'}</li>
+                    <li>{language === 'ar' ? 'استرداد جميع شيكاتك البنكية المؤجلة فوراً.' : 'Retrieval of deferred checks upon signing.'}</li>
+                    <li>{language === 'ar' ? 'إبراء ذمة رسمي ونهائي من إدارة المطور.' : 'Full clearance from developer.'}</li>
                   </ul>
                 </div>
 

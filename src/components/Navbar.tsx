@@ -11,14 +11,10 @@ import {
   ArrowUpRight, 
   Globe, 
   ChevronDown,
-  User,
-  LogIn,
-  UserPlus,
   Repeat
 } from 'lucide-react';
 import { BrandSuggestion, PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
-import { useAuth } from '../context/AuthContext';
 
 interface NavbarProps {
   currentBrand: BrandSuggestion;
@@ -27,8 +23,6 @@ interface NavbarProps {
   onSelectBrand?: (brand: BrandSuggestion) => void;
   onOpenAddUnit: () => void;
   onOpenBrandShowcase?: () => void;
-  onOpenAuthModal: (tab?: 'login' | 'register') => void;
-  onOpenUserProfile: () => void;
   onOpenInvestorClub?: () => void;
 }
 
@@ -38,90 +32,64 @@ export const Navbar: React.FC<NavbarProps> = ({
   onNavigate,
   onOpenAddUnit,
   onOpenBrandShowcase,
-  onOpenAuthModal,
-  onOpenUserProfile,
   onOpenInvestorClub
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { t, language, toggleLanguage, isRTL } = useLanguage();
-  const { user, isAuthenticated } = useAuth();
 
   const navItemClass = (page: PageId) => `
-    px-2 py-1.5 2xl:px-2.5 rounded-md text-xs 2xl:text-sm font-bold transition-colors cursor-pointer whitespace-nowrap
+    px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap
     ${activePage === page 
-      ? 'bg-[#0f766e]/10 text-[#0f766e]' 
-      : 'text-[#0f172a] hover:text-[#0f766e] hover:bg-slate-50'
+      ? 'bg-slate-100 text-slate-900 font-bold' 
+      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
     }
   `;
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-[#e5e7eb] shadow-xs">
-      {/* Top Bar country & hotline header */}
-      <div className="bg-[#0f172a] text-slate-300 text-xs py-1.5 px-3 sm:px-6 border-b border-slate-800">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200">
+      {/* Top Bar - Clean, quiet and understated */}
+      <div className="bg-slate-900 text-slate-300 text-xs py-1.5 px-3 sm:px-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
-          <div className="flex items-center gap-3 text-[11px] min-w-0">
-            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-              <span className="text-white font-bold flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#0d9488]"></span>
-                {t('countryEgypt')}
-              </span>
-              <span className="text-slate-400 hidden xs:inline">
-                {t('countryKSA')} <span className="text-[9px] bg-slate-800 text-slate-300 px-1 py-0.2 rounded">{t('soon')}</span>
-              </span>
-              <span className="text-slate-400 hidden md:inline">
-                {t('countryUAE')} <span className="text-[9px] bg-slate-800 text-slate-300 px-1 py-0.2 rounded">{t('soon')}</span>
-              </span>
-            </div>
-            <span className="text-slate-600 hidden lg:inline">|</span>
-            <p className="hidden lg:inline text-slate-300 text-[11px] truncate max-w-sm xl:max-w-md">
-              {t('topbarTagline')}
-            </p>
+          <div className="flex items-center gap-3 text-xs">
+            <span className="text-white font-medium flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-teal-400"></span>
+              {t('countryEgypt')}
+            </span>
+            <span className="text-slate-600 hidden sm:inline">/</span>
+            <span className="text-slate-400 hidden sm:inline text-xs">
+              {language === 'ar' ? 'التنازل المالي الرسمي بمقر المطور بدون أوفر برايس' : 'Official developer HQ contract transfer · 0% Overprice'}
+            </span>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 text-[11px] shrink-0">
-            {/* VIP Investor Club Button */}
-            {onOpenInvestorClub && (
-              <button
-                onClick={onOpenInvestorClub}
-                className="hidden sm:flex items-center gap-1 px-2.5 py-0.5 rounded font-bold transition-all cursor-pointer text-[11px] bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 border border-amber-400/30"
-                title={language === 'ar' ? 'انضم لنادي المستثمرين' : 'Join VIP Investor Club'}
-              >
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span>{language === 'ar' ? 'نادي المستثمرين' : 'Investor Club'}</span>
-              </button>
-            )}
-
+          <div className="flex items-center gap-3 text-xs">
             {/* Admin Platform Quick Access */}
             <button
               onClick={() => onNavigate('admin')}
-              className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded font-bold transition-all cursor-pointer text-[11px] ${
+              className={`text-xs px-2 py-0.5 rounded transition-colors cursor-pointer ${
                 activePage === 'admin'
-                  ? 'bg-[#0f766e] text-white shadow-xs'
-                  : 'text-slate-300 hover:text-[#2dd4bf] bg-slate-800/80 hover:bg-slate-700'
+                  ? 'text-teal-300 font-bold bg-slate-800'
+                  : 'text-slate-400 hover:text-white'
               }`}
-              title={language === 'ar' ? 'لوحة تحكم الإدارة والتدقيق' : 'Admin Operations Suite'}
             >
-              <ShieldCheck className="w-3.5 h-3.5 text-[#2dd4bf]" />
-              <span>{language === 'ar' ? 'لوحة الإدارة' : 'Admin'}</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+              {language === 'ar' ? 'لوحة الإدارة' : 'Admin'}
             </button>
 
             {/* Language Switcher in Topbar */}
             <button
               onClick={toggleLanguage}
-              className="flex items-center gap-1 text-white hover:text-[#2dd4bf] font-bold px-2 py-0.5 rounded bg-slate-800/80 hover:bg-slate-700 transition-colors cursor-pointer"
-              title={t('switchLangLabel')}
+              className="text-xs text-slate-300 hover:text-white transition-colors cursor-pointer px-1.5 py-0.5"
             >
-              <Globe className="w-3.5 h-3.5 text-[#2dd4bf]" />
-              <span>{t('switchLang')}</span>
+              {t('switchLang')}
             </button>
+
+            <span className="text-slate-700 hidden xs:inline">|</span>
 
             <a 
               href="tel:19822" 
-              className="flex items-center gap-1 text-white hover:text-[#0d9488] font-sans font-semibold transition-colors"
+              className="text-xs text-slate-300 hover:text-white font-sans font-semibold transition-colors flex items-center gap-1"
             >
-              <PhoneCall className="w-3 h-3 text-[#0d9488]" />
-              <span className="font-bold">19822</span>
+              <PhoneCall className="w-3 h-3 text-teal-400" />
+              <span>19822</span>
             </a>
           </div>
         </div>
@@ -142,94 +110,45 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center gap-1 sm:gap-1.5">
-                  <span className="text-lg sm:text-xl font-black tracking-tight text-[#0f172a] leading-none">
+                  <span className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 leading-none">
                     {language === 'ar' ? currentBrand.nameAr : currentBrand.nameEn}
                   </span>
-                  <span className="text-[9px] sm:text-[10px] font-bold text-[#0f766e] bg-[#ecfdf5] border border-[#d1fae5] px-1 sm:px-1.5 py-0.5 rounded leading-none hidden xs:inline-block">
-                    {language === 'ar' ? currentBrand.nameEn : currentBrand.nameAr}
+                  <span className="text-[10px] text-slate-500 font-sans hidden sm:inline">
+                    / {language === 'ar' ? currentBrand.nameEn : currentBrand.nameAr}
                   </span>
                 </div>
-                <span className="text-[10px] sm:text-[11px] text-[#475569] font-medium mt-0.5 truncate max-w-[140px] sm:max-w-none">
+                <span className="text-[11px] text-slate-500 font-normal mt-0.5 truncate max-w-[150px] sm:max-w-none">
                   {t('noOverpriceBadge')}
                 </span>
               </div>
             </button>
           </div>
 
-          {/* Desktop Nav Links (xl and up to guarantee zero overlap) */}
-          <nav className="hidden xl:flex items-center gap-0.5 2xl:gap-1 text-xs 2xl:text-sm font-semibold text-[#0f172a]">
+          {/* Desktop Nav Links */}
+          <nav className="hidden lg:flex items-center gap-1 xl:gap-2 text-xs font-semibold text-slate-700">
             <button onClick={() => onNavigate('home')} className={navItemClass('home')}>
               {t('home')}
             </button>
             <button onClick={() => onNavigate('sell')} className={navItemClass('sell')}>
               {t('sellUnit')}
             </button>
-            <button onClick={() => onNavigate('swap')} className={navItemClass('swap')}>
-              <span className="flex items-center gap-1">
-                <Repeat className="w-3.5 h-3.5 text-amber-500" />
-                <span>{language === 'ar' ? 'المناقلة والمبادلة' : 'Property Swap'}</span>
-                <span className="text-[9px] bg-amber-100 text-amber-900 px-1 py-0.2 rounded font-bold">{language === 'ar' ? 'حصري' : 'Exclusive'}</span>
-              </span>
-            </button>
             <button onClick={() => onNavigate('opportunities')} className={navItemClass('opportunities')}>
               {t('opportunities')}
             </button>
+            <button onClick={() => onNavigate('swap')} className={navItemClass('swap')}>
+              <span>{language === 'ar' ? 'تبديل عقارك' : 'Property Swap'}</span>
+            </button>
             <button onClick={() => onNavigate('how-it-works')} className={navItemClass('how-it-works')}>
               {t('howItWorks')}
-            </button>
-            <button onClick={() => onNavigate('investors')} className={navItemClass('investors')}>
-              {t('forInvestors')}
-            </button>
-            <button onClick={() => onNavigate('story')} className={navItemClass('story')}>
-              {t('ourStory')}
-            </button>
-            <button onClick={() => onNavigate('contact')} className={navItemClass('contact')}>
-              {t('contactUs')}
             </button>
           </nav>
 
           {/* Right Actions: Clean & Adaptive */}
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            {/* Desktop Auth Controls */}
-            {isAuthenticated && user ? (
-              <button
-                onClick={onOpenUserProfile}
-                className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-lg border border-slate-200 hover:border-[#0f766e] bg-slate-50 hover:bg-white text-xs font-bold text-slate-800 transition-all cursor-pointer shadow-2xs"
-              >
-                <div className="w-6 h-6 rounded-full bg-[#0f766e] text-white flex items-center justify-center text-xs font-black overflow-hidden shrink-0">
-                  {user.avatar ? (
-                    <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <span>{user.name.charAt(0)}</span>
-                  )}
-                </div>
-                <span className="hidden sm:inline max-w-[80px] truncate">{user.name.split(' ')[0]}</span>
-                <span className="hidden md:inline text-[9px] bg-teal-100 text-[#0f766e] px-1.5 py-0.2 rounded font-bold">
-                  {user.role === 'seller' ? (language === 'ar' ? 'بائع' : 'Seller') : user.role === 'buyer' ? (language === 'ar' ? 'مشتري' : 'Buyer') : (language === 'ar' ? 'مستثمر' : 'Investor')}
-                </span>
-              </button>
-            ) : (
-              <div className="hidden sm:flex items-center gap-1">
-                <button
-                  onClick={() => onOpenAuthModal('login')}
-                  className="px-2.5 py-1.5 text-xs font-bold text-slate-700 hover:text-[#0f766e] rounded-lg transition-colors cursor-pointer flex items-center gap-1"
-                >
-                  <LogIn className="w-3.5 h-3.5" />
-                  <span>{t('login')}</span>
-                </button>
-                <button
-                  onClick={() => onOpenAuthModal('register')}
-                  className="px-2.5 py-1.5 text-xs font-bold text-[#0f766e] bg-[#0f766e]/10 hover:bg-[#0f766e]/20 rounded-lg transition-colors cursor-pointer hidden md:inline-block"
-                >
-                  <span>{t('register')}</span>
-                </button>
-              </div>
-            )}
-
             {/* Opportunities quick link (on very wide screens) */}
             <button 
               onClick={() => onNavigate('opportunities')}
-              className="hidden 2xl:inline-flex px-3 py-1.5 text-xs font-bold text-[#0f172a] border border-[#cbd2d9] rounded-lg hover:bg-slate-100 transition-all cursor-pointer whitespace-nowrap"
+              className="hidden 2xl:inline-flex px-3 py-1.5 text-xs font-semibold text-slate-800 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer whitespace-nowrap"
             >
               {t('wantToBuy')}
             </button>
@@ -237,16 +156,16 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Primary Action Button (Adaptive) */}
             <button 
               onClick={() => onNavigate('sell')}
-              className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-xs font-bold text-white bg-[#0f766e] hover:bg-[#115e59] rounded-lg shadow-sm transition-all cursor-pointer whitespace-nowrap"
+              className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-xs font-semibold text-white bg-teal-700 hover:bg-teal-800 rounded-lg transition-colors cursor-pointer whitespace-nowrap"
             >
               <span className="hidden xs:inline">{t('sellGetCash')}</span>
               <span className="xs:hidden">{language === 'ar' ? 'اعرض وحدتك' : 'Sell Unit'}</span>
             </button>
 
-            {/* Mobile & Tablet menu trigger (visible under xl) */}
+            {/* Mobile & Tablet menu trigger (visible under lg) */}
             <button 
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="xl:hidden p-1.5 sm:p-2 text-slate-700 hover:bg-slate-100 rounded-lg cursor-pointer transition-colors border border-slate-200"
+              className="lg:hidden p-1.5 sm:p-2 text-slate-700 hover:bg-slate-100 rounded-lg cursor-pointer transition-colors border border-slate-200"
               aria-label={language === 'ar' ? 'القائمة الرئيسية' : 'Main Menu'}
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -259,41 +178,15 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* Mobile & Tablet Drawer */}
       {mobileMenuOpen && (
         <div className="xl:hidden bg-white border-b border-slate-200 px-4 py-4 space-y-2 text-sm font-bold text-slate-900 shadow-xl max-h-[85vh] overflow-y-auto">
-          {isAuthenticated && user ? (
-            <div className="p-3 bg-slate-50 rounded-xl flex items-center justify-between border border-slate-200 mb-2">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-full bg-[#0f766e] text-white flex items-center justify-center text-sm font-black overflow-hidden shrink-0">
-                  {user.avatar ? <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" /> : user.name.charAt(0)}
-                </div>
-                <div>
-                  <p className="text-xs font-black text-slate-900">{user.name}</p>
-                  <p className="text-[10px] text-slate-500 truncate max-w-[160px]">{user.email}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => { onOpenUserProfile(); setMobileMenuOpen(false); }}
-                className="text-xs font-bold text-[#0f766e] bg-teal-50 hover:bg-teal-100 border border-teal-200 px-3 py-1.5 rounded-lg cursor-pointer"
-              >
-                {t('myAccount')}
-              </button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-2 mb-3">
-              <button
-                onClick={() => { onOpenAuthModal('login'); setMobileMenuOpen(false); }}
-                className="py-2.5 px-3 text-xs font-bold text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-lg text-center cursor-pointer flex items-center justify-center gap-1.5"
-              >
-                <LogIn className="w-3.5 h-3.5" />
-                <span>{t('login')}</span>
-              </button>
-              <button
-                onClick={() => { onOpenAuthModal('register'); setMobileMenuOpen(false); }}
-                className="py-2.5 px-3 text-xs font-bold text-white bg-[#0f766e] hover:bg-[#115e59] rounded-lg text-center cursor-pointer"
-              >
-                {t('register')}
-              </button>
-            </div>
-          )}
+          {/* Quick CTA in drawer */}
+          <button
+            onClick={() => { onNavigate('sell'); setMobileMenuOpen(false); }}
+            className="w-full py-2.5 px-3 text-xs font-bold text-white bg-[#0f766e] hover:bg-[#115e59] rounded-lg text-center cursor-pointer shadow-sm mb-2 flex items-center justify-center gap-1.5"
+          >
+            <span>{t('sellGetCash')}</span>
+          </button>
+
+          {/* Navigation links inside drawer */}
 
           {/* Navigation links inside drawer */}
           <div className="space-y-1 pt-1">
@@ -315,7 +208,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <span className="flex items-center gap-2">
                 <Repeat className="w-4 h-4 text-amber-600" />
-                <span>{language === 'ar' ? 'المناقلة والمبادلة العقارية' : 'Property Swap & Switch'}</span>
+                <span>{language === 'ar' ? 'تبديل عقارك' : 'Property Swap'}</span>
               </span>
               <span className="text-[10px] bg-amber-500 text-slate-950 font-bold px-2 py-0.5 rounded">{language === 'ar' ? 'جديد' : 'New'}</span>
             </button>
@@ -331,24 +224,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               {t('howItWorks')}
             </button>
-            <button 
-              onClick={() => { onNavigate('investors'); setMobileMenuOpen(false); }}
-              className={`w-full ${isRTL ? 'text-right' : 'text-left'} p-2.5 rounded-lg transition-colors cursor-pointer ${activePage === 'investors' ? 'bg-[#0f766e]/10 text-[#0f766e] font-black' : 'hover:bg-slate-50'}`}
-            >
-              {t('forInvestors')}
-            </button>
-            {onOpenInvestorClub && (
-              <button 
-                onClick={() => { onOpenInvestorClub(); setMobileMenuOpen(false); }}
-                className={`w-full ${isRTL ? 'text-right' : 'text-left'} p-2.5 rounded-lg transition-colors cursor-pointer flex items-center justify-between bg-amber-50 text-amber-950 border border-amber-300 font-bold`}
-              >
-                <span className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-amber-600" />
-                  <span>{language === 'ar' ? 'نادي المستثمرين (الصفقات العاجلة)' : 'VIP Investor Club'}</span>
-                </span>
-                <span className="text-[10px] bg-amber-600 text-white font-bold px-2 py-0.5 rounded">VIP</span>
-              </button>
-            )}
             <button 
               onClick={() => { onNavigate('story'); setMobileMenuOpen(false); }}
               className={`w-full ${isRTL ? 'text-right' : 'text-left'} p-2.5 rounded-lg transition-colors cursor-pointer ${activePage === 'story' ? 'bg-[#0f766e]/10 text-[#0f766e] font-black' : 'hover:bg-slate-50'}`}

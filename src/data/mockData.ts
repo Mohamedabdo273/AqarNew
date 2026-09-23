@@ -42,7 +42,7 @@ export const BRAND_SUGGESTIONS: BrandSuggestion[] = [
     taglineAr: 'مخرجك الآمن من عبء الأقساط العقارية',
     taglineEn: 'Your Safe Exit from Real Estate Installments',
     concept: 'الترجمة العربية البليغة والمثالية لكلمة Exit',
-    rationale: 'يعالج المشكلة النفسية الكبرى للمشتري المتعثر: "عاوز مخرج". الاسم يعطي شعوراً فورياً بالفرج والحل السريع مع الحفاظ على الكرامة المالية واسترداد الأموال.',
+    rationale: 'يعالج المشكلة النفسية الكبرى للمالك تحت ضغط الأقساط: "عاوز مخرج". الاسم يعطي شعوراً فورياً بالفرج والحل السريع مع الحفاظ على الكرامة المالية واسترداد الأموال.',
     domainIdea: 'makhraj.com / makhraj.eg',
     badge: 'الترجمة العربية الأدق لـ Safe Exit',
     vibe: 'حل مباشر، إيجابي، ومريح نفسياً',
@@ -169,8 +169,16 @@ export const MOCK_UNITS: RealEstateUnit[] = [
     viewsCount: 1420,
     offersCount: 9,
     isHotDeal: true,
-    urgencyBadge: 'وفر 4.3 مليون ج.م',
-    urgencyBadgeEn: 'Save 4.3M EGP'
+    urgencyBadge: 'تخارج عاجل: خصم 150 ألف ج كاش',
+    urgencyBadgeEn: 'Fire Sale: 150K EGP Discount',
+    sellerWillingDiscountAmount: 150000,
+    sellerWillingDiscountPercent: 8,
+    acceptsInstallmentsForCash: true,
+    cashInstallmentsTerms: 'يقبل استلام 1.2 مليون فوراً والباقي بشيك مقبول الدفع بعد 60 يوماً',
+    hasOverdueFinesDeducted: false,
+    taxCategory: 'residential_exempt',
+    taxBearer: 'معفى',
+    onlineReservationActive: true
   },
   {
     id: 'unit-2',
@@ -598,7 +606,7 @@ export const FAQS = [
   {
     q: 'ما هي فكرة منصة "تنازل" وكيف تختلف عن شركات السمسرة التقليدية؟',
     qEn: 'What is the core premise of Tanazul and how does it differ from traditional brokerages?',
-    a: 'المنصة هي سوق رقمي متخصص في "التنازل العقاري وإعادة التدوير الآمن". نربط مالك العقار المتعثر الذي يريد الخروج من أقساطه واسترداد ما دفعه كاش 100% بدون أي خسارة أو غرامات مطور وبدون أي عمولة عليه (عمولة 0% على البائع)، بمشتري يبحث عن فرصة استثمارية بسعر التعاقد القديم بدون "أوفر برايس" واستكمال بقية الأقساط القديمة.',
+    a: 'المنصة هي سوق رقمي متخصص في "التنازل العقاري وإعادة التدوير الآمن". نربط مالك العقار الراغب في التخارج من أقساطه واسترداد ما دفعه كاش 100% بدون أي خسارة أو غرامات مطور وبدون أي عمولة عليه (عمولة 0% على البائع)، بمشتري يبحث عن فرصة استثمارية بسعر التعاقد القديم بدون "أوفر برايس" واستكمال بقية الأقساط القديمة.',
     aEn: 'The platform is a dedicated marketplace for secure contract assignment and exit. We connect property owners seeking to exit installments and recover 100% of their paid cash with zero penalties and 0% seller commission, with buyers looking for grandfathered contract prices without any speculative overprice.'
   },
   {

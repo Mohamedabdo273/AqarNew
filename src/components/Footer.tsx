@@ -35,14 +35,14 @@ export const Footer: React.FC<FooterProps> = ({
           {/* Brand Info (2 cols) */}
           <div className="lg:col-span-2 space-y-3.5">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-lg bg-[#0f766e] flex items-center justify-center text-white font-black">
-                <span className="text-base text-white font-mono">⧉</span>
+              <div className="w-8 h-8 rounded-lg bg-teal-800 flex items-center justify-center text-white font-bold">
+                <span className="text-sm font-mono">⧉</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xl font-black text-white">
+                <span className="text-lg font-bold text-white">
                   {language === 'ar' ? currentBrand.nameAr : currentBrand.nameEn}
                 </span>
-                <span className="text-[10px] font-bold text-[#2dd4bf] bg-white/10 px-1.5 py-0.5 rounded">
+                <span className="text-xs text-slate-400">
                   {language === 'ar' ? currentBrand.nameEn : currentBrand.nameAr}
                 </span>
               </div>
@@ -50,20 +50,16 @@ export const Footer: React.FC<FooterProps> = ({
 
             <p className="text-slate-400 leading-relaxed text-xs max-w-sm">
               {language === 'ar' 
-                ? 'منصة التنازل عن وحدات التقسيط بدون أوفر — البايع يسترجع فلوسه كاش، والمشتري ياخد سعر التعاقد القديم، وإحنا بنسهّل الإجراءات خطوة بخطوة لحد الإتمام بمقر المطور.'
-                : 'The official installment contract transfer marketplace with zero overprice. Sellers recover 100% of their paid cash; buyers acquire legacy contracts directly at developer HQ.'}
+                ? 'منصة التنازل عن وحدات التقسيط بدون أوفر — البايع يسترجع فلوسه كاش، والمشتري ياخد سعر التعاقد القديم، مع إتمام الإجراءات داخل مقر المطور.'
+                : 'The official installment contract transfer marketplace with zero overprice. Direct transfer at developer headquarters.'}
             </p>
 
-            <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px]">
-              <span className="text-white bg-white/10 px-2.5 py-1 rounded-md font-bold">
-                {language === 'ar' ? 'مجانًا للبايع 0%' : 'Free for Sellers 0%'}
-              </span>
-              <span className="text-[#2dd4bf] bg-[#0f766e]/20 px-2.5 py-1 rounded-md font-bold">
-                {language === 'ar' ? '1.25% على المشتري بس' : '1.25% Buyer Commission'}
-              </span>
-              <span className="text-slate-300 bg-white/5 px-2.5 py-1 rounded-md">
-                {t('noOverpriceBadge')}
-              </span>
+            <div className="flex items-center gap-3 pt-1 text-xs text-slate-400">
+              <span>{language === 'ar' ? 'مجانًا للبائع 0%' : 'Free for Sellers 0%'}</span>
+              <span>·</span>
+              <span>{language === 'ar' ? '1.25% عمولة المشتري' : '1.25% Buyer Commission'}</span>
+              <span>·</span>
+              <span>{t('noOverpriceBadge')}</span>
             </div>
           </div>
 
@@ -84,17 +80,17 @@ export const Footer: React.FC<FooterProps> = ({
               <li>
                 <button 
                   onClick={() => onNavigate('sell')} 
-                  className="hover:text-white transition-colors cursor-pointer text-[#2dd4bf] font-bold"
+                  className="hover:text-white transition-colors cursor-pointer text-teal-400 font-medium"
                 >
                   {t('sellUnit')}
                 </button>
               </li>
               <li>
                 <button 
-                  onClick={() => onNavigate('investors')} 
-                  className="hover:text-white transition-colors cursor-pointer"
+                  onClick={() => onNavigate('swap')} 
+                  className="hover:text-white transition-colors cursor-pointer text-slate-300 font-medium"
                 >
-                  {t('forInvestors')}
+                  {language === 'ar' ? 'تبديل عقارك' : 'Property Swap'}
                 </button>
               </li>
               <li>
@@ -151,15 +147,24 @@ export const Footer: React.FC<FooterProps> = ({
               <div className="text-slate-500">
                 {t('countryKSA')} <span className="text-[10px] bg-white/10 text-slate-400 px-1.5 py-0.5 rounded">{t('soon')}</span>
               </div>
-              <div className="text-slate-500">
-                {t('countryUAE')} <span className="text-[10px] bg-white/10 text-slate-400 px-1.5 py-0.5 rounded">{t('soon')}</span>
-              </div>
               <div className="pt-2 text-slate-300">
                 {language === 'ar' ? 'شارع التسعين الشمالي، التجمع الخامس، القاهرة' : 'North 90th St, New Cairo, Egypt'}
               </div>
             </div>
           </div>
 
+        </div>
+
+        {/* Legal Disclaimer Strip */}
+        <div className="p-3.5 bg-slate-900/90 border border-slate-800 rounded-xl text-[11px] text-slate-400 leading-relaxed">
+          <strong className="text-slate-300 block mb-0.5 font-bold">
+            {language === 'ar' ? '⚖️ إخلاء المسؤولية القانونية والتحقق:' : '⚖️ Legal Disclaimer & Verification Policy:'}
+          </strong>
+          <span>
+            {language === 'ar'
+              ? 'المنصة منصة تقنية للتوفيق والربط المالي بين الأطراف، وليست مسؤولة عن صحة المستندات أو أصل الملكية أو سلامة التوكيلات. يتم التحقق والاعتماد والتحويل الرسمي حصراً داخل الإدارة القانونية لشركة التطوير العقاري وبحضور الطرفين بشخصهما. كما يلتزم كل طرف بما عليه من التزامات ضريبية مقررة قانوناً.'
+              : 'The platform serves as a matching technology portal and is not liable for document authenticity or title verification; official execution and audit take place strictly at developer legal headquarters with both parties present. Statutory taxes apply per law.'}
+          </span>
         </div>
 
         {/* Bottom Bar */}

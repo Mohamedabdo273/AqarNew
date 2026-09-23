@@ -86,21 +86,21 @@ export const UnitDetailModal: React.FC<UnitDetailModalProps> = ({
         dir={isRTL ? "rtl" : "ltr"}
       >
         {/* Header */}
-        <div className="p-4 sm:px-6 border-b border-[#e5e7eb] flex items-center justify-between bg-[#f5f6f8]">
+        <div className="p-4 sm:px-6 border-b border-slate-200 flex items-center justify-between bg-slate-50">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#0d9488]"></span>
-            <span className="text-xs font-bold text-[#0f172a]">
+            <span className="w-2.5 h-2.5 rounded-full bg-teal-600"></span>
+            <span className="text-xs font-bold text-slate-900">
               {language === "ar" ? (
                 <>
                   فرصة موثقة بكشف حساب رسمي • كود:{" "}
-                  <span className="text-[#0f766e] font-mono">
+                  <span className="text-teal-700 font-mono">
                     {unit.verificationCode}
                   </span>
                 </>
               ) : (
                 <>
                   Verified Listing with Audited Statement • Code:{" "}
-                  <span className="text-[#0f766e] font-mono">
+                  <span className="text-teal-700 font-mono">
                     {unit.verificationCode}
                   </span>
                 </>
@@ -154,35 +154,27 @@ export const UnitDetailModal: React.FC<UnitDetailModalProps> = ({
         <div className="overflow-y-auto p-4 sm:p-6 space-y-6 text-[#0f172a]">
           {/* Title & Compound */}
           <div>
-            <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span className="px-2.5 py-0.5 rounded-md bg-[#ecfdf5] text-[#0f766e] font-bold text-xs border border-[#d1fae5]">
+            <div className="flex flex-wrap items-center gap-2 mb-2 text-xs">
+              <span className="font-semibold text-teal-800 bg-teal-50 px-2.5 py-0.5 rounded-md border border-teal-200">
                 {t("noOverpriceBadge")}
               </span>
-              <span className="px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-700 font-bold text-xs border border-blue-200">
-                {language === "ar"
-                  ? `وفر ${formatEGP(savings)}`
-                  : `Save ${formatEGP(savings)}`}
+              <span className="font-semibold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-md">
+                {language === "ar" ? `وفر ${formatEGP(savings)}` : `Save ${formatEGP(savings)}`}
               </span>
-              <span className="px-2.5 py-0.5 rounded-md bg-slate-900 text-emerald-400 font-bold text-xs border border-emerald-600/40 flex items-center gap-1">
-                <FileCheck2 className="w-3.5 h-3.5 text-emerald-400" />
-                {language === "ar" ? "فحص قانوني معتمد 100%" : "Audited & Verified 100%"}
-              </span>
-              <span className="px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700 font-medium text-xs">
-                {language === "ar"
-                  ? `سعر تعاقد ${unit.contractYear}`
-                  : `${unit.contractYear} Contract Price`}
+              <span className="font-medium text-slate-600 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200">
+                {language === "ar" ? `سعر تعاقد ${unit.contractYear}` : `${unit.contractYear} Contract`}
               </span>
             </div>
 
-            <h2 className="text-xl sm:text-2xl font-black text-[#0f172a]">
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900">
               {displayTitle}
             </h2>
 
-            <div className="flex items-center gap-3 text-xs text-slate-500 mt-1">
-              <span className="font-semibold text-[#0f172a]">
+            <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
+              <span className="font-medium text-slate-700">
                 {displayDeveloper} — {displayCompound}
               </span>
-              <span>•</span>
+              <span>·</span>
               <span className="flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5 text-slate-400" />
                 {displayLocation}
@@ -190,38 +182,33 @@ export const UnitDetailModal: React.FC<UnitDetailModalProps> = ({
             </div>
           </div>
 
-          {/* FEATURE 1: Instant Liquidity & Matching Index Dashboard Banner */}
-          <div className="bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 text-white rounded-xl p-4 border border-teal-800/60 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-teal-500/20 border border-teal-400/30 flex items-center justify-center shrink-0">
-                <Users className="w-5 h-5 text-teal-400 animate-pulse" />
+          {/* Liquidity Indicator - Clean & Understated */}
+          <div className="bg-slate-50 text-slate-800 rounded-xl p-3.5 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center shrink-0 border border-teal-200">
+                <Users className="w-4 h-4" />
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-black text-white">
-                    {language === "ar" ? "مؤشر السيولة وسرعة التخارج الفوري" : "Instant Liquidity & Matching Index"}
-                  </span>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold text-[10px] border border-emerald-500/30">
-                    {language === "ar" ? "طلب شراء نشط" : "High Demand"}
-                  </span>
-                </div>
-                <p className="text-[11px] text-teal-200/80 mt-0.5">
+                <span className="font-bold text-slate-900 block">
+                  {language === "ar" ? "مؤشر السيولة وتوفر المشترين الكاش" : "Liquidity & Cash Buyers Index"}
+                </span>
+                <p className="text-[11px] text-slate-500 mt-0.5">
                   {language === "ar"
-                    ? `يوجد حالياً ${unit.activeMatchedBuyersCount || 14} مشتري كاش مسجل يبحثون عن نفس الوحدة والكمبوند.`
-                    : `${unit.activeMatchedBuyersCount || 14} verified cash buyers are currently actively seeking this layout.`}
+                    ? `مسجل لدينا ${unit.activeMatchedBuyersCount || 14} مشتري كاش يبحثون عن نفس الوحدة والكمبوند.`
+                    : `${unit.activeMatchedBuyersCount || 14} verified cash buyers matching this compound.`}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 self-end sm:self-center shrink-0">
-              <div className="text-right">
-                <span className="text-[10px] text-slate-400 block">{language === "ar" ? "متوسط سرعة الإغلاق:" : "Avg. Close Speed:"}</span>
-                <span className="text-sm font-black text-emerald-400 font-sans">~{unit.estimatedDaysToClose || 3} {language === "ar" ? "أيام عمل" : "Business Days"}</span>
+            <div className="flex items-center gap-4 text-xs text-slate-600 self-end sm:self-center">
+              <div>
+                <span className="text-[10px] text-slate-400 block">{language === "ar" ? "سرعة التخارج:" : "Avg. Close:"}</span>
+                <span className="font-bold text-slate-900">~{unit.estimatedDaysToClose || 3} {language === "ar" ? "أيام" : "days"}</span>
               </div>
-              <div className="h-8 w-px bg-white/10 hidden sm:block"></div>
-              <div className="text-right">
-                <span className="text-[10px] text-slate-400 block">{language === "ar" ? "السيولة المحققة:" : "Instant Liquidity:"}</span>
-                <span className="text-sm font-black text-teal-300 font-sans">100% {language === "ar" ? "كاش" : "Cash"}</span>
+              <span className="text-slate-300">|</span>
+              <div>
+                <span className="text-[10px] text-slate-400 block">{language === "ar" ? "طريقة الاستلام:" : "Payment:"}</span>
+                <span className="font-bold text-teal-800">{language === "ar" ? "شيك مصرفي معتمد" : "Cashier check"}</span>
               </div>
             </div>
           </div>
@@ -266,110 +253,163 @@ export const UnitDetailModal: React.FC<UnitDetailModalProps> = ({
             )}
           </div>
 
-          {/* Financial Breakdown Card */}
-          <div className="bg-[#0f172a] text-white rounded-xl p-5 border border-slate-800">
-            <div className="flex items-center justify-between border-b border-white/10 pb-2.5 mb-3.5">
+          {/* Financial Breakdown Card - Clean & Eye-friendly */}
+          <div className="bg-slate-900 text-white rounded-2xl p-5 border border-slate-800 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2">
-                <Coins className="w-4 h-4 text-[#2dd4bf]" />
+                <Coins className="w-4 h-4 text-teal-400" />
                 <h3 className="font-bold text-sm text-white">
                   {language === "ar"
                     ? "الحسابات المالية (سعر التعاقد القديم بدون أوفر)"
-                    : "Financial Breakdown (Grandfathered Contract • 0% Overprice)"}
+                    : "Financial Breakdown (Official Contract Price)"}
                 </h3>
               </div>
-              <span className="text-[11px] text-[#2dd4bf] font-bold bg-[#0f766e]/30 px-2 py-0.5 rounded">
-                {language === "ar"
-                  ? "1.25% عمولة للمشتري بس"
-                  : "1.25% Buyer Fee Only"}
+              <span className="text-xs text-slate-400">
+                {language === "ar" ? "عمولة المشتري 1.25% فقط" : "1.25% Buyer Fee"}
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
-              <div className="bg-white/5 p-3 rounded-lg border border-white/10">
-                <span className="text-[11px] text-slate-300 block mb-1">
-                  {language === "ar"
-                    ? "المدفوع كاش للبائع:"
-                    : "Cash Paid to Seller:"}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="bg-slate-800/80 p-3.5 rounded-xl border border-slate-700/80">
+                <span className="text-xs text-slate-400 block mb-1">
+                  {language === "ar" ? "المدفوع كاش للبائع:" : "Cash Paid to Seller:"}
                 </span>
-                <div className="text-xl font-black text-[#2dd4bf] font-sans">
-                  {formatEGP(unit.paidCashAmount)}
+                <div className="text-lg font-bold text-white font-sans">
+                  {unit.sellerWillingDiscountAmount && unit.sellerWillingDiscountAmount > 0 ? (
+                    <div className="flex items-baseline gap-1.5 flex-wrap">
+                      <span className="text-teal-400">{formatEGP(unit.paidCashAmount - unit.sellerWillingDiscountAmount)}</span>
+                      <span className="text-xs text-slate-500 line-through font-normal">{formatEGP(unit.paidCashAmount)}</span>
+                    </div>
+                  ) : (
+                    formatEGP(unit.paidCashAmount)
+                  )}
                 </div>
-                <span className="text-[10px] text-slate-400 block mt-0.5">
-                  {language === "ar"
-                    ? "اللي اتدفع فعلاً للمطور"
-                    : "Actual amount paid to developer"}
+                <span className="text-[11px] text-slate-400 block mt-1">
+                  {unit.sellerWillingDiscountAmount && unit.sellerWillingDiscountAmount > 0
+                    ? (language === "ar" ? "🔥 البائع تنازل بخصم للتخارج السريع" : "🔥 Seller discount applied")
+                    : (language === "ar" ? "المبلغ الفعلي المدفوع للمطور" : "Actual amount paid to developer")}
                 </span>
               </div>
 
-              <div className="bg-white/5 p-3 rounded-lg border border-white/10">
-                <span className="text-[11px] text-slate-300 block mb-1">
-                  {language === "ar"
-                    ? "المتبقي أقساط للمطور:"
-                    : "Remaining Installments:"}
+              <div className="bg-slate-800/80 p-3.5 rounded-xl border border-slate-700/80">
+                <span className="text-xs text-slate-400 block mb-1">
+                  {language === "ar" ? "المتبقي أقساط للمطور:" : "Remaining Installments:"}
                 </span>
-                <div className="text-xl font-black text-white font-sans">
+                <div className="text-lg font-bold text-white font-sans">
                   {formatEGP(unit.remainingAmount)}
                 </div>
-                <span className="text-[10px] text-slate-400 block mt-0.5">
-                  {language === "ar"
-                    ? `على ${unit.installmentPeriodYears} سنين`
-                    : `Over ${unit.installmentPeriodYears} years`}
+                <span className="text-[11px] text-slate-400 block mt-1">
+                  {language === "ar" ? `على ${unit.installmentPeriodYears} سنين` : `Over ${unit.installmentPeriodYears} years`}
                 </span>
               </div>
 
-              <div className="bg-white/5 p-3 rounded-lg border border-white/10">
-                <span className="text-[11px] text-slate-300 block mb-1">
-                  {language === "ar" ? "قيمة القسط:" : "Installment Value:"}
+              <div className="bg-slate-800/80 p-3.5 rounded-xl border border-slate-700/80">
+                <span className="text-xs text-slate-400 block mb-1">
+                  {language === "ar" ? "قيمة القسط والدورية:" : "Installment Value:"}
                 </span>
-                <div className="text-xl font-black text-amber-300 font-sans">
+                <div className="text-lg font-bold text-white font-sans">
                   {formatEGP(unit.installmentValue)}
                 </div>
-                <span className="text-[10px] text-slate-400 block mt-0.5">
-                  {unit.installmentFrequency} •{" "}
-                  {language === "ar" ? "القادم:" : "Next:"}{" "}
-                  {unit.nextInstallmentDate}
+                <span className="text-[11px] text-slate-400 block mt-1">
+                  {unit.installmentFrequency} · {language === "ar" ? "القادم:" : "Next:"} {unit.nextInstallmentDate}
                 </span>
               </div>
             </div>
 
-            {/* FEATURE 2: Opportunity Arbitrage Visual Comparison */}
-            <div className="bg-gradient-to-r from-teal-950/70 via-slate-900 to-teal-950/70 border border-teal-500/40 p-3.5 rounded-xl space-y-2.5">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-teal-300 flex items-center gap-1.5">
-                  <TrendingUp className="w-4 h-4 text-teal-400" />
-                  <span>{language === "ar" ? "مقارنة مراجحة الأسعار (Developer vs. Platform Arbitrage):" : "Opportunity Arbitrage Analysis:"}</span>
+            {/* Platform Rules Notice on Transfer Fees */}
+            <div className="bg-slate-800/60 border border-slate-700 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-2">
+              <div className="flex items-center gap-2 text-slate-300">
+                <ShieldCheck className="w-4 h-4 text-teal-400 shrink-0" />
+                <span>
+                  {language === "ar" ? "رسوم التنازل لدى شركة التطوير:" : "Developer Transfer Fee:"}
                 </span>
-                <span className="text-[11px] font-black text-amber-300 bg-amber-950/80 border border-amber-600/50 px-2 py-0.5 rounded">
-                  +{unit.arbitrageYieldPercent || Math.round((savings / unit.originalContractPrice) * 100)}% {language === "ar" ? "فرق سعري فوري" : "Instant Arbitrage"}
-                </span>
+                <strong className="text-white">
+                  {unit.transferFeeBearer === "معفي بالعقد" 
+                    ? (language === "ar" ? "معفاة بالعقد الرسمي (0 جنيه)" : "Contract Exempt (0 EGP)")
+                    : (language === "ar" ? "يتحملها المشتري بالكامل" : "Borne by Buyer")}
+                </strong>
               </div>
+              <span className="text-slate-400 text-[11px]">
+                {language === "ar" ? "مقابل استلام الوحدة بسعر العقد القديم بدون أوفر" : "In exchange for 0% overprice"}
+              </span>
+            </div>
 
+            {/* Special Conditions: Overdue Fines Deduction, Flexible Cash Terms, Tax Status */}
+            {(unit.hasOverdueFinesDeducted || unit.acceptsInstallmentsForCash || unit.taxCategory) && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                {unit.hasOverdueFinesDeducted && (
+                  <div className="bg-slate-800/50 border border-slate-700 p-2.5 rounded-xl flex items-center gap-2">
+                    <span className="text-rose-400 font-bold">✓</span>
+                    <div>
+                      <span className="font-semibold text-slate-200 block">
+                        {language === "ar" ? "خصم متأخرات المطور من ثمن الوحدة:" : "Developer Arrears Deducted:"}
+                      </span>
+                      <span className="text-slate-400 text-[11px]">
+                        {unit.overdueFinesAmount 
+                          ? (language === "ar" ? `مخصوم ${unit.overdueFinesAmount.toLocaleString()} ج يسددها المشتري للمطور بدلاً من البائع` : `${unit.overdueFinesAmount.toLocaleString()} EGP deducted`)
+                          : (language === "ar" ? "أي متأخرات تُخصم مباشرة من الكاش" : "Deducted directly from seller cash")}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {unit.acceptsInstallmentsForCash && (
+                  <div className="bg-slate-800/50 border border-slate-700 p-2.5 rounded-xl flex items-center gap-2">
+                    <span className="text-teal-400 font-bold">✓</span>
+                    <div>
+                      <span className="font-semibold text-slate-200 block">
+                        {language === "ar" ? "تسهيلات في سداد الكاش:" : "Flexible Cash Terms:"}
+                      </span>
+                      <span className="text-slate-400 text-[11px]">
+                        {unit.cashInstallmentsTerms || (language === "ar" ? "يقبل البائع دفعة أولى كاش والباقي بشيك مقبول الدفع" : "Accepts cashier checks in tranches")}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="bg-slate-800/50 border border-slate-700 p-2.5 rounded-xl flex items-center gap-2 sm:col-span-2">
+                  <span className="text-slate-400 font-bold">⚖️</span>
+                  <div>
+                    <span className="font-semibold text-slate-200 block">
+                      {language === "ar" ? "الموقف الضريبي والقانوني:" : "Tax Classification:"}
+                    </span>
+                    <span className="text-slate-400 text-[11px]">
+                      {unit.taxCategory === 'commercial_vat' 
+                        ? (language === "ar" ? "تجاري (تخضع للقيمة المضافة)" : "Commercial VAT")
+                        : (language === "ar" ? "سكني معفى من القيمة المضافة (كل طرف يتحمل التزامه القانوني)" : "Residential exempt from VAT")}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Price Comparison - Understated */}
+            <div className="bg-slate-800/60 border border-slate-700 p-3.5 rounded-xl space-y-3">
               <div className="grid grid-cols-2 gap-3 text-center text-xs">
-                <div className="bg-white/5 p-2 rounded-lg border border-white/10">
-                  <span className="text-[10px] text-slate-400 block mb-0.5">
+                <div className="bg-slate-900/80 p-2.5 rounded-lg border border-slate-700">
+                  <span className="text-[11px] text-slate-400 block mb-0.5">
                     {language === "ar" ? "سعر نفس الوحدة لدى المطور اليوم" : "Today's Developer Price"}
                   </span>
-                  <div className="text-sm font-bold text-slate-300 line-through font-sans">
+                  <div className="text-sm font-bold text-slate-400 line-through font-sans">
                     {formatEGP(unit.currentMarketPrice)}
                   </div>
                 </div>
 
-                <div className="bg-[#0f766e]/30 p-2 rounded-lg border border-[#0f766e]/60">
-                  <span className="text-[10px] text-teal-300 font-bold block mb-0.5">
+                <div className="bg-slate-900/80 p-2.5 rounded-lg border border-teal-700/60">
+                  <span className="text-[11px] text-teal-300 font-medium block mb-0.5">
                     {language === "ar" ? "سعر التنازل الرسمي بالمنصة" : "Platform Grandfathered Price"}
                   </span>
-                  <div className="text-base font-black text-[#2dd4bf] font-sans">
+                  <div className="text-sm font-bold text-teal-300 font-sans">
                     {formatEGP(unit.originalContractPrice)}
                   </div>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-xs font-bold bg-teal-500/10 p-2 rounded-lg border border-teal-500/20 text-[#2dd4bf]">
-                <span className="flex items-center gap-1 text-slate-200">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                  <span>{language === "ar" ? "إجمالي المبلغ الذي يوفره المشتري فوراً:" : "Total Cash Saved by Buyer:"}</span>
+              <div className="flex items-center justify-between text-xs font-semibold bg-slate-900/90 p-2.5 rounded-lg border border-slate-700 text-teal-400">
+                <span className="text-slate-300">
+                  {language === "ar" ? "إجمالي المبلغ الذي يوفره المشتري فوراً:" : "Total Cash Saved by Buyer:"}
                 </span>
-                <span className="text-amber-300 font-black font-sans text-sm">
+                <span className="font-bold font-sans text-sm">
                   {formatEGP(savings)}
                 </span>
               </div>
@@ -580,10 +620,27 @@ export const UnitDetailModal: React.FC<UnitDetailModalProps> = ({
                   </div>
                 </div>
 
+                <div className="p-3 bg-teal-50 border border-teal-200 rounded-lg space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-teal-900 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-teal-600" />
+                      <span>{language === "ar" ? "طلب وعد بيع وحجز جلسة المطور أونلاين:" : "Online Reservation & Promise of Sale:"}</span>
+                    </span>
+                    <span className="text-[10px] font-black text-teal-800 bg-teal-100 px-2 py-0.5 rounded">
+                      {language === "ar" ? "حجز مبدئي مؤقت" : "Temporary Lock"}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-teal-700 leading-relaxed">
+                    {language === "ar"
+                      ? "يتيح لك هذا الطلب تجميد الوحدة مؤقتاً لحين مطابقة كشف الحساب بمقر المطور وإصدار الشيك المصرفي المعتمد للبائع."
+                      : "Temporarily freezes this unit while developer statement verification and certified cashier check are arranged."}
+                  </p>
+                </div>
+
                 <div className="flex flex-col sm:flex-row gap-2 pt-1">
                   <button
                     type="submit"
-                    className="flex-1 py-3 sm:py-2.5 px-4 bg-[#0f766e] hover:bg-[#115e59] text-white rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs min-h-[44px]"
+                    className="flex-1 py-3 sm:py-2.5 px-4 bg-teal-700 hover:bg-teal-800 text-white rounded-lg font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-xs min-h-[44px]"
                   >
                     <span>
                       {language === "ar"
@@ -605,9 +662,9 @@ export const UnitDetailModal: React.FC<UnitDetailModalProps> = ({
                     )}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="py-3 sm:py-2.5 px-4 bg-[#0f172a] hover:bg-slate-800 text-white rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition-colors min-h-[44px]"
+                    className="py-3 sm:py-2.5 px-4 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors min-h-[44px]"
                   >
-                    <MessageSquare className="w-3.5 h-3.5 text-[#2dd4bf]" />
+                    <MessageSquare className="w-3.5 h-3.5 text-teal-400" />
                     <span>
                       {language === "ar"
                         ? "استفسار عبر واتساب"

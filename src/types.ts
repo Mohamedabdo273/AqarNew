@@ -161,6 +161,17 @@ export interface RealEstateUnit {
   preAuditedReportUrl?: string; // Verifiable audit passport
   isPreAudited100?: boolean; // Verified 0% legal encumbrance badge
   swapPreferenceMatchPercent?: number; // Match score for equity swap (e.g. 96%)
+
+  // New Features: Seller Discount (Fire Sale), Payment Facilitation, Penalties & Tax Handling
+  sellerWillingDiscountAmount?: number; // قيمة التنازل/الخصم الإضافي من المدفوع
+  sellerWillingDiscountPercent?: number; // نسبة الخصم الإضافي
+  acceptsInstallmentsForCash?: boolean; // هل يقبل تسهيلات في سداد الكاش على دفعتين بشيك مصرفي؟
+  cashInstallmentsTerms?: string; // تفاصيل تسهيلات الكاش
+  hasOverdueFinesDeducted?: boolean; // هل توجد متأخرات تخصم من ثمن الوحدة؟
+  overdueFinesAmount?: number; // قيمة الغرامات أو المتأخرات المخصومة
+  taxCategory?: 'residential_exempt' | 'commercial_vat' | 'business_tax'; // نوع المعاملة الضريبية
+  taxBearer?: 'بائع' | 'مشتري' | 'حسب القانون' | 'معفى'; // الطرف المتحمل للضريبة
+  onlineReservationActive?: boolean; // تفعيل وعد البيع والحجز أونلاين
 }
 
 export interface UnitFilters {

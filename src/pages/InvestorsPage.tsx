@@ -12,7 +12,8 @@ import {
   Lock, 
   Briefcase, 
   FileText,
-  BadgePercent
+  BadgePercent,
+  Bell
 } from 'lucide-react';
 import { BrandSuggestion, PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
@@ -36,12 +37,27 @@ export const InvestorsPage: React.FC<InvestorsPageProps> = ({
   const [paidCashToSeller, setPaidCashToSeller] = useState<number>(2400000);
   const [remainingYears, setRemainingYears] = useState<number>(5);
 
-  // VIP Investor Club state
+  // VIP Investor Club Unified state
   const [vipName, setVipName] = useState('');
   const [vipPhone, setVipPhone] = useState('');
+  const [investorType, setInvestorType] = useState<'individual' | 'fund' | 'family_office'>('individual');
   const [vipBudget, setVipBudget] = useState('5M - 10M EGP');
-  const [vipTargetRegion, setVipTargetRegion] = useState('القاهرة الجديدة');
+  const [targetDistricts, setTargetDistricts] = useState<string[]>(['القاهرة الجديدة']);
+  const [targetPropertyTypes, setTargetPropertyTypes] = useState<string[]>(['شقق وبنتهاوس']);
+  const [whatsappAlertsOnly, setWhatsappAlertsOnly] = useState(true);
   const [vipSubmitted, setVipSubmitted] = useState(false);
+
+  const toggleDistrict = (district: string) => {
+    setTargetDistricts(prev => 
+      prev.includes(district) ? prev.filter(d => d !== district) : [...prev, district]
+    );
+  };
+
+  const togglePropertyType = (type: string) => {
+    setTargetPropertyTypes(prev => 
+      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
+    );
+  };
 
   // Calculations
   const immediateEquityGain = dealCurrentPrice - dealOldPrice;
@@ -295,8 +311,8 @@ export const InvestorsPage: React.FC<InvestorsPageProps> = ({
             </h2>
             <p className="text-xs sm:text-sm text-slate-400 mt-1">
               {language === 'ar'
-                ? 'إذا كنت مديراً لصندوق استثماري أو مكتب عائلي وتبحث عن شراء حزم وحدات متعثرة لدى كبار المطورين بخصم نقدي هائل، نوفر لك:'
-                : 'For private equity funds, corporate treasuries, and family offices seeking syndicated block purchases of high-end units with deep cash discounts:'}
+                ? 'إذا كنت مديراً لصندوق استثماري أو مكتب عائلي وتبحث عن الاستحواذ على حزم أصول التخارج وإعادة الهيكلة لدى كبار المطورين بخصم نقدي هائل، نوفر لك:'
+                : 'For private equity funds, corporate treasuries, and family offices seeking syndicated block purchases of high-end exit units with deep cash discounts:'}
             </p>
           </div>
 
@@ -347,45 +363,67 @@ export const InvestorsPage: React.FC<InvestorsPageProps> = ({
             </h3>
             <p className="text-xs text-slate-500 mt-1">
               {language === 'ar'
-                ? 'الفرص بدون أوفر المميزة تباع خلال ساعات. نرسل إشعارات مخصصة لأعضاء القائمة قبل الطرح العام بـ 48 ساعة.'
+                ? 'الصفقات بصفر أوفر برايس وسعر عقد 2022 تنتهي في ساعات. نرسل إشعارات خاصة للأعضاء المعتمدين قبل الطرح العام بـ 48 ساعة.'
                 : 'Zero-overprice prime units sell within hours. Registered private investors receive priority private notifications.'}
             </p>
           </div>
 
           {vipSubmitted ? (
-            <div className="text-center py-6 space-y-3">
-              <div className="w-12 h-12 rounded-full bg-[#ecfdf5] text-[#0f766e] flex items-center justify-center mx-auto">
-                <CheckCircle2 className="w-7 h-7" />
+            <div className="text-center py-8 space-y-4">
+              <div className="w-16 h-16 rounded-full bg-emerald-50 text-[#0f766e] border border-emerald-200 flex items-center justify-center mx-auto shadow-sm">
+                <CheckCircle2 className="w-9 h-9" />
               </div>
-              <h4 className="font-bold text-base text-[#0f172a]">
-                {language === 'ar' ? 'تم تسجيلك في قائمة المستثمرين VIP بنجاح!' : 'Successfully Joined VIP Investor Desk!'}
-              </h4>
-              <p className="text-xs text-slate-600">
-                {language === 'ar'
-                  ? 'سيتواصل معك مدير علاقات كبار المستثمرين لتحديد معايير الفرص المفضلة وميزانيتك بدقة.'
-                  : 'A Senior Wealth Relationship Manager will reach out to tailor your off-market investment criteria.'}
-              </p>
+              <div className="space-y-1">
+                <h4 className="text-lg font-black text-slate-900">
+                  {language === 'ar' ? 'تم تفعيل عضويتك في قائمة المستثمرين VIP بنجاح!' : 'VIP Investor Membership Activated!'}
+                </h4>
+                <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
+                  {language === 'ar'
+                    ? 'تم تسجيل معايير محفظتك وسيقوم مدير علاقات كبار المستثمرين بالتواصل معك عبر واتساب لتأكيد قنوات إرسال الصفقات العاجلة.'
+                    : 'Your investment parameters have been archived. A senior wealth relationship officer will contact you via WhatsApp with off-market deal packets.'}
+                </p>
+              </div>
+
+              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-700 max-w-md mx-auto text-right space-y-1">
+                <div className="flex justify-between border-b border-slate-200 pb-1">
+                  <span className="text-slate-500">{language === 'ar' ? 'المستثمر:' : 'Investor:'}</span>
+                  <span className="font-bold">{vipName}</span>
+                </div>
+                <div className="flex justify-between border-b border-slate-200 pb-1">
+                  <span className="text-slate-500">{language === 'ar' ? 'السيولة المتاحة:' : 'Liquid Capital:'}</span>
+                  <span className="font-bold text-[#0f766e]">{vipBudget}</span>
+                </div>
+                <div className="flex justify-between border-b border-slate-200 pb-1">
+                  <span className="text-slate-500">{language === 'ar' ? 'المناطق المحددة:' : 'Districts:'}</span>
+                  <span className="font-bold truncate max-w-[200px]">{targetDistricts.join('، ')}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">{language === 'ar' ? 'الأصول المطلوبة:' : 'Asset Types:'}</span>
+                  <span className="font-bold truncate max-w-[200px]">{targetPropertyTypes.join('، ')}</span>
+                </div>
+              </div>
             </div>
           ) : (
-            <form onSubmit={handleVipSubmit} className="space-y-3.5 text-xs">
+            <form onSubmit={handleVipSubmit} className="space-y-4 text-xs">
+              {/* Row 1: Name & Phone */}
               <div className="grid sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">
-                    {language === 'ar' ? 'اسم المستثمر / الكيان:' : 'Investor / Entity Name:'}
+                  <label className="block font-bold text-slate-800 mb-1">
+                    {language === 'ar' ? 'اسم المستثمر / ممثل الكيان:' : 'Investor / Entity Representative:'} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder={language === 'ar' ? 'الاسم الكريم...' : 'Name or Fund...'}
+                    placeholder={language === 'ar' ? 'الاسم بالكامل...' : 'Full Name...'}
                     value={vipName}
                     onChange={(e) => setVipName(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-[#cbd2d9] rounded-lg"
+                    className="w-full px-3 py-2 bg-slate-50 border border-[#cbd2d9] rounded-lg focus:outline-none focus:border-[#0f766e]"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">
-                    {language === 'ar' ? 'رقم الموبايل (واتساب مباشر):' : 'Phone / WhatsApp:'}
+                  <label className="block font-bold text-slate-800 mb-1">
+                    {language === 'ar' ? 'رقم الموبايل (واتساب للإشعارات):' : 'Mobile / WhatsApp (For Priority Alerts):'} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="tel"
@@ -393,52 +431,147 @@ export const InvestorsPage: React.FC<InvestorsPageProps> = ({
                     placeholder="010XXXXXXXX"
                     value={vipPhone}
                     onChange={(e) => setVipPhone(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-[#cbd2d9] rounded-lg"
+                    className="w-full px-3 py-2 bg-slate-50 border border-[#cbd2d9] rounded-lg focus:outline-none focus:border-[#0f766e]"
+                    dir="ltr"
                   />
                 </div>
               </div>
 
+              {/* Row 2: Investor Type & Liquid Capital */}
               <div className="grid sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">
-                    {language === 'ar' ? 'الميزانية النقدية المتاحة (كاش الدخول):' : 'Available Liquid Capital (Entry Cash):'}
+                  <label className="block font-bold text-slate-800 mb-1">
+                    {language === 'ar' ? 'صفة المستثمر:' : 'Investor Classification:'}
+                  </label>
+                  <select
+                    value={investorType}
+                    onChange={(e) => setInvestorType(e.target.value as any)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-[#cbd2d9] rounded-lg focus:outline-none focus:border-[#0f766e]"
+                  >
+                    <option value="individual">{language === 'ar' ? 'مستثمر فردي (Private Individual)' : 'Private Individual'}</option>
+                    <option value="family_office">{language === 'ar' ? 'مكتب عائلي (Family Office)' : 'Family Office'}</option>
+                    <option value="fund">{language === 'ar' ? 'صندوق استثمار / شركة إدارة أصول' : 'Investment Fund / Asset Mgmt'}</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-800 mb-1">
+                    {language === 'ar' ? 'السيولة الكاش الجاهزة للدخول فوراً:' : 'Available Ready Cash for Instant Entry:'}
                   </label>
                   <select
                     value={vipBudget}
                     onChange={(e) => setVipBudget(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-[#cbd2d9] rounded-lg"
+                    className="w-full px-3 py-2 bg-slate-50 border border-[#cbd2d9] rounded-lg focus:outline-none focus:border-[#0f766e]"
                   >
                     <option value="2M - 5M EGP">{language === 'ar' ? '2 مليون إلى 5 مليون ج.م' : '2M to 5M EGP'}</option>
                     <option value="5M - 10M EGP">{language === 'ar' ? '5 مليون إلى 10 مليون ج.م' : '5M to 10M EGP'}</option>
-                    <option value="10M - 25M EGP">{language === 'ar' ? '10 مليون إلى 25 مليون ج.م' : '10M to 25M EGP'}</option>
-                    <option value="+25M EGP">{language === 'ar' ? 'أكثر من 25 مليون ج.م (محفظة مجمعة)' : 'Over 25M EGP (Bulk Portfolio)'}</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">
-                    {language === 'ar' ? 'المنطقة المستهدفة أولاً:' : 'Target Region:'}
-                  </label>
-                  <select
-                    value={vipTargetRegion}
-                    onChange={(e) => setVipTargetRegion(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-50 border border-[#cbd2d9] rounded-lg"
-                  >
-                    <option value="القاهرة الجديدة">{language === 'ar' ? 'القاهرة الجديدة والتجمع' : 'New Cairo & Tagamoa'}</option>
-                    <option value="الشيخ زايد وأكتوبر">{language === 'ar' ? 'الشيخ زايد وأكتوبر' : 'Sheikh Zayed & 6th of October'}</option>
-                    <option value="الساحل الشمالي">{language === 'ar' ? 'الساحل الشمالي وسيدي عبد الرحمن' : 'North Coast & Sidi Abdel Rahman'}</option>
-                    <option value="العاصمة الإدارية">{language === 'ar' ? 'العاصمة الإدارية والمستقبل' : 'New Capital & Mostakbal City'}</option>
-                    <option value="كافة المناطق ذات العائد الأعلى">{language === 'ar' ? 'كافة المناطق ذات العائد الأعلى' : 'All Top-Yield Districts'}</option>
+                    <option value="10M - 20M EGP">{language === 'ar' ? '10 مليون إلى 20 مليون ج.م' : '10M to 20M EGP'}</option>
+                    <option value="+20M EGP">{language === 'ar' ? 'أكثر من 20 مليون ج.م (محافظ مجمعة)' : 'Over 20M EGP (Bulk Portfolios)'}</option>
                   </select>
                 </div>
               </div>
 
+              {/* Target Regions Checklist */}
+              <div>
+                <label className="block font-bold text-slate-800 mb-1.5">
+                  {language === 'ar' ? 'المناطق المستهدفة (يمكن اختيار أكثر من منطقة):' : 'Target Regions of Interest:'}
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {[
+                    'القاهرة الجديدة',
+                    'الشيخ زايد وأكتوبر',
+                    'الساحل الشمالي',
+                    'العاصمة الإدارية',
+                    'المستقبل والشروق',
+                    'البحر الأحمر والجونة'
+                  ].map((district) => {
+                    const isSelected = targetDistricts.includes(district);
+                    return (
+                      <button
+                        type="button"
+                        key={district}
+                        onClick={() => toggleDistrict(district)}
+                        className={`p-2 rounded-lg border text-start transition-all cursor-pointer flex items-center justify-between text-[11px] font-bold ${
+                          isSelected
+                            ? 'bg-[#0f766e]/10 border-[#0f766e] text-[#0f766e]'
+                            : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                        }`}
+                      >
+                        <span>{district}</span>
+                        {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-[#0f766e] shrink-0" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Target Types */}
+              <div>
+                <label className="block font-bold text-slate-800 mb-1.5">
+                  {language === 'ar' ? 'نوعية الأصول المطلوبة:' : 'Target Asset Types:'}
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {[
+                    'شقق وبنتهاوس',
+                    'فيلات وتاون هاوس',
+                    'تجاري وإداري (عيادات/مكاتب)',
+                    'شاليهات ساحلية',
+                    'أصول جاهزة للاستلام الفوري',
+                    'أي فرصة بخصم تاريخي يتجاوز 40%'
+                  ].map((type) => {
+                    const isSelected = targetPropertyTypes.includes(type);
+                    return (
+                      <button
+                        type="button"
+                        key={type}
+                        onClick={() => togglePropertyType(type)}
+                        className={`p-2 rounded-lg border text-start transition-all cursor-pointer flex items-center justify-between text-[11px] font-bold ${
+                          isSelected
+                            ? 'bg-amber-50 border-amber-500 text-amber-900'
+                            : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                        }`}
+                      >
+                        <span>{type}</span>
+                        {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-amber-600 shrink-0" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Notification Preference */}
+              <div className="bg-[#ecfdf5] border border-[#d1fae5] p-3 rounded-xl flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Bell className="w-4 h-4 text-[#0f766e] shrink-0" />
+                  <span className="text-[11px] text-[#0f766e] font-bold">
+                    {language === 'ar' ? 'إرسال ملف الصفقات بصيغة PDF عبر واتساب قبل الطرح بـ 48 ساعة' : 'Deliver encrypted deal dossiers via WhatsApp 48h prior to public listing'}
+                  </span>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={whatsappAlertsOnly}
+                  onChange={(e) => setWhatsappAlertsOnly(e.target.checked)}
+                  className="w-4 h-4 accent-[#0f766e] cursor-pointer"
+                />
+              </div>
+
+              {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full py-3 rounded-lg bg-[#0f766e] hover:bg-[#115e59] text-white font-bold text-xs sm:text-sm cursor-pointer shadow-sm transition-all"
+                className="w-full py-3.5 bg-[#0f766e] hover:bg-[#115e59] text-white font-black text-sm rounded-xl shadow-md transition-all cursor-pointer flex items-center justify-center gap-2"
               >
-                {language === 'ar' ? 'انضم الآن لقائمة المستثمرين المميزين' : 'Join VIP Investor Club Now'}
+                <Sparkles className="w-4 h-4" />
+                <span>{language === 'ar' ? 'تأكيد الانضمام واستلام صفقات الأوف ماركت' : 'Confirm Membership & Receive Off-Market Alerts'}</span>
               </button>
+
+              <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-500">
+                <Lock className="w-3.5 h-3.5 text-slate-400" />
+                <span>
+                  {language === 'ar'
+                    ? 'بياناتك الاستثمارية سرية ومحمية، ولا تُشارك مع أي طرف خارجي.'
+                    : 'Strictly confidential and encrypted under banking NDA standards.'}
+                </span>
+              </div>
             </form>
           )}
         </div>

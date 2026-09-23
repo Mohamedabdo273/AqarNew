@@ -17,25 +17,24 @@ export const TestimonialsAndFaq: React.FC = () => {
   };
 
   return (
-    <section className="py-20 bg-white border-b border-[#e5e7eb]">
+    <section className="py-20 bg-white border-b border-slate-200">
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 space-y-16">
         
         {/* Testimonials Section */}
         <div>
-          <div className="text-center max-w-2xl mx-auto mb-10">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#ecfdf5] text-[#0f766e] text-xs font-bold mb-2 border border-[#d1fae5]">
-              <MessageSquareQuote className="w-3.5 h-3.5" />
-              <span>{language === 'ar' ? 'تجارب حقيقية' : 'Verified Reviews'}</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-[#0f172a] tracking-tight">
+          <div className="text-center max-w-xl mx-auto mb-10 space-y-1">
+            <span className="text-xs font-semibold text-teal-800 tracking-wide block">
+              {language === 'ar' ? 'تجارب حقيقية' : 'Verified Reviews'}
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
               {language === 'ar' 
                 ? 'قصص نجاح في التنازل والشراء بدون أوفر' 
-                : 'Success Stories: 0% Overprice & Safe Cash Exits'}
+                : 'Success Stories: Zero Overprice & Safe Exits'}
             </h2>
-            <p className="text-slate-600 text-xs sm:text-sm mt-1">
+            <p className="text-slate-500 text-xs sm:text-sm mt-1">
               {language === 'ar'
                 ? 'آراء حقيقية من بائعين استردوا فلوسهم كاملة، ومستثمرين اشتروا بسعر التعاقد القديم.'
-                : 'Real experiences from sellers who recovered 100% of their cash and buyers who secured past contract pricing.'}
+                : 'Real feedback from sellers who recovered their cash and buyers who secured legacy contract pricing.'}
             </p>
           </div>
 
@@ -43,7 +42,7 @@ export const TestimonialsAndFaq: React.FC = () => {
             {TESTIMONIALS.map((t) => (
               <div 
                 key={t.id}
-                className={`bg-[#f5f6f8] p-5 rounded-2xl border border-[#e5e7eb] flex flex-col justify-between space-y-3 ${isRTL ? 'text-right' : 'text-left'}`}
+                className={`bg-slate-50 p-5 rounded-2xl border border-slate-200/80 flex flex-col justify-between space-y-4 ${isRTL ? 'text-right' : 'text-left'}`}
               >
                 <div className="space-y-2">
                   <div className="flex items-center gap-1 text-amber-500">
@@ -64,10 +63,10 @@ export const TestimonialsAndFaq: React.FC = () => {
                     className="w-9 h-9 rounded-full object-cover border border-slate-300"
                   />
                   <div>
-                    <h4 className="text-xs font-bold text-[#0f172a]">
+                    <h4 className="text-xs font-bold text-slate-900">
                       {language === 'en' && t.authorEn ? t.authorEn : t.author}
                     </h4>
-                    <span className="text-[11px] text-[#0f766e] font-medium block">
+                    <span className="text-[11px] text-teal-800 font-medium block">
                       {language === 'en' && t.roleEn ? t.roleEn : t.role}
                     </span>
                   </div>
@@ -78,16 +77,15 @@ export const TestimonialsAndFaq: React.FC = () => {
         </div>
 
         {/* FAQs Section */}
-        <div id="faq" className="max-w-3xl mx-auto pt-6 border-t border-[#e5e7eb]">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-bold mb-2 border border-blue-200">
-              <HelpCircle className="w-3.5 h-3.5" />
-              <span>{language === 'ar' ? 'الأسئلة الشائعة' : 'Frequently Asked Questions'}</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-black text-[#0f172a] tracking-tight">
+        <div id="faq" className="max-w-2xl mx-auto pt-6 border-t border-slate-200">
+          <div className="text-center mb-8 space-y-1">
+            <span className="text-xs font-semibold text-teal-800 tracking-wide block">
+              {language === 'ar' ? 'الأسئلة الشائعة' : 'Frequently Asked Questions'}
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
               {language === 'ar' 
-                ? 'كل اللي محتاج تعرفه عن التنازل والعمولات' 
-                : 'Everything You Need to Know About Contract Transfer & Fees'}
+                ? 'كل ما تود معرفته عن التنازل والإجراءات' 
+                : 'Frequently Asked Questions About Contract Transfer'}
             </h2>
           </div>
 
@@ -100,14 +98,14 @@ export const TestimonialsAndFaq: React.FC = () => {
               return (
                 <div 
                   key={idx}
-                  className="bg-[#f5f6f8] rounded-xl border border-[#e5e7eb] overflow-hidden transition-all"
+                  className="bg-slate-50 rounded-xl border border-slate-200 overflow-hidden transition-all"
                 >
                   <button
                     onClick={() => toggleFaq(idx)}
-                    className={`w-full ${isRTL ? 'text-right' : 'text-left'} p-4 flex items-center justify-between gap-4 font-bold text-xs sm:text-sm text-[#0f172a] hover:bg-slate-100 transition-colors cursor-pointer`}
+                    className={`w-full ${isRTL ? 'text-right' : 'text-left'} p-4 flex items-center justify-between gap-4 font-bold text-xs sm:text-sm text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer`}
                   >
                     <span>{question}</span>
-                    <ChevronDown className={`w-4 h-4 text-slate-500 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180 text-[#0f766e]' : ''}`} />
+                    <ChevronDown className={`w-4 h-4 text-slate-500 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180 text-teal-700' : ''}`} />
                   </button>
 
                   {isOpen && (

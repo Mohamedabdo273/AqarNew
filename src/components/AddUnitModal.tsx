@@ -235,7 +235,7 @@ export const AddUnitModal: React.FC<AddUnitModalProps> = ({
         {/* Header */}
         <div className="p-4 sm:px-6 border-b border-slate-200 flex items-center justify-between bg-slate-50">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#0f766e]"></span>
+            <span className="w-2.5 h-2.5 rounded-full bg-teal-700"></span>
             <span className="text-xs font-bold text-slate-900">
               {language === 'ar'
                 ? 'طلب قيد وتنازل رسمي • استرداد 100% كاش (0% عمولة على البائع)'
@@ -290,7 +290,7 @@ export const AddUnitModal: React.FC<AddUnitModalProps> = ({
                 <div
                   key={st}
                   className={`h-1.5 rounded-full transition-all duration-300 ${
-                    st <= currentStep ? 'bg-[#0f766e]' : 'bg-slate-200'
+                    st <= currentStep ? 'bg-teal-700' : 'bg-slate-200'
                   }`}
                 />
               ))}
@@ -919,7 +919,7 @@ export const AddUnitModal: React.FC<AddUnitModalProps> = ({
                         type="checkbox"
                         checked={ackIsDirectOwner}
                         onChange={(e) => setAckIsDirectOwner(e.target.checked)}
-                        className="w-4 h-4 accent-[#0f766e] rounded cursor-pointer shrink-0"
+                        className="w-4 h-4 accent-teal-700 rounded cursor-pointer shrink-0"
                       />
                     </div>
 
@@ -936,7 +936,7 @@ export const AddUnitModal: React.FC<AddUnitModalProps> = ({
                         type="checkbox"
                         checked={ackNoBroker}
                         onChange={(e) => setAckNoBroker(e.target.checked)}
-                        className="w-4 h-4 accent-[#0f766e] rounded cursor-pointer shrink-0"
+                        className="w-4 h-4 accent-teal-700 rounded cursor-pointer shrink-0"
                       />
                     </div>
                   </div>
@@ -961,7 +961,7 @@ export const AddUnitModal: React.FC<AddUnitModalProps> = ({
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="px-6 py-2.5 bg-[#0f766e] hover:bg-[#115e59] text-white text-xs font-bold rounded-xl flex items-center gap-2 cursor-pointer shadow-sm transition-all"
+                  className="px-6 py-2.5 bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold rounded-xl flex items-center gap-2 cursor-pointer shadow-xs transition-colors"
                 >
                   <span>
                     {currentStep === totalSteps

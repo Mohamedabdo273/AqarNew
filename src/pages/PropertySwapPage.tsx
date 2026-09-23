@@ -81,7 +81,7 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({
 
             <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
               {language === 'ar' ? (
-                <>المناقلة والمبادلة العقارية الذكية <br className="hidden sm:inline" />
+                <>تبديل عقارك الذكي <br className="hidden sm:inline" />
                 <span className="text-[#2dd4bf]">بدّل وحدتك.. واستمر في السوق دون تعثر</span></>
               ) : (
                 <>Smart Property Swap & Switch <br className="hidden sm:inline" />

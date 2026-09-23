@@ -61,16 +61,16 @@ export const SafeExitCalculator: React.FC<SafeExitCalculatorProps> = ({
   };
 
   return (
-    <section id="calculator" className="py-12 sm:py-16 bg-white border-b border-[#e5e7eb]">
+    <section id="calculator" className="py-12 sm:py-16 bg-white border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-10">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#ecfdf5] text-[#0f766e] text-xs font-bold mb-2 border border-[#d1fae5]">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-teal-50 text-teal-800 text-xs font-semibold mb-2 border border-teal-200/60">
             <Calculator className="w-3.5 h-3.5" />
             <span>{language === 'ar' ? 'حاسبة الخروج العادل بالأرقام' : 'Numerical Exit Calculator'}</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#0f172a] tracking-tight">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
             {t('calcTitle')}
           </h2>
           <p className="text-slate-600 text-xs sm:text-sm mt-2">
@@ -79,21 +79,21 @@ export const SafeExitCalculator: React.FC<SafeExitCalculatorProps> = ({
         </div>
 
         {/* Calculator Card */}
-        <div className="bg-[#f5f6f8] rounded-2xl border border-[#cbd2d9] p-3.5 sm:p-6 lg:p-8">
+        <div className="bg-slate-50/70 rounded-2xl border border-slate-200 p-3.5 sm:p-6 lg:p-8">
           <div className="grid lg:grid-cols-12 gap-6 lg:gap-8 items-start">
             
             {/* Left: Inputs (5 cols) */}
-            <div className="lg:col-span-5 bg-white p-4 sm:p-6 rounded-xl border border-[#e5e7eb] space-y-4 sm:space-y-5 shadow-xs">
-              <h3 className="text-base font-bold text-[#0f172a] pb-2 border-b border-slate-100 flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-[#0f766e]" />
+            <div className="lg:col-span-5 bg-white p-4 sm:p-6 rounded-xl border border-slate-200 space-y-4 sm:space-y-5 shadow-xs">
+              <h3 className="text-base font-bold text-slate-900 pb-2 border-b border-slate-100 flex items-center gap-2">
+                <Building2 className="w-4 h-4 text-teal-700" />
                 <span>{language === 'ar' ? 'بيانات عقد وحدتك' : 'Your Contract Figures'}</span>
               </h3>
 
               {/* Total Price */}
               <div className="space-y-2">
-                <div className="flex justify-between items-center text-xs font-bold text-slate-700">
+                <div className="flex justify-between items-center text-xs font-semibold text-slate-700">
                   <label htmlFor="c-price">{t('calcContractPrice')}:</label>
-                  <span className="text-[#0f766e] font-sans font-bold text-sm">
+                  <span className="text-teal-800 font-sans font-bold text-sm">
                     {formatCurrency(contractPrice)}
                   </span>
                 </div>
@@ -109,7 +109,7 @@ export const SafeExitCalculator: React.FC<SafeExitCalculatorProps> = ({
                     setContractPrice(val);
                     if (paidAmount > val) setPaidAmount(val);
                   }}
-                  className="w-full accent-[#0f766e] cursor-pointer"
+                  className="w-full accent-teal-700 cursor-pointer"
                 />
                 <div className="flex justify-between text-[10px] text-slate-400">
                   <span>1M {t('egp')}</span>
@@ -120,9 +120,9 @@ export const SafeExitCalculator: React.FC<SafeExitCalculatorProps> = ({
 
               {/* Paid Amount */}
               <div className="space-y-2">
-                <div className="flex justify-between items-center text-xs font-bold text-slate-700">
+                <div className="flex justify-between items-center text-xs font-semibold text-slate-700">
                   <label htmlFor="p-amount">{t('calcPaidAmount')}:</label>
-                  <span className="text-[#0f766e] font-sans font-bold text-sm">
+                  <span className="text-teal-800 font-sans font-bold text-sm">
                     {formatCurrency(validatedPaid)}
                   </span>
                 </div>
@@ -134,7 +134,7 @@ export const SafeExitCalculator: React.FC<SafeExitCalculatorProps> = ({
                   step={100000}
                   value={validatedPaid}
                   onChange={(e) => setPaidAmount(Number(e.target.value))}
-                  className="w-full accent-[#0f766e] cursor-pointer"
+                  className="w-full accent-teal-700 cursor-pointer"
                 />
                 <div className="flex justify-between text-[10px] text-slate-400">
                   <span>200K {t('egp')}</span>
@@ -145,13 +145,13 @@ export const SafeExitCalculator: React.FC<SafeExitCalculatorProps> = ({
 
               {/* Developer */}
               <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700">
+                <label className="block text-xs font-semibold text-slate-700">
                   {t('calcDeveloperName')}:
                 </label>
                 <select
                   value={developerName}
                   onChange={(e) => setDeveloperName(e.target.value)}
-                  className="w-full p-2.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 font-medium cursor-pointer"
+                  className="w-full p-2.5 text-xs bg-slate-50 border border-slate-200 rounded-lg text-slate-800 font-medium cursor-pointer focus:outline-none focus:border-teal-700"
                 >
                   <option value="بالم هيلز">Palm Hills (بالم هيلز للتعمير)</option>
                   <option value="سوديك">SODIC (سوديك)</option>
@@ -171,9 +171,9 @@ export const SafeExitCalculator: React.FC<SafeExitCalculatorProps> = ({
               </div>
 
               {/* Micro Explanation */}
-              <div className="p-3 bg-amber-50 rounded-lg border border-amber-200 text-xs text-amber-900 space-y-1">
-                <div className="font-bold flex items-center gap-1 text-[11px]">
-                  <HelpCircle className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+              <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs text-slate-700 space-y-1">
+                <div className="font-semibold flex items-center gap-1 text-[11px] text-slate-800">
+                  <HelpCircle className="w-3.5 h-3.5 text-slate-500 shrink-0" />
                   <span>{language === 'ar' ? 'تنبيه هام حول خصم المطور:' : 'Important Developer Penalty Note:'}</span>
                 </div>
                 <p className="text-[10px] text-slate-600 leading-relaxed">
@@ -188,17 +188,17 @@ export const SafeExitCalculator: React.FC<SafeExitCalculatorProps> = ({
             <div className="lg:col-span-7 space-y-4">
               
               {/* Winner: Exit via Platform */}
-              <div className="bg-[#0f172a] text-white rounded-xl p-6 border border-[#0d9488]/40 shadow-md">
+              <div className="bg-slate-900 text-white rounded-xl p-5 sm:p-6 border border-slate-800 shadow-md">
                 <div className="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
                   <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-md bg-[#0f766e] text-white flex items-center justify-center text-xs font-bold">
+                    <span className="w-6 h-6 rounded-md bg-teal-700 text-white flex items-center justify-center text-xs font-bold">
                       ✓
                     </span>
                     <h4 className="text-base font-bold text-white">
                       {t('calcPlatformTitle')}
                     </h4>
                   </div>
-                  <span className="text-[11px] font-bold text-[#2dd4bf] bg-[#0f766e]/30 px-2.5 py-0.5 rounded">
+                  <span className="text-[11px] font-semibold text-teal-300 bg-teal-900/40 border border-teal-700/40 px-2.5 py-0.5 rounded">
                     {language === 'ar' ? 'وفرت ' : 'Saved '} {formatCurrency(calculations.totalSavedMoney)}
                   </span>
                 </div>
@@ -206,7 +206,7 @@ export const SafeExitCalculator: React.FC<SafeExitCalculatorProps> = ({
                 <div className="grid sm:grid-cols-3 gap-3 mb-4">
                   <div className="bg-white/5 p-3 rounded-lg border border-white/10">
                     <span className="text-[11px] text-slate-400 block mb-1">{t('calcPlatformCash')}</span>
-                    <div className="text-xl font-black text-[#2dd4bf] font-sans">
+                    <div className="text-xl font-black text-teal-300 font-sans">
                       {formatCurrency(calculations.tanazulNetCash)}
                     </div>
                     <span className="text-[10px] text-slate-400">{language === 'ar' ? 'استرداد كامل رأس المال' : '100% full capital recovery'}</span>
@@ -237,7 +237,7 @@ export const SafeExitCalculator: React.FC<SafeExitCalculatorProps> = ({
                   </span>
                   <button
                     onClick={() => onStartExitRequest(contractPrice, validatedPaid, developerName)}
-                    className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-[#0f766e] hover:bg-[#115e59] text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
+                    className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-teal-700 hover:bg-teal-800 text-white text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
                   >
                     <span>{t('calcStartExitBtn')}</span>
                     {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
@@ -246,13 +246,13 @@ export const SafeExitCalculator: React.FC<SafeExitCalculatorProps> = ({
               </div>
 
               {/* Developer Cancellation Comparison */}
-              <div className="bg-white rounded-xl p-5 border border-red-200 shadow-xs">
-                <div className="flex items-center justify-between border-b border-red-100 pb-2.5 mb-3">
-                  <div className="flex items-center gap-2 text-red-600 font-bold text-sm">
-                    <AlertTriangle className="w-4 h-4 shrink-0" />
+              <div className="bg-white rounded-xl p-5 border border-rose-200/80 shadow-xs">
+                <div className="flex items-center justify-between border-b border-rose-100 pb-2.5 mb-3">
+                  <div className="flex items-center gap-2 text-rose-700 font-bold text-sm">
+                    <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
                     <span>{language === 'ar' ? 'المسار البديل: لو اخترت فسخ العقد مع المطور' : t('calcDevLossTitle')}</span>
                   </div>
-                  <span className="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded border border-red-200">
+                  <span className="text-[10px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200/70">
                     {language === 'ar' ? `خسارة ${Math.round((Math.min(calculations.developerPenalty, validatedPaid) / validatedPaid) * 100)}% من أموالك` : 'Heavy Loss'}
                   </span>
                 </div>
@@ -266,20 +266,20 @@ export const SafeExitCalculator: React.FC<SafeExitCalculatorProps> = ({
                     <span className="text-[9px] text-slate-400">{language === 'ar' ? 'رأس مالك المدفوع' : 'Your paid capital'}</span>
                   </div>
 
-                  <div className="bg-red-50 p-2.5 rounded-lg border border-red-200">
-                    <span className="text-[10px] text-red-700 block font-semibold">{language === 'ar' ? 'غرامة الفسخ (المخصومة):' : t('calcDevLossPenalty')}</span>
-                    <div className="text-sm font-black text-red-600 font-sans">
+                  <div className="bg-rose-50/60 p-2.5 rounded-lg border border-rose-200/70">
+                    <span className="text-[10px] text-rose-800 block font-semibold">{language === 'ar' ? 'غرامة الفسخ (المخصومة):' : t('calcDevLossPenalty')}</span>
+                    <div className="text-sm font-bold text-rose-700 font-sans">
                       -{formatCurrency(calculations.developerPenalty)}
                     </div>
-                    <span className="text-[9px] text-red-500">{language === 'ar' ? '15% من ثمن الوحدة' : '15% of contract'}</span>
+                    <span className="text-[9px] text-rose-600">{language === 'ar' ? '15% من ثمن الوحدة' : '15% of contract'}</span>
                   </div>
 
-                  <div className="bg-amber-50 p-2.5 rounded-lg border border-amber-200">
-                    <span className="text-[10px] text-amber-900 block font-semibold">{language === 'ar' ? 'ما يتبقى لك فعلياً:' : 'Net Refund:'}</span>
-                    <div className="text-sm font-black text-amber-900 font-sans">
+                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                    <span className="text-[10px] text-slate-700 block font-semibold">{language === 'ar' ? 'ما يتبقى لك فعلياً:' : 'Net Refund:'}</span>
+                    <div className="text-sm font-bold text-slate-900 font-sans">
                       {formatCurrency(calculations.developerNetRefund)}
                     </div>
-                    <span className="text-[9px] text-amber-700">{language === 'ar' ? 'فقط بعد الاستقطاع' : 'After penalty'}</span>
+                    <span className="text-[9px] text-slate-500">{language === 'ar' ? 'فقط بعد الاستقطاع' : 'After penalty'}</span>
                   </div>
 
                   <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200">

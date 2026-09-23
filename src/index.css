@@ -2,21 +2,23 @@
 
 @layer base {
   :root {
-    --ae-brand-navy: #0f172a;
-    --ae-support-teal: #0d9488;
+    --ae-brand-navy: #1e293b;
+    --ae-support-teal: #0f766e;
     --ae-support-teal-action: #0f766e;
     --ae-support-teal-action-hover: #115e59;
-    --ae-surface-page: #f5f6f8;
+    --ae-surface-page: #f8fafc;
     --ae-surface-card: #ffffff;
     --ae-border-line: #e2e8f0;
     --ae-text-ink: #0f172a;
-    --ae-text-muted: #475569;
+    --ae-text-muted: #64748b;
   }
 
   body {
     font-family: 'IBM Plex Sans Arabic', 'Alexandria', system-ui, -apple-system, sans-serif;
     background-color: var(--ae-surface-page);
     color: var(--ae-text-ink);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
@@ -24,10 +26,10 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Custom modern scrollbar */
+/* Custom quiet, subtle scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: #f1f5f9;
@@ -39,3 +41,4 @@ html {
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+

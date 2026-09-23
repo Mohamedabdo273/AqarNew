@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
-import { ValueDifferenceSection } from './components/ValueDifferenceSection';
-import { SafeExitCalculator } from './components/SafeExitCalculator';
-import { ListingsSection } from './components/ListingsSection';
 import { HowItWorks } from './components/HowItWorks';
 import { LegalGuarantees } from './components/LegalGuarantees';
 import { TestimonialsAndFaq } from './components/TestimonialsAndFaq';
 import { Footer } from './components/Footer';
 import { UnitDetailModal } from './components/UnitDetailModal';
 import { AddUnitModal } from './components/AddUnitModal';
-import { AuthModal } from './components/AuthModal';
-import { UserProfileModal } from './components/UserProfileModal';
 import { StoryPage } from './pages/StoryPage';
 import { HowItWorksPage } from './pages/HowItWorksPage';
 import { ContactPage } from './pages/ContactPage';
@@ -19,7 +14,7 @@ import { InvestorsPage } from './pages/InvestorsPage';
 import { SellUnitPage } from './pages/SellUnitPage';
 import { OpportunitiesPage } from './pages/OpportunitiesPage';
 import { PropertySwapPage } from './pages/PropertySwapPage';
-import { DifferenceFromEqarExit } from './components/DifferenceFromEqarExit';
+import { InstitutionalAdvantage } from './components/InstitutionalAdvantage';
 import { AdminPlatform } from './components/admin/AdminPlatform';
 import { InvestorClubModal } from './components/InvestorClubModal';
 import { BRAND_SUGGESTIONS } from './data/mockData';
@@ -36,9 +31,6 @@ export default function App() {
   const [isAddUnitOpen, setIsAddUnitOpen] = useState<boolean>(false);
   const [isInvestorClubOpen, setIsInvestorClubOpen] = useState<boolean>(false);
   const [activePage, setActivePage] = useState<PageId>('home');
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authModalTab, setAuthModalTab] = useState<'login' | 'register'>('login');
-  const [isUserProfileOpen, setIsUserProfileOpen] = useState(false);
   
   // Calculator prefill state for AddUnitModal
   const [prefillCalculator, setPrefillCalculator] = useState<{
@@ -124,53 +116,20 @@ export default function App() {
         onSelectBrand={setCurrentBrand}
         onOpenAddUnit={() => setIsAddUnitOpen(true)}
         onOpenInvestorClub={() => setIsInvestorClubOpen(true)}
-        onOpenAuthModal={(tab) => {
-          setAuthModalTab(tab || 'login');
-          setIsAuthModalOpen(true);
-        }}
-        onOpenUserProfile={() => setIsUserProfileOpen(true)}
       />
 
       {/* Main Content Area */}
       <main className="flex-1">
         {activePage === 'home' && (
           <>
-            {/* Hero Section */}
+            {/* Hero Section (Clean & Direct) */}
             <HeroSection
               currentBrand={currentBrand}
               onOpenAddUnit={() => handleNavigate('sell')}
-              onScrollToSection={scrollToSection}
-              onSearchChange={handleHeroSearch}
-            />
-
-            {/* Institutional Differentiation: Why We Differ from Traditional Portals & Brokers */}
-            <DifferenceFromEqarExit
-              currentBrand={currentBrand}
               onNavigate={handleNavigate}
-              onOpenAddUnit={() => handleNavigate('sell')}
             />
 
-            {/* Two-sided Value Proposition & Comparison Table */}
-            <ValueDifferenceSection
-              currentBrand={currentBrand}
-              onOpenAddUnit={() => handleNavigate('sell')}
-              onScrollToSection={scrollToSection}
-            />
-
-            {/* Units Marketplace (Listings Preview) */}
-            <ListingsSection
-              units={units}
-              initialFilters={heroSearchFilters}
-              onSelectUnit={(unit) => setSelectedUnit(unit)}
-              onOpenAddUnit={() => handleNavigate('sell')}
-            />
-
-            {/* Safe Exit Calculator */}
-            <SafeExitCalculator
-              onStartExitRequest={handleStartExitRequest}
-            />
-
-            {/* How It Works (5 steps) */}
+            {/* How It Works (Simple 4 steps) */}
             <HowItWorks />
 
             {/* Legal Guarantees & Safety Pillars */}
@@ -279,31 +238,6 @@ export default function App() {
         prefillDeveloper={prefillCalculator.developer}
         onUnitCreated={(unit) => {
           setSelectedUnit(unit);
-        }}
-      />
-
-      {/* Auth Modal (Login / Register) */}
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        initialTab={authModalTab}
-        onSuccess={() => {
-          setIsAuthModalOpen(false);
-        }}
-      />
-
-      {/* User Profile Modal */}
-      <UserProfileModal
-        isOpen={isUserProfileOpen}
-        onClose={() => setIsUserProfileOpen(false)}
-        units={units}
-        onSelectUnit={(unit) => {
-          setIsUserProfileOpen(false);
-          setSelectedUnit(unit);
-        }}
-        onOpenAddUnit={() => {
-          setIsUserProfileOpen(false);
-          setIsAddUnitOpen(true);
         }}
       />
 

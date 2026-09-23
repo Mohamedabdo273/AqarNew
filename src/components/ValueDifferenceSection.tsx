@@ -28,33 +28,33 @@ export const ValueDifferenceSection: React.FC<ValueDifferenceProps> = ({
   const { t, language, isRTL } = useLanguage();
 
   return (
-    <section id="comparison" className="py-20 bg-[#f5f6f8] border-b border-[#e5e7eb]">
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 space-y-20">
+    <section id="comparison" className="py-16 sm:py-20 bg-slate-50/60 border-b border-slate-200">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 space-y-16 sm:space-y-20">
         
         {/* Two-Sided Proposition */}
         <div>
-          <div className="text-center max-w-3xl mx-auto mb-12">
-            <h2 className="text-2xl sm:text-4xl font-black text-[#0f172a] tracking-tight">
+          <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
               {language === 'ar' 
                 ? 'طرف يبحث عن التخارج الآمن، وآخر ينتظر الفرصة الاستثمارية'
                 : 'One Party Needs to Exit, One Awaits the Deal — We Bridge the Gap'}
             </h2>
-            <p className="text-slate-600 text-sm sm:text-base mt-2">
+            <p className="text-slate-600 text-xs sm:text-sm mt-2">
               {language === 'ar'
                 ? 'منظومة تعاقدية حصرية ترتكز على مبدأ "صفر أوفر برايس": يسترد البائع كامل رأس ماله المسدد دون أي استقطاعات، ويكتسب المشتري حق الحلول التعاقدي بنفس سعر وتسهيلات الطرح الأصلي.'
                 : 'This is not traditional resale: strictly 0% overprice. Sellers claim back their exact paid cash, while buyers inherit original past pricing.'}
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-6 sm:gap-8">
             
             {/* Card 1: البائع */}
-            <div className="bg-white rounded-2xl border border-[#cbd2d9] p-7 sm:p-8 flex flex-col justify-between space-y-6 shadow-xs hover:border-[#0f766e] transition-all">
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 flex flex-col justify-between space-y-6 shadow-xs hover:border-slate-300 transition-all">
               <div className="space-y-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#ecfdf5] text-[#0f766e] text-xs font-bold border border-[#d1fae5]">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-teal-50 text-teal-800 text-xs font-semibold border border-teal-200/60">
                   {language === 'ar' ? 'البائع — مالك الوحدة التعاقدية' : 'The Seller — Property Owner'}
                 </div>
-                <h3 className="text-xl sm:text-2xl font-bold text-[#0f172a]">
+                <h3 className="text-lg sm:text-xl font-bold text-slate-900">
                   {language === 'ar' ? 'صفر أوفر برايس = أعلى سرعة إنجاز للتنازل' : '0% Overprice = Fastest Exit in the Market'}
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
@@ -65,7 +65,7 @@ export const ValueDifferenceSection: React.FC<ValueDifferenceProps> = ({
 
                 <ul className="space-y-3 pt-2 text-xs sm:text-sm text-slate-700">
                   <li className="flex items-start gap-2.5">
-                    <div className="w-5 h-5 rounded-full bg-[#ecfdf5] text-[#0f766e] flex items-center justify-center shrink-0 mt-0.5">
+                    <div className="w-5 h-5 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center shrink-0 mt-0.5">
                       <Check className="w-3.5 h-3.5 stroke-[3]" />
                     </div>
                     <span>
@@ -77,7 +77,7 @@ export const ValueDifferenceSection: React.FC<ValueDifferenceProps> = ({
                     </span>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <div className="w-5 h-5 rounded-full bg-[#ecfdf5] text-[#0f766e] flex items-center justify-center shrink-0 mt-0.5">
+                    <div className="w-5 h-5 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center shrink-0 mt-0.5">
                       <Check className="w-3.5 h-3.5 stroke-[3]" />
                     </div>
                     <span>
@@ -89,7 +89,7 @@ export const ValueDifferenceSection: React.FC<ValueDifferenceProps> = ({
                     </span>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <div className="w-5 h-5 rounded-full bg-[#ecfdf5] text-[#0f766e] flex items-center justify-center shrink-0 mt-0.5">
+                    <div className="w-5 h-5 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center shrink-0 mt-0.5">
                       <Check className="w-3.5 h-3.5 stroke-[3]" />
                     </div>
                     <span>
@@ -101,7 +101,7 @@ export const ValueDifferenceSection: React.FC<ValueDifferenceProps> = ({
                     </span>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <div className="w-5 h-5 rounded-full bg-[#ecfdf5] text-[#0f766e] flex items-center justify-center shrink-0 mt-0.5">
+                    <div className="w-5 h-5 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center shrink-0 mt-0.5">
                       <Check className="w-3.5 h-3.5 stroke-[3]" />
                     </div>
                     <span>
@@ -117,7 +117,7 @@ export const ValueDifferenceSection: React.FC<ValueDifferenceProps> = ({
 
               <button
                 onClick={onOpenAddUnit}
-                className="w-full py-3.5 px-6 rounded-xl bg-[#0f172a] hover:bg-slate-800 text-white text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
+                className="w-full py-3 px-6 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
               >
                 <span>{t('sellGetCash')}</span>
                 {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
@@ -125,12 +125,12 @@ export const ValueDifferenceSection: React.FC<ValueDifferenceProps> = ({
             </div>
 
             {/* Card 2: المشتري */}
-            <div className="bg-white rounded-2xl border border-[#cbd2d9] p-7 sm:p-8 flex flex-col justify-between space-y-6 shadow-xs hover:border-[#0f766e] transition-all">
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 flex flex-col justify-between space-y-6 shadow-xs hover:border-slate-300 transition-all">
               <div className="space-y-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-blue-50 text-blue-800 text-xs font-bold border border-blue-200">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-slate-100 text-slate-800 text-xs font-semibold border border-slate-200">
                   {language === 'ar' ? 'المشتري' : 'The Buyer'}
                 </div>
-                <h3 className="text-xl sm:text-2xl font-bold text-[#0f172a]">
+                <h3 className="text-lg sm:text-xl font-bold text-slate-900">
                   {language === 'ar' ? 'شراء وحدات بالتقسيط بصفر أوفر برايس' : 'Installment Units with 0% Overprice'}
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
@@ -141,7 +141,7 @@ export const ValueDifferenceSection: React.FC<ValueDifferenceProps> = ({
 
                 <ul className="space-y-3 pt-2 text-xs sm:text-sm text-slate-700">
                   <li className="flex items-start gap-2.5">
-                    <div className="w-5 h-5 rounded-full bg-[#ecfdf5] text-[#0f766e] flex items-center justify-center shrink-0 mt-0.5">
+                    <div className="w-5 h-5 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center shrink-0 mt-0.5">
                       <Check className="w-3.5 h-3.5 stroke-[3]" />
                     </div>
                     <span>
@@ -153,7 +153,7 @@ export const ValueDifferenceSection: React.FC<ValueDifferenceProps> = ({
                     </span>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <div className="w-5 h-5 rounded-full bg-[#ecfdf5] text-[#0f766e] flex items-center justify-center shrink-0 mt-0.5">
+                    <div className="w-5 h-5 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center shrink-0 mt-0.5">
                       <Check className="w-3.5 h-3.5 stroke-[3]" />
                     </div>
                     <span>
@@ -165,7 +165,7 @@ export const ValueDifferenceSection: React.FC<ValueDifferenceProps> = ({
                     </span>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <div className="w-5 h-5 rounded-full bg-[#ecfdf5] text-[#0f766e] flex items-center justify-center shrink-0 mt-0.5">
+                    <div className="w-5 h-5 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center shrink-0 mt-0.5">
                       <Check className="w-3.5 h-3.5 stroke-[3]" />
                     </div>
                     <span>
@@ -177,7 +177,7 @@ export const ValueDifferenceSection: React.FC<ValueDifferenceProps> = ({
                     </span>
                   </li>
                   <li className="flex items-start gap-2.5">
-                    <div className="w-5 h-5 rounded-full bg-[#ecfdf5] text-[#0f766e] flex items-center justify-center shrink-0 mt-0.5">
+                    <div className="w-5 h-5 rounded-full bg-teal-50 text-teal-700 flex items-center justify-center shrink-0 mt-0.5">
                       <Check className="w-3.5 h-3.5 stroke-[3]" />
                     </div>
                     <span>
@@ -193,7 +193,7 @@ export const ValueDifferenceSection: React.FC<ValueDifferenceProps> = ({
 
               <button
                 onClick={() => onScrollToSection('listings')}
-                className="w-full py-3.5 px-6 rounded-xl bg-[#0f766e] hover:bg-[#115e59] text-white text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
+                className="w-full py-3 px-6 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
               >
                 <span>{t('exploreOpportunities')}</span>
                 {isRTL ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
@@ -204,52 +204,52 @@ export const ValueDifferenceSection: React.FC<ValueDifferenceProps> = ({
         </div>
 
         {/* Comparison Table */}
-        <div className="pt-6">
-          <div className="text-center max-w-2xl mx-auto mb-10">
-            <h2 className="text-2xl sm:text-3xl font-black text-[#0f172a] tracking-tight">
+        <div className="pt-2">
+          <div className="text-center max-w-2xl mx-auto mb-8">
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
               {t('comparisonTableTitle')}
             </h2>
-            <p className="text-slate-600 text-xs sm:text-sm mt-1">
+            <p className="text-slate-500 text-xs sm:text-sm mt-1">
               {t('comparisonTableSub')}
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl border border-[#cbd2d9] overflow-hidden shadow-xs">
+          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
             <div className="overflow-x-auto">
               <table className={`w-full ${isRTL ? 'text-right' : 'text-left'} text-xs sm:text-sm border-collapse`}>
                 <thead>
-                  <tr className="border-b border-[#e5e7eb] bg-slate-50 text-[#0f172a]">
-                    <th className="p-4 sm:p-5 font-bold w-1/4">{t('featureCol')}</th>
-                    <th className="p-4 sm:p-5 font-bold text-slate-500 w-3/8">{t('brokerCol')}</th>
-                    <th className="p-4 sm:p-5 font-bold text-[#0f766e] bg-[#ecfdf5]/70 w-3/8">
+                  <tr className="border-b border-slate-200 bg-slate-50 text-slate-900">
+                    <th className="p-3.5 sm:p-4 font-bold w-1/4">{t('featureCol')}</th>
+                    <th className="p-3.5 sm:p-4 font-medium text-slate-500 w-3/8">{t('brokerCol')}</th>
+                    <th className="p-3.5 sm:p-4 font-bold text-teal-800 bg-teal-50/50 w-3/8">
                       {language === 'ar' ? currentBrand.nameAr : currentBrand.nameEn} ({t('platformCol')})
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#e5e7eb]">
+                <tbody className="divide-y divide-slate-100">
                   
                   <tr>
-                    <td className="p-4 sm:p-5 font-bold text-[#0f172a] bg-slate-50/50">{t('compRow1Feature')}</td>
-                    <td className="p-4 sm:p-5 text-slate-600">{t('compRow1Broker')}</td>
-                    <td className="p-4 sm:p-5 font-bold text-[#0f766e] bg-[#ecfdf5]/30">{t('compRow1Platform')}</td>
+                    <td className="p-3.5 sm:p-4 font-semibold text-slate-900 bg-slate-50/40">{t('compRow1Feature')}</td>
+                    <td className="p-3.5 sm:p-4 text-slate-500">{t('compRow1Broker')}</td>
+                    <td className="p-3.5 sm:p-4 font-semibold text-teal-800 bg-teal-50/30">{t('compRow1Platform')}</td>
                   </tr>
 
                   <tr>
-                    <td className="p-4 sm:p-5 font-bold text-[#0f172a] bg-slate-50/50">{t('compRow2Feature')}</td>
-                    <td className="p-4 sm:p-5 text-slate-600">{t('compRow2Broker')}</td>
-                    <td className="p-4 sm:p-5 font-semibold text-slate-900 bg-[#ecfdf5]/30">{t('compRow2Platform')}</td>
+                    <td className="p-3.5 sm:p-4 font-semibold text-slate-900 bg-slate-50/40">{t('compRow2Feature')}</td>
+                    <td className="p-3.5 sm:p-4 text-slate-500">{t('compRow2Broker')}</td>
+                    <td className="p-3.5 sm:p-4 font-semibold text-slate-800 bg-teal-50/30">{t('compRow2Platform')}</td>
                   </tr>
 
                   <tr>
-                    <td className="p-4 sm:p-5 font-bold text-[#0f172a] bg-slate-50/50">{t('compRow3Feature')}</td>
-                    <td className="p-4 sm:p-5 text-slate-600">{t('compRow3Broker')}</td>
-                    <td className="p-4 sm:p-5 font-semibold text-slate-900 bg-[#ecfdf5]/30">{t('compRow3Platform')}</td>
+                    <td className="p-3.5 sm:p-4 font-semibold text-slate-900 bg-slate-50/40">{t('compRow3Feature')}</td>
+                    <td className="p-3.5 sm:p-4 text-slate-500">{t('compRow3Broker')}</td>
+                    <td className="p-3.5 sm:p-4 font-semibold text-slate-800 bg-teal-50/30">{t('compRow3Platform')}</td>
                   </tr>
 
                   <tr>
-                    <td className="p-4 sm:p-5 font-bold text-[#0f172a] bg-slate-50/50">{t('compRow4Feature')}</td>
-                    <td className="p-4 sm:p-5 text-slate-600">{t('compRow4Broker')}</td>
-                    <td className="p-4 sm:p-5 font-bold text-[#0f766e] bg-[#ecfdf5]/30">{t('compRow4Platform')}</td>
+                    <td className="p-3.5 sm:p-4 font-semibold text-slate-900 bg-slate-50/40">{t('compRow4Feature')}</td>
+                    <td className="p-3.5 sm:p-4 text-slate-500">{t('compRow4Broker')}</td>
+                    <td className="p-3.5 sm:p-4 font-semibold text-teal-800 bg-teal-50/30">{t('compRow4Platform')}</td>
                   </tr>
 
                 </tbody>

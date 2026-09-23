@@ -17,97 +17,97 @@ export const LegalGuarantees: React.FC = () => {
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
         
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#0f766e]/30 text-[#2dd4bf] border border-[#0f766e]/50 text-xs font-bold mb-2">
+        <div className="text-center max-w-2xl mx-auto mb-12 space-y-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-slate-800 text-teal-300 text-xs font-medium mb-1">
             <Scale className="w-3.5 h-3.5" />
             <span>{language === 'ar' ? 'الحماية القانونية والأمان المالي' : 'Legal Protection & Financial Security'}</span>
           </div>
-          <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
             {language === 'ar' ? (
-              <>الأركان الأربعة <span className="text-[#2dd4bf]">لأمان التنازل ونقل الملكية</span></>
+              <>الأركان الأربعة لأمان التنازل ونقل الملكية</>
             ) : (
-              <>The Four Pillars of <span className="text-[#2dd4bf]">Safe Assignment & Ownership Transfer</span></>
+              <>The Four Pillars of Safe Assignment</>
             )}
           </h2>
-          <p className="text-slate-400 text-xs sm:text-sm mt-2">
+          <p className="text-slate-400 text-xs sm:text-sm">
             {language === 'ar' 
               ? 'صممنا النموذج القانوني لضمان حقوق الطرفين 100% داخل المقر الرسمي للمطور العقاري.' 
-              : 'We engineered the legal framework to safeguard 100% of both parties\' rights exclusively at developer headquarters.'}
+              : 'Safeguarding both parties\' rights exclusively at developer headquarters.'}
           </p>
         </div>
 
         {/* 4 Pillars Grid */}
-        <div className="grid md:grid-cols-2 gap-5">
+        <div className="grid md:grid-cols-2 gap-4">
           
-          <div className={`bg-slate-900/80 border border-slate-800 rounded-xl p-6 space-y-2.5 ${isRTL ? 'text-right' : 'text-left'}`}>
-            <div className="w-10 h-10 rounded-lg bg-[#0f766e]/20 text-[#2dd4bf] flex items-center justify-center">
-              <Building2 className="w-5 h-5" />
+          <div className={`bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 space-y-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+            <div className="w-8 h-8 rounded-lg bg-teal-900/50 text-teal-400 flex items-center justify-center">
+              <Building2 className="w-4 h-4" />
             </div>
-            <h3 className="text-base font-bold text-white">
-              {language === 'ar' ? '1. التنازل الرسمي بمقر شركة التطوير فقط' : '1. Official Transfer Exclusively at Developer HQ'}
+            <h3 className="text-sm sm:text-base font-bold text-white">
+              {language === 'ar' ? '1. التنازل بمقر شركة التطوير حصراً' : '1. Exclusively at Developer HQ'}
             </h3>
             <p className="text-xs text-slate-400 leading-relaxed">
               {language === 'ar'
-                ? 'حظر قاطع للتوكيلات أو المحررات العرفية خارج المقر الرسمي لشركة التطوير. تُنجز كافة المعاملات بحضور أطراف التعاقد والمستشار القانوني للمنصة داخل إدارة علاقات العملاء بالشركة المطورة.'
-                : 'Zero risky notary powers of attorney or unofficial contracts. Every step is executed with both parties and our legal counsel at the developer\'s customer relations department.'}
+                ? 'لا توكيلات ولا عقود عرفية. نقل التعاقد يتم رسمياً داخل خدمة عملاء المطور وبحضور ممثل المنصة.'
+                : 'Zero unofficial contracts. Everything happens inside the developer customer relations office.'}
             </p>
           </div>
 
-          <div className={`bg-slate-900/80 border border-slate-800 rounded-xl p-6 space-y-2.5 ${isRTL ? 'text-right' : 'text-left'}`}>
-            <div className="w-10 h-10 rounded-lg bg-[#0f766e]/20 text-[#2dd4bf] flex items-center justify-center">
-              <Lock className="w-5 h-5" />
+          <div className={`bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 space-y-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+            <div className="w-8 h-8 rounded-lg bg-teal-900/50 text-teal-400 flex items-center justify-center">
+              <Lock className="w-4 h-4" />
             </div>
-            <h3 className="text-base font-bold text-white">
-              {language === 'ar' ? '2. استرداد شيكات البائع وإبراء الذمة' : '2. Complete Check Discharge & Release'}
+            <h3 className="text-sm sm:text-base font-bold text-white">
+              {language === 'ar' ? '2. استرداد شيكاتك البنكية وإبراء الذمة' : '2. Bank Checks Return & Clearance'}
             </h3>
             <p className="text-xs text-slate-400 leading-relaxed">
               {language === 'ar'
-                ? 'تلتزم شركة التطوير برد كامل أوراق الدفع والشيكات الآجلة غير المستحقة للبائع، مع إصدار مخالصة مالية نهائية وإبراء ذمة قانوني شامل يُسقط كافة الالتزامات التعاقدية.'
-                : 'The developer returns all future uncashed checks to the seller, issuing a final financial clearance discharging them from all liability.'}
+                ? 'استلام كافة الشيكات الآجلة غير المصروفة فور التوقيع، مع إبراء ذمة مالي وقانوني كامل من المطور.'
+                : 'Receive all uncashed future checks upon transfer with full discharge from all liabilities.'}
             </p>
           </div>
 
-          <div className={`bg-slate-900/80 border border-slate-800 rounded-xl p-6 space-y-2.5 ${isRTL ? 'text-right' : 'text-left'}`}>
-            <div className="w-10 h-10 rounded-lg bg-[#0f766e]/20 text-[#2dd4bf] flex items-center justify-center">
-              <Coins className="w-5 h-5" />
+          <div className={`bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 space-y-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+            <div className="w-8 h-8 rounded-lg bg-teal-900/50 text-teal-400 flex items-center justify-center">
+              <Coins className="w-4 h-4" />
             </div>
-            <h3 className="text-base font-bold text-white">
-              {language === 'ar' ? '3. سداد كاش آمن بشيك مصرفي مقبول الدفع' : '3. Certified Cashier Check Payment'}
+            <h3 className="text-sm sm:text-base font-bold text-white">
+              {language === 'ar' ? '3. استلام كامل كاشك بشيك مصرفي مقبول الدفع' : '3. Certified Cashier Check'}
             </h3>
             <p className="text-xs text-slate-400 leading-relaxed">
               {language === 'ar'
-                ? 'يسترد البائع كامل رأس ماله المسدد بموجب شيك مصرفي مقبول الدفع (Banker\'s Draft) صادر باسمه من بنك معتمد، يُسلّم تزامناً مع توقيع ملحق التنازل الرسمي لدى المطور.'
-                : 'Sellers receive 100% of their paid cash via a verified cashier\'s check (Banker\'s Draft) in their name at the moment of signing at developer HQ.'}
+                ? 'تسترد كامل رأس مالك المسدد بشيك مصرفي مضمون وصادر باسمك يُسلّم لك لحظة توقيع التنازل.'
+                : '100% of your paid cash returned via guaranteed cashier check issued in your name.'}
             </p>
           </div>
 
-          <div className={`bg-slate-900/80 border border-slate-800 rounded-xl p-6 space-y-2.5 ${isRTL ? 'text-right' : 'text-left'}`}>
-            <div className="w-10 h-10 rounded-lg bg-[#0f766e]/20 text-[#2dd4bf] flex items-center justify-center">
-              <FileText className="w-5 h-5" />
+          <div className={`bg-slate-800/60 border border-slate-700/60 rounded-xl p-5 space-y-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+            <div className="w-8 h-8 rounded-lg bg-teal-900/50 text-teal-400 flex items-center justify-center">
+              <FileText className="w-4 h-4" />
             </div>
-            <h3 className="text-base font-bold text-white">
-              {language === 'ar' ? '4. مطابقة كشف الحساب والعقد قبل العرض' : '4. Pre-Listing Audit & Statement Reconciliation'}
+            <h3 className="text-sm sm:text-base font-bold text-white">
+              {language === 'ar' ? '4. تدقيق كشف الحساب مجاناً للبائع' : '4. Fast Statement Verification'}
             </h3>
             <p className="text-xs text-slate-400 leading-relaxed">
               {language === 'ar'
-                ? 'تتولى إدارة التدقيق المالي والقانوني مراجعة كشف الحساب المعتمد، والتأكد من انتظام سداد الأقساط وعدم وجود أي نزاعات قضائية أو غرامات تأخير قبل اعتماد ونشر الوحدة.'
-                : 'Our audit team validates all paid installments, confirms zero penalties or disputes, and reconciles delivery milestones prior to listing.'}
+                ? 'مراجعة الموقف المالي مجاناً، والتأكد من صحة المدفوعات لضمان عدم وجود أي مفاجآت أو مصاريف خفية.'
+                : 'Free validation of statements and dues to ensure seamless transfer with zero surprises.'}
             </p>
           </div>
 
         </div>
 
         {/* Compatibility Bar */}
-        <div className={`mt-8 bg-slate-900/50 border border-slate-800 rounded-xl p-4 text-center ${isRTL ? 'sm:text-right' : 'sm:text-left'} flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400`}>
+        <div className={`mt-8 bg-slate-800/40 border border-slate-700/50 rounded-xl p-3.5 text-center ${isRTL ? 'sm:text-right' : 'sm:text-left'} flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400`}>
           <div>
             {language === 'ar' ? (
-              <>🤝 متوافقون مع لوائح التنازل لكبرى الشركات: <span className="text-white font-bold">بالم هيلز، سوديك، ماونتن فيو، إعمار مصر، طلعت مصطفى، أورا، وصبور</span>.</>
+              <>متوافقون مع إجراءات التنازل لكبرى الشركات: <span className="text-slate-200 font-medium">بالم هيلز، سوديك، ماونتن فيو، إعمار مصر، طلعت مصطفى، أورا، وصبور</span>.</>
             ) : (
-              <>🤝 Fully compliant with transfer bylaws of top developers: <span className="text-white font-bold">Palm Hills, SODIC, Mountain View, Emaar Misr, TMG, ORA, and Sabbour</span>.</>
+              <>Compliant with transfer bylaws of major developers: <span className="text-slate-200 font-medium">Palm Hills, SODIC, Mountain View, Emaar, TMG, ORA, Sabbour</span>.</>
             )}
           </div>
-          <span className="text-[#2dd4bf] font-medium">
-            {language === 'ar' ? 'فريق قانوني متخصص في عقود التطوير' : 'Specialized Developer Contract Legal Team'}
+          <span className="text-slate-400">
+            {language === 'ar' ? 'فريق قانوني متخصص' : 'Specialized Legal Team'}
           </span>
         </div>
 

@@ -47,6 +47,17 @@ export interface NewUnitInput {
   eligibleForSwap?: boolean;
   swapTargetType?: string;
   instantLiquidityEligible?: boolean;
+
+  // New Features: Seller Discount (Fire Sale), Payment Facilitation, Penalties & Tax Handling
+  sellerWillingDiscountAmount?: number;
+  sellerWillingDiscountPercent?: number;
+  acceptsInstallmentsForCash?: boolean;
+  cashInstallmentsTerms?: string;
+  hasOverdueFinesDeducted?: boolean;
+  overdueFinesAmount?: number;
+  taxCategory?: 'residential_exempt' | 'commercial_vat' | 'business_tax';
+  taxBearer?: 'بائع' | 'مشتري' | 'حسب القانون' | 'معفى';
+  onlineReservationActive?: boolean;
 }
 
 export interface InquiryInput {
@@ -278,8 +289,19 @@ export const UnitsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       contractYear: 2023,
       viewsCount: 1,
       offersCount: 0,
-      isHotDeal: true,
-      urgencyBadge: 'معروضة حديثاً'
+      isHotDeal: (input.sellerWillingDiscountAmount && input.sellerWillingDiscountAmount > 0) || true,
+      urgencyBadge: (input.sellerWillingDiscountAmount && input.sellerWillingDiscountAmount > 0)
+        ? `تخارج عاجل: خصم ${input.sellerWillingDiscountAmount.toLocaleString()} ج`
+        : 'معروضة حديثاً',
+      sellerWillingDiscountAmount: input.sellerWillingDiscountAmount,
+      sellerWillingDiscountPercent: input.sellerWillingDiscountPercent,
+      acceptsInstallmentsForCash: input.acceptsInstallmentsForCash,
+      cashInstallmentsTerms: input.cashInstallmentsTerms,
+      hasOverdueFinesDeducted: input.hasOverdueFinesDeducted,
+      overdueFinesAmount: input.overdueFinesAmount,
+      taxCategory: input.taxCategory || 'residential_exempt',
+      taxBearer: input.taxBearer || 'حسب القانون',
+      onlineReservationActive: true
     };
 
     setUnits((prev) => [newUnit, ...prev]);

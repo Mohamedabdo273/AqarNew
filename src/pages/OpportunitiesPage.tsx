@@ -107,13 +107,13 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#cbd2d9] pb-6 sm:pb-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-6 sm:pb-8">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#ecfdf5] text-[#0f766e] text-xs font-bold border border-[#d1fae5] mb-2">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-teal-50 text-teal-800 text-xs font-semibold border border-teal-200 mb-2">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>{language === 'ar' ? 'سوق الفرص الموثقة • 0 ج.م أوفر برايس' : 'Verified Assignment Market • 0 EGP Overprice'}</span>
+              <span>{language === 'ar' ? 'سوق الفرص الموثقة · 0% أوفر برايس' : 'Verified Assignment Market · 0% Overprice'}</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#0f172a] tracking-tight">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
               {language === 'ar' ? 'الفرص العقارية المتاحة للتنازل' : 'Verified Assignment Opportunities'}
             </h1>
             <p className="text-slate-600 text-xs sm:text-sm mt-1">
@@ -126,7 +126,7 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={onOpenAddUnit}
-              className="w-full sm:w-auto px-4 py-2.5 rounded-lg bg-[#0f766e] hover:bg-[#115e59] text-white text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full sm:w-auto px-4 py-2.5 rounded-lg bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <PlusCircle className="w-4 h-4" />
               <span>{language === 'ar' ? 'اعرض وحدتك للتنازل' : 'List Your Unit for Assignment'}</span>
@@ -313,7 +313,7 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
                 <div
                   key={unit.id}
                   onClick={() => onSelectUnit(unit)}
-                  className="bg-white rounded-2xl border border-[#cbd2d9] overflow-hidden hover:shadow-lg transition-all flex flex-col justify-between group cursor-pointer"
+                  className="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:border-slate-300 transition-all flex flex-col justify-between group cursor-pointer"
                 >
                   <div>
                     {/* Image & Badges */}
@@ -324,19 +324,12 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
                         referrerPolicy="no-referrer"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
-                      
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20"></div>
 
                       {/* Top Badges */}
-                      <div className={`absolute top-3 ${isRTL ? 'right-3' : 'left-3'} flex flex-col gap-1 items-start`}>
-                        <span className="bg-[#0f766e] text-white text-[10px] font-bold px-2.5 py-1 rounded-md shadow-sm">
-                          {language === 'ar' ? '0 ج.م أوفر برايس' : '0 EGP Overprice'}
+                      <div className={`absolute top-3 ${isRTL ? 'right-3' : 'left-3'} flex items-center gap-1.5`}>
+                        <span className="bg-slate-900/90 text-white text-[11px] font-medium px-2 py-0.5 rounded-md">
+                          {t("noOverpriceBadge")}
                         </span>
-                        {unit.isHotDeal && (
-                          <span className="bg-amber-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-md shadow-sm">
-                            {language === 'ar' ? 'فرصة نادرة' : 'Prime Deal'}
-                          </span>
-                        )}
                       </div>
 
                       <div className={`absolute top-3 ${isRTL ? 'left-3' : 'right-3'} flex items-center gap-1.5`}>
@@ -348,73 +341,67 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
                           }}
                           className={`p-1.5 rounded-full backdrop-blur-xs transition-transform active:scale-90 cursor-pointer ${
                             isUnitSaved(unit.id)
-                              ? 'bg-white text-rose-500 shadow-md'
-                              : 'bg-black/50 hover:bg-black/75 text-white'
+                              ? 'bg-white text-rose-500 shadow-xs'
+                              : 'bg-slate-900/60 hover:bg-slate-900/80 text-white'
                           }`}
                           title={isUnitSaved(unit.id) ? (language === 'ar' ? 'محفوظة في المفضلة' : 'Saved to Favorites') : (language === 'ar' ? 'حفظ في المفضلة' : 'Save to Favorites')}
                         >
                           <Heart className={`w-3.5 h-3.5 ${isUnitSaved(unit.id) ? 'fill-rose-500 text-rose-500' : ''}`} />
                         </button>
-
-                        <span className="bg-black/60 backdrop-blur-xs text-white text-[10px] font-medium px-2 py-1 rounded-md">
-                          {displayDelivery}
-                        </span>
                       </div>
 
-                      {/* Bottom Image Info: Savings Pill */}
-                      <div className="absolute bottom-3 right-3 left-3 flex justify-between items-end text-white">
-                        <div className="bg-emerald-600 text-white px-2.5 py-1 rounded-lg text-[11px] font-bold shadow-md flex items-center gap-1">
-                          <TrendingDown className="w-3.5 h-3.5" />
-                          <span>
-                            {language === 'ar'
-                              ? `وفر ${formatEGP(savings)} عن سعر اليوم`
-                              : `Save ${formatEGP(savings)} vs Market`}
-                          </span>
-                        </div>
+                      {/* Bottom Image Info */}
+                      <div className="absolute bottom-2.5 right-2.5 left-2.5 flex justify-between items-center text-white">
+                        <span className="bg-slate-900/80 text-[11px] font-medium px-2 py-0.5 rounded">
+                          {language === 'ar' ? `وفر ${formatEGP(savings)}` : `Save ${formatEGP(savings)}`}
+                        </span>
+                        <span className="text-[11px] bg-slate-900/80 px-2 py-0.5 rounded">
+                          {displayDelivery}
+                        </span>
                       </div>
                     </div>
 
                     {/* Card Content */}
                     <div className="p-4 space-y-3">
                       <div>
-                        <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mb-1">
-                          <span className="font-bold text-[#0f172a]">{displayDev}</span>
-                          <span>•</span>
+                        <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-1">
+                          <span className="font-semibold text-slate-800">{displayDev}</span>
+                          <span>·</span>
                           <span>{displayCompound}</span>
                         </div>
-                        <h3 className="font-bold text-sm text-[#0f172a] group-hover:text-[#0f766e] transition-colors line-clamp-1">
+                        <h3 className="font-bold text-base text-slate-900 group-hover:text-teal-700 transition-colors line-clamp-1">
                           {displayTitle}
                         </h3>
                       </div>
 
-                      {/* Specs pills */}
-                      <div className="flex items-center gap-3 text-xs text-slate-600 py-1 border-y border-slate-100">
+                      {/* Specs */}
+                      <div className="flex items-center gap-2 text-xs text-slate-500 py-1.5 border-y border-slate-100">
                         <span>{unit.areaM2} {t('sqm')}</span>
-                        <span>•</span>
+                        <span>·</span>
                         <span>{unit.bedrooms} {language === 'ar' ? 'غرف' : 'Beds'}</span>
-                        <span>•</span>
+                        <span>·</span>
                         <span>{unit.bathrooms} {language === 'ar' ? 'حمام' : 'Baths'}</span>
-                        <span>•</span>
-                        <span className="text-[11px]">{displayType}</span>
+                        <span>·</span>
+                        <span>{displayType}</span>
                       </div>
 
                       {/* Financial Breakdown Box */}
-                      <div className="bg-[#f5f6f8] p-3 rounded-xl space-y-1.5 text-xs">
+                      <div className="bg-slate-50 p-3 rounded-xl space-y-1.5 text-xs border border-slate-100">
                         <div className="flex justify-between items-center">
                           <span className="text-slate-500">{language === 'ar' ? 'الكاش المطلوب للبائع:' : 'Cash to Seller:'}</span>
-                          <strong className="text-[#0f766e] font-sans font-bold text-sm">
+                          <strong className="text-slate-900 font-sans font-bold text-sm">
                             {formatEGP(unit.paidCashAmount)}
                           </strong>
                         </div>
 
-                        <div className="flex justify-between items-center text-[11px] text-slate-600">
+                        <div className="flex justify-between items-center text-[11px] text-slate-500">
                           <span>{language === 'ar' ? 'المتبقي للمطور أقساط:' : 'Remaining Installments:'}</span>
-                          <span className="font-sans font-medium">{formatEGP(unit.remainingAmount)}</span>
+                          <span className="font-sans font-medium text-slate-700">{formatEGP(unit.remainingAmount)}</span>
                         </div>
 
-                        <div className="flex justify-between items-center text-[11px] text-slate-600">
+                        <div className="flex justify-between items-center text-[11px] text-slate-500">
                           <span>{language === 'ar' ? 'القسط الدوري:' : 'Installment:'}</span>
-                          <span className="font-sans text-slate-800 font-bold">
+                          <span className="font-sans text-slate-800 font-medium">
                             {formatEGP(unit.installmentValue)} ({unit.installmentFrequency === 'ربع سنوي' ? (language === 'ar' ? 'ربع سنوي' : 'Quarterly') : unit.installmentFrequency === 'نصف سنوي' ? (language === 'ar' ? 'نصف سنوي' : 'Semi-Annual') : (language === 'ar' ? 'شهري' : 'Monthly')})
                           </span>
                         </div>
@@ -429,10 +416,10 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
                         e.stopPropagation();
                         onSelectUnit(unit);
                       }}
-                      className="w-full py-2.5 rounded-lg bg-[#0f172a] group-hover:bg-[#0f766e] text-white text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                      className="w-full py-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                     >
                       <Eye className="w-3.5 h-3.5" />
-                      <span>{language === 'ar' ? 'تفاصيل العقد وكشف الحساب' : 'View Contract & Account Statement'}</span>
+                      <span>{language === 'ar' ? 'عرض تفاصيل الوحدة والعقد' : 'View Unit Details & Contract'}</span>
                     </button>
                   </div>
                 </div>

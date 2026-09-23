@@ -16,73 +16,66 @@ export const HowItWorks: React.FC = () => {
   const steps = [
     {
       number: '01',
-      title: language === 'ar' ? 'تقييم الموقف المالي' : 'Evaluate Financial Position',
+      title: language === 'ar' ? 'سجل بيانات شقتك' : 'Submit Details',
       desc: language === 'ar'
-        ? 'إدخال بيانات الوحدة التعاقدية (إجمالي التعاقد، رأس المال المسدد، وجدول الأقساط) لتحديد سيناريو التخارج واسترداد المستحقات بدقة.'
-        : 'Input your numbers: total contract value, paid capital, and remaining installments. Calculate your financial scenario accurately.'
+        ? 'اسم المشروع، المدفوع كاش، وجدول الأقساط المتبقية للمطور.'
+        : 'Compound name, paid cash, and remaining developer installments.'
     },
     {
       number: '02',
-      title: language === 'ar' ? 'التدقيق القانوني والمستندي' : 'Documentary & Legal Audit',
+      title: language === 'ar' ? 'التدقيق مع المطور' : 'Developer Audit',
       desc: language === 'ar'
-        ? 'رفع صورة العقد وآخر إيصال سداد مصرفي لمطابقة المركز المالي وإجراء الاستعلام المعتمد لدى إدارة خدمة العملاء بشركة التطوير.'
-        : 'Upload the contract & latest payment receipts. Our legal auditors verify standing with the developer in strict confidence.'
+        ? 'فحص ومطابقة الموقف المالي وكشف الحساب رسمياً في ساعتين.'
+        : 'Reconciling financial statement with developer in 2 hours.'
     },
     {
       number: '03',
-      title: language === 'ar' ? 'الاعتماد وإدراج الفرصة' : 'Audit Approval & Listing',
+      title: language === 'ar' ? 'توفير المشتري الكاش' : 'Buyer Matching',
       desc: language === 'ar'
-        ? 'مراجعة كشف الحساب البنكي واعتماد الوحدة رسمياً بنظام "صفر أوفر برايس" وبسعر التعاقد التأسيسي المسدد فقط.'
-        : 'We reconcile developer statements to the penny and publish your unit strictly under zero overprice policy.'
+        ? 'توجيه الشقة لمشتري كاش جاهز يسترد منك مدفوعاتك بالكامل.'
+        : 'Direct matching with a ready buyer to repay 100% of your paid cash.'
     },
     {
       number: '04',
-      title: language === 'ar' ? 'المطابقة مع المشتري المعتمد' : 'Certified Buyer Matching',
+      title: language === 'ar' ? 'التنازل واستلام فلوسك' : 'HQ Transfer & Payout',
       desc: language === 'ar'
-        ? 'توجيه الفرصة لمشتري استثماري جاد ملتزم بسداد كامل رأس المال المسدد فوراً واستكمال سداد باقي الأقساط للمطور.'
-        : 'We match your unit with a verified buyer committed to repaying your paid capital upfront and assuming future installments.'
-    },
-    {
-      number: '05',
-      title: language === 'ar' ? 'التنازل الرسمي بمقر المطور' : 'Official Assignment at Developer HQ',
-      desc: language === 'ar'
-        ? 'إتمام إجراءات التنازل القانوني وسحب وإبراء ذمة الشيكات الآجلة واستلام شيك مصرفي معتمد بكامل رأس المال المسدد.'
-        : 'Complete official transfer at developer headquarters: collect your cashier check, retrieve all pending checks, and receive full discharge.'
+        ? 'توقع التنازل بمقر المطور، تستلم شيك مصرفي، وتسترجع شيكاتك القديمة.'
+        : 'Official signing at developer HQ: receive certified check & retrieve checks.'
     }
   ];
 
   return (
-    <section id="how-it-works" className="py-20 bg-white border-b border-[#e5e7eb]">
+    <section id="how-it-works" className="py-14 sm:py-18 bg-white border-b border-slate-200">
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
         
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-14">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#ecfdf5] text-[#0f766e] text-xs font-bold mb-2 border border-[#d1fae5]">
+        <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-teal-50 text-teal-800 text-xs font-semibold mb-2 border border-teal-200/60">
             <Building2 className="w-3.5 h-3.5" />
             <span>{t('howItWorks')}</span>
           </div>
-          <h2 className="text-2xl sm:text-4xl font-black text-[#0f172a] tracking-tight">
-            {language === 'ar' ? 'مراحل التنازل ونقل الملكية المعتمدة' : 'Certified Transfer & Exit Workflow'}
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+            {language === 'ar' ? 'كيف يتم التنازل في 4 خطوات بسيطة؟' : 'How Assignment Works in 4 Quick Steps'}
           </h2>
-          <p className="text-slate-600 text-xs sm:text-sm mt-2">
+          <p className="text-slate-500 text-xs sm:text-sm mt-1">
             {language === 'ar'
-              ? 'إجراءات تعاقدية محكمة وموثقة قانونياً تضمن استرداد كامل رأس مالك دون تعريضك لغرامات الفسخ.'
-              : 'Simple, legally documented milestones ensuring 100% recovery without developer penalties or broker hassle.'}
+              ? 'إجراءات قانونية واضحة ومباشرة تضمن استرداد كاشك 100% بدون أي وجع دماغ.'
+              : 'Clear, direct legal steps ensuring 100% cash recovery without stress.'}
           </p>
         </div>
 
-        {/* 5 Steps Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 relative">
+        {/* 4 Steps Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative">
           {steps.map((s, idx) => (
             <div 
               key={idx}
-              className="bg-[#f5f6f8] rounded-2xl border border-[#e5e7eb] p-5 flex flex-col justify-between space-y-3 relative hover:border-[#0f766e] transition-all group"
+              className="bg-slate-50/70 rounded-2xl border border-slate-200 p-5 flex flex-col justify-between space-y-3 hover:border-slate-300 hover:bg-white transition-all shadow-xs"
             >
               <div>
-                <div className="text-2xl font-black text-[#0f766e] font-sans mb-3">
+                <div className="text-xl font-black text-teal-700 font-sans mb-2">
                   {s.number}
                 </div>
-                <h3 className="font-bold text-base text-[#0f172a] mb-2">
+                <h3 className="font-bold text-sm sm:text-base text-slate-900 mb-1.5">
                   {s.title}
                 </h3>
                 <p className="text-xs text-slate-600 leading-relaxed">
@@ -90,21 +83,21 @@ export const HowItWorks: React.FC = () => {
                 </p>
               </div>
 
-              <div className="pt-2 border-t border-slate-200 text-[11px] font-semibold text-[#0f766e] flex items-center gap-1 opacity-80 group-hover:opacity-100">
-                <ShieldCheck className="w-3 h-3" />
-                <span>{language === 'ar' ? 'إجراء رسمي ومضمون' : 'Certified Official Transfer'}</span>
+              <div className="pt-2 border-t border-slate-200/80 text-[11px] font-semibold text-teal-800 flex items-center gap-1">
+                <ShieldCheck className="w-3.5 h-3.5 text-teal-700" />
+                <span>{language === 'ar' ? 'رسمي بمقر المطور' : 'Official Developer Transfer'}</span>
               </div>
             </div>
           ))}
         </div>
 
         {/* Bottom Banner */}
-        <div className="mt-10 bg-[#0f172a] text-white rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="mt-10 bg-slate-900 text-white rounded-2xl p-6 sm:p-7 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
-            <h4 className="font-bold text-base text-white">
+            <h4 className="font-bold text-base sm:text-lg text-white">
               {language === 'ar' ? 'جاهز تبدأ إجراءات الخروج الآمن لوحدتك؟' : 'Ready to start your safe exit?'}
             </h4>
-            <p className="text-xs text-slate-300 mt-0.5">
+            <p className="text-xs sm:text-sm text-slate-300 mt-0.5">
               {language === 'ar'
                 ? 'مجانًا تمامًا للبائع — لا نتقاضى أي عمولة أو مصاريف تسجيل منك.'
                 : '100% Free for Sellers — Zero commission or registration charges.'}
@@ -112,7 +105,7 @@ export const HowItWorks: React.FC = () => {
           </div>
           <a
             href="#calculator"
-            className="px-6 py-3 rounded-lg bg-[#0f766e] hover:bg-[#115e59] text-white text-xs sm:text-sm font-bold transition-all shrink-0"
+            className="px-6 py-2.5 sm:py-3 rounded-lg bg-teal-700 hover:bg-teal-800 text-white text-xs sm:text-sm font-semibold transition-colors shrink-0"
           >
             {language === 'ar' ? 'احسب خروجك الآن' : 'Calculate Exit Now'}
           </a>
