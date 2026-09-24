@@ -1,111 +1,6 @@
-import { RealEstateUnit, BrandSuggestion } from '../types';
+import { RealEstateUnit } from '../types';
 
-export const BRAND_SUGGESTIONS: BrandSuggestion[] = [
-  {
-    id: 'takharoj',
-    nameAr: 'تَخارُج',
-    nameEn: 'Takharoj',
-    taglineAr: 'منظومة التخارج والمناقلة العقارية الذكية • 0% أوفر برايس',
-    taglineEn: 'Institutional Real Estate Exit, Property Swap & Capital Reallocation',
-    concept: 'المصطلح المالي والاستثماري الأرقى والأكثر دقة لإعادة توجيه الأصول والتحرر من الأقساط',
-    rationale: 'التخارج هو المفهوم الاستثماري المعتمد لدى الصناديق العقارية. يتفوق جذرياً على النماذج التقليدية بتوفير 3 مسارات حصرية: استرداد كاش 100%، مناقلة ومبادلة أصول، وشبكة سيولة فورية خلال 72 ساعة دون وصمة تعثر.',
-    domainIdea: 'takharoj.com / takharuj.eg',
-    badge: 'الخيار المؤسسي الأرقى',
-    vibe: 'مؤسسي، مصرفي، استثماري رفيع المستوى',
-    highlights: [
-      'بلا وصمة تعثر: خطاب استثماري راقٍ لكبار الملاك والمستثمرين',
-      '3 مسارات ذكية: استرداد كاش، مناقلة ومبادلة أصول، واستحواذ فوري',
-      'تدقيق ائتماني وقانوني معتمد (Due Diligence Grade A+)'
-    ]
-  },
-  {
-    id: 'tanazul',
-    nameAr: 'تَنازُل',
-    nameEn: 'Tanazul',
-    taglineAr: 'منصة التنازل العقاري الآمن بدون أوفر برايس وبدون خسارة',
-    taglineEn: 'Safe Real Estate Contract Exit & Resale at Original Prices',
-    concept: 'المصطلح القانوني والتجاري الأكثر استخداماً ومصداقية في مصر والعالم العربي',
-    rationale: 'كلمة "تنازل" هي الإجراء الرسمي المعترف به في كل شركات التطوير العقاري لنقل ملكية الوحدات بعقودها وأقساطها. الاسم رسمي، مباشر، موثوق، ولا يحتاج إلى تفسير.',
-    domainIdea: 'tanazul.com / tanazol.eg / tanazul.app',
-    badge: 'الخيار الأقوى والأشمل',
-    vibe: 'قانوني، رسمي، ذو مصداقية عالية',
-    highlights: [
-      'كلمة قانونية شائعة يعرفها كل مشتري ومستثمر وبائع في مصر والخليج',
-      'سهلة الحفظ والبحث (SEO قوي جداً لكلمة تنازل عقاري)',
-      'تزيل حاجز الخوف المرتبط بالكلمات الإنجليزية كـ Exit'
-    ]
-  },
-  {
-    id: 'makhraj',
-    nameAr: 'مَخْرَج',
-    nameEn: 'Makhraj',
-    taglineAr: 'مخرجك الآمن من عبء الأقساط العقارية',
-    taglineEn: 'Your Safe Exit from Real Estate Installments',
-    concept: 'الترجمة العربية البليغة والمثالية لكلمة Exit',
-    rationale: 'يعالج المشكلة النفسية الكبرى للمالك تحت ضغط الأقساط: "عاوز مخرج". الاسم يعطي شعوراً فورياً بالفرج والحل السريع مع الحفاظ على الكرامة المالية واسترداد الأموال.',
-    domainIdea: 'makhraj.com / makhraj.eg',
-    badge: 'الترجمة العربية الأدق لـ Safe Exit',
-    vibe: 'حل مباشر، إيجابي، ومريح نفسياً',
-    highlights: [
-      'يعبر عن الخروج السلس بدون غرامات أو خسائر',
-      'نبرة عربية أصيلة وواضحة جداً للجمهور المصري',
-      'يصلح لتطبيقات الهواتف وحملات الإعلانات التفاعلية'
-    ]
-  },
-  {
-    id: 'aqarsafe',
-    nameAr: 'عقار سيف',
-    nameEn: 'AqarSafe',
-    taglineAr: 'أمان استرداد أموالك ونقل الأقساط الموثوق',
-    taglineEn: 'Guaranteed Exit & Risk-Free Off-Plan Transfers',
-    concept: 'التركيز على عنصر الأمان المطلق وحماية المدفوعات',
-    rationale: 'أكبر عائق يواجه البائع والمشتري هو الأمان: هل سأسترد أموالي؟ هل الشيكات ستُنقل بأمان؟ اسم AqarSafe يغرس الطمأنينة الفورية.',
-    domainIdea: 'aqarsafe.com / aqarsafe.eg',
-    badge: 'الأعلى موثوقية وأماناً',
-    vibe: 'مؤسسي، بنكي، ومحصن ضد المخاطر',
-    highlights: [
-      'اسم تقني حديث يجمع بين العقار والأمان (Safe)',
-      'مناسب للشراكات مع البنوك وشركات التطوير الكبرى',
-      'سهل التوسع إقليمياً في السعودية والإمارات'
-    ]
-  },
-  {
-    id: 'sanad',
-    nameAr: 'سَنَد',
-    nameEn: 'Sanad Aqar',
-    taglineAr: 'سندك المالي لنقل ملكية العقار دون خسارة',
-    taglineEn: 'Your Financial Pillar for Property Offloading',
-    concept: 'السند والظهر المالي في مواجهة أقساط العقار',
-    rationale: 'السند في اللغة هو ما يستند إليه، وفي القانون هو الصك والوثيقة المعتمدة. يعطي ثقلاً وهيبة تجارية للمنصة.',
-    domainIdea: 'sanadaqar.com / sanad.estate',
-    badge: 'اسم ذو وقار وهيبة',
-    vibe: 'استثماري، رسمي، ومحترم',
-    highlights: [
-      'دلالة مزدوجة: السند القانوني + السند المالي',
-      'رنان جداً وذو طابع راقٍ',
-      'يناسب فئة المستثمرين وأصحاب الوحدات الفاخرة'
-    ]
-  },
-  {
-    id: 'istirdad',
-    nameAr: 'استرداد',
-    nameEn: 'Istirdad',
-    taglineAr: 'استرد كامل مدفوعاتك كاش بنسبة 100%',
-    taglineEn: '100% Cash Recovery for Your Real Estate Installments',
-    concept: 'التركيز الصريح على النتيجة النهائية التي يبحث عنها العميل',
-    rationale: 'أهم سؤال في عقل العميل: "هل هترجعلي فلوسي؟". اسم استرداد يقطع الشك باليقين ويعد باسترداد المدفوع فوراً.',
-    domainIdea: 'istirdad.com / aqaristirdad.com',
-    badge: 'الوعد التسويقي الأكثر جاذبية',
-    vibe: 'مباشر وقوي التأثير الإعلاني',
-    highlights: [
-      'يجذب الراغبين في السيولة الفورية والضمان الأكيد',
-      'رسالة تسويقية واضحة لا تقبل اللبس',
-      'يعارض سياسة شركات التطوير في حجز الأموال'
-    ]
-  }
-];
-
-export const MOCK_UNITS: RealEstateUnit[] = [
+const BASE_UNITS: RealEstateUnit[] = [
   {
     id: 'unit-1',
     title: 'شقة فاخرة بحري بإطلالة بحيرات في بالم هيلز التجمع',
@@ -142,7 +37,7 @@ export const MOCK_UNITS: RealEstateUnit[] = [
     transferFeePolicy: 'معفي من رسوم التنازل',
     transferFeePolicyEn: 'Exempt from Transfer Fees',
     verifiedContract: true,
-    verificationCode: 'TKZ-PH-8821',
+    verificationCode: 'WHD-PH-8821',
     overpriceAmount: 0,
     eligibleForSwap: true,
     swapTargetType: 'مكتب إداري أو عيادة بالتجمع / الشيخ زايد',
@@ -169,7 +64,7 @@ export const MOCK_UNITS: RealEstateUnit[] = [
     viewsCount: 1420,
     offersCount: 9,
     isHotDeal: true,
-    urgencyBadge: 'تخارج عاجل: خصم 150 ألف ج كاش',
+    urgencyBadge: 'خصم 150 ألف ج كاش',
     urgencyBadgeEn: 'Fire Sale: 150K EGP Discount',
     sellerWillingDiscountAmount: 150000,
     sellerWillingDiscountPercent: 8,
@@ -214,7 +109,7 @@ export const MOCK_UNITS: RealEstateUnit[] = [
     transferFeePolicy: 'مناصفة',
     transferFeePolicyEn: '50/50 Split',
     verifiedContract: true,
-    verificationCode: 'TKZ-BD-9042',
+    verificationCode: 'WHD-BD-9042',
     overpriceAmount: 0,
     eligibleForSwap: true,
     swapTargetType: 'شقة سكنية بالتجمع الخامس مساحة 150م - 200م',
@@ -279,7 +174,7 @@ export const MOCK_UNITS: RealEstateUnit[] = [
     transferFeePolicy: 'على البائع',
     transferFeePolicyEn: 'Covered by Seller',
     verifiedContract: true,
-    verificationCode: 'TNZ-SD-4311',
+    verificationCode: 'WHD-SD-4311',
     overpriceAmount: 0,
     auditScore: 'AAA',
     activeMatchedBuyersCount: 27,
@@ -335,7 +230,7 @@ export const MOCK_UNITS: RealEstateUnit[] = [
     transferFeePolicy: 'معفي من رسوم التنازل',
     transferFeePolicyEn: 'Exempt from Transfer Fees',
     verifiedContract: true,
-    verificationCode: 'TNZ-EM-1102',
+    verificationCode: 'WHD-EM-1102',
     overpriceAmount: 0,
     images: [
       'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=1200&q=80',
@@ -388,7 +283,7 @@ export const MOCK_UNITS: RealEstateUnit[] = [
     transferFeePolicy: 'على المشتري',
     transferFeePolicyEn: 'Covered by Buyer',
     verifiedContract: true,
-    verificationCode: 'TNZ-MI-7729',
+    verificationCode: 'WHD-MI-7729',
     overpriceAmount: 0,
     images: [
       'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80',
@@ -438,7 +333,7 @@ export const MOCK_UNITS: RealEstateUnit[] = [
     transferFeePolicy: 'مناصفة',
     transferFeePolicyEn: '50/50 Split',
     verifiedContract: true,
-    verificationCode: 'TNZ-MV-5531',
+    verificationCode: 'WHD-MV-5531',
     overpriceAmount: 0,
     images: [
       'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80',
@@ -491,7 +386,7 @@ export const MOCK_UNITS: RealEstateUnit[] = [
     transferFeePolicy: 'معفي من رسوم التنازل',
     transferFeePolicyEn: 'Exempt from Transfer Fees',
     verifiedContract: true,
-    verificationCode: 'TNZ-SB-2290',
+    verificationCode: 'WHD-SB-2290',
     overpriceAmount: 0,
     images: [
       'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80',
@@ -541,7 +436,7 @@ export const MOCK_UNITS: RealEstateUnit[] = [
     transferFeePolicy: 'على البائع',
     transferFeePolicyEn: 'Covered by Seller',
     verifiedContract: true,
-    verificationCode: 'TNZ-ORA-6019',
+    verificationCode: 'WHD-ORA-6019',
     overpriceAmount: 0,
     images: [
       'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80',
@@ -560,91 +455,65 @@ export const MOCK_UNITS: RealEstateUnit[] = [
   }
 ];
 
-export const TESTIMONIALS = [
-  {
-    id: 'test-1',
-    author: 'المهندس كريم الشاذلي',
-    authorEn: 'Eng. Karim El-Shazly',
-    role: 'بائع - شقة في ماونتن فيو التجمع',
-    roleEn: 'Seller - Apartment in Mountain View New Cairo',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
-    quote: 'كانت غرامة الفسخ لدى المطور ستكلفني أكثر من 450 ألف جنيه مع جدولة استرداد المتبقي على شيكات مؤجلة لسنوات. من خلال المنصة، تم توفيق مشتري معتمد وأُنجز التنازل بمقر شركة التطوير خلال 5 أيام فقط، واسترددت كامل رأس مالي بشيك مصرفي معتمد دون سداد أي عمولة.',
-    quoteEn: 'I was facing a 450,000+ EGP penalty if I cancelled with the developer, with the remainder repaid across delayed checks! Through this platform, a verified buyer was matched and the transfer completed at the developer HQ in 5 days. I recovered 100% of my cash with zero commission.',
-    rating: 5,
-    date: 'منذ أسبوعين',
-    dateEn: '2 weeks ago'
-  },
-  {
-    id: 'test-2',
-    author: 'د. سارة عبد الرحمن',
-    authorEn: 'Dr. Sarah Abdelrahman',
-    role: 'مشترية - تاون هاوس في الشيخ زايد',
-    roleEn: 'Buyer - Townhouse in Sheikh Zayed',
-    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=200&q=80',
-    quote: 'وفقت في شراء تاون هاوس بسعر تعاقد 2021 التأسيسي مع صفر أوفر برايس، محققة وفراً مالياً يناهز 50% من سعر الطرح الحالي. قامت المنصة بتدقيق الموقف المالي وكشوف الحسابات المعتمدة، وتم التنازل الرسمي بسجلات المطور في أمان قانوني تام.',
-    quoteEn: 'I acquired a prime townhouse at the original 2021 contract price with zero overprice! The developer current price was almost double. The platform verified all checks and contract records, ensuring safe official assignment at developer headquarters.',
-    rating: 5,
-    date: 'منذ شهر',
-    dateEn: '1 month ago'
-  },
-  {
-    id: 'test-3',
-    author: 'أ/ حسام القاضي',
-    authorEn: 'Hossam El-Kady',
-    role: 'بائع - مكتب إداري بالعاصمة الإدارية',
-    roleEn: 'Seller - Commercial Office in New Capital',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
-    quote: 'تمثل المنصة نموذج عمل مؤسسي عالي الشفافية، حيث وفرت حلاً تعاقدياً لحماية رؤوس الأموال من تقلبات السوق وفوائد الأقساط. استرددت كامل المبلغ المسدد بقيمة 1.2 مليون جنيه بموجب مخالصة بنكية رسمية وإبراء ذمة شامل.',
-    quoteEn: 'The concept is ingenious and solves the burden of mounting installments following currency devaluations. I recovered my 1.2M EGP paid cash completely, seamlessly and with absolute transparency.',
-    rating: 5,
-    date: 'منذ 3 أسابيع',
-    dateEn: '3 weeks ago'
-  }
-];
+// Extra listings derived from the hand-written ones so browsing, filters and
+// pagination behave like a real marketplace. Deterministic (no Math.random).
+const DELIVERIES: RealEstateUnit['deliveryStatus'][] = ['استلام فوري', 'استلام 2026', 'استلام 2027', 'استلام 2028', 'استلام 2029+'];
+const DELIVERIES_EN = ['Ready to move', 'Delivery 2026', 'Delivery 2027', 'Delivery 2028', 'Delivery 2029+'];
+const FINISHINGS: RealEstateUnit['finishing'][] = ['بدون تشطيب', 'نصف تشطيب', 'تشطيب كامل سوبر لوكس', 'ألترا سوبر لوكس'];
+const FINISHINGS_EN = ['Core & Shell', 'Semi-Finished', 'Fully Finished', 'Ultra Super Lux'];
+const FREQUENCIES: RealEstateUnit['installmentFrequency'][] = ['شهري', 'ربع سنوي', 'نصف سنوي', 'سنوي'];
+const MONTHS: Record<string, number> = { 'شهري': 1, 'ربع سنوي': 3, 'نصف سنوي': 6, 'سنوي': 12 };
+const FEE_POLICIES: RealEstateUnit['transferFeePolicy'][] = ['معفي من رسوم التنازل', 'على المشتري', 'مناصفة', 'على البائع'];
 
-export const FAQS = [
-  {
-    q: 'ما هي فكرة منصة "تنازل" وكيف تختلف عن شركات السمسرة التقليدية؟',
-    qEn: 'What is the core premise of Tanazul and how does it differ from traditional brokerages?',
-    a: 'المنصة هي سوق رقمي متخصص في "التنازل العقاري وإعادة التدوير الآمن". نربط مالك العقار الراغب في التخارج من أقساطه واسترداد ما دفعه كاش 100% بدون أي خسارة أو غرامات مطور وبدون أي عمولة عليه (عمولة 0% على البائع)، بمشتري يبحث عن فرصة استثمارية بسعر التعاقد القديم بدون "أوفر برايس" واستكمال بقية الأقساط القديمة.',
-    aEn: 'The platform is a dedicated marketplace for secure contract assignment and exit. We connect property owners seeking to exit installments and recover 100% of their paid cash with zero penalties and 0% seller commission, with buyers looking for grandfathered contract prices without any speculative overprice.'
-  },
-  {
-    q: 'كيف يضمن البائع إبراء ذمته من الشيكات البنكية؟',
-    qEn: 'How is the seller legally released from postdated bank checks?',
-    a: 'يتم نقل الملكية والتنازل حصرياً داخل المقر الرئيسي لشركة التطوير العقاري. يقوم المطور بإلغاء واسترداد شيكات البائع القديمة بالكامل أمام عينيه وتسليمها له، وإصدار شيكات جديدة باسم المشتري الجديد مع إصدار ملحق عقد رسمي أو عقد جديد باسم المشتري.',
-    aEn: 'Ownership transfer takes place exclusively inside the developer official headquarters. The developer retrieves and returns the seller old deferred checks in their presence, issuing replacement checks in the buyer name along with a formal assignment addendum.'
-  },
-  {
-    q: 'ما هي عمولة المنصة؟ ومن يدفعها؟',
-    qEn: 'What is the platform fee and who pays it?',
-    a: 'البائع لا يدفع أي عمولة على الإطلاق (0% عمولة على البائع). يدفع المشتري عمولة إدارية وتوثيقية مخفضة تبلغ 1.25% فقط، وتُدفع حصرياً بعد اكتمال إجراءات التنازل القانوني واستلام إيصال التنازل من المطور.',
-    aEn: 'Sellers pay absolutely zero commission (0% fee). The buyer pays a modest 1.25% administrative and audit verification fee only upon the successful completion of the assignment at developer HQ.'
-  },
-  {
-    q: 'لماذا يفضل البائع منصتنا بدلاً من إلغاء العقد مع المطور؟',
-    qEn: 'Why do sellers prefer this platform over direct cancellation with the developer?',
-    a: 'عند إلغاء العقد مع المطور مباشرة، تخصم الشركة ما بين 10% إلى 15% من إجمالي قيمة العقد كمصاريف إدارية وغرامة فسخ (قد تلتهم نصف ما دفعه العميل)، علاوة على تأجيل رد المبلغ لمدد تتراوح بين 6 إلى 12 شهراً بشيكات آجلة. معنا، يسترد البائع 100% من المبلغ كاش فوري عند التنازل!',
-    aEn: 'Cancelling with the developer triggers a 10% to 15% penalty on the TOTAL property contract price (which often erases up to 75% of cash paid), with delayed repayments over months or years. Through our platform, sellers receive 100% of their cash immediately upon transfer.'
-  },
-  {
-    q: 'كيف نتحقق من صحة العقود والشيكات؟',
-    qEn: 'How are contracts and financial statements verified?',
-    a: 'فريقنا القانوني المتخصص يقوم بمراجعة مستندات الوحدة، مطابقة إيصالات السداد البنكية، والاتصال بإدارة خدمة العملاء وعلاقات المستثمرين لدى المطور للتأكد من عدم وجود متأخرات أو نزاعات قضائية قبل طرح الوحدة.',
-    aEn: 'Our specialized legal and audit team audits property contracts, reconciles bank payment receipts, and liaises directly with developer customer service to verify the absence of fines or disputes prior to listing.'
-  },
-  {
-    q: 'من يتحمل رسوم مصاريف التنازل لدى المطور (Developer Transfer Fees)؟',
-    qEn: 'Who covers the developer transfer fee?',
-    a: 'تختلف من مطور لآخر؛ بعض المطورين يسمحون بتنازل مجاني لأول مرة، والبعض يفرض رسوم نقل من 2% إلى 5%. نوضح في تفاصيل كل وحدة بكل شفافية ما إذا كانت الرسوم مشمولة أو يتحملها البائع أو المشتري أو مناصفة وفقاً للاتفاق.',
-    aEn: 'Transfer policies vary by developer; some offer free first-time transfers while others charge 2% to 5%. We clearly state for every listing whether fees are covered by seller, buyer, split 50/50, or exempt.'
-  }
-];
+const roundTo = (n: number, step: number) => Math.round(n / step) * step;
 
-export const TRUST_STATS = [
-  { value: '5,800+', label: 'وحدة تم تسجيلها', labelEn: 'Registered Units', sublabel: 'في مختلف مناطق مصر', sublabelEn: 'Across Egypt' },
-  { value: '78.5 مليار ج.م', label: 'إجمالي قيمة التعاقدات', labelEn: 'Total Contract Value', sublabel: 'محمية من غرامات الفسخ', sublabelEn: 'Protected from Penalties' },
-  { value: '0%', label: 'عمولة على البائع', labelEn: 'Seller Commission', sublabel: 'استرداد كامل المدفوع كاش', sublabelEn: '100% Cash Recovery' },
-  { value: '0 ج.م', label: 'أوفر برايس للمشتري', labelEn: 'Buyer Overprice', sublabel: 'سعر الطرح الأصلي القديم', sublabelEn: 'Original Past Pricing' },
-  { value: '98.4%', label: 'نسبة نجاح التنازل', labelEn: 'Transfer Success Rate', sublabel: 'إجراءات موثقة رسمياً', sublabelEn: 'Officially Certified' }
-];
+const generateUnits = (bases: RealEstateUnit[], count: number): RealEstateUnit[] =>
+  Array.from({ length: count }, (_, i) => {
+    const base = bases[i % bases.length];
+    const scale = 0.7 + ((i * 37) % 70) / 100; // 0.70 – 1.39
+    const paidRatio = 0.25 + ((i * 13) % 30) / 100; // 25% – 54% paid
+    const contract = roundTo(base.originalContractPrice * scale, 50_000);
+    const paid = roundTo(contract * paidRatio, 10_000);
+    const remaining = contract - paid;
+    const years = 3 + (i % 5);
+    const frequency = FREQUENCIES[(i * 3) % FREQUENCIES.length];
+    const payments = Math.max(1, Math.round((years * 12) / MONTHS[frequency]));
+    const d = (i * 7) % DELIVERIES.length;
+    const f = (i * 5) % FINISHINGS.length;
+    const discount = i % 4 === 0 ? roundTo(paid * 0.05, 10_000) : undefined;
+    return {
+      ...base,
+      id: `unit-g${i + 1}`,
+      verificationCode: `WHD-${4100 + i}`,
+      originalContractPrice: contract,
+      currentMarketPrice: roundTo(contract * (1.55 + ((i * 11) % 50) / 100), 50_000),
+      paidCashAmount: paid,
+      remainingAmount: remaining,
+      installmentPeriodYears: years,
+      installmentFrequency: frequency,
+      installmentValue: Math.round(remaining / payments),
+      areaM2: Math.max(40, Math.round(base.areaM2 * (0.8 + ((i * 17) % 45) / 100))),
+      bedrooms: base.bedrooms === 0 ? 0 : Math.max(1, Math.min(6, base.bedrooms + ((i % 3) - 1))),
+      deliveryStatus: DELIVERIES[d],
+      deliveryStatusEn: DELIVERIES_EN[d],
+      finishing: FINISHINGS[f],
+      finishingEn: FINISHINGS_EN[f],
+      transferFeePolicy: FEE_POLICIES[i % FEE_POLICIES.length],
+      hasLatePenalties: i % 9 === 4,
+      eligibleForSwap: i % 3 !== 2,
+      viewsCount: 120 + ((i * 97) % 2400),
+      offersCount: (i * 3) % 11,
+      sellerWillingDiscountAmount: discount,
+      isHotDeal: !!discount,
+      images: [...base.images.slice(i % base.images.length), ...base.images.slice(0, i % base.images.length)],
+      description: `المالك دفع ${paid.toLocaleString('en-US')} ج.م وعاوز يتنازل بدون أوفر برايس. الباقي ${remaining.toLocaleString('en-US')} ج.م أقساط ${frequency} على ${years} سنين.`,
+      descriptionEn: `Owner paid ${paid.toLocaleString('en-US')} EGP and wants to exit with zero overprice. Remaining ${remaining.toLocaleString('en-US')} EGP over ${years} years.`,
+      urgencyBadge: discount ? `خصم ${discount.toLocaleString('en-US')} ج.م` : undefined,
+      urgencyBadgeEn: discount ? `${discount.toLocaleString('en-US')} EGP off` : undefined,
+      sellerWillingDiscountPercent: discount ? 5 : undefined,
+      cashInstallmentsTerms: undefined,
+      acceptsInstallmentsForCash: false,
+    };
+  });
+
+export const MOCK_UNITS: RealEstateUnit[] = [...BASE_UNITS, ...generateUnits(BASE_UNITS, 52)];

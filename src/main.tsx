@@ -4,6 +4,7 @@ import App from './App.tsx';
 import { LanguageProvider } from './context/LanguageContext';
 import { AuthProvider } from './context/AuthContext';
 import { UnitsProvider } from './context/UnitsContext';
+import { RequestsProvider } from './context/RequestsContext';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(
@@ -11,7 +12,9 @@ createRoot(document.getElementById('root')!).render(
     <LanguageProvider>
       <AuthProvider>
         <UnitsProvider>
-          <App />
+          <RequestsProvider>
+            <App />
+          </RequestsProvider>
         </UnitsProvider>
       </AuthProvider>
     </LanguageProvider>

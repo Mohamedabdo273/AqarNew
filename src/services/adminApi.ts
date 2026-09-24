@@ -94,7 +94,7 @@ export const adminApi = {
 
     const queue = getStored<AdminQueueUnit[]>(STORAGE_KEYS.QUEUE, INITIAL_QUEUE_UNITS);
     const index = queue.findIndex((u) => u.id === id);
-    const verificationCode = `TNZ-VRF-${Math.floor(1000 + Math.random() * 9000)}`;
+    const verificationCode = `WHD-VRF-${Math.floor(1000 + Math.random() * 9000)}`;
 
     if (index !== -1) {
       const updatedUnit: AdminQueueUnit = {

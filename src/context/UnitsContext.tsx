@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { RealEstateUnit, PropertyType, DeliveryStatus, FinishingType, UserInquiry } from '../types';
 import { MOCK_UNITS } from '../data/mockData';
 import { useAuth } from './AuthContext';
+import { BRAND } from '../config/brand';
 
 export interface NewUnitInput {
   title?: string;
@@ -84,7 +85,7 @@ interface UnitsContextType {
 
 const UnitsContext = createContext<UnitsContextType | undefined>(undefined);
 
-const STORAGE_KEY_UNITS = 'tanazul_units_data_v1';
+const STORAGE_KEY_UNITS = 'tanazul_units_data_v2';
 const STORAGE_KEY_SAVED = 'tanazul_saved_units_v1';
 const STORAGE_KEY_INQUIRIES = 'tanazul_inquiries_data_v1';
 
@@ -134,7 +135,7 @@ export const UnitsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     } catch (e) {
       console.error('Failed to load bookmarks', e);
     }
-    return ['unit-1', 'unit-3'];
+    return [];
   });
 
   // Load inquiries
@@ -190,10 +191,10 @@ export const UnitsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       let updated: string[];
       if (exists) {
         updated = prev.filter((item) => item !== id);
-        showToast('تمت إزالة الوحدة من المفضلة');
+        showToast('اتشالت من المفضلة');
       } else {
         updated = [...prev, id];
-        showToast('تم حفظ الوحدة في قائمتك المفضلة بنجاح ❤️');
+        showToast('اتحفظت في المفضلة');
       }
       return updated;
     });
@@ -215,7 +216,7 @@ export const UnitsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const installmentsCount = years * 4; // quarterly
     const installmentValue = input.installmentValue || Math.round(remainingAmount / Math.max(1, installmentsCount));
 
-    const unitCode = `TNZ-${Math.floor(1000 + Math.random() * 9000)}`;
+    const unitCode = `${BRAND.codePrefix}-${Math.floor(1000 + Math.random() * 9000)}`;
     const newId = `unit-${Date.now()}`;
 
     const defaultImages = DEFAULT_IMAGES_BY_TYPE[input.propertyType] || DEFAULT_IMAGES_BY_TYPE['شقة'];
@@ -291,7 +292,7 @@ export const UnitsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       offersCount: 0,
       isHotDeal: (input.sellerWillingDiscountAmount && input.sellerWillingDiscountAmount > 0) || true,
       urgencyBadge: (input.sellerWillingDiscountAmount && input.sellerWillingDiscountAmount > 0)
-        ? `تخارج عاجل: خصم ${input.sellerWillingDiscountAmount.toLocaleString()} ج`
+        ? `خصم ${input.sellerWillingDiscountAmount.toLocaleString()} ج`
         : 'معروضة حديثاً',
       sellerWillingDiscountAmount: input.sellerWillingDiscountAmount,
       sellerWillingDiscountPercent: input.sellerWillingDiscountPercent,
@@ -317,7 +318,7 @@ export const UnitsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       });
     } catch (_) {}
 
-    showToast('تم إدراج وحدتك بنجاح في منصة التنازل بدون أوفر برايس! 🚀');
+    showToast('طلبك وصل');
     return newUnit;
   };
 
@@ -337,7 +338,7 @@ export const UnitsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     };
 
     setInquiries((prev) => [newInquiry, ...prev]);
-    showToast('تم استلام طلبك بنجاح! سيتواصل معك مستشار التنازل القانوني خلال ساعتين.');
+    showToast('تمام! هنكلمك خلال ساعتين');
   };
 
   return (
@@ -359,8 +360,8 @@ export const UnitsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
       {/* Floating Notification Toast */}
       {toastMessage && (
-        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl bg-[#0f172a] text-white text-xs sm:text-sm font-bold shadow-2xl border border-white/20 flex items-center gap-3 animate-in fade-in slide-in-from-bottom-5 duration-300">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#2dd4bf] animate-pulse"></span>
+        <div role="status" className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-[60] max-w-[calc(100%-2rem)] px-5 py-3.5 rounded-2xl bg-ink text-white text-sm font-medium shadow-lift flex items-center gap-3">
+          <span className="w-2 h-2 rounded-full bg-brand-soft shrink-0"></span>
           <span>{toastMessage}</span>
         </div>
       )}

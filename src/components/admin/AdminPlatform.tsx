@@ -186,7 +186,7 @@ export const AdminPlatform: React.FC<AdminPlatformProps> = ({
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-black tracking-tight text-white">
-                    {isRTL ? 'لوحة تحكم العمليات والتنازل' : 'Tanazul Operations Platform'}
+                    {isRTL ? 'لوحة تحكم العمليات والتنازل' : 'Wahdety Operations'}
                   </span>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-teal-500/20 text-[#2dd4bf] border border-teal-500/30">
                     ADMIN v2.6
@@ -599,7 +599,7 @@ export const AdminPlatform: React.FC<AdminPlatformProps> = ({
                             <div className="flex items-center justify-center gap-1.5">
                               <a
                                 href={`https://wa.me/2${inq.clientPhone.replace(/\D/g, '')}?text=${encodeURIComponent(
-                                  `مرحباً ${inq.clientName}، مع حضرتك مستشار العمليات بمنصة تنازل بخصوص طلبك (${inq.inquiryCode}).`
+                                  `مرحباً ${inq.clientName}، مع حضرتك مستشار العمليات بمنصة وحدتي بخصوص طلبك (${inq.inquiryCode}).`
                                 )}`}
                                 target="_blank"
                                 rel="noreferrer"

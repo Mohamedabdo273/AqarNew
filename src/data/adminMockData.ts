@@ -38,7 +38,7 @@ export const ADMIN_ADVISORS: AdminAdvisor[] = [
 export const INITIAL_QUEUE_UNITS: AdminQueueUnit[] = [
   {
     id: 'q-101',
-    unitCode: 'TNZ-Q-101',
+    unitCode: 'WHD-Q-101',
     title: 'شقة 165م بحري صريح B12 مدينتي طلعت مصطفى',
     titleEn: '165m Apartment B12 Madinaty - TMG',
     developer: 'مجموعة طلعت مصطفى (TMG)',
@@ -115,7 +115,7 @@ export const INITIAL_QUEUE_UNITS: AdminQueueUnit[] = [
   },
   {
     id: 'q-102',
-    unitCode: 'TNZ-Q-102',
+    unitCode: 'WHD-Q-102',
     title: 'تاون هاوس كورنر 210م بادية بالم هيلز أكتوبر',
     titleEn: 'Townhouse Corner 210m Badya Palm Hills',
     developer: 'بالم هيلز للتعمير (Palm Hills)',
@@ -182,7 +182,7 @@ export const INITIAL_QUEUE_UNITS: AdminQueueUnit[] = [
   },
   {
     id: 'q-103',
-    unitCode: 'TNZ-Q-103',
+    unitCode: 'WHD-Q-103',
     title: 'شقة 140م فيليت سوديك التجمع الخامس',
     titleEn: '140m Apartment Villette SODIC New Cairo',
     developer: 'سوديك (SODIC)',
@@ -241,7 +241,7 @@ export const INITIAL_QUEUE_UNITS: AdminQueueUnit[] = [
   },
   {
     id: 'q-104',
-    unitCode: 'TNZ-Q-104',
+    unitCode: 'WHD-Q-104',
     title: 'فيلا مستقلة 305م ماونتن فيو آي سيتي التجمع',
     titleEn: 'Standalone Villa 305m Mountain View iCity',
     developer: 'ماونتن فيو (Mountain View)',
@@ -266,7 +266,7 @@ export const INITIAL_QUEUE_UNITS: AdminQueueUnit[] = [
     status: 'verified',
     verifiedAt: '2026-09-20 10:15',
     verifiedBy: 'م. شريف المنياوي',
-    verificationCode: 'TNZ-VRF-MV-8821',
+    verificationCode: 'WHD-VRF-MV-8821',
     checklist: {
       developerSoaMatched: true,
       originalContractValid: true,
@@ -307,7 +307,7 @@ export const INITIAL_QUEUE_UNITS: AdminQueueUnit[] = [
   },
   {
     id: 'q-105',
-    unitCode: 'TNZ-Q-105',
+    unitCode: 'WHD-Q-105',
     title: 'شقة 125م كمبوند سراي مدينة المستقبل',
     titleEn: '125m Apartment Sarai Mostakbal City',
     developer: 'مدينة نصر للإسكان والتعمير (Madinet Masr)',

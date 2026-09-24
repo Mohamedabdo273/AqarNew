@@ -7,6 +7,8 @@ interface LanguageContextType {
   setLanguage: (lang: Language) => void;
   toggleLanguage: () => void;
   t: (key: keyof Translations, fallback?: string) => string;
+  /** Inline bilingual string: tx('عربي', 'English'). */
+  tx: (ar: string, en: string) => string;
   isRTL: boolean;
   dir: 'rtl' | 'ltr';
 }
@@ -41,11 +43,13 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     return fallback || (translations.ar[key] ?? String(key));
   };
 
+  const tx = (ar: string, en: string) => (language === 'ar' ? ar : en);
+
   const isRTL = language === 'ar';
   const dir = isRTL ? 'rtl' : 'ltr';
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, toggleLanguage, t, isRTL, dir }}>
+    <LanguageContext.Provider value={{ language, setLanguage, toggleLanguage, t, tx, isRTL, dir }}>
       {children}
     </LanguageContext.Provider>
   );

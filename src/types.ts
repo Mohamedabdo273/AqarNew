@@ -57,10 +57,12 @@ export type FinishingType = 'بدون تشطيب' | 'نصف تشطيب' | 'تش�
 
 export type PageId = 
   | 'home' 
-  | 'story' 
-  | 'how-it-works' 
-  | 'contact' 
-  | 'investors' 
+  | 'about'
+  | 'rules'
+  | 'saved'
+  | 'requests'
+  | 'privacy'
+  | 'terms'
   | 'sell' 
   | 'opportunities'
   | 'swap'
@@ -204,18 +206,5 @@ export interface ExitCalculationResult {
   totalSavedMoney: number;
 }
 
-export interface BrandSuggestion {
-  id: string;
-  nameAr: string;
-  nameEn: string;
-  taglineAr: string;
-  taglineEn: string;
-  concept: string;
-  rationale: string;
-  domainIdea: string;
-  badge: string;
-  vibe: string;
-  highlights: string[];
-}
 
 export type ActivePage = PageId;

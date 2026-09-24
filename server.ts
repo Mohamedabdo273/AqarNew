@@ -45,7 +45,7 @@ async function startServer() {
   }
 
   const server = app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Tanazul Server running on http://0.0.0.0:${PORT}`);
+    console.log(`Wahdety server running on http://0.0.0.0:${PORT}`);
   });
 
   server.on('error', (err) => {

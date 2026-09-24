@@ -1,199 +1,75 @@
 import React from 'react';
-import { 
-  Building2, 
-  Phone, 
-  Mail, 
-  MapPin, 
-  ShieldCheck, 
-  Sparkles, 
-  Clock 
-} from 'lucide-react';
-import { BrandSuggestion, PageId } from '../types';
+import { Phone, MessageCircle } from 'lucide-react';
+import { PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
+import { Logo } from './Logo';
+import { BRAND, whatsappLink } from '../config/brand';
 
 interface FooterProps {
-  currentBrand: BrandSuggestion;
   onNavigate: (page: PageId) => void;
-  onOpenBrandShowcase?: () => void;
-  onOpenAddUnit: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({
-  currentBrand,
-  onNavigate,
-  onOpenAddUnit
-}) => {
-  const { t, language, isRTL } = useLanguage();
+export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
+  const { language, tx } = useLanguage();
+  const columns: { title: string; links: { id: PageId; l: string }[] }[] = [
+    {
+      title: tx('المنصة', 'Platform'),
+      links: [
+        { id: 'opportunities', l: tx('اشتري وحدة', 'Buy a unit') },
+        { id: 'sell', l: tx('بيع وحدتك', 'Sell your unit') },
+        { id: 'swap', l: tx('بدّل وحدتك', 'Swap your unit') },
+        { id: 'saved', l: tx('المفضلة', 'Saved') },
+        { id: 'requests', l: tx('طلباتي', 'My requests') },
+      ],
+    },
+    {
+      title: tx('اعرفنا', 'Company'),
+      links: [
+        { id: 'about', l: tx('احنا مين', 'About us') },
+        { id: 'rules', l: tx('القواعد', 'Rules') },
+        { id: 'terms', l: tx('الشروط والأحكام', 'Terms & conditions') },
+        { id: 'privacy', l: tx('سياسة الخصوصية', 'Privacy policy') },
+      ],
+    },
+  ];
 
   return (
-    <footer className="bg-[#0f172a] text-slate-400 text-xs pt-16 pb-12 border-t border-slate-800">
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 space-y-10">
-        
-        {/* Top Grid */}
-        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 ${isRTL ? 'text-right' : 'text-left'}`}>
-          
-          {/* Brand Info (2 cols) */}
-          <div className="lg:col-span-2 space-y-3.5">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-teal-800 flex items-center justify-center text-white font-bold">
-                <span className="text-sm font-mono">⧉</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-lg font-bold text-white">
-                  {language === 'ar' ? currentBrand.nameAr : currentBrand.nameEn}
-                </span>
-                <span className="text-xs text-slate-400">
-                  {language === 'ar' ? currentBrand.nameEn : currentBrand.nameAr}
-                </span>
-              </div>
-            </div>
-
-            <p className="text-slate-400 leading-relaxed text-xs max-w-sm">
-              {language === 'ar' 
-                ? 'منصة التنازل عن وحدات التقسيط بدون أوفر — البايع يسترجع فلوسه كاش، والمشتري ياخد سعر التعاقد القديم، مع إتمام الإجراءات داخل مقر المطور.'
-                : 'The official installment contract transfer marketplace with zero overprice. Direct transfer at developer headquarters.'}
-            </p>
-
-            <div className="flex items-center gap-3 pt-1 text-xs text-slate-400">
-              <span>{language === 'ar' ? 'مجانًا للبائع 0%' : 'Free for Sellers 0%'}</span>
-              <span>·</span>
-              <span>{language === 'ar' ? '1.25% عمولة المشتري' : '1.25% Buyer Commission'}</span>
-              <span>·</span>
-              <span>{t('noOverpriceBadge')}</span>
-            </div>
-          </div>
-
-          {/* Nav: صفحات المنصة */}
-          <div className="space-y-2.5">
-            <h4 className="text-xs font-bold text-white/50 uppercase tracking-wide">
-              {language === 'ar' ? 'صفحات المنصة' : 'Marketplace'}
-            </h4>
-            <ul className="space-y-2">
-              <li>
-                <button 
-                  onClick={() => onNavigate('opportunities')} 
-                  className="hover:text-white transition-colors cursor-pointer"
-                >
-                  {t('opportunities')}
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => onNavigate('sell')} 
-                  className="hover:text-white transition-colors cursor-pointer text-teal-400 font-medium"
-                >
-                  {t('sellUnit')}
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => onNavigate('swap')} 
-                  className="hover:text-white transition-colors cursor-pointer text-slate-300 font-medium"
-                >
-                  {language === 'ar' ? 'تبديل عقارك' : 'Property Swap'}
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => onNavigate('how-it-works')} 
-                  className="hover:text-white transition-colors cursor-pointer"
-                >
-                  {t('howItWorks')}
-                </button>
-              </li>
-            </ul>
-          </div>
-
-          {/* Nav: الشركة & الأسماء */}
-          <div className="space-y-2.5">
-            <h4 className="text-xs font-bold text-white/50 uppercase tracking-wide">
-              {language === 'ar' ? 'الشركة والاتصال' : 'Company'}
-            </h4>
-            <ul className="space-y-2">
-              <li>
-                <button 
-                  onClick={() => onNavigate('story')} 
-                  className="hover:text-white transition-colors cursor-pointer"
-                >
-                  {t('ourStory')}
-                </button>
-              </li>
-              <li>
-                <button 
-                  onClick={() => onNavigate('contact')} 
-                  className="hover:text-white transition-colors cursor-pointer"
-                >
-                  {t('contactUs')}
-                </button>
-              </li>
-              <li>
-                <a href="tel:19822" className="hover:text-white transition-colors">
-                  {language === 'ar' ? 'الخط الساخن: 19822' : 'Hotline: 19822'}
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* الدولة والتواصل */}
-          <div className="space-y-2.5">
-            <h4 className="text-xs font-bold text-white/50 uppercase tracking-wide">
-              {language === 'ar' ? 'الدولة والتواجد' : 'Presence'}
-            </h4>
-            <div className="space-y-2 text-xs">
-              <div className="flex items-center gap-2 text-white font-bold">
-                <span className="w-2 h-2 rounded-full bg-[#0d9488]"></span>
-                <span>{language === 'ar' ? 'مصر (المقر الرئيسي)' : 'Egypt (Headquarters)'}</span>
-              </div>
-              <div className="text-slate-500">
-                {t('countryKSA')} <span className="text-[10px] bg-white/10 text-slate-400 px-1.5 py-0.5 rounded">{t('soon')}</span>
-              </div>
-              <div className="pt-2 text-slate-300">
-                {language === 'ar' ? 'شارع التسعين الشمالي، التجمع الخامس، القاهرة' : 'North 90th St, New Cairo, Egypt'}
-              </div>
-            </div>
-          </div>
-
+    <footer className="bg-brand-ink text-white/80 pb-20 md:pb-0">
+      <div className="page-wrap py-10 sm:py-12 grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4">
+        <div className="col-span-2 md:col-span-1">
+          <Logo light onClick={() => onNavigate('home')} />
+          <p className="mt-3 text-sm leading-relaxed max-w-xs">{language === 'ar' ? BRAND.taglineAr : BRAND.taglineEn}</p>
         </div>
-
-        {/* Legal Disclaimer Strip */}
-        <div className="p-3.5 bg-slate-900/90 border border-slate-800 rounded-xl text-[11px] text-slate-400 leading-relaxed">
-          <strong className="text-slate-300 block mb-0.5 font-bold">
-            {language === 'ar' ? '⚖️ إخلاء المسؤولية القانونية والتحقق:' : '⚖️ Legal Disclaimer & Verification Policy:'}
-          </strong>
-          <span>
-            {language === 'ar'
-              ? 'المنصة منصة تقنية للتوفيق والربط المالي بين الأطراف، وليست مسؤولة عن صحة المستندات أو أصل الملكية أو سلامة التوكيلات. يتم التحقق والاعتماد والتحويل الرسمي حصراً داخل الإدارة القانونية لشركة التطوير العقاري وبحضور الطرفين بشخصهما. كما يلتزم كل طرف بما عليه من التزامات ضريبية مقررة قانوناً.'
-              : 'The platform serves as a matching technology portal and is not liable for document authenticity or title verification; official execution and audit take place strictly at developer legal headquarters with both parties present. Statutory taxes apply per law.'}
-          </span>
+        {columns.map((c) => (
+          <nav key={c.title} className="flex flex-col">
+            <p className="font-semibold text-white mb-1">{c.title}</p>
+            {c.links.map((x) => (
+              <button key={x.id} onClick={() => onNavigate(x.id)} className="text-start hover:text-white w-fit min-h-11 sm:min-h-9">
+                {x.l}
+              </button>
+            ))}
+          </nav>
+        ))}
+        <div className="col-span-2 md:col-span-1 flex flex-wrap md:flex-col gap-x-6 text-sm">
+          <p className="w-full font-semibold text-white text-base mb-1">{tx('كلمنا', 'Contact')}</p>
+          <a href={`tel:${BRAND.hotline}`} className="flex items-center gap-2 hover:text-white min-h-11">
+            <Phone className="w-4 h-4" /> {BRAND.hotline}
+          </a>
+          <a href={whatsappLink()} target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-white min-h-11">
+            <MessageCircle className="w-4 h-4" /> {tx('واتساب', 'WhatsApp')}
+          </a>
         </div>
-
-        {/* Bottom Bar */}
-        <div className="pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500">
-          <div>
-            © {new Date().getFullYear()} {language === 'ar' ? currentBrand.nameAr : currentBrand.nameEn} ({language === 'ar' ? currentBrand.nameEn : currentBrand.nameAr}). {language === 'ar' ? 'نموذج التنازل الآمن بدون أوفر برايس.' : 'Safe installment transfer model with 0% overprice.'}
-          </div>
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => onNavigate('story')}
-              className="hover:text-slate-300 transition-colors cursor-pointer"
-            >
-              {t('ourStory')}
-            </button>
-            <button 
-              onClick={() => onNavigate('how-it-works')}
-              className="hover:text-slate-300 transition-colors cursor-pointer"
-            >
-              {t('howItWorks')}
-            </button>
-            <button 
-              onClick={() => onNavigate('contact')}
-              className="hover:text-slate-300 transition-colors cursor-pointer"
-            >
-              {t('contactUs')}
-            </button>
+      </div>
+      <div className="border-t border-white/10">
+        <div className="page-wrap py-5 flex flex-wrap items-center justify-between gap-3 text-xs text-white/50">
+          <p>
+            © {new Date().getFullYear()} {language === 'ar' ? BRAND.nameAr : BRAND.nameEn}. {tx('جميع الحقوق محفوظة', 'All rights reserved')}
+          </p>
+          <div className="flex gap-4">
+            <button onClick={() => onNavigate('terms')} className="hover:text-white min-h-11">{tx('الشروط والأحكام', 'Terms')}</button>
+            <button onClick={() => onNavigate('privacy')} className="hover:text-white min-h-11">{tx('سياسة الخصوصية', 'Privacy')}</button>
           </div>
         </div>
-
       </div>
     </footer>
   );

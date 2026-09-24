@@ -163,7 +163,7 @@ export async function handleAdminApiRequest(req: IncomingMessage, res: ServerRes
     const body = await parseBody(req);
     const idx = queueUnitsState.findIndex((u) => u.id === unitId);
     if (idx !== -1) {
-      const code = `TNZ-VRF-${Math.floor(1000 + Math.random() * 9000)}`;
+      const code = `WHD-VRF-${Math.floor(1000 + Math.random() * 9000)}`;
       queueUnitsState[idx] = {
         ...queueUnitsState[idx],
         status: 'verified',

@@ -1,44 +1,123 @@
 @import "tailwindcss";
 
-@layer base {
-  :root {
-    --ae-brand-navy: #1e293b;
-    --ae-support-teal: #0f766e;
-    --ae-support-teal-action: #0f766e;
-    --ae-support-teal-action-hover: #115e59;
-    --ae-surface-page: #f8fafc;
-    --ae-surface-card: #ffffff;
-    --ae-border-line: #e2e8f0;
-    --ae-text-ink: #0f172a;
-    --ae-text-muted: #64748b;
-  }
+/* Design tokens — calm, warm, low-glare palette */
+@theme {
+  --font-sans: 'IBM Plex Sans Arabic', 'Plus Jakarta Sans', system-ui, sans-serif;
 
+  --color-paper: #f7f6f2;
+  --color-surface: #ffffff;
+  --color-ink: #1c2522;
+  --color-ink-soft: #3d4844;
+  --color-muted: #626c67; /* 5.0:1 on paper */
+  --color-line: #e8e5dd;
+  --color-line-strong: #d9d5ca;
+
+  --color-brand: #145c4b;
+  --color-brand-hover: #0f4a3c;
+  --color-brand-soft: #e7f0ec;
+  --color-brand-ink: #0c3b30;
+
+  --color-gold: #8f5d12; /* 5.1:1 on gold-soft, white text 5.6:1 */
+  --color-gold-soft: #fbf2e2;
+
+  --color-danger: #b4483c;
+  --color-danger-soft: #fbecea;
+
+  --radius-card: 1.25rem;
+  --shadow-soft: 0 1px 2px rgb(28 37 34 / 0.04), 0 8px 24px -12px rgb(28 37 34 / 0.12);
+  --shadow-lift: 0 2px 4px rgb(28 37 34 / 0.05), 0 18px 40px -16px rgb(28 37 34 / 0.22);
+}
+
+@layer base {
   body {
-    font-family: 'IBM Plex Sans Arabic', 'Alexandria', system-ui, -apple-system, sans-serif;
-    background-color: var(--ae-surface-page);
-    color: var(--ae-text-ink);
+    font-family: var(--font-sans);
+    background-color: var(--color-paper);
+    color: var(--color-ink);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+
+  button {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+}
+
+/* One page width for the whole site. rem-based, so it grows with the root font size on big screens. */
+@utility page-wrap {
+  @apply w-full mx-auto px-4 sm:px-6 lg:px-10 max-w-[90rem];
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-colors min-h-12 px-6 text-[15px] disabled:opacity-50 disabled:cursor-not-allowed;
+}
+@utility btn-primary {
+  @apply btn bg-brand text-white hover:bg-brand-hover;
+}
+@utility btn-ghost {
+  @apply btn bg-surface text-ink border border-line-strong hover:border-ink-soft;
+}
+@utility card {
+  @apply bg-surface rounded-card border border-line shadow-soft;
+}
+@utility chip {
+  @apply inline-flex items-center justify-center gap-1.5 rounded-full px-3.5 min-h-11 sm:min-h-10 text-sm font-medium border transition-colors whitespace-nowrap;
+}
+@utility chip-off {
+  @apply chip bg-surface border-line text-ink-soft hover:border-line-strong;
+}
+@utility chip-on {
+  @apply chip bg-brand text-white border-brand;
+}
+@utility field {
+  @apply w-full rounded-2xl border border-line bg-surface px-4 h-13 text-[15px] text-ink placeholder:text-muted focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 transition;
+}
+@utility label {
+  @apply block text-sm font-medium text-ink-soft mb-2;
+}
+@utility num {
+  font-variant-numeric: tabular-nums;
 }
 
 html {
   scroll-behavior: smooth;
 }
 
-/* Custom quiet, subtle scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+/* Scale everything up a little on large monitors so the page fills the screen and text stays comfortable. */
+@media (min-width: 1536px) {
+  html {
+    font-size: 17px;
+  }
 }
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+@media (min-width: 1800px) {
+  html {
+    font-size: 18px;
+  }
 }
 
+input[type='range'] {
+  accent-color: var(--color-brand);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-line-strong);
+  border-radius: 9999px;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
