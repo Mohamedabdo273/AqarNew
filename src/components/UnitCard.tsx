@@ -60,14 +60,16 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
         />
         <div className="absolute inset-x-0 top-0 p-3 flex items-start justify-between">
-          {unit.verifiedContract ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-surface/95 px-2.5 py-1 text-xs font-semibold text-brand-ink">
-              <BadgeCheck className="w-3.5 h-3.5 text-brand" />
-              {tx('موثّقة', 'Verified')}
-            </span>
-          ) : (
-            <span />
-          )}
+          {/* Status pills live on the photo so the title gets the full width. */}
+          <div className="flex flex-wrap gap-1.5">
+            {unit.verifiedContract && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-surface/95 px-2.5 py-1 text-xs font-semibold text-brand-ink">
+                <BadgeCheck className="w-3.5 h-3.5 text-brand" />
+                {tx('موثّقة', 'Verified')}
+              </span>
+            )}
+            {fitsBudget && <span className="rounded-full bg-ink px-2.5 py-1 text-xs font-semibold text-white">{tx('في ميزانيتك', 'In budget')}</span>}
+          </div>
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -97,20 +99,16 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
 
       <div className="p-5 flex-1 flex flex-col">
         {/* Who and where */}
-        <div className="flex items-start justify-between gap-2 min-w-0">
-          <h3 className="font-bold text-lg leading-snug text-ink truncate">{pick(language, unit.compound, unit.compoundEn)}</h3>
-          {fitsBudget && (
-            <span className="shrink-0 rounded-full bg-brand-soft text-brand-ink px-2.5 py-0.5 text-xs font-semibold">{tx('في ميزانيتك', 'In budget')}</span>
-          )}
-        </div>
-        <p className="mt-1 flex items-center gap-1 text-sm text-muted">
+        <h3 className="font-bold text-lg leading-snug text-ink line-clamp-2">{pick(language, unit.compound, unit.compoundEn)}</h3>
+        {/* Wraps instead of truncating — on a narrow phone card the code drops to its own line. */}
+        <p className="mt-1 flex flex-wrap items-center gap-x-1 gap-y-0.5 text-sm text-muted">
           <MapPin className="w-3.5 h-3.5 shrink-0" />
-          <span className="truncate">{pick(language, unit.location, unit.locationEn)}</span>
-          <span className="num ms-auto shrink-0 text-xs text-muted" dir="ltr">
+          <span>{pick(language, unit.location, unit.locationEn)}</span>
+          <span className="num ms-auto text-xs" dir="ltr">
             {unit.verificationCode}
           </span>
         </p>
-        <p className="mt-2 text-sm font-medium text-ink-soft truncate">{specs.join(' · ')}</p>
+        <p className="mt-2 text-sm font-medium text-ink-soft">{specs.join(' · ')}</p>
 
         {/* The headline number is the monthly — "within your budget" is the whole idea. Cash comes second. */}
         <div className="mt-4">

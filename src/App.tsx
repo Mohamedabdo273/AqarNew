@@ -50,6 +50,19 @@ export default function App() {
   const [unitId, setUnitId] = useState<string | null>(null);
   const [thanks, setThanks] = useState<{ kind: ThanksKind; ref: string | null }>({ kind: 'contact', ref: null });
   const [adminIn, setAdminIn] = useState(hasAdminSession);
+  // The floating WhatsApp button steps aside while you scroll down (it sits over content on phones) and comes back on scroll up.
+  const [fabVisible, setFabVisible] = useState(true);
+  useEffect(() => {
+    let lastY = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (Math.abs(y - lastY) < 8) return;
+      setFabVisible(y < lastY || y < 200);
+      lastY = y;
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
   // Budget is shared between the home finder and the browse page filters.
   const [budget, setBudget] = useState<Budget>(DEFAULT_BUDGET);
   const [budgetOn, setBudgetOn] = useState(false);
@@ -197,7 +210,9 @@ export default function App() {
         target="_blank"
         rel="noreferrer"
         aria-label={tx('واتساب', 'WhatsApp')}
-        className="fixed bottom-20 md:bottom-6 end-4 md:end-6 z-30 grid place-items-center w-14 h-14 rounded-full bg-ink text-white ring-2 ring-white shadow-lift hover:scale-105 transition-transform"
+        className={`fixed bottom-20 md:bottom-6 end-4 md:end-6 z-30 grid place-items-center w-12 h-12 md:w-14 md:h-14 rounded-full bg-ink text-white ring-2 ring-white shadow-lift hover:scale-105 transition-all duration-300 ${
+          fabVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+        }`}
       >
         <MessageCircle className="w-6 h-6" />
       </a>
