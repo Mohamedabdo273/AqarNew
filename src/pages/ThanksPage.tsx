@@ -93,18 +93,18 @@ export const ThanksPage: React.FC<ThanksPageProps> = ({ kind, code, unit, sugges
   return (
     <div className="page-wrap py-10 sm:py-16">
       <div className="max-w-3xl mx-auto">
-        <span className="grid place-items-center w-16 h-16 rounded-full bg-ink text-white">
+        <span className="grid place-items-center w-16 h-16 rounded-full bg-brand text-white">
           <Check className="w-8 h-8" strokeWidth={2.5} />
         </span>
-        <h1 className="mt-6 text-4xl sm:text-5xl font-extrabold leading-tight text-ink">{content.title}</h1>
+        <h1 className="mt-6 text-4xl sm:text-5xl font-bold leading-tight text-ink">{content.title}</h1>
         <p className="mt-3 text-lg text-ink-soft leading-relaxed">{content.sub}</p>
 
         {/* What we received */}
         {kind === 'sell' && code && (
-          <div className="mt-8 rounded-card border-2 border-ink p-5 sm:p-6 flex flex-wrap items-center justify-between gap-4">
+          <div className="mt-8 rounded-card border-2 border-brand p-5 sm:p-6 flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="text-sm text-muted">{tx('رقم طلبك — احتفظ بيه عشان تتابع', 'Your request number — keep it to follow up')}</p>
-              <p className="num font-display mt-1 text-3xl sm:text-4xl font-extrabold text-ink" dir="ltr">
+              <p className="num font-display mt-1 text-3xl sm:text-4xl font-bold text-ink" dir="ltr">
                 {code}
               </p>
             </div>
@@ -130,11 +130,11 @@ export const ThanksPage: React.FC<ThanksPageProps> = ({ kind, code, unit, sugges
         {/* What happens next */}
         {content.steps.length > 0 && (
           <div className="mt-10">
-            <h2 className="text-xl sm:text-2xl font-extrabold text-ink">{tx('اللي هيحصل بعد كده', 'What happens next')}</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-ink">{tx('اللي هيحصل بعد كده', 'What happens next')}</h2>
             <ol className="mt-5 relative space-y-5 before:absolute before:top-2 before:bottom-2 before:start-5 before:w-px before:bg-line-strong">
               {content.steps.map((s, i) => (
                 <li key={s.t} className="relative flex items-start gap-4">
-                  <span className={`relative grid place-items-center w-10 h-10 rounded-full shrink-0 ${i === 0 ? 'bg-ink text-white' : 'bg-surface border border-line text-ink'}`}>
+                  <span className={`relative grid place-items-center w-10 h-10 rounded-full shrink-0 ${i === 0 ? 'bg-brand text-white' : 'bg-surface border border-line text-ink'}`}>
                     <s.icon className="w-5 h-5" />
                   </span>
                   <div className="pt-1.5">
@@ -192,7 +192,7 @@ export const ThanksPage: React.FC<ThanksPageProps> = ({ kind, code, unit, sugges
 
       {kind === 'viewing' && suggestions.length > 0 && (
         <section className="mt-16 sm:mt-20">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-ink">{tx('وحدات ممكن تعجبك كمان', 'You might also like')}</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-ink">{tx('وحدات ممكن تعجبك كمان', 'You might also like')}</h2>
           <div className="mt-6 -mx-4 px-4 sm:mx-0 sm:px-0 flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 overflow-x-auto snap-x snap-mandatory no-scrollbar">
             {suggestions.map((u) => (
               <div key={u.id} className="w-[82%] shrink-0 snap-start sm:w-auto">

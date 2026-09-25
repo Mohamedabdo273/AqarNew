@@ -20,10 +20,10 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({ variant, suggestions
   return (
     <div className="page-wrap py-12 sm:py-20">
       <div className="max-w-2xl">
-        <p className="num font-display text-7xl sm:text-8xl font-extrabold text-line-strong" aria-hidden="true">
+        <p className="num font-display text-7xl sm:text-8xl font-bold text-line-strong" aria-hidden="true">
           {isUnit ? tx('اتباعت', 'Sold') : '404'}
         </p>
-        <h1 className="mt-4 text-3xl sm:text-5xl font-extrabold leading-tight text-ink">
+        <h1 className="mt-4 text-3xl sm:text-5xl font-bold leading-tight text-ink">
           {isUnit ? tx('الوحدة دي مش متاحة دلوقتي.', "This unit isn't available anymore.") : tx('الصفحة دي مش موجودة.', "This page doesn't exist.")}
         </h1>
         <p className="mt-3 text-lg text-ink-soft leading-relaxed">
@@ -56,7 +56,7 @@ export const NotFoundPage: React.FC<NotFoundPageProps> = ({ variant, suggestions
 
       {suggestions.length > 0 && (
         <section className="mt-14 sm:mt-20">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-ink">{isUnit ? tx('وحدات شبهها', 'Similar units') : tx('وحدات بسعر زمان', 'Units at old prices')}</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-ink">{isUnit ? tx('وحدات شبهها', 'Similar units') : tx('وحدات بسعر زمان', 'Units at old prices')}</h2>
           <div className="mt-6 -mx-4 px-4 sm:mx-0 sm:px-0 flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 overflow-x-auto snap-x snap-mandatory no-scrollbar">
             {suggestions.map((u) => (
               <div key={u.id} className="w-[82%] shrink-0 snap-start sm:w-auto">

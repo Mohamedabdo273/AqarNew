@@ -134,7 +134,7 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
       <ol className="mt-8 grid sm:grid-cols-2 gap-3">
         {rules.map((r, i) => (
           <li key={r.t} className="card p-5 flex gap-4">
-            <span className="grid place-items-center w-12 h-12 rounded-2xl bg-brand-soft text-brand shrink-0">
+            <span className="grid place-items-center w-12 h-12 rounded-xl bg-brand-soft text-brand shrink-0">
               <r.icon className="w-6 h-6" />
             </span>
             <div>
