@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   Inbox,
+  Zap,
   Search,
   Megaphone,
   Users,
@@ -112,9 +113,9 @@ export const MyRequestsPage: React.FC<MyRequestsPageProps> = ({ code, onOpenRequ
                     {pct < 100 && (
                       <div className="mt-3 flex items-center gap-3">
                         <div className="flex-1 h-2 rounded-full bg-line overflow-hidden">
-                          <div className="h-full bg-gold rounded-full" style={{ width: `${pct}%` }} />
+                          <div className="h-full bg-ink rounded-full" style={{ width: `${pct}%` }} />
                         </div>
-                        <span className="num text-xs font-semibold text-gold whitespace-nowrap">{tx(`البيانات ${pct}%`, `Details ${pct}%`)}</span>
+                        <span className="num text-xs font-semibold text-ink-soft whitespace-nowrap">{tx(`البيانات ${pct}%`, `Details ${pct}%`)}</span>
                       </div>
                     )}
                   </div>
@@ -145,7 +146,7 @@ const RequestDetail: React.FC<{ req: SellRequest; onBack: () => void }> = ({ req
 
   const stages = [
     { icon: Inbox, t: tx('استلمنا طلبك', 'Request received'), d: formatDate(req.createdAt, language) },
-    { icon: Search, t: tx('مراجعة العقد والمديونية', 'Contract & dues review'), d: pct < 100 ? tx('بتبدأ لما البيانات تكمل', 'Starts once details are complete') : tx('خلال 24 ساعة', 'Within 24h') },
+    { icon: Search, t: tx('كشف حساب وحدتك', 'Your unit statement'), d: pct < 100 ? tx('بيبدأ لما البيانات تكمل — نراجع العقد والمديونية', 'Starts once details are complete — we check contract and dues') : tx('خلال 24 ساعة', 'Within 24h') },
     { icon: Megaphone, t: tx('نشر الوحدة للمشترين', 'Listed to buyers'), d: tx('بعد المراجعة', 'After review') },
     { icon: Users, t: tx('معاينة واتفاق مع مشتري', 'Viewing & agreement'), d: tx('بنرتبها معاك', 'We arrange it with you') },
     { icon: Handshake, t: tx('التنازل والقبض', 'Transfer & payout'), d: tx('في مقر المطور بشيك مصرفي', 'At the developer, by bank cheque') },
@@ -154,7 +155,8 @@ const RequestDetail: React.FC<{ req: SellRequest; onBack: () => void }> = ({ req
   const sectionMeta: Record<DetailSection, { icon: React.ElementType; t: string }> = {
     specs: { icon: Ruler, t: tx('مواصفات الوحدة', 'Unit specs') },
     installments: { icon: CalendarClock, t: tx('الأقساط الباقية', 'Remaining installments') },
-    dues: { icon: AlertTriangle, t: tx('المديونية والشروط', 'Dues & terms') },
+    dues: { icon: AlertTriangle, t: tx('المديونية والرسوم', 'Dues & fees') },
+    faster: { icon: Zap, t: tx('تبيع أسرع؟ (اختياري)', 'Sell faster? (optional)') },
     docs: { icon: FileText, t: tx('صورة العقد', 'Contract photo') },
   };
 
@@ -203,29 +205,33 @@ const RequestDetail: React.FC<{ req: SellRequest; onBack: () => void }> = ({ req
         <div className="space-y-6">
           {/* What's missing */}
           {pct < 100 && (
-            <div className="card p-6 border-gold/30">
+            <div className="card p-6">
               <div className="flex items-center justify-between gap-3">
                 <p className="font-bold text-ink">{tx('كمّل بياناتك عشان المراجعة تبدأ', 'Complete your details to start review')}</p>
-                <span className="num text-sm font-bold text-gold">{pct}%</span>
+                <span className="num text-sm font-bold text-ink">{pct}%</span>
               </div>
               <div className="mt-3 h-2 rounded-full bg-line overflow-hidden">
-                <div className="h-full bg-gold rounded-full transition-all" style={{ width: `${pct}%` }} />
+                <div className="h-full bg-ink rounded-full transition-all" style={{ width: `${pct}%` }} />
               </div>
               <ul className="mt-5 grid sm:grid-cols-2 gap-2">
                 {DETAIL_SECTIONS.map((s, i) => {
-                  const done = sectionDone(f, s);
+                  // The optional step never shows as "done" — nothing was necessarily filled in.
+                  const optional = s === 'faster';
+                  const done = !optional && sectionDone(f, s);
                   const M = sectionMeta[s];
                   return (
                     <li key={s}>
                       <button
                         onClick={() => setEditing(i)}
-                        className={`w-full flex items-center gap-3 rounded-2xl border px-4 py-3 text-start transition-colors ${done ? 'border-line bg-paper' : 'border-gold/30 bg-gold-soft hover:border-gold'}`}
+                        className={`w-full flex items-center gap-3 rounded-2xl border px-4 py-3 text-start transition-colors ${done ? 'border-line bg-paper' : optional ? 'border-line border-dashed bg-surface hover:border-ink-soft' : 'border-line-strong bg-surface hover:border-ink'}`}
                       >
-                        <span className={`grid place-items-center w-8 h-8 rounded-full shrink-0 ${done ? 'bg-brand text-white' : 'bg-surface text-gold'}`}>
+                        <span className={`grid place-items-center w-8 h-8 rounded-full shrink-0 ${done ? 'bg-brand text-white' : 'bg-brand-soft text-ink'}`}>
                           {done ? <Check className="w-4 h-4" strokeWidth={3} /> : <M.icon className="w-4 h-4" />}
                         </span>
                         <span className={`flex-1 font-medium ${done ? 'text-muted' : 'text-ink'}`}>{M.t}</span>
-                        <span className={`text-sm font-semibold ${done ? 'text-muted' : 'text-gold'}`}>{done ? tx('تعديل', 'Edit') : tx('كمّل', 'Add')}</span>
+                        <span className={`text-sm font-semibold ${done || optional ? 'text-muted' : 'text-ink underline'}`}>
+                          {done ? tx('تعديل', 'Edit') : optional ? tx('افتح', 'Open') : tx('كمّل', 'Add')}
+                        </span>
                       </button>
                     </li>
                   );
@@ -272,7 +278,7 @@ const RequestDetail: React.FC<{ req: SellRequest; onBack: () => void }> = ({ req
 
         <aside className="lg:sticky lg:top-24 card p-6">
           <p className="font-bold text-ink">{tx('هتستلم', "You'll receive")}</p>
-          <p className="num mt-2 text-4xl font-bold text-brand">{money(net, language)}</p>
+          <p className="num font-display mt-2 text-4xl font-extrabold text-ink">{money(net, language)}</p>
           <p className="text-sm text-muted">{currency(language)} · {tx('بشيك مصرفي', 'by bank cheque')}</p>
           <dl className="mt-5 space-y-2.5 text-sm">
             <div className="flex justify-between">
@@ -290,15 +296,21 @@ const RequestDetail: React.FC<{ req: SellRequest; onBack: () => void }> = ({ req
               </div>
             )}
             {discount > 0 && (
-              <div className="flex justify-between text-gold">
+              <div className="flex justify-between text-accent">
                 <dt>{tx('خصم منك', 'Your discount')}</dt>
                 <dd className="num font-semibold">−{fullMoney(discount, language)}</dd>
               </div>
             )}
             <div className="flex justify-between">
-              <dt className="text-muted">{tx('عمولتنا', 'Our fee')}</dt>
-              <dd className="font-semibold text-brand">0</dd>
+              <dt className="text-muted">{tx('عمولتنا عليك', 'Our fee to you')}</dt>
+              <dd className="font-semibold text-ink">{tx('صفر', 'Zero')}</dd>
             </div>
+            {(f.negotiable || f.eligibleForSwap) && (
+              <div className="pt-2.5 border-t border-line flex flex-wrap gap-1.5">
+                {f.negotiable && <span className="rounded-full bg-brand-soft px-2.5 py-0.5 text-xs font-semibold text-ink">{tx('قابل للتفاوض', 'Negotiable')}</span>}
+                {f.eligibleForSwap && <span className="rounded-full bg-brand-soft px-2.5 py-0.5 text-xs font-semibold text-ink">{tx('يقبل التبديل', 'Open to swap')}</span>}
+              </div>
+            )}
           </dl>
         </aside>
       </div>

@@ -66,6 +66,11 @@ export type PageId =
   | 'sell' 
   | 'opportunities'
   | 'swap'
+  | 'contact'
+  | 'statement'
+  | 'unit'
+  | 'thanks'
+  | 'notfound'
   | 'admin';
 
 export interface RealEstateUnit {
@@ -167,6 +172,8 @@ export interface RealEstateUnit {
   // New Features: Seller Discount (Fire Sale), Payment Facilitation, Penalties & Tax Handling
   sellerWillingDiscountAmount?: number; // قيمة التنازل/الخصم الإضافي من المدفوع
   sellerWillingDiscountPercent?: number; // نسبة الخصم الإضافي
+  /** Owner is open to lower offers (never higher — no overprice). */
+  negotiable?: boolean;
   acceptsInstallmentsForCash?: boolean; // هل يقبل تسهيلات في سداد الكاش على دفعتين بشيك مصرفي؟
   cashInstallmentsTerms?: string; // تفاصيل تسهيلات الكاش
   hasOverdueFinesDeducted?: boolean; // هل توجد متأخرات تخصم من ثمن الوحدة؟

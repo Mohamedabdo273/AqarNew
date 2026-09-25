@@ -39,7 +39,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ title, updated, summaryTit
       </p>
 
       {/* The short version, for people who won't read the rest. */}
-      <div className="mt-8 rounded-3xl bg-brand-soft p-6 sm:p-7">
+      <div className="mt-8 rounded-card bg-brand-soft p-6 sm:p-7">
         <p className="font-bold text-brand-ink">{summaryTitle}</p>
         <ul className="mt-4 grid sm:grid-cols-2 gap-3">
           {summary.map((s) => (

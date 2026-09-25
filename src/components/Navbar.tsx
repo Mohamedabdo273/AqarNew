@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, Search, Tag, Repeat, Globe, Menu, X, Info, ScrollText, MessageCircle, Heart, ClipboardList, FileText, Lock } from 'lucide-react';
+import { Home, Search, Tag, Repeat, Globe, Menu, X, Info, ShieldCheck, MessageCircle, Heart, ClipboardList, Phone } from 'lucide-react';
 import { PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useUnits } from '../context/UnitsContext';
@@ -25,28 +25,32 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
   const { requests } = useRequests();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const main: { id: PageId; label: string; icon: React.ElementType }[] = [
-    { id: 'opportunities', label: tx('اشتري', 'Buy'), icon: Search },
-    { id: 'sell', label: tx('بيع وحدتك', 'Sell'), icon: Tag },
-    { id: 'swap', label: tx('بدّل وحدتك', 'Swap'), icon: Repeat },
-  ];
-  const info: { id: PageId; label: string; icon: React.ElementType }[] = [
-    { id: 'about', label: tx('احنا مين', 'About us'), icon: Info },
-    { id: 'rules', label: tx('القواعد', 'Rules'), icon: ScrollText },
-  ];
-  const mobileTabs: { id: PageId; label: string; icon: React.ElementType; badge?: number }[] = [
+  type Link = { id: PageId; label: string; icon: React.ElementType };
+  const buy: Link = { id: 'opportunities', label: tx('اشتري', 'Buy'), icon: Search };
+  const sell: Link = { id: 'sell', label: tx('بيع وحدتك', 'Sell'), icon: Tag };
+  const swap: Link = { id: 'swap', label: tx('بدّل وحدتك', 'Swap'), icon: Repeat };
+  const rules: Link = { id: 'rules', label: tx('ضمان حقك', 'Your protection'), icon: ShieldCheck };
+  const contact: Link = { id: 'contact', label: tx('كلمنا', 'Contact'), icon: Phone };
+
+  // Desktop: selling lives in the black button on the right, "about" lives in the footer.
+  const desktop: Link[] = [buy, swap, rules, contact];
+  const mobileTabs: (Link & { badge?: number })[] = [
     { id: 'home', label: tx('الرئيسية', 'Home'), icon: Home },
-    ...main,
+    buy,
+    { ...sell, label: tx('بيع', 'Sell') },
+    { ...swap, label: tx('بدّل', 'Swap') },
     { id: 'requests', label: tx('طلباتي', 'Requests'), icon: ClipboardList, badge: requests.length },
   ];
-  const menuLinks: { id: PageId; label: string; icon: React.ElementType }[] = [
+  const menuLinks: Link[] = [
     { id: 'home', label: tx('الرئيسية', 'Home'), icon: Home },
-    ...main,
+    buy,
+    sell,
+    swap,
+    rules,
+    contact,
     { id: 'saved', label: tx('المفضلة', 'Saved'), icon: Heart },
     { id: 'requests', label: tx('طلباتي', 'My requests'), icon: ClipboardList },
-    ...info,
-    { id: 'terms', label: tx('الشروط والأحكام', 'Terms & conditions'), icon: FileText },
-    { id: 'privacy', label: tx('سياسة الخصوصية', 'Privacy policy'), icon: Lock },
+    { id: 'about', label: tx('احنا مين', 'About us'), icon: Info },
   ];
 
   const go = (id: PageId) => {
@@ -64,7 +68,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
           <Logo onClick={() => go('home')} />
 
           <nav className="hidden lg:flex items-center gap-0.5">
-            {[...main, ...info].map((l) => (
+            {desktop.map((l) => (
               <button
                 key={l.id}
                 onClick={() => go(l.id)}
@@ -82,16 +86,23 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
               <Heart className="w-5 h-5" />
               <Badge n={savedUnitIds.length} />
             </button>
-            <button onClick={() => go('requests')} aria-label={tx('طلباتي', 'My requests')} className={`${iconBtn('requests')} hidden md:grid`}>
+            <button
+              onClick={() => go('requests')}
+              className={`relative hidden md:inline-flex items-center gap-2 h-11 px-3 rounded-full text-sm font-medium transition-colors ${
+                activePage === 'requests' ? 'bg-brand-soft text-ink' : 'text-ink-soft hover:bg-surface'
+              }`}
+            >
               <ClipboardList className="w-5 h-5" />
+              {tx('طلباتي', 'My requests')}
               <Badge n={requests.length} />
             </button>
             <button onClick={toggleLanguage} className="h-11 px-3 rounded-full text-sm font-medium text-ink-soft hover:bg-surface flex items-center gap-1.5">
               <Globe className="w-4 h-4" />
               {language === 'ar' ? 'EN' : 'عربي'}
             </button>
-            <button onClick={() => go('sell')} className="btn-primary hidden xl:inline-flex min-h-10 px-5 text-sm ms-1">
-              {tx('اعرض وحدتك مجاناً', 'List your unit free')}
+            <button onClick={() => go('sell')} className="btn-primary hidden lg:inline-flex min-h-10 px-5 text-sm ms-1 whitespace-nowrap">
+              <Tag className="w-4 h-4" />
+              {tx('اعرض وحدتك', 'List your unit')}
             </button>
             <button onClick={() => setMenuOpen(true)} aria-label={tx('القائمة', 'Menu')} className="lg:hidden grid place-items-center w-11 h-11 rounded-full hover:bg-surface">
               <Menu className="w-5 h-5" />
@@ -104,7 +115,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
       {menuOpen && (
         <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
           <div className="absolute inset-0 bg-ink/40" onClick={() => setMenuOpen(false)} />
-          <div className="absolute top-0 inset-x-0 max-h-[90vh] overflow-y-auto bg-surface rounded-b-[28px] p-5 shadow-lift">
+          <div className="absolute top-0 inset-x-0 max-h-[90vh] overflow-y-auto bg-surface rounded-b-card p-5 shadow-lift">
             <div className="flex items-center justify-between">
               <Logo onClick={() => go('home')} />
               <button onClick={() => setMenuOpen(false)} aria-label={tx('إغلاق', 'Close')} className="grid place-items-center w-11 h-11 rounded-full bg-paper">

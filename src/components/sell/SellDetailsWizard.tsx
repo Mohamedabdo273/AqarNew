@@ -1,14 +1,9 @@
 import React, { useState } from 'react';
-import { ArrowLeft, ArrowRight, Check, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, AlertTriangle, Lock, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
-import {
-  DELIVERY_OPTIONS,
-  FINISHING_OPTIONS,
-  FREQUENCY_OPTIONS,
-  fullMoney,
-} from '../../lib/unitHelpers';
-import { DETAIL_SECTIONS, FeeBearer, SellForm, TaxBearer, TaxCategory, View, isResidential } from '../../lib/sellForm';
-import { ChipSelect, CheckBox, Counter, Field, FilePick, Group, MoneyInput, NumberInput, Toggle } from './FormBits';
+import { DELIVERY_OPTIONS, FINISHING_OPTIONS, FREQUENCY_OPTIONS, fullMoney } from '../../lib/unitHelpers';
+import { DETAIL_SECTIONS, FeeBearer, MONTHS_PER_PAYMENT, SellForm, TaxBearer, TaxCategory, View, isResidential } from '../../lib/sellForm';
+import { ChipSelect, CheckBox, Counter, Field, FilePick, Group, MoneyInput, MonthYearInput, NumberInput, Toggle } from './FormBits';
 
 interface SellDetailsWizardProps {
   initial: SellForm;
@@ -30,16 +25,33 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
   const remaining = Math.max(0, form.contractPrice - form.paidAmount);
   const L = <T extends string>(list: { ar: T; en: string }[]) => list.map((o) => ({ value: o.ar, label: language === 'ar' ? o.ar : o.en }));
 
-  const titles = [tx('المواصفات', 'Specs'), tx('الأقساط', 'Installments'), tx('المديونية والشروط', 'Dues & terms'), tx('المستندات', 'Documents')];
+  const titles = [
+    tx('المواصفات', 'Specs'),
+    tx('الأقساط', 'Installments'),
+    tx('المديونية والرسوم', 'Dues & fees'),
+    tx('تبيع أسرع؟', 'Sell faster?'),
+    tx('المستندات', 'Documents'),
+  ];
+
+  // Installments sanity check: amount × count should land near what's left to the developer.
+  const plannedTotal = form.installmentValue * form.installmentsRemainingCount;
+  const suggestedCount = form.installmentValue ? Math.round(remaining / form.installmentValue) : 0;
+  const totalOff = plannedTotal > 0 && remaining > 0 && Math.abs(plannedTotal - remaining) / remaining > 0.1;
 
   const validate = (s: number): string[] => {
     const e: string[] = [];
-    if (DETAIL_SECTIONS[s] === 'specs' && !form.areaM2) e.push(tx('المساحة', 'Size'));
-    if (DETAIL_SECTIONS[s] === 'installments' && remaining > 0 && !form.installmentValue) e.push(tx('قيمة القسط', 'Installment amount'));
-    if (DETAIL_SECTIONS[s] === 'dues') {
-      if (form.hasLatePenalties && !form.latePenaltiesAmount) e.push(tx('قيمة المتأخرات', 'Overdue amount'));
-      if (form.willingToDiscount && !form.discountAmount) e.push(tx('قيمة الخصم', 'Discount amount'));
+    const section = DETAIL_SECTIONS[s];
+    if (section === 'specs') {
+      if (!form.areaM2) e.push(tx('المساحة', 'Size'));
+      if (!form.finishing) e.push(tx('التشطيب', 'Finishing'));
+      if (!form.deliveryStatus) e.push(tx('الاستلام', 'Delivery'));
     }
+    if (section === 'installments' && remaining > 0) {
+      if (!form.installmentValue) e.push(tx('قيمة القسط', 'Installment amount'));
+      if (!form.installmentFrequency) e.push(tx('بتدفع كل قد إيه', 'Payment frequency'));
+    }
+    if (section === 'dues' && form.hasLatePenalties && !form.latePenaltiesAmount) e.push(tx('قيمة المتأخرات', 'Overdue amount'));
+    if (section === 'faster' && form.willingToDiscount && !form.discountAmount) e.push(tx('قيمة الخصم', 'Discount amount'));
     return e;
   };
 
@@ -50,7 +62,11 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
       setErrors(e);
       return;
     }
-    const next = DETAIL_SECTIONS[step] === 'dues' ? { ...form, duesConfirmed: true } : form;
+    let next = form;
+    if (DETAIL_SECTIONS[step] === 'dues') next = { ...next, duesConfirmed: true };
+    if (DETAIL_SECTIONS[step] === 'installments' && next.installmentFrequency && next.installmentsRemainingCount) {
+      next = { ...next, installmentPeriodYears: Math.ceil((next.installmentsRemainingCount * MONTHS_PER_PAYMENT[next.installmentFrequency]) / 12) };
+    }
     setForm(next);
     setErrors([]);
     onSave(next);
@@ -65,15 +81,21 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
     <div id="details-top" className="card p-5 sm:p-8 scroll-mt-24">
       <div className="flex items-center justify-between gap-3">
         <p className="text-xl font-bold text-ink">{tx('كمّل بيانات وحدتك', 'Complete your unit details')}</p>
-        <button onClick={onCancel} className="text-sm font-semibold text-muted hover:text-ink">{tx('بعدين', 'Later')}</button>
+        <button onClick={onCancel} className="text-sm font-semibold text-muted hover:text-ink min-h-11">
+          {tx('بعدين', 'Later')}
+        </button>
       </div>
 
-      <ol className="mt-5 grid grid-cols-4 gap-2">
+      {/* Steps: the current one is the boldest; finished ones are ticked. */}
+      <ol className="mt-5 grid grid-cols-5 gap-1.5 sm:gap-2">
         {titles.map((t, i) => (
           <li key={t}>
             <button onClick={() => (i < step ? setStep(i) : i > step && saveAndGo(i))} className="w-full text-start" aria-current={i === step ? 'step' : undefined}>
-              <span className={`block h-1.5 rounded-full ${i < step ? 'bg-brand' : i === step ? 'bg-brand/60' : 'bg-line'}`} />
-              <span className={`mt-2 block text-xs sm:text-sm font-medium truncate ${i <= step ? 'text-ink' : 'text-muted'}`}>{t}</span>
+              <span className={`block h-1.5 rounded-full ${i === step ? 'bg-ink' : i < step ? 'bg-ink/35' : 'bg-line'}`} />
+              <span className={`mt-2 flex items-center gap-1 text-[11px] sm:text-sm truncate ${i === step ? 'font-bold text-ink' : i < step ? 'font-medium text-ink-soft' : 'text-muted'}`}>
+                {i < step && <Check className="w-3.5 h-3.5 shrink-0" strokeWidth={3} />}
+                <span className="truncate">{t}</span>
+              </span>
             </button>
           </li>
         ))}
@@ -113,31 +135,24 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
                   <input id="unitno" value={form.unitNumber} onChange={(e) => set('unitNumber', e.target.value)} placeholder={tx('مثلاً: عمارة 14 - شقة 302', 'e.g. B14 - 302')} className="field" />
                 </Field>
                 <Field label={tx('مساحة الجنينة', 'Garden')} htmlFor="garden" hint={tx('لو فيه', 'If any')}>
-                  <NumberInput id="garden" value={form.gardenAreaM2} onChange={(n) => set('gardenAreaM2', n)} placeholder="0" suffix={tx('م²', 'm²')} />
+                  <NumberInput id="garden" value={form.gardenAreaM2} onChange={(n) => set('gardenAreaM2', n)} suffix={tx('م²', 'm²')} />
                 </Field>
                 <Field label={tx('مساحة الروف', 'Roof')} htmlFor="roof" hint={tx('لو فيه', 'If any')}>
-                  <NumberInput id="roof" value={form.roofAreaM2} onChange={(n) => set('roofAreaM2', n)} placeholder="0" suffix={tx('م²', 'm²')} />
+                  <NumberInput id="roof" value={form.roofAreaM2} onChange={(n) => set('roofAreaM2', n)} suffix={tx('م²', 'm²')} />
                 </Field>
               </div>
             </Group>
             <Group title={tx('الحالة', 'Condition')}>
-              <Field label={tx('التشطيب', 'Finishing')}>
+              <Field label={tx('التشطيب', 'Finishing')} required>
                 <ChipSelect options={L(FINISHING_OPTIONS)} value={form.finishing} onChange={(v) => set('finishing', v)} />
               </Field>
-              <Field label={tx('الاستلام', 'Delivery')}>
+              <Field label={tx('الاستلام', 'Delivery')} required>
                 <ChipSelect
                   options={DELIVERY_OPTIONS.map((d) => ({ value: d.ar, label: language === 'ar' ? d.short : d.en }))}
                   value={form.deliveryStatus}
                   onChange={(v) => set('deliveryStatus', v)}
                 />
               </Field>
-              {form.deliveryStatus !== 'استلام فوري' && (
-                <div className="sm:w-1/2">
-                  <Field label={tx('تاريخ الاستلام في العقد', 'Delivery date in contract')} htmlFor="ddate">
-                    <input id="ddate" type="date" value={form.deliveryDate} onChange={(e) => set('deliveryDate', e.target.value)} className="field" />
-                  </Field>
-                </div>
-              )}
               <Field label={tx('الواجهة', 'Facing')}>
                 <ChipSelect<View>
                   options={[
@@ -172,26 +187,39 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
                 <Field label={tx('قيمة القسط', 'Installment amount')} required htmlFor="inst">
                   <MoneyInput id="inst" value={form.installmentValue} onChange={(n) => set('installmentValue', n)} placeholder="125,000" />
                 </Field>
-                <Field label={tx('القسط الجاي امتى؟', 'Next installment date')} htmlFor="next">
-                  <input id="next" type="date" value={form.nextInstallmentDate} onChange={(e) => set('nextInstallmentDate', e.target.value)} className="field" />
+                <Field label={tx('القسط الجاي امتى؟', 'Next installment')} htmlFor="next">
+                  <MonthYearInput id="next" value={form.nextInstallmentDate} onChange={(v) => set('nextInstallmentDate', v)} />
                 </Field>
               </div>
-              <Field label={tx('بتدفع كل', 'Paid every')}>
+              <Field label={tx('بتدفع كل', 'Paid every')} required>
                 <ChipSelect options={L(FREQUENCY_OPTIONS)} value={form.installmentFrequency} onChange={(v) => set('installmentFrequency', v)} />
               </Field>
-              <div className="grid grid-cols-2 gap-4">
-                <Counter label={tx('سنين باقية', 'Years left')} value={form.installmentPeriodYears} onChange={(n) => set('installmentPeriodYears', n)} max={15} />
-                <Field label={tx('عدد الأقساط الباقية', 'Installments left')} htmlFor="count">
-                  <NumberInput id="count" value={form.installmentsRemainingCount} onChange={(n) => set('installmentsRemainingCount', n)} placeholder="20" />
+              <div className="sm:w-1/2">
+                <Field
+                  label={tx('عدد الأقساط الباقية', 'Installments left')}
+                  htmlFor="count"
+                  hint={suggestedCount > 0 && !form.installmentsRemainingCount ? tx(`على حسب الباقي، غالباً حوالي ${suggestedCount} قسط`, `Based on the balance, probably about ${suggestedCount}`) : undefined}
+                >
+                  <NumberInput id="count" value={form.installmentsRemainingCount} onChange={(n) => set('installmentsRemainingCount', n)} placeholder={suggestedCount ? String(suggestedCount) : '20'} />
                 </Field>
               </div>
+              {plannedTotal > 0 && (
+                <p className={`flex items-start gap-2 rounded-xl px-4 py-3 text-sm ${totalOff ? 'bg-danger-soft text-ink' : 'bg-paper text-ink-soft'}`}>
+                  {totalOff ? <AlertTriangle className="w-4 h-4 text-danger shrink-0 mt-0.5" /> : <CheckCircle2 className="w-4 h-4 text-ink shrink-0 mt-0.5" />}
+                  <span className="num">
+                    {tx('كده إجمالي الأقساط', 'That totals')} <b>{fullMoney(plannedTotal, language)}</b>{tx('، والباقي للمطور', ', and the balance is')}{' '}
+                    <b>{fullMoney(remaining, language)}</b>.
+                    {totalOff && tx(' الرقمين بعاد عن بعض — راجع القسط أو العدد.', " These don't match — check the amount or count.")}
+                  </span>
+                </p>
+              )}
             </Group>
             <Group title={tx('أرقام إضافية', 'Extra figures')}>
               <div className="grid sm:grid-cols-2 gap-4">
                 <Field label={tx('المقدم وقت التعاقد', 'Original down payment')} htmlFor="down">
                   <MoneyInput id="down" value={form.downPaymentOriginal} onChange={(n) => set('downPaymentOriginal', n)} placeholder="500,000" />
                 </Field>
-                <Field label={tx('سعر نفس الوحدة عند المطور النهارده', "Developer's price today")} htmlFor="market" hint={tx('لو مش عارف سيبها، هنحسبها', "Leave empty and we'll estimate")}>
+                <Field label={tx('سعر نفس الوحدة من المطور النهارده', "Developer's price today")} htmlFor="market" hint={tx('مش عارفه؟ سيبه، واحنا هنجيبه', "Don't know it? Leave it — we'll find out")}>
                   <MoneyInput id="market" value={form.currentMarketPrice} onChange={(n) => set('currentMarketPrice', n)} placeholder="9,000,000" />
                 </Field>
               </div>
@@ -220,9 +248,11 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
             </Group>
 
             <Group title={tx('الرسوم والضرايب', 'Fees & tax')}>
+              <p className="-mt-2 text-sm text-muted">{tx('مش متأكد؟ سيبها على "مش عارف" والمستشار هيراجعها من العقد.', 'Not sure? Leave "Don\'t know" and your advisor will check the contract.')}</p>
               <Field label={tx('رسوم التنازل عند المطور على مين؟', 'Developer transfer fee paid by')}>
                 <ChipSelect<FeeBearer>
                   options={[
+                    { value: '', label: tx('مش عارف', "Don't know") },
                     { value: 'مشتري', label: tx('المشتري', 'Buyer') },
                     { value: 'بائع', label: tx('أنا', 'Me') },
                     { value: 'مناصفة', label: tx('مناصفة', '50/50') },
@@ -232,7 +262,7 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
                   onChange={(v) => set('transferFeeBearer', v)}
                 />
               </Field>
-              {form.transferFeeBearer !== 'معفي بالعقد' && (
+              {form.transferFeeBearer !== '' && form.transferFeeBearer !== 'معفي بالعقد' && (
                 <div className="sm:w-1/2">
                   <Field label={tx('نسبة الرسوم', 'Fee %')} htmlFor="feepct" hint={tx('غالباً من 2% لـ 10% من سعر العقد', 'Usually 2–10% of contract price')}>
                     <NumberInput id="feepct" value={form.transferFeePercent} onChange={(n) => set('transferFeePercent', Math.min(100, n))} placeholder="5" suffix="%" />
@@ -242,6 +272,7 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
               <Field label={tx('نوع الوحدة ضريبياً', 'Tax category')}>
                 <ChipSelect<TaxCategory>
                   options={[
+                    { value: '', label: tx('مش عارف', "Don't know") },
                     { value: 'residential_exempt', label: tx('سكني (معفي)', 'Residential (exempt)') },
                     { value: 'commercial_vat', label: tx('تجاري / إداري', 'Commercial (VAT)') },
                     { value: 'business_tax', label: tx('مملوكة لشركة', 'Company-owned') },
@@ -263,52 +294,67 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
                 />
               </Field>
             </Group>
-
-            <Group title={tx('عاوز تبيع أسرع؟', 'Want to sell faster?')}>
-              <Toggle
-                tone="gold"
-                label={tx('موافق على خصم من المدفوع', 'Offer a discount on the paid amount')}
-                hint={tx('الوحدات اللي فيها خصم بتتباع أسرع', 'Discounted units sell faster')}
-                on={form.willingToDiscount}
-                onChange={(v) => set('willingToDiscount', v)}
-              >
-                <Field label={tx('قيمة الخصم', 'Discount amount')} required htmlFor="disc">
-                  <MoneyInput id="disc" value={form.discountAmount} onChange={(n) => set('discountAmount', n)} placeholder="100,000" />
-                </Field>
-              </Toggle>
-              <Toggle
-                label={tx('تقبل الكاش على دفعتين؟', 'Accept cash in two payments?')}
-                hint={tx('مثلاً جزء عند التوقيع والباقي بشيك بعد شهرين', 'e.g. part on signing, rest by cheque in 60 days')}
-                on={form.acceptsCashInstallments}
-                onChange={(v) => set('acceptsCashInstallments', v)}
-              >
-                <textarea
-                  value={form.cashInstallmentNotes}
-                  onChange={(e) => set('cashInstallmentNotes', e.target.value)}
-                  rows={2}
-                  placeholder={tx('مثلاً: 60% عند التوقيع و40% بشيك بعد شهرين', 'e.g. 60% on signing, 40% cheque in 60 days')}
-                  className="field h-auto py-3 resize-none"
-                />
-              </Toggle>
-              <Toggle
-                label={tx('تقبل تبدّل وحدتك؟', 'Open to swapping?')}
-                hint={tx('بوحدة تانية تدفع أو تاخد الفرق', 'For another unit, settling the difference')}
-                on={form.eligibleForSwap}
-                onChange={(v) => set('eligibleForSwap', v)}
-              >
-                <input
-                  value={form.swapTargetType}
-                  onChange={(e) => set('swapTargetType', e.target.value)}
-                  placeholder={tx('عاوز إيه بدالها؟ مثلاً: شقة أصغر في زايد', 'What do you want instead?')}
-                  className="field"
-                />
-              </Toggle>
-            </Group>
           </div>
+        )}
+
+        {DETAIL_SECTIONS[step] === 'faster' && (
+          <Group title={tx('كل ده اختياري — بس بيخلّي وحدتك تتباع أسرع', 'All optional — but it helps your unit sell faster')}>
+            <Toggle
+              tone="accent"
+              label={tx('أعمل خصم من اللي دفعته', 'Take a discount off what I paid')}
+              hint={tx('وحدتك هتظهر بعلامة الخصم وفي الرئيسية', 'Your unit gets the discount badge and shows on the home page')}
+              on={form.willingToDiscount}
+              onChange={(v) => set('willingToDiscount', v)}
+            >
+              <Field label={tx('قيمة الخصم', 'Discount amount')} required htmlFor="disc">
+                <MoneyInput id="disc" value={form.discountAmount} onChange={(n) => set('discountAmount', n)} placeholder="100,000" />
+              </Field>
+            </Toggle>
+            <Toggle
+              label={tx('السعر قابل للتفاوض', 'Open to offers')}
+              hint={tx('المشتري يقدر يعرض سعر أقل شوية، والقرار في الآخر ليك', 'Buyers can offer a little less — you decide')}
+              on={form.negotiable}
+              onChange={(v) => set('negotiable', v)}
+            />
+            <Toggle
+              label={tx('تقبل الكاش على دفعتين؟', 'Accept cash in two payments?')}
+              hint={tx('مثلاً جزء عند التوقيع والباقي بشيك بعد شهرين', 'e.g. part on signing, rest by cheque in 60 days')}
+              on={form.acceptsCashInstallments}
+              onChange={(v) => set('acceptsCashInstallments', v)}
+            >
+              <textarea
+                value={form.cashInstallmentNotes}
+                onChange={(e) => set('cashInstallmentNotes', e.target.value)}
+                rows={2}
+                placeholder={tx('مثلاً: 60% عند التوقيع و40% بشيك بعد شهرين', 'e.g. 60% on signing, 40% cheque in 60 days')}
+                className="field h-auto py-3 resize-none"
+              />
+            </Toggle>
+            <Toggle
+              label={tx('تقبل تبدّل وحدتك؟', 'Open to swapping?')}
+              hint={tx('بوحدة تانية تدفع أو تاخد الفرق', 'For another unit, settling the difference')}
+              on={form.eligibleForSwap}
+              onChange={(v) => set('eligibleForSwap', v)}
+            >
+              <input
+                value={form.swapTargetType}
+                onChange={(e) => set('swapTargetType', e.target.value)}
+                placeholder={tx('عاوز إيه بدالها؟ مثلاً: شقة أصغر في زايد', 'What do you want instead?')}
+                className="field"
+              />
+            </Toggle>
+          </Group>
         )}
 
         {DETAIL_SECTIONS[step] === 'docs' && (
           <Group title={tx('المستندات بتسرّع المراجعة', 'Documents speed up review')}>
+            <p className="flex items-start gap-2 rounded-xl bg-paper px-4 py-3 text-sm text-ink-soft">
+              <Lock className="w-4 h-4 text-ink shrink-0 mt-0.5" />
+              {tx(
+                'مستنداتك مش بتظهر لأي مشتري ولا بتتنشر. بنستخدمها في المراجعة بس، وبتتمسح لو سحبت طلبك.',
+                "Your documents are never shown to buyers or published. We use them for review only, and delete them if you withdraw.",
+              )}
+            </p>
             <div className="grid gap-3">
               <FilePick label={tx('صورة العقد', 'Contract')} hint={tx('صورة أو PDF', 'Photo or PDF')} value={form.contractFile} onChange={(v) => set('contractFile', v)} />
               <FilePick label={tx('كشف حساب أو آخر إيصال', 'Statement or last receipt')} hint={tx('من المطور', 'From the developer')} value={form.receiptFile} onChange={(v) => set('receiptFile', v)} />
@@ -327,7 +373,7 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
         <button onClick={() => saveAndGo(step < DETAIL_SECTIONS.length - 1 ? step + 1 : 'done')} className="btn-primary flex-1 min-h-13">
           {step < DETAIL_SECTIONS.length - 1 ? (
             <>
-              {tx('حفظ والتالي', 'Save & next')}
+              {DETAIL_SECTIONS[step] === 'faster' ? tx('حفظ والتالي (أو عدّي)', 'Save & next (or skip)') : tx('حفظ والتالي', 'Save & next')}
               <Next className="w-5 h-5" />
             </>
           ) : (

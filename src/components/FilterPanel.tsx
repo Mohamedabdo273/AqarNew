@@ -24,7 +24,7 @@ const Switch: React.FC<{ on: boolean; onClick: () => void; label: string }> = ({
     aria-checked={on}
     aria-label={label}
     onClick={onClick}
-    className={`relative w-12 h-7 rounded-full transition-colors shrink-0 ${on ? 'bg-brand' : 'bg-line-strong'}`}
+    className={`relative w-12 h-7 rounded-full transition-colors shrink-0 ${on ? 'bg-brand' : 'bg-field-border'}`}
   >
     <span className={`absolute top-1 w-5 h-5 rounded-full bg-white shadow transition-all ${on ? 'start-6' : 'start-1'}`} />
   </button>
@@ -117,8 +117,9 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
   const shownDevs = developers.filter((d) => d.label.toLowerCase().includes(devQuery.trim().toLowerCase()));
   const L = (o: { ar: string; en: string }) => ({ value: o.ar, label: language === 'ar' ? o.ar : o.en });
 
-  const extras: { key: 'negotiable' | 'swappable' | 'noTransferFee' | 'noPenalties'; label: string }[] = [
-    { key: 'negotiable', label: tx('فيها خصم / قابلة للتفاوض', 'Discount / negotiable') },
+  const extras: { key: 'discounted' | 'negotiable' | 'swappable' | 'noTransferFee' | 'noPenalties'; label: string }[] = [
+    { key: 'discounted', label: tx('أقل من المدفوع بس (صاحبها عامل خصم)', 'Below what was paid only (owner discount)') },
+    { key: 'negotiable', label: tx('قابل للتفاوض', 'Negotiable') },
     { key: 'swappable', label: tx('تقبل مبادلة', 'Open to swap') },
     { key: 'noTransferFee', label: tx('معفاة من رسوم التنازل', 'No transfer fee') },
     { key: 'noPenalties', label: tx('بدون غرامات تأخير', 'No late penalties') },

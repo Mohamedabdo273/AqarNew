@@ -11,6 +11,14 @@ export const BRAND = {
   buyerFeePercent: 1.25,
   /** Prefix for listing / request codes shown to users. */
   codePrefix: 'WHD',
+  /** Contact page details. Placeholders until the real ones are set — an empty value hides that line. */
+  email: 'hello@wahdety.com',
+  addressAr: 'القاهرة الجديدة، التجمع الخامس',
+  addressEn: 'Fifth Settlement, New Cairo',
+  /** Google Maps link for the office. Empty hides the "open in maps" button. */
+  mapUrl: '',
+  hoursAr: 'كل يوم من 10 الصبح لـ 10 بالليل',
+  hoursEn: 'Every day, 10am–10pm',
 };
 
 /** Shown on the privacy policy and terms pages. Update whenever either text changes. */

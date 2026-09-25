@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Search, SlidersHorizontal, X, SearchX } from 'lucide-react';
+import { Search, SlidersHorizontal, X, BellRing, Flame } from 'lucide-react';
 import { RealEstateUnit } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { UnitCard } from '../components/UnitCard';
@@ -7,7 +7,7 @@ import { Budget } from '../components/BudgetFinder';
 import { FilterPanel } from '../components/FilterPanel';
 import { Pagination } from '../components/Pagination';
 import { EMPTY_FILTERS, Filters, SortKey, applyFilters } from '../lib/unitFilters';
-import { DELIVERY_OPTIONS, FINISHING_OPTIONS, FREQUENCY_OPTIONS, PROPERTY_TYPES, REGIONS, money, pick } from '../lib/unitHelpers';
+import { DELIVERY_OPTIONS, FINISHING_OPTIONS, FREQUENCY_OPTIONS, PROPERTY_TYPES, REGIONS, isDeal, money, pick } from '../lib/unitHelpers';
 
 interface OpportunitiesPageProps {
   units: RealEstateUnit[];
@@ -16,6 +16,10 @@ interface OpportunitiesPageProps {
   budgetOn: boolean;
   onBudgetOnChange: (on: boolean) => void;
   onSelectUnit: (unit: RealEstateUnit) => void;
+  /** Open with the "deals only" filter on (from the home page deals section). */
+  dealsOnly?: boolean;
+  /** Called when a buyer asks to be told about new matching units. */
+  onAlertRequested: () => void;
 }
 
 const PAGE_SIZE = 12;
@@ -27,9 +31,14 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   budgetOn,
   onBudgetOnChange,
   onSelectUnit,
+  dealsOnly = false,
+  onAlertRequested,
 }) => {
-  const { language, tx } = useLanguage();
-  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+  const { language, tx, isRTL } = useLanguage();
+  const [filters, setFilters] = useState<Filters>(() => ({ ...EMPTY_FILTERS, discounted: dealsOnly }));
+  const [alertPhone, setAlertPhone] = useState('');
+  const [alertTried, setAlertTried] = useState(false);
+  const dealsCount = useMemo(() => units.filter(isDeal).length, [units]);
   const [sort, setSort] = useState<SortKey>('newest');
   const [page, setPage] = useState(1);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -37,9 +46,11 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
 
   const patch = (p: Partial<Filters>) => setFilters((f) => ({ ...f, ...p }));
 
+  // With "below what was paid" on and no other sort picked, biggest discount comes first.
+  const effectiveSort: SortKey = filters.discounted && sort === 'newest' ? 'deals' : sort;
   const results = useMemo(
-    () => applyFilters(units, filters, budgetOn ? budget : null, sort),
-    [units, filters, budgetOn, budget, sort]
+    () => applyFilters(units, filters, budgetOn ? budget : null, effectiveSort),
+    [units, filters, budgetOn, budget, effectiveSort]
   );
 
   useEffect(() => setPage(1), [filters, budgetOn, budget, sort]);
@@ -90,7 +101,8 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
     ...filters.delivery.map((v) => ({ key: `dl-${v}`, label: labelOf(DELIVERY_OPTIONS, v), remove: () => patch({ delivery: without(filters.delivery, v) }) })),
     ...filters.finishing.map((v) => ({ key: `f-${v}`, label: labelOf(FINISHING_OPTIONS, v), remove: () => patch({ finishing: without(filters.finishing, v) }) })),
     ...filters.frequency.map((v) => ({ key: `q-${v}`, label: labelOf(FREQUENCY_OPTIONS, v), remove: () => patch({ frequency: without(filters.frequency, v) }) })),
-    ...(filters.negotiable ? [{ key: 'neg', label: tx('فيها خصم', 'Discount'), remove: () => patch({ negotiable: false }) }] : []),
+    ...(filters.discounted ? [{ key: 'disc', label: tx('أقل من المدفوع', 'Below what was paid'), remove: () => patch({ discounted: false }) }] : []),
+    ...(filters.negotiable ? [{ key: 'neg', label: tx('قابل للتفاوض', 'Negotiable'), remove: () => patch({ negotiable: false }) }] : []),
     ...(filters.swappable ? [{ key: 'swap', label: tx('تقبل مبادلة', 'Swap'), remove: () => patch({ swappable: false }) }] : []),
     ...(filters.noTransferFee ? [{ key: 'fee', label: tx('بدون رسوم تنازل', 'No transfer fee'), remove: () => patch({ noTransferFee: false }) }] : []),
     ...(filters.noPenalties ? [{ key: 'pen', label: tx('بدون غرامات', 'No penalties'), remove: () => patch({ noPenalties: false }) }] : []),
@@ -153,6 +165,20 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
 
       {/* Sort chips */}
       <div className="mt-4 -mx-4 px-4 sm:mx-0 sm:px-0 flex gap-2 overflow-x-auto no-scrollbar">
+        {dealsCount > 0 && (
+          <>
+            <button
+              onClick={() => patch({ discounted: !filters.discounted })}
+              aria-pressed={filters.discounted}
+              className={`chip ${filters.discounted ? 'bg-accent border-accent text-white' : 'bg-accent-soft border-accent/30 text-accent hover:border-accent'}`}
+            >
+              <Flame className="w-4 h-4" />
+              {tx('أقل من المدفوع', 'Below what was paid')}
+              <span className="num text-xs opacity-80">{dealsCount}</span>
+            </button>
+            <span className="w-px shrink-0 bg-line my-1.5" aria-hidden="true" />
+          </>
+        )}
         {sorts.map((s) => (
           <button key={s.key} onClick={() => setSort(s.key)} aria-pressed={sort === s.key} className={sort === s.key ? 'chip-on' : 'chip-off'}>
             {s.label}
@@ -188,7 +214,7 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
             </div>
           )}
 
-          <p className="mb-5 text-ink-soft">
+          <p className="mb-1 text-ink-soft">
             {results.length > 0 ? (
               <>
                 {tx('عرض', 'Showing')} <span className="num font-bold text-ink">{from}–{to}</span> {tx('من', 'of')}{' '}
@@ -198,10 +224,13 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
               <span className="num">0 {tx('وحدة', 'units')}</span>
             )}
           </p>
+          <p className="mb-5 text-xs text-muted">
+            {tx('التوفير محسوب على سعر المطور النهارده وقت نشر الإعلان، وهو تقديري.', "Savings are against the developer's price when the listing went up — an estimate.")}
+          </p>
 
           {results.length > 0 ? (
             <>
-              <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">
+              <div className="grid sm:grid-cols-2 2xl:grid-cols-3 gap-5">
                 {pageItems.map((u) => (
                   <UnitCard key={u.id} unit={u} onOpen={onSelectUnit} fitsBudget={budgetOn} />
                 ))}
@@ -211,13 +240,60 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
               </div>
             </>
           ) : (
-            <div className="card p-12 text-center">
-              <span className="mx-auto grid place-items-center w-14 h-14 rounded-2xl bg-paper text-muted">
-                <SearchX className="w-7 h-7" />
+            <div className="card p-6 sm:p-10">
+              <span className="grid place-items-center w-14 h-14 rounded-xl bg-ink text-white">
+                <BellRing className="w-7 h-7" />
               </span>
-              <p className="mt-4 font-bold text-lg text-ink">{tx('مفيش وحدات بالفلاتر دي', 'No units match')}</p>
-              <p className="mt-1 text-muted">{tx('جرّب تشيل فلتر أو توسّع الميزانية', 'Try removing a filter or widening the budget')}</p>
-              <button onClick={clearAll} className="btn-ghost mt-6">{tx('مسح الفلاتر', 'Clear filters')}</button>
+              <p className="mt-5 font-display text-2xl font-bold text-ink">{tx('مفيش وحدة بالمواصفات دي النهارده', 'Nothing matches this search today')}</p>
+              <p className="mt-2 text-ink-soft leading-relaxed max-w-xl">
+                {tx(
+                  'بس فيه وحدات جديدة بتنزل كل يوم. سيب رقمك ونبعتلك على واتساب أول ما تنزل وحدة زي اللي بتدوّر عليها.',
+                  "New units go up every day. Leave your number and we'll WhatsApp you as soon as one like this is listed.",
+                )}
+              </p>
+              {pills.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {pills.map((p) => (
+                    <span key={p.key} className="rounded-full bg-paper border border-line px-3 py-1 text-sm text-ink-soft">
+                      {p.label}
+                    </span>
+                  ))}
+                </div>
+              )}
+              <form
+                noValidate
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setAlertTried(true);
+                  if (!/^01\d{9}$/.test(alertPhone.replace(/\s/g, ''))) return;
+                  // TODO(api): save { phone, filters, budget } as a saved search once the backend exists.
+                  onAlertRequested();
+                }}
+                className="mt-6 flex flex-col sm:flex-row gap-3 max-w-xl"
+              >
+                <label htmlFor="alert-phone" className="sr-only">
+                  {tx('رقم الموبايل (واتساب)', 'Mobile (WhatsApp)')}
+                </label>
+                <input
+                  id="alert-phone"
+                  value={alertPhone}
+                  onChange={(e) => setAlertPhone(e.target.value)}
+                  inputMode="tel"
+                  dir="ltr"
+                  placeholder="01xxxxxxxxx"
+                  className={`field flex-1 ${isRTL ? 'text-right' : 'text-left'}`}
+                />
+                <button type="submit" className="btn-primary min-h-13 whitespace-nowrap">
+                  <BellRing className="w-5 h-5" />
+                  {tx('نبّهني', 'Alert me')}
+                </button>
+              </form>
+              {alertTried && !/^01\d{9}$/.test(alertPhone.replace(/\s/g, '')) && (
+                <p className="mt-2 text-sm text-danger">{tx('رقم موبايل مصري صحيح، 11 رقم', 'A valid 11-digit Egyptian mobile')}</p>
+              )}
+              <button onClick={clearAll} className="mt-5 text-sm font-semibold text-ink-soft hover:text-ink underline min-h-11">
+                {tx('أو امسح الفلاتر وشوف كل الوحدات', 'Or clear filters and see everything')}
+              </button>
             </div>
           )}
         </div>

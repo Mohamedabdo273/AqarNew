@@ -72,15 +72,15 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* The problem */}
-      <section className="bg-surface border-y border-line">
-        <div className="page-wrap py-14">
-          <h2 className="text-2xl sm:text-3xl font-bold text-ink text-center">{tx('المشكلة', 'The problem')}</h2>
-          <div className="mt-8 grid sm:grid-cols-3 gap-4">
+      <section className="bg-ink text-white">
+        <div className="page-wrap py-16">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-center">{tx('المشكلة', 'The problem')}</h2>
+          <div className="mt-10 grid sm:grid-cols-3 gap-4">
             {problems.map((p) => (
-              <div key={p.t} className="rounded-3xl bg-danger-soft p-6 text-center">
-                <p.icon className="mx-auto w-7 h-7 text-danger" />
-                <p className="num mt-3 text-3xl font-bold text-danger">{p.v}</p>
-                <p className="mt-1 text-ink-soft">{p.t}</p>
+              <div key={p.t} className="rounded-card border border-white/10 bg-white/[0.04] p-7 text-center">
+                <p.icon className="mx-auto w-7 h-7 text-accent-light" />
+                <p className="num font-display mt-4 text-4xl font-extrabold">{p.v}</p>
+                <p className="mt-2 text-white/60">{p.t}</p>
               </div>
             ))}
           </div>
@@ -89,7 +89,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
 
       {/* What we do */}
       <section className="page-wrap py-14">
-        <h2 className="text-2xl sm:text-3xl font-bold text-ink text-center">{tx('بنعمل إيه؟', 'What we do')}</h2>
+        <h2 className="text-3xl sm:text-4xl font-extrabold text-ink text-center">{tx('بنعمل إيه؟', 'What we do')}</h2>
         <div className="mt-8 grid md:grid-cols-3 gap-4">
           {what.map((w) => (
             <button key={w.t} onClick={() => onNavigate(w.page)} className="card p-7 text-start transition-all hover:shadow-lift hover:-translate-y-0.5">
@@ -106,11 +106,11 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
       {/* How we're different */}
       <section className="bg-surface border-y border-line">
         <div className="page-wrap py-14">
-          <h2 className="text-2xl sm:text-3xl font-bold text-ink text-center">{tx('إيه اللي يميّزنا؟', 'What makes us different')}</h2>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-ink text-center">{tx('إيه اللي يميّزنا؟', 'What makes us different')}</h2>
           <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {different.map((d) => (
-              <div key={d.t} className="rounded-3xl bg-paper p-6">
-                <d.icon className="w-7 h-7 text-gold" />
+              <div key={d.t} className="rounded-card bg-paper p-6">
+                <d.icon className="w-7 h-7 text-ink" />
                 <p className="mt-4 font-bold text-lg text-ink">{d.t}</p>
                 <p className="mt-1 text-muted">{d.d}</p>
               </div>
@@ -121,7 +121,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
 
       {/* Promises */}
       <section className="page-wrap py-14">
-        <h2 className="text-2xl sm:text-3xl font-bold text-ink text-center">{tx('وعدنا ليك', 'Our promise')}</h2>
+        <h2 className="text-3xl sm:text-4xl font-extrabold text-ink text-center">{tx('وعدنا ليك', 'Our promise')}</h2>
         <div className="mt-8 grid sm:grid-cols-2 gap-4">
           {promises.map((p) => (
             <div key={p.t} className="card p-6 flex gap-4">
@@ -144,7 +144,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
 
       {/* Contact CTA */}
       <section className="page-wrap pb-16">
-        <div className="rounded-[28px] bg-brand-ink text-white px-6 py-12 sm:px-12 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-start">
+        <div className="rounded-card bg-brand-ink text-white px-6 py-12 sm:px-12 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-start">
           <div>
             <p className="text-2xl sm:text-3xl font-bold">{tx('عندك سؤال؟ كلمنا', 'Questions? Talk to us')}</p>
             <p className="mt-2 text-white/70">{tx('فريقنا بيرد كل يوم', 'Our team replies every day')}</p>

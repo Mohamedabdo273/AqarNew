@@ -2,31 +2,45 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MessageCircle } from 'lucide-react';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
-import { UnitDetailModal } from './components/UnitDetailModal';
 import { DEFAULT_BUDGET, Budget } from './components/BudgetFinder';
 import { HomePage } from './pages/HomePage';
 import { SellUnitPage } from './pages/SellUnitPage';
 import { OpportunitiesPage } from './pages/OpportunitiesPage';
 import { PropertySwapPage } from './pages/PropertySwapPage';
 import { AdminPlatform } from './components/admin/AdminPlatform';
+import { AdminLogin } from './components/admin/AdminLogin';
 import { AboutPage } from './pages/AboutPage';
 import { RulesPage, RulesTab } from './pages/RulesPage';
 import { MyRequestsPage } from './pages/MyRequestsPage';
 import { SavedPage } from './pages/SavedPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { TermsPage } from './pages/TermsPage';
+import { UnitPage, similarUnits } from './pages/UnitPage';
+import { ThanksPage, ThanksKind } from './pages/ThanksPage';
+import { ContactPage } from './pages/ContactPage';
+import { NotFoundPage } from './pages/NotFoundPage';
+import { StatementPage } from './pages/StatementPage';
 import { whatsappLink } from './config/brand';
+import { hasAdminSession } from './services/adminAuth';
 import { PageId, RealEstateUnit } from './types';
 import { useUnits } from './context/UnitsContext';
 import { useLanguage } from './context/LanguageContext';
 
-const PAGES: PageId[] = ['home', 'opportunities', 'sell', 'swap', 'about', 'rules', 'saved', 'requests', 'privacy', 'terms', 'admin'];
+/** Pages reachable by a bare hash (#sell, #contact, …). */
+const PAGES: PageId[] = ['home', 'opportunities', 'sell', 'statement', 'swap', 'contact', 'about', 'rules', 'saved', 'requests', 'privacy', 'terms', 'admin'];
+const THANKS: ThanksKind[] = ['sell', 'statement', 'viewing', 'swap', 'contact', 'alert'];
 
 /*
  * Hash routes:
+ *   (empty)                        home
  *   #opportunities, #sell, …       a page
+ *   #unit/<id>                     one unit, as a full page (shareable link)
  *   #requests/WHD-12345            one seller request
- *   #unit/<id>                     a unit opened over the current page (shareable link)
+ *   #thanks/sell/WHD-12345         confirmation after listing a unit
+ *   #thanks/viewing/<unitId>       confirmation after booking a viewing
+ *   #thanks/swap/<unitId>          confirmation after a swap request
+ *   #thanks/contact                confirmation after the contact form
+ *   anything else                  404
  */
 export default function App() {
   const { units } = useUnits();
@@ -34,88 +48,74 @@ export default function App() {
   const [activePage, setActivePage] = useState<PageId>('home');
   const [requestCode, setRequestCode] = useState<string | null>(null);
   const [unitId, setUnitId] = useState<string | null>(null);
+  const [thanks, setThanks] = useState<{ kind: ThanksKind; ref: string | null }>({ kind: 'contact', ref: null });
+  const [adminIn, setAdminIn] = useState(hasAdminSession);
   // Budget is shared between the home finder and the browse page filters.
   const [budget, setBudget] = useState<Budget>(DEFAULT_BUDGET);
   const [budgetOn, setBudgetOn] = useState(false);
+  // Opens the listings with "deals only" on; any other navigation turns it back off.
+  const [dealsOn, setDealsOn] = useState(false);
   const [rulesTab, setRulesTab] = useState<RulesTab>('seller');
 
-  // True when the unit was opened by a click here (so closing can just go "back").
-  const unitOpenedInApp = useRef(false);
-  const firstLoad = useRef(true);
+  // True once the visitor has moved around inside the app, so "back" can use browser history.
+  const navigatedInApp = useRef(false);
 
   useEffect(() => {
     const handleHash = () => {
       const hash = decodeURIComponent(window.location.hash.replace('#', ''));
-      const isFirst = firstLoad.current;
-      firstLoad.current = false;
+      const [head, ...rest] = hash.split('/');
+      const tail = rest.join('/');
+      window.scrollTo({ top: 0 });
 
-      if (hash.startsWith('unit/')) {
-        setUnitId(hash.slice('unit/'.length));
-        // Opened from a shared link: show the listings behind it.
-        if (isFirst) setActivePage('opportunities');
-        return;
-      }
-      setUnitId(null);
-      unitOpenedInApp.current = false;
+      setUnitId(head === 'unit' ? tail : null);
+      setRequestCode(head === 'requests' && tail ? tail : null);
 
-      if (hash.startsWith('requests/')) {
-        setActivePage('requests');
-        setRequestCode(hash.slice('requests/'.length));
-        return;
+      if (head === 'unit' && tail) return setActivePage('unit');
+      if (head === 'thanks' && THANKS.includes(rest[0] as ThanksKind)) {
+        setThanks({ kind: rest[0] as ThanksKind, ref: rest[1] ?? null });
+        return setActivePage('thanks');
       }
-      setRequestCode(null);
-      if (hash === 'listings') setActivePage('opportunities');
-      else setActivePage(PAGES.includes(hash as PageId) ? (hash as PageId) : 'home');
+      if (head === 'requests') return setActivePage('requests');
+      if (hash === '') return setActivePage('home');
+      if (hash === 'listings') return setActivePage('opportunities');
+      setActivePage(PAGES.includes(hash as PageId) ? (hash as PageId) : 'notfound');
     };
     handleHash();
     window.addEventListener('hashchange', handleHash);
     return () => window.removeEventListener('hashchange', handleHash);
   }, []);
 
-  const selectedUnit = unitId ? units.find((u) => u.id === unitId) ?? null : null;
-
-  // A shared link to a unit that no longer exists falls back to the listings.
-  useEffect(() => {
-    if (unitId && !selectedUnit) {
-      window.history.replaceState(null, '', '#opportunities');
-      setUnitId(null);
-      setActivePage('opportunities');
-    }
-  }, [unitId, selectedUnit]);
+  const go = (hash: string) => {
+    navigatedInApp.current = true;
+    window.location.hash = hash;
+  };
 
   const handleNavigate = (page: PageId) => {
-    setActivePage(page);
-    window.location.hash = page === 'home' ? '' : page;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setDealsOn(false);
+    go(page === 'home' ? '' : page);
   };
-
-  const openUnit = (unit: RealEstateUnit) => {
-    unitOpenedInApp.current = true;
-    window.location.hash = `unit/${unit.id}`;
+  const openDeals = () => {
+    handleNavigate('opportunities');
+    setDealsOn(true);
   };
-
-  const closeUnit = () => {
-    if (unitOpenedInApp.current) {
-      window.history.back();
-    } else {
-      const pageHash = activePage === 'home' ? '' : activePage === 'requests' && requestCode ? `requests/${requestCode}` : activePage;
-      window.history.replaceState(null, '', `#${pageHash}`);
-      setUnitId(null);
-    }
-  };
-
-  const openRequest = (code: string | null) => {
-    window.location.hash = code ? `requests/${code}` : 'requests';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
+  const openUnit = (unit: RealEstateUnit) => go(`unit/${unit.id}`);
+  const openRequest = (code: string | null) => go(code ? `requests/${code}` : 'requests');
   const openRules = (tab: RulesTab) => {
     setRulesTab(tab);
     handleNavigate('rules');
   };
+  // From a unit page: go back where the visitor came from, or to the listings if they landed here from a shared link.
+  const backFromUnit = () => (navigatedInApp.current ? window.history.back() : handleNavigate('opportunities'));
+
+  const selectedUnit = unitId ? units.find((u) => u.id === unitId) ?? null : null;
+  const thanksUnit = (thanks.kind === 'viewing' || thanks.kind === 'swap') && thanks.ref ? units.find((u) => u.id === thanks.ref) ?? null : null;
 
   if (activePage === 'admin') {
-    return <AdminPlatform onBackToApp={() => handleNavigate('home')} language={language} />;
+    return adminIn ? (
+      <AdminPlatform onBackToApp={() => handleNavigate('home')} language={language} />
+    ) : (
+      <AdminLogin onSignedIn={() => setAdminIn(true)} onBackToSite={() => handleNavigate('home')} />
+    );
   }
 
   return (
@@ -135,6 +135,7 @@ export default function App() {
             onNavigate={handleNavigate}
             onSelectUnit={openUnit}
             onOpenRules={openRules}
+            onOpenDeals={openDeals}
           />
         )}
         {activePage === 'opportunities' && (
@@ -145,28 +146,58 @@ export default function App() {
             budgetOn={budgetOn}
             onBudgetOnChange={setBudgetOn}
             onSelectUnit={openUnit}
+            dealsOnly={dealsOn}
+            onAlertRequested={() => go('thanks/alert')}
           />
         )}
-        {activePage === 'sell' && <SellUnitPage onSubmitted={openRequest} onOpenRules={() => openRules('seller')} onNavigate={handleNavigate} />}
-        {activePage === 'swap' && <PropertySwapPage units={units} onSelectUnit={openUnit} />}
+        {activePage === 'unit' &&
+          (selectedUnit ? (
+            <UnitPage
+              unit={selectedUnit}
+              units={units}
+              onBack={backFromUnit}
+              onSelectUnit={openUnit}
+              onOpenBuyerRules={() => openRules('buyer')}
+              onNavigate={handleNavigate}
+              onBooked={(u) => go(`thanks/viewing/${u.id}`)}
+            />
+          ) : (
+            <NotFoundPage variant="unit" suggestions={units.slice(0, 3)} onNavigate={handleNavigate} onSelectUnit={openUnit} />
+          ))}
+        {activePage === 'sell' && (
+          <SellUnitPage onSubmitted={(code) => go(`thanks/sell/${code}`)} onOpenRules={() => openRules('seller')} onNavigate={handleNavigate} />
+        )}
+        {activePage === 'thanks' && (
+          <ThanksPage
+            kind={thanks.kind}
+            code={thanks.kind === 'sell' ? thanks.ref : null}
+            unit={thanksUnit}
+            suggestions={thanksUnit ? similarUnits(thanksUnit, units) : []}
+            onNavigate={handleNavigate}
+            onOpenRequest={openRequest}
+            onSelectUnit={openUnit}
+          />
+        )}
+        {activePage === 'swap' && <PropertySwapPage units={units} onSelectUnit={openUnit} onRequested={(u) => go(`thanks/swap/${u.id}`)} />}
         {activePage === 'saved' && <SavedPage onSelectUnit={openUnit} onNavigate={handleNavigate} />}
         {activePage === 'requests' && <MyRequestsPage code={requestCode} onOpenRequest={openRequest} onNavigate={handleNavigate} />}
+        {activePage === 'statement' && <StatementPage onNavigate={handleNavigate} onSent={() => go('thanks/statement')} />}
+        {activePage === 'contact' && <ContactPage onNavigate={handleNavigate} onSent={() => go('thanks/contact')} />}
         {activePage === 'about' && <AboutPage onNavigate={handleNavigate} />}
         {activePage === 'rules' && <RulesPage tab={rulesTab} onTabChange={setRulesTab} onNavigate={handleNavigate} />}
         {activePage === 'privacy' && <PrivacyPage />}
         {activePage === 'terms' && <TermsPage onNavigate={handleNavigate} />}
+        {activePage === 'notfound' && <NotFoundPage variant="page" suggestions={units.slice(0, 3)} onNavigate={handleNavigate} onSelectUnit={openUnit} />}
       </main>
 
       <Footer onNavigate={handleNavigate} />
-
-      <UnitDetailModal unit={selectedUnit} onClose={closeUnit} onOpenBuyerRules={() => openRules('buyer')} onNavigate={handleNavigate} />
 
       <a
         href={whatsappLink(tx('مرحباً، عندي سؤال', 'Hi, I have a question'))}
         target="_blank"
         rel="noreferrer"
         aria-label={tx('واتساب', 'WhatsApp')}
-        className="fixed bottom-20 md:bottom-6 end-4 md:end-6 z-30 grid place-items-center w-14 h-14 rounded-full bg-[#25d366] text-white shadow-lift hover:scale-105 transition-transform"
+        className="fixed bottom-20 md:bottom-6 end-4 md:end-6 z-30 grid place-items-center w-14 h-14 rounded-full bg-ink text-white ring-2 ring-white shadow-lift hover:scale-105 transition-transform"
       >
         <MessageCircle className="w-6 h-6" />
       </a>

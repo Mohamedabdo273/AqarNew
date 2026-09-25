@@ -93,7 +93,7 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-12">
-      <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-ink">{tx('القواعد', 'The rules')}</h1>
+      <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-ink">{tx('ضمان حقك', 'Your protection')}</h1>
       <p className="mt-2 text-muted">
         {tx('قواعد بسيطة بتحمي البايع والمشتري. النسخة القانونية الكاملة في ', 'Simple rules that protect both sides. The full legal version is in the ')}
         <button onClick={() => onNavigate('terms')} className="text-brand font-semibold hover:underline">
@@ -105,8 +105,8 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
       {/* Golden rules — apply to everyone */}
       <div className="mt-8 grid sm:grid-cols-3 gap-4">
         {golden.map((g) => (
-          <div key={g.t} className="rounded-3xl bg-brand-ink text-white p-6">
-            <g.icon className="w-7 h-7 text-[#f2b53a]" />
+          <div key={g.t} className="rounded-card bg-brand-ink text-white p-6">
+            <g.icon className="w-7 h-7 text-accent-light" />
             <p className="mt-4 text-lg font-bold">{g.t}</p>
             <p className="mt-1 text-white/70 text-[15px]">{g.d}</p>
           </div>
@@ -148,7 +148,7 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
         ))}
       </ol>
 
-      <div className="mt-6 rounded-3xl bg-danger-soft p-6">
+      <div className="mt-6 rounded-card border border-danger/25 bg-surface p-6">
         <p className="flex items-center gap-2 font-bold text-danger">
           <XCircle className="w-5 h-5" />
           {tx('ممنوع', 'Never')}
@@ -192,7 +192,7 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
             <MessageCircle className="w-5 h-5 text-brand" />
             {tx('واتساب', 'WhatsApp')}
           </a>
-          <button onClick={() => onNavigate(tab === 'seller' ? 'sell' : 'opportunities')} className="btn-primary flex-1">
+          <button onClick={() => onNavigate(tab === 'seller' ? 'sell' : 'opportunities')} className="btn-primary flex-1 whitespace-nowrap">
             {tab === 'seller' ? tx('اعرض وحدتك', 'List your unit') : tx('تصفح الوحدات', 'Browse units')}
           </button>
         </div>

@@ -26,7 +26,8 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
       title: tx('اعرفنا', 'Company'),
       links: [
         { id: 'about', l: tx('احنا مين', 'About us') },
-        { id: 'rules', l: tx('القواعد', 'Rules') },
+        { id: 'rules', l: tx('ضمان حقك', 'Your protection') },
+        { id: 'contact', l: tx('كلمنا', 'Contact us') },
         { id: 'terms', l: tx('الشروط والأحكام', 'Terms & conditions') },
         { id: 'privacy', l: tx('سياسة الخصوصية', 'Privacy policy') },
       ],

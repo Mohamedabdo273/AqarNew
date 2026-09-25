@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { AlertTriangle, ShieldCheck, TrendingDown, Clock, ScrollText, Send, Check, UserCheck } from 'lucide-react';
+import { AlertTriangle, ShieldCheck, TrendingDown, Clock, ScrollText, Send, Check, Repeat, MessageCircle, ArrowLeft, ArrowRight } from 'lucide-react';
 import { PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useRequests } from '../context/RequestsContext';
 import { PROPERTY_TYPES, REGIONS, cancellationLoss, currency, money } from '../lib/unitHelpers';
-import { EMPTY_SELL_FORM, SellForm, isValidPhone } from '../lib/sellForm';
-import { ChipSelect, CheckBox, Field, MoneyInput } from '../components/sell/FormBits';
+import { EMPTY_SELL_FORM, SellForm, isValidPhone, netToSeller } from '../lib/sellForm';
+import { ChipSelect, CheckBox, Field, MoneyInput, Toggle } from '../components/sell/FormBits';
+import { whatsappLink } from '../config/brand';
 
 interface SellUnitPageProps {
   onSubmitted: (code: string) => void;
@@ -21,6 +22,7 @@ const DRAFT_KEY = 'wahdety_sell_quick_draft_v1';
  */
 export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenRules, onNavigate }) => {
   const { language, tx, isRTL } = useLanguage();
+  const Arrow = isRTL ? ArrowLeft : ArrowRight;
   const { createRequest } = useRequests();
   const [form, setForm] = useState<SellForm>(() => {
     try {
@@ -47,11 +49,15 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
     const e: string[] = [];
     if (!form.developer.trim()) e.push(tx('المطور', 'Developer'));
     if (!form.compound.trim()) e.push(tx('الكمبوند', 'Compound'));
+    if (!form.region) e.push(tx('المنطقة', 'Area'));
+    if (!form.propertyType) e.push(tx('النوع', 'Type'));
     if (!form.contractPrice) e.push(tx('سعر العقد', 'Contract price'));
     if (!form.paidAmount) e.push(tx('المدفوع', 'Amount paid'));
     if (form.paidAmount > form.contractPrice && form.contractPrice) e.push(tx('المدفوع أكبر من سعر العقد', 'Paid is more than contract price'));
     if (!form.ownerName.trim()) e.push(tx('اسمك', 'Your name'));
     if (!isValidPhone(form.ownerPhone)) e.push(tx('موبايل صحيح (01xxxxxxxxx)', 'Valid mobile (01xxxxxxxxx)'));
+    if (form.willingToDiscount && !form.discountAmount) e.push(tx('قيمة الخصم', 'Discount amount'));
+    if (form.willingToDiscount && form.discountAmount >= form.paidAmount && form.paidAmount) e.push(tx('الخصم أكبر من المدفوع', 'Discount is more than what you paid'));
     if (!form.ackOwner || !form.ackNoOverprice || !form.ackDeclareDues) e.push(tx('الموافقة على القواعد التلاتة', 'Agree to the three rules'));
     setErrors(e);
     if (e.length) {
@@ -68,29 +74,38 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
   };
 
   const validMoney = form.paidAmount > 0 && form.paidAmount <= form.contractPrice;
+  const { net, discount, fines } = netToSeller(form);
 
   return (
     <div id="sell-top" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-12 scroll-mt-20">
-      <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-ink">{tx('عاوز تخرج من وحدتك؟', 'Want out of your unit?')}</h1>
+      <h1 className="text-3xl sm:text-4xl font-extrabold text-ink">{tx('اعرض وحدتك في دقيقة', 'List your unit in a minute')}</h1>
       <p className="mt-2 flex items-center gap-2 text-muted">
         <Clock className="w-4 h-4" />
-        {tx('دقيقة واحدة · مجاناً · وباقي البيانات بعدين', 'One minute · free · the rest later')}
+        {tx('مجاناً · من غير عمولة عليك · وباقي البيانات بعدين', 'Free · no fee for you · the rest later')}
       </p>
 
-      {/* What the seller gets — one glanceable line, so the form starts on the first screen. */}
+      {/* What the seller can do here — one glanceable line, so the form starts on the first screen. */}
       <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-ink-soft">
         {[
-          tx('مراجعة حقيقية لعقدك', 'Real contract review'),
-          tx('مقارنة الإلغاء قصاد التنازل', 'Cancel vs transfer compared'),
-          tx('نصيحة صريحة', 'Honest advice'),
-          tx('صفر عمولة عليك', 'Zero fee for you'),
+          tx('تبيع باللي دفعته، أو تبدّلها بوحدة تانية', 'Sell for what you paid, or swap it'),
+          tx('تعمل خصم أو تخليها قابلة للتفاوض عشان تتباع أسرع', 'Add a discount or accept offers to sell faster'),
+          tx('اسمك ورقمك مش بيتنشروا', 'Your name and number stay private'),
         ].map((b) => (
           <li key={b} className="flex items-center gap-1.5">
-            <Check className="w-4 h-4 text-brand shrink-0" strokeWidth={2.5} />
+            <Check className="w-4 h-4 text-ink shrink-0" strokeWidth={2.5} />
             {b}
           </li>
         ))}
       </ul>
+
+      {/* For owners who are already behind — the first worry, answered before the form. */}
+      <p className="mt-5 flex items-start gap-3 rounded-2xl border-2 border-ink bg-surface px-4 py-3.5 text-[15px] text-ink max-w-3xl">
+        <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+        <span>
+          <b>{tx('اتأخرت في الأقساط أو عليك غرامات؟ ', 'Behind on installments or have fines? ')}</b>
+          {tx('عادي، بنبيعها برضه. المتأخرات بتتخصم من فلوسك يوم التنازل، ومش مطلوب منك تدفع حاجة دلوقتي.', "That's fine — we still sell it. Arrears come out of your payout on transfer day; nothing to pay now.")}
+        </span>
+      </p>
 
       <div className="mt-6 grid lg:grid-cols-[1fr_20rem] gap-6 items-start">
         <div className="card p-5 sm:p-8 space-y-7">
@@ -113,10 +128,10 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
             </Field>
           </div>
 
-          <Field label={tx('المنطقة', 'Area')}>
+          <Field label={tx('المنطقة', 'Area')} required>
             <ChipSelect options={L(REGIONS)} value={form.region} onChange={(v) => set('region', v)} />
           </Field>
-          <Field label={tx('النوع', 'Type')}>
+          <Field label={tx('النوع', 'Type')} required>
             <ChipSelect options={L(PROPERTY_TYPES)} value={form.propertyType} onChange={(v) => set('propertyType', v)} />
           </Field>
 
@@ -128,6 +143,24 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               <MoneyInput id="paid" value={form.paidAmount} onChange={(n) => set('paidAmount', n)} placeholder="1,500,000" />
             </Field>
           </div>
+          <Toggle
+            tone="danger"
+            label={tx('عليك أقساط متأخرة أو غرامات؟', 'Any overdue installments or fines?')}
+            hint={tx('قول بصراحة — ده مش هيوقف البيع، وبيخلّي الحسبة أدق', "Be upfront — it won't stop the sale, and keeps the maths honest")}
+            on={form.hasLatePenalties}
+            onChange={(v) => set('hasLatePenalties', v)}
+          >
+            <Field label={tx('حوالي كام؟ (لو تعرف)', 'Roughly how much? (if you know)')} htmlFor="fines">
+              <MoneyInput id="fines" value={form.latePenaltiesAmount} onChange={(n) => set('latePenaltiesAmount', n)} placeholder="80,000" />
+            </Field>
+          </Toggle>
+          <Field
+            label={tx('سعر نفس الوحدة من المطور النهارده (اختياري)', "Developer's price for the same unit today (optional)")}
+            htmlFor="market"
+            hint={tx('ده اللي بيبيّن للمشتري هيوفّر قد إيه. مش عارفه؟ سيبه، واحنا هنجيبه.', "It shows buyers how much they save. Don't know it? Leave it — we'll find out.")}
+          >
+            <MoneyInput id="market" value={form.currentMarketPrice} onChange={(n) => set('currentMarketPrice', n)} placeholder="9,000,000" />
+          </Field>
 
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label={tx('اسمك زي العقد', 'Name as in contract')} required htmlFor="oname">
@@ -146,6 +179,40 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
             </Field>
           </div>
 
+          {/* Our own levers, shown before sending — not buried in the details later. */}
+          <div className="space-y-3">
+            <p className="font-bold text-ink">
+              {tx('عايز تبيع أسرع؟', 'Want to sell faster?')} <span className="text-sm font-medium text-muted">{tx('(اختياري)', '(optional)')}</span>
+            </p>
+            <Toggle
+              tone="accent"
+              label={tx('أعمل خصم من اللي دفعته', 'Take a discount off what I paid')}
+              hint={tx('وحدتك هتظهر بعلامة الخصم وفي الرئيسية', 'Your unit gets the discount badge and shows on the home page')}
+              on={form.willingToDiscount}
+              onChange={(v) => set('willingToDiscount', v)}
+            >
+              <Field label={tx('قيمة الخصم', 'Discount amount')} required htmlFor="disc">
+                <MoneyInput id="disc" value={form.discountAmount} onChange={(n) => set('discountAmount', n)} placeholder="100,000" />
+              </Field>
+            </Toggle>
+            <Toggle
+              label={tx('السعر قابل للتفاوض', 'Open to offers')}
+              hint={tx('المشتري يقدر يعرض سعر أقل شوية، والقرار في الآخر ليك', 'Buyers can offer a little less — you decide')}
+              on={form.negotiable}
+              onChange={(v) => set('negotiable', v)}
+            />
+            <button type="button" onClick={() => onNavigate('swap')} className="w-full flex items-center gap-3 rounded-2xl border border-line p-4 text-start hover:border-ink-soft transition-colors">
+              <span className="grid place-items-center w-10 h-10 rounded-xl bg-brand-soft text-ink shrink-0">
+                <Repeat className="w-5 h-5" />
+              </span>
+              <span className="flex-1">
+                <span className="block font-semibold text-ink">{tx('ولا تحب تبدّلها بوحدة تانية؟', 'Rather swap it for another unit?')}</span>
+                <span className="block text-sm text-muted">{tx('من غير ما تبيع الأول — تدفع أو تاخد الفرق بس', 'No selling first — just settle the difference')}</span>
+              </span>
+              <Arrow className="w-4 h-4 text-muted" />
+            </button>
+          </div>
+
           {/* The three seller rules that matter most, agreed to right where they apply. */}
           <div className="rounded-2xl bg-paper p-5 space-y-4">
             <div className="flex items-center justify-between gap-3">
@@ -155,15 +222,8 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
                 {tx('كل القواعد', 'All rules')}
               </button>
             </div>
-            <p className="flex items-start gap-2 rounded-xl bg-gold-soft px-3 py-2.5 text-sm text-ink">
-              <UserCheck className="w-4 h-4 text-gold shrink-0 mt-0.5" />
-              <span>
-                <b>{tx('ملّاك بس. ', 'Owners only. ')}</b>
-                {tx('بنتعامل مع صاحب الوحدة مباشرة، ومش بنقبل سماسرة.', 'We deal directly with the owner — no brokers.')}
-              </span>
-            </p>
             <CheckBox checked={form.ackOwner} onChange={(v) => set('ackOwner', v)}>
-              <b>{tx('أنا المالك', "I'm the owner")}</b> — {tx('العقد باسمي أو معايا توكيل رسمي', 'the contract is in my name or I hold a formal POA')}
+              <b>{tx('أنا المالك', "I'm the owner")}</b> — {tx('العقد باسمي أو معايا توكيل رسمي. مش بنقبل سماسرة.', 'the contract is in my name or I hold a formal POA. No brokers.')}
             </CheckBox>
             <CheckBox checked={form.ackNoOverprice} onChange={(v) => set('ackNoOverprice', v)}>
               <b>{tx('مفيش أوفر برايس', 'No overprice')}</b> — {tx('هاخد اللي دفعته بس، ومش هاخد عربون برّه', "I'll take only what I paid, and no side deposits")}
@@ -187,6 +247,15 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               {tx('سياسة الخصوصية', 'Privacy policy')}
             </button>
           </p>
+          <a
+            href={whatsappLink(tx('عايز أعرض وحدتي', "I'd like to list my unit"))}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center justify-center gap-2 rounded-2xl border border-line py-3 text-sm font-semibold text-ink-soft hover:text-ink hover:border-ink-soft transition-colors"
+          >
+            <MessageCircle className="w-4 h-4" />
+            {tx('مش حابب تملا فورم؟ ابعتلنا على واتساب', "Rather not fill a form? Message us on WhatsApp")}
+          </a>
         </div>
 
         <aside className="lg:sticky lg:top-24 space-y-4">
@@ -194,8 +263,12 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
             <p className="font-bold text-ink">{tx('هتسترد كام؟', "What you'll get back")}</p>
             {validMoney ? (
               <>
-                <p className="num mt-3 text-4xl font-bold text-brand">{money(form.paidAmount, language)}</p>
-                <p className="text-sm text-muted">{currency(language)} · {tx('من غير عمولة', 'no fee')}</p>
+                <p className="num font-display mt-3 text-4xl font-extrabold text-ink">{money(net, language)}</p>
+                <p className="text-sm text-muted">
+                  {currency(language)} · {tx('من غير عمولة', 'no fee')}
+                  {discount > 0 && tx(` · بعد خصمك ${money(discount, language)}`, ` · after your ${money(discount, language)} discount`)}
+                  {fines > 0 && tx(` · بعد المتأخرات ${money(fines, language)}`, ` · after ${money(fines, language)} arrears`)}
+                </p>
                 <div className="mt-5 rounded-2xl bg-danger-soft p-4 flex items-center gap-3">
                   <TrendingDown className="w-5 h-5 text-danger shrink-0" />
                   <p className="text-sm text-ink-soft">

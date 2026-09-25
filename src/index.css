@@ -1,31 +1,41 @@
 @import "tailwindcss";
 
-/* Design tokens — calm, warm, low-glare palette */
+/* Design tokens — near-monochrome: off-white, warm black, and one accent used sparingly.
+   Attention comes from type size, contrast and photos, not from colour. */
 @theme {
   --font-sans: 'IBM Plex Sans Arabic', 'Plus Jakarta Sans', system-ui, sans-serif;
+  /* Headlines and hero numbers only. */
+  --font-display: 'Alexandria', 'IBM Plex Sans Arabic', system-ui, sans-serif;
 
-  --color-paper: #f7f6f2;
+  --color-paper: #fafaf7;
   --color-surface: #ffffff;
-  --color-ink: #1c2522;
-  --color-ink-soft: #3d4844;
-  --color-muted: #626c67; /* 5.0:1 on paper */
-  --color-line: #e8e5dd;
-  --color-line-strong: #d9d5ca;
+  --color-ink: #121210;
+  --color-ink-soft: #3a3935;
+  --color-muted: #6b6a64; /* 5.2:1 on paper */
+  --color-line: #e7e5df;
+  --color-line-strong: #d6d3cb;
+  /* Borders of things you type in or tap: 3.4:1 on white, so an empty field still reads as a field. */
+  --color-field-border: #8f8b82;
+  /* Field fill, a step off the white card behind it. */
+  --color-field: #fbfaf7;
 
-  --color-brand: #145c4b;
-  --color-brand-hover: #0f4a3c;
-  --color-brand-soft: #e7f0ec;
-  --color-brand-ink: #0c3b30;
+  /* "brand" is the warm black: buttons, selected states, dark sections. */
+  --color-brand: #121210;
+  --color-brand-hover: #2e2d29;
+  --color-brand-soft: #f1f0eb;
+  --color-brand-ink: #121210;
 
-  --color-gold: #8f5d12; /* 5.1:1 on gold-soft, white text 5.6:1 */
-  --color-gold-soft: #fbf2e2;
+  /* The single accent. At most one or two touches per screen. */
+  --color-accent: #a8431f; /* white text 5.9:1 */
+  --color-accent-soft: #f8ede7;
+  --color-accent-light: #e39068; /* for accent text on the dark sections */
 
-  --color-danger: #b4483c;
-  --color-danger-soft: #fbecea;
+  --color-danger: #b42318;
+  --color-danger-soft: #fdecea;
 
-  --radius-card: 1.25rem;
-  --shadow-soft: 0 1px 2px rgb(28 37 34 / 0.04), 0 8px 24px -12px rgb(28 37 34 / 0.12);
-  --shadow-lift: 0 2px 4px rgb(28 37 34 / 0.05), 0 18px 40px -16px rgb(28 37 34 / 0.22);
+  --radius-card: 1rem;
+  --shadow-soft: 0 1px 2px rgb(18 18 16 / 0.04);
+  --shadow-lift: 0 2px 4px rgb(18 18 16 / 0.04), 0 20px 40px -20px rgb(18 18 16 / 0.25);
 }
 
 @layer base {
@@ -35,6 +45,12 @@
     color: var(--color-ink);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2 {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
   }
 
   button {
@@ -53,7 +69,7 @@
 }
 
 @utility btn {
-  @apply inline-flex items-center justify-center gap-2 rounded-full font-semibold transition-colors min-h-12 px-6 text-[15px] disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-colors min-h-12 px-6 text-[15px] disabled:opacity-50 disabled:cursor-not-allowed;
 }
 @utility btn-primary {
   @apply btn bg-brand text-white hover:bg-brand-hover;
@@ -68,13 +84,13 @@
   @apply inline-flex items-center justify-center gap-1.5 rounded-full px-3.5 min-h-11 sm:min-h-10 text-sm font-medium border transition-colors whitespace-nowrap;
 }
 @utility chip-off {
-  @apply chip bg-surface border-line text-ink-soft hover:border-line-strong;
+  @apply chip bg-surface border-field-border text-ink hover:border-ink;
 }
 @utility chip-on {
   @apply chip bg-brand text-white border-brand;
 }
 @utility field {
-  @apply w-full rounded-2xl border border-line bg-surface px-4 h-13 text-[15px] text-ink placeholder:text-muted focus:outline-none focus:border-brand focus:ring-4 focus:ring-brand/10 transition;
+  @apply w-full rounded-2xl border border-field-border bg-field px-4 h-13 text-[15px] text-ink placeholder:text-ink/40 hover:border-ink-soft focus:outline-none focus:border-ink focus:bg-surface focus:ring-4 focus:ring-ink/10 transition;
 }
 @utility label {
   @apply block text-sm font-medium text-ink-soft mb-2;

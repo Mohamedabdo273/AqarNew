@@ -85,7 +85,8 @@ interface UnitsContextType {
 
 const UnitsContext = createContext<UnitsContextType | undefined>(undefined);
 
-const STORAGE_KEY_UNITS = 'tanazul_units_data_v2';
+// Bump the version whenever the mock data shape changes, so browsers drop the old cached copy.
+const STORAGE_KEY_UNITS = 'tanazul_units_data_v4';
 const STORAGE_KEY_SAVED = 'tanazul_saved_units_v1';
 const STORAGE_KEY_INQUIRIES = 'tanazul_inquiries_data_v1';
 
@@ -290,7 +291,7 @@ export const UnitsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       contractYear: 2023,
       viewsCount: 1,
       offersCount: 0,
-      isHotDeal: (input.sellerWillingDiscountAmount && input.sellerWillingDiscountAmount > 0) || true,
+      isHotDeal: !!input.sellerWillingDiscountAmount && input.sellerWillingDiscountAmount > 0,
       urgencyBadge: (input.sellerWillingDiscountAmount && input.sellerWillingDiscountAmount > 0)
         ? `خصم ${input.sellerWillingDiscountAmount.toLocaleString()} ج`
         : 'معروضة حديثاً',

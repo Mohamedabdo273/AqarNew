@@ -1,9 +1,22 @@
 import React from 'react';
-import { Heart, MapPin, BedDouble, Maximize2, KeyRound, BadgeCheck } from 'lucide-react';
+import { Heart, MapPin, BadgeCheck, Flame, ArrowDown } from 'lucide-react';
 import { RealEstateUnit } from '../types';
+import { BRAND } from '../config/brand';
 import { useLanguage } from '../context/LanguageContext';
 import { useUnits } from '../context/UnitsContext';
-import { deliveryLabel, money, monthlyInstallment, pick, savingsPercent, currency } from '../lib/unitHelpers';
+import {
+  cashPrice,
+  currency,
+  deliveryLabel,
+  isDeal,
+  isNegotiable,
+  money,
+  monthlyInstallment,
+  pick,
+  savingsAmount,
+  savingsPercent,
+  sellerDiscount,
+} from '../lib/unitHelpers';
 
 interface UnitCardProps {
   unit: RealEstateUnit;
@@ -12,20 +25,34 @@ interface UnitCardProps {
   fitsBudget?: boolean;
   /** Extra pill shown on the image (e.g. swap price difference). */
   tag?: { label: string; strong?: boolean };
+  /** Extra content at the bottom of the card (e.g. the swap page's monthly change and request button). */
+  footer?: React.ReactNode;
 }
 
-export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, tag }) => {
+/** Full number with thousands separators — easier to read and compare than "1.7 مليون" on a price card. */
+const full = (n: number) => Math.round(n).toLocaleString('en-US');
+
+export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, tag, footer }) => {
   const { language, tx } = useLanguage();
   const { isUnitSaved, toggleSaveUnit } = useUnits();
   const saved = isUnitSaved(unit.id);
-  const pct = savingsPercent(unit);
+  const deal = isDeal(unit);
+  const cur = currency(language);
+
+  const specs = [
+    pick(language, unit.propertyType, unit.propertyTypeEn),
+    unit.bedrooms > 0 ? tx(`${unit.bedrooms} غرف`, `${unit.bedrooms} beds`) : null,
+    unit.bathrooms > 0 ? tx(`${unit.bathrooms} حمام`, `${unit.bathrooms} baths`) : null,
+    `${unit.areaM2} ${tx('م²', 'm²')}`,
+    tx(`استلام ${deliveryLabel(unit, language)}`, `Delivery ${deliveryLabel(unit, language)}`),
+  ].filter(Boolean);
 
   return (
     <article
       onClick={() => onOpen(unit)}
-      className="group card overflow-hidden cursor-pointer transition-all hover:shadow-lift hover:-translate-y-0.5"
+      className={`group card overflow-hidden cursor-pointer transition-all hover:shadow-lift hover:-translate-y-0.5 flex flex-col ${deal ? 'border-accent/50 ring-1 ring-accent/20' : ''}`}
     >
-      <div className="relative aspect-[4/3] overflow-hidden bg-line">
+      <div className="relative aspect-[16/10] overflow-hidden bg-line">
         <img
           src={unit.images[0]}
           alt=""
@@ -52,60 +79,92 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
             <Heart className={`w-4 h-4 ${saved ? 'fill-danger text-danger' : 'text-ink-soft'}`} />
           </button>
         </div>
-        {pct > 0 && (
-          <span className="absolute bottom-3 start-3 rounded-full bg-gold text-white px-3 py-1 text-xs font-bold">
-            {tx(`أرخص ${pct}% من سعر النهارده`, `${pct}% below today's price`)}
-          </span>
-        )}
-        {tag && (
-          <span
-            className={`absolute top-14 start-3 rounded-full px-3 py-1 text-xs font-bold shadow ${
-              tag.strong ? 'bg-brand text-white' : 'bg-surface text-ink'
-            }`}
-          >
-            {tag.label}
-          </span>
-        )}
+        <div className="absolute inset-x-3 bottom-3 flex items-end justify-between gap-2">
+          {/* The one place the accent colour shows up in a list: a seller discount. */}
+          {deal ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-accent text-white px-3 py-1 text-xs font-bold shadow">
+              <Flame className="w-3.5 h-3.5" />
+              {tx(`خصم ${money(sellerDiscount(unit), language)}`, `${money(sellerDiscount(unit), language)} off`)}
+            </span>
+          ) : (
+            <span />
+          )}
+          {tag && (
+            <span className={`rounded-full px-3 py-1 text-xs font-bold ${tag.strong ? 'bg-brand text-white' : 'bg-surface/95 text-ink'}`}>{tag.label}</span>
+          )}
+        </div>
       </div>
 
-      <div className="p-4 sm:p-5">
+      <div className="p-5 flex-1 flex flex-col">
+        {/* Who and where */}
         <div className="flex items-start justify-between gap-2 min-w-0">
-          <h3 className="font-bold text-[17px] leading-snug text-ink truncate">
-            {pick(language, unit.compound, unit.compoundEn)}
-          </h3>
+          <h3 className="font-bold text-lg leading-snug text-ink truncate">{pick(language, unit.compound, unit.compoundEn)}</h3>
           {fitsBudget && (
-            <span className="shrink-0 rounded-full bg-brand-soft text-brand-ink px-2.5 py-0.5 text-xs font-semibold">
-              {tx('في ميزانيتك', 'In budget')}
-            </span>
+            <span className="shrink-0 rounded-full bg-brand-soft text-brand-ink px-2.5 py-0.5 text-xs font-semibold">{tx('في ميزانيتك', 'In budget')}</span>
           )}
         </div>
         <p className="mt-1 flex items-center gap-1 text-sm text-muted">
           <MapPin className="w-3.5 h-3.5 shrink-0" />
           <span className="truncate">{pick(language, unit.location, unit.locationEn)}</span>
+          <span className="num ms-auto shrink-0 text-xs text-muted" dir="ltr">
+            {unit.verificationCode}
+          </span>
         </p>
+        <p className="mt-2 text-sm font-medium text-ink-soft truncate">{specs.join(' · ')}</p>
 
-        <div className="mt-3 flex items-center gap-4 text-sm text-ink-soft">
-          <span className="flex items-center gap-1.5"><Maximize2 className="w-4 h-4 text-muted" />{unit.areaM2} {tx('م²', 'm²')}</span>
-          {unit.bedrooms > 0 && (
-            <span className="flex items-center gap-1.5"><BedDouble className="w-4 h-4 text-muted" />{unit.bedrooms}</span>
+        {/* The headline number is the monthly — "within your budget" is the whole idea. Cash comes second. */}
+        <div className="mt-4">
+          <p className="text-sm text-muted">{tx('قسطك الشهري تقريباً', 'Your monthly, roughly')}</p>
+          <p className="num font-display mt-0.5 text-3xl font-extrabold text-ink whitespace-nowrap">
+            {full(monthlyInstallment(unit))} <span className="text-sm font-semibold text-muted">{tx(`${cur} / شهر`, `${cur} / mo`)}</span>
+          </p>
+        </div>
+
+        <div className="mt-3 rounded-xl border border-line px-4 py-3">
+          <div className="flex items-baseline justify-between gap-3">
+            <span className="text-sm text-muted">{tx('وتدفع كاش دلوقتي', 'Plus cash now')}</span>
+            <span className="num text-lg font-bold text-ink whitespace-nowrap">
+              {full(cashPrice(unit))} <span className="text-xs font-semibold text-muted">{cur}</span>
+            </span>
+          </div>
+          {deal && (
+            <p className="num text-end text-sm text-muted whitespace-nowrap">
+              {tx('كان', 'was')} <span className="line-through">{full(unit.paidCashAmount)}</span>
+            </p>
           )}
-          <span className="flex items-center gap-1.5"><KeyRound className="w-4 h-4 text-muted" />{deliveryLabel(unit, language)}</span>
+          {isNegotiable(unit) && (
+            <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-ink px-3 py-1 text-sm font-bold text-white whitespace-nowrap">
+              <ArrowDown className="w-4 h-4" strokeWidth={2.5} />
+              {tx('الكاش قابل للتفاوض', 'Cash negotiable')}
+            </p>
+          )}
         </div>
 
-        <div className="mt-4 pt-4 border-t border-line grid grid-cols-2 gap-3">
-          <div>
-            <p className="text-xs text-muted">{tx('تدفع كاش', 'Cash now')}</p>
-            <p className="num mt-0.5 text-lg font-bold text-ink whitespace-nowrap">
-              {money(unit.paidCashAmount, language)} <span className="text-xs font-medium text-muted">{currency(language)}</span>
-            </p>
-          </div>
-          <div>
-            <p className="text-xs text-muted">{tx('قسط شهري تقريباً', '≈ Monthly')}</p>
-            <p className="num mt-0.5 text-lg font-bold text-brand whitespace-nowrap">
-              {money(monthlyInstallment(unit), language)} <span className="text-xs font-medium text-muted">{currency(language)}</span>
-            </p>
-          </div>
+        {/* What they gain */}
+        <div className="mt-3 rounded-xl bg-paper border border-line px-4 py-3">
+          <p className="text-xs text-muted">{tx('توفيرك عن سعر المطور النهارده', "Saving vs the developer's price today")}</p>
+          <p className="num mt-0.5 text-lg font-bold text-ink whitespace-nowrap">
+            + {full(savingsAmount(unit))} <span className="text-sm font-semibold text-muted">{cur}</span>
+            <span className="ms-2 text-sm font-semibold text-muted">{savingsPercent(unit)}%</span>
+          </p>
+          <p className="num mt-1 text-[11px] text-muted">
+            {tx(
+              `سعر المطور النهارده ${full(unit.currentMarketPrice)} · بعد عمولتنا ${BRAND.buyerFeePercent}%`,
+              `Developer's price today ${full(unit.currentMarketPrice)} · after our ${BRAND.buyerFeePercent}% fee`,
+            )}
+          </p>
         </div>
+
+        {/* What they take on */}
+        <dl className="mt-auto pt-4 space-y-2 text-sm">
+          <div className="flex items-baseline justify-between gap-3 border-t border-line pt-3">
+            <dt className="text-muted">{tx('باقي للمطور', 'Left to developer')}</dt>
+            <dd className="num font-semibold text-ink whitespace-nowrap">
+              {full(unit.remainingAmount)} <span className="text-xs text-muted">{cur}</span>
+            </dd>
+          </div>
+        </dl>
+        {footer}
       </div>
     </article>
   );

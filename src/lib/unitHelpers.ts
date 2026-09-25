@@ -1,4 +1,5 @@
 import { Language, RealEstateUnit } from '../types';
+import { BRAND } from '../config/brand';
 
 const MONTHS_PER_PAYMENT: Record<string, number> = {
   'شهري': 1,
@@ -11,9 +12,27 @@ const MONTHS_PER_PAYMENT: Record<string, number> = {
 export const monthlyInstallment = (unit: RealEstateUnit): number =>
   Math.round(unit.installmentValue / (MONTHS_PER_PAYMENT[unit.installmentFrequency] ?? 3));
 
-/** What the buyer saves versus buying the same unit from the developer today. */
+/** Amount the seller agreed to knock off what they paid, to sell faster. */
+export const sellerDiscount = (unit: RealEstateUnit): number => Math.max(0, unit.sellerWillingDiscountAmount ?? 0);
+
+/** A "لقطة": the seller is taking less than they paid. */
+export const isDeal = (unit: RealEstateUnit): boolean => sellerDiscount(unit) > 0;
+
+/** The owner accepts offers below the asking cash. */
+export const isNegotiable = (unit: RealEstateUnit): boolean => !!unit.negotiable;
+
+/** Cash the buyer actually hands over: what the seller paid, less any agreed discount. */
+export const cashPrice = (unit: RealEstateUnit): number => Math.max(0, unit.paidCashAmount - sellerDiscount(unit));
+
+/** Our fee, paid by the buyer after signing: a % of the contract price. */
+export const buyerFee = (unit: RealEstateUnit): number => Math.round((unit.originalContractPrice * BRAND.buyerFeePercent) / 100);
+
+/**
+ * Buyer's real saving vs buying the same unit from the developer today:
+ * includes any seller discount and is already net of our fee — so the number we show is the number they keep.
+ */
 export const savingsAmount = (unit: RealEstateUnit): number =>
-  Math.max(0, unit.currentMarketPrice - unit.originalContractPrice);
+  Math.max(0, unit.currentMarketPrice - unit.originalContractPrice + sellerDiscount(unit) - buyerFee(unit));
 
 export const savingsPercent = (unit: RealEstateUnit): number =>
   unit.currentMarketPrice > 0 ? Math.round((savingsAmount(unit) / unit.currentMarketPrice) * 100) : 0;

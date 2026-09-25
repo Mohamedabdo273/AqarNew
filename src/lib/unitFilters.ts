@@ -1,6 +1,6 @@
 import { RealEstateUnit } from '../types';
 import { Budget, fitsBudget } from '../components/BudgetFinder';
-import { monthlyInstallment, savingsPercent } from './unitHelpers';
+import { cashPrice, isDeal, isNegotiable, monthlyInstallment, savingsPercent, sellerDiscount } from './unitHelpers';
 
 export interface Filters {
   query: string;
@@ -15,6 +15,9 @@ export interface Filters {
   delivery: string[];
   finishing: string[];
   frequency: string[];
+  /** Seller offers a fixed discount. */
+  discounted: boolean;
+  /** Seller accepts lower offers. */
   negotiable: boolean;
   swappable: boolean;
   noTransferFee: boolean;
@@ -34,21 +37,23 @@ export const EMPTY_FILTERS: Filters = {
   delivery: [],
   finishing: [],
   frequency: [],
+  discounted: false,
   negotiable: false,
   swappable: false,
   noTransferFee: false,
   noPenalties: false,
 };
 
-export type SortKey = 'newest' | 'savings' | 'cash' | 'monthly' | 'delivery' | 'popular' | 'area';
+export type SortKey = 'newest' | 'deals' | 'savings' | 'cash' | 'monthly' | 'delivery' | 'popular' | 'area';
 
 const deliveryRank = (u: RealEstateUnit) =>
   u.deliveryStatus === 'استلام فوري' ? 0 : Number(u.deliveryStatus.replace(/\D/g, '')) || 9999;
 
 export const SORTERS: Record<SortKey, (a: RealEstateUnit, b: RealEstateUnit) => number> = {
   newest: () => 0, // units are stored newest-first
+  deals: (a, b) => sellerDiscount(b) - sellerDiscount(a),
   savings: (a, b) => savingsPercent(b) - savingsPercent(a),
-  cash: (a, b) => a.paidCashAmount - b.paidCashAmount,
+  cash: (a, b) => cashPrice(a) - cashPrice(b),
   monthly: (a, b) => monthlyInstallment(a) - monthlyInstallment(b),
   delivery: (a, b) => deliveryRank(a) - deliveryRank(b),
   popular: (a, b) => b.viewsCount - a.viewsCount,
@@ -75,7 +80,8 @@ export const applyFilters = (
     if (f.delivery.length && !f.delivery.includes(u.deliveryStatus)) return false;
     if (f.finishing.length && !f.finishing.includes(u.finishing)) return false;
     if (f.frequency.length && !f.frequency.includes(u.installmentFrequency)) return false;
-    if (f.negotiable && !(u.sellerWillingDiscountAmount && u.sellerWillingDiscountAmount > 0)) return false;
+    if (f.discounted && !isDeal(u)) return false;
+    if (f.negotiable && !isNegotiable(u)) return false;
     if (f.swappable && u.eligibleForSwap === false) return false;
     if (f.noTransferFee && u.transferFeePolicy !== 'معفي من رسوم التنازل') return false;
     if (f.noPenalties && u.hasLatePenalties) return false;

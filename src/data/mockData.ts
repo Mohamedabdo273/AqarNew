@@ -77,6 +77,7 @@ const BASE_UNITS: RealEstateUnit[] = [
   },
   {
     id: 'unit-2',
+    negotiable: true,
     title: 'تاون هاوس كورنر في بادية بالم هيلز أكتوبر',
     titleEn: 'Corner Townhouse in Badya Palm Hills 6th of October',
     developer: 'بالم هيلز للتعمير (Badya)',
@@ -198,6 +199,7 @@ const BASE_UNITS: RealEstateUnit[] = [
   },
   {
     id: 'unit-4',
+    negotiable: true,
     title: 'شاليه أرضي بجاردن في مراسي الساحل الشمالي (سيدي عبد الرحمن)',
     titleEn: 'Ground Chalet with Garden in Marassi North Coast',
     developer: 'إعمار مصر (Emaar Misr)',
@@ -505,6 +507,7 @@ const generateUnits = (bases: RealEstateUnit[], count: number): RealEstateUnit[]
       offersCount: (i * 3) % 11,
       sellerWillingDiscountAmount: discount,
       isHotDeal: !!discount,
+      negotiable: i % 3 === 1,
       images: [...base.images.slice(i % base.images.length), ...base.images.slice(0, i % base.images.length)],
       description: `المالك دفع ${paid.toLocaleString('en-US')} ج.م وعاوز يتنازل بدون أوفر برايس. الباقي ${remaining.toLocaleString('en-US')} ج.م أقساط ${frequency} على ${years} سنين.`,
       descriptionEn: `Owner paid ${paid.toLocaleString('en-US')} EGP and wants to exit with zero overprice. Remaining ${remaining.toLocaleString('en-US')} EGP over ${years} years.`,
