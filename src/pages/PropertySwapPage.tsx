@@ -80,7 +80,7 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
           <Repeat className="w-4 h-4" />
           {tx('حصري عندنا', 'Only here')}
         </span>
-        <h1 className="mt-4 text-3xl sm:text-4xl font-bold text-ink">{tx('بدّل وحدتك بوحدة قسطها يريحك', 'Swap for a unit whose instalment you can manage')}</h1>
+        <h1 className="mt-4 text-3xl sm:text-4xl font-extrabold text-ink">{tx('بدّل وحدتك بوحدة قسطها يريحك', 'Swap for a unit whose instalment you can manage')}</h1>
         <p className="mt-3 text-ink-soft leading-relaxed">
           {tx(
             'مش لازم تبيع الأول وتدوّر لوحدك. إحنا بنبيع وحدتك وبنشتريلك الوحدة التانية مع بعض، وإنت تدفع أو تاخد الفرق بس.',
@@ -101,7 +101,7 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
           },
         ].map((s, i) => (
           <li key={s.t} className="card p-4 flex items-start gap-3">
-            <span className="num grid place-items-center w-8 h-8 rounded-full bg-brand text-white text-sm font-bold shrink-0">{i + 1}</span>
+            <span className="num grid place-items-center w-8 h-8 rounded-full bg-ink text-white text-sm font-bold shrink-0">{i + 1}</span>
             <div>
               <p className="font-bold text-ink">{s.t}</p>
               <p className="mt-0.5 text-sm text-muted">{s.d}</p>

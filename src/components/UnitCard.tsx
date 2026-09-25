@@ -68,7 +68,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
                 {tx('موثّقة', 'Verified')}
               </span>
             )}
-            {fitsBudget && <span className="rounded-full bg-brand px-2.5 py-1 text-xs font-semibold text-white">{tx('في ميزانيتك', 'In budget')}</span>}
+            {fitsBudget && <span className="rounded-full bg-ink px-2.5 py-1 text-xs font-semibold text-white">{tx('في ميزانيتك', 'In budget')}</span>}
           </div>
           <button
             onClick={(e) => {
@@ -113,7 +113,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
         {/* The headline number is the monthly — "within your budget" is the whole idea. Cash comes second. */}
         <div className="mt-4">
           <p className="text-sm text-muted">{tx('قسطك الشهري تقريباً', 'Your monthly, roughly')}</p>
-          <p className="num font-display mt-0.5 text-3xl font-bold text-ink whitespace-nowrap">
+          <p className="num font-display mt-0.5 text-3xl font-extrabold text-ink whitespace-nowrap">
             {full(monthlyInstallment(unit))} <span className="text-sm font-semibold text-muted">{tx(`${cur} / شهر`, `${cur} / mo`)}</span>
           </p>
         </div>
@@ -131,7 +131,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
             </p>
           )}
           {isNegotiable(unit) && (
-            <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-brand px-3 py-1 text-sm font-bold text-white whitespace-nowrap">
+            <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-ink px-3 py-1 text-sm font-bold text-white whitespace-nowrap">
               <ArrowDown className="w-4 h-4" strokeWidth={2.5} />
               {tx('الكاش قابل للتفاوض', 'Cash negotiable')}
             </p>

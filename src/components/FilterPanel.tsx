@@ -128,7 +128,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
   return (
     <div>
       <Section title={tx('دوّر بميزانيتك', 'Search by budget')} active={budgetOn ? 1 : 0} defaultOpen>
-        <div className="flex items-center justify-between gap-3 mb-5 rounded-xl bg-paper px-4 py-3">
+        <div className="flex items-center justify-between gap-3 mb-5 rounded-2xl bg-paper px-4 py-3">
           <span className="text-sm text-ink-soft">{tx('وريني اللي على قدي بس', 'Only show what I can afford')}</span>
           <Switch on={budgetOn} onClick={() => onBudgetOnChange(!budgetOn)} label={tx('دوّر بميزانيتك', 'Search by budget')} />
         </div>
@@ -162,7 +162,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                   aria-pressed={on}
                   className="w-full flex items-center gap-3 rounded-xl px-2 py-2 hover:bg-paper text-start"
                 >
-                  <span className={`grid place-items-center w-5 h-5 rounded-xl border-2 shrink-0 ${on ? 'bg-brand border-brand text-white' : 'border-line-strong'}`}>
+                  <span className={`grid place-items-center w-5 h-5 rounded-md border-2 shrink-0 ${on ? 'bg-brand border-brand text-white' : 'border-line-strong'}`}>
                     {on && <Check className="w-3.5 h-3.5" strokeWidth={3} />}
                   </span>
                   <span className="flex-1 text-sm text-ink truncate">{d.label}</span>

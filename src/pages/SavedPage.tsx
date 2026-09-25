@@ -32,7 +32,7 @@ export const SavedPage: React.FC<SavedPageProps> = ({ onSelectUnit, onNavigate }
         </div>
       ) : (
         <div className="mt-8 card p-12 text-center">
-          <span className="mx-auto grid place-items-center w-14 h-14 rounded-xl bg-danger-soft text-danger">
+          <span className="mx-auto grid place-items-center w-14 h-14 rounded-2xl bg-danger-soft text-danger">
             <Heart className="w-7 h-7" />
           </span>
           <p className="mt-4 font-bold text-lg text-ink">{tx('لسه ما حفظتش حاجة', 'Nothing saved yet')}</p>

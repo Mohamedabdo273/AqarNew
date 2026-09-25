@@ -361,7 +361,7 @@ export const UnitsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
       {/* Floating Notification Toast */}
       {toastMessage && (
-        <div role="status" className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-[60] max-w-[calc(100%-2rem)] px-5 py-3.5 rounded-xl bg-brand text-white text-sm font-medium shadow-lift flex items-center gap-3">
+        <div role="status" className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-[60] max-w-[calc(100%-2rem)] px-5 py-3.5 rounded-2xl bg-ink text-white text-sm font-medium shadow-lift flex items-center gap-3">
           <span className="w-2 h-2 rounded-full bg-brand-soft shrink-0"></span>
           <span>{toastMessage}</span>
         </div>

@@ -83,7 +83,7 @@ export const MyRequestsPage: React.FC<MyRequestsPageProps> = ({ code, onOpenRequ
 
       {requests.length === 0 ? (
         <div className="mt-8 card p-10 text-center">
-          <span className="mx-auto grid place-items-center w-14 h-14 rounded-xl bg-brand-soft text-brand">
+          <span className="mx-auto grid place-items-center w-14 h-14 rounded-2xl bg-brand-soft text-brand">
             <Inbox className="w-7 h-7" />
           </span>
           <p className="mt-4 font-bold text-lg text-ink">{tx('لسه ما بعتّش طلبات', 'No requests yet')}</p>
@@ -113,7 +113,7 @@ export const MyRequestsPage: React.FC<MyRequestsPageProps> = ({ code, onOpenRequ
                     {pct < 100 && (
                       <div className="mt-3 flex items-center gap-3">
                         <div className="flex-1 h-2 rounded-full bg-line overflow-hidden">
-                          <div className="h-full bg-brand rounded-full" style={{ width: `${pct}%` }} />
+                          <div className="h-full bg-ink rounded-full" style={{ width: `${pct}%` }} />
                         </div>
                         <span className="num text-xs font-semibold text-ink-soft whitespace-nowrap">{tx(`البيانات ${pct}%`, `Details ${pct}%`)}</span>
                       </div>
@@ -211,7 +211,7 @@ const RequestDetail: React.FC<{ req: SellRequest; onBack: () => void }> = ({ req
                 <span className="num text-sm font-bold text-ink">{pct}%</span>
               </div>
               <div className="mt-3 h-2 rounded-full bg-line overflow-hidden">
-                <div className="h-full bg-brand rounded-full transition-all" style={{ width: `${pct}%` }} />
+                <div className="h-full bg-ink rounded-full transition-all" style={{ width: `${pct}%` }} />
               </div>
               <ul className="mt-5 grid sm:grid-cols-2 gap-2">
                 {DETAIL_SECTIONS.map((s, i) => {
@@ -223,7 +223,7 @@ const RequestDetail: React.FC<{ req: SellRequest; onBack: () => void }> = ({ req
                     <li key={s}>
                       <button
                         onClick={() => setEditing(i)}
-                        className={`w-full flex items-center gap-3 rounded-xl border px-4 py-3 text-start transition-colors ${done ? 'border-line bg-paper' : optional ? 'border-line border-dashed bg-surface hover:border-ink-soft' : 'border-line-strong bg-surface hover:border-brand'}`}
+                        className={`w-full flex items-center gap-3 rounded-2xl border px-4 py-3 text-start transition-colors ${done ? 'border-line bg-paper' : optional ? 'border-line border-dashed bg-surface hover:border-ink-soft' : 'border-line-strong bg-surface hover:border-ink'}`}
                       >
                         <span className={`grid place-items-center w-8 h-8 rounded-full shrink-0 ${done ? 'bg-brand text-white' : 'bg-brand-soft text-ink'}`}>
                           {done ? <Check className="w-4 h-4" strokeWidth={3} /> : <M.icon className="w-4 h-4" />}
@@ -278,7 +278,7 @@ const RequestDetail: React.FC<{ req: SellRequest; onBack: () => void }> = ({ req
 
         <aside className="lg:sticky lg:top-24 card p-6">
           <p className="font-bold text-ink">{tx('هتستلم', "You'll receive")}</p>
-          <p className="num font-display mt-2 text-4xl font-bold text-ink">{money(net, language)}</p>
+          <p className="num font-display mt-2 text-4xl font-extrabold text-ink">{money(net, language)}</p>
           <p className="text-sm text-muted">{currency(language)} · {tx('بشيك مصرفي', 'by bank cheque')}</p>
           <dl className="mt-5 space-y-2.5 text-sm">
             <div className="flex justify-between">

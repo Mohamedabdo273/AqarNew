@@ -22,7 +22,6 @@ import { NotFoundPage } from './pages/NotFoundPage';
 import { StatementPage } from './pages/StatementPage';
 import { whatsappLink } from './config/brand';
 import { hasAdminSession } from './services/adminAuth';
-import { useScrollReveal } from './lib/useScrollReveal';
 import { PageId, RealEstateUnit } from './types';
 import { useUnits } from './context/UnitsContext';
 import { useLanguage } from './context/LanguageContext';
@@ -51,8 +50,6 @@ export default function App() {
   const [unitId, setUnitId] = useState<string | null>(null);
   const [thanks, setThanks] = useState<{ kind: ThanksKind; ref: string | null }>({ kind: 'contact', ref: null });
   const [adminIn, setAdminIn] = useState(hasAdminSession);
-  // Sections and cards fade up as they scroll in; re-armed on every page change.
-  useScrollReveal(`${activePage}:${unitId ?? ''}`);
   // The floating WhatsApp button steps aside while you scroll down (it sits over content on phones) and comes back on scroll up.
   const [fabVisible, setFabVisible] = useState(true);
   useEffect(() => {
@@ -213,7 +210,7 @@ export default function App() {
         target="_blank"
         rel="noreferrer"
         aria-label={tx('واتساب', 'WhatsApp')}
-        className={`fixed bottom-20 md:bottom-6 end-4 md:end-6 z-30 grid place-items-center w-12 h-12 md:w-14 md:h-14 rounded-full bg-brand text-white ring-2 ring-white shadow-lift hover:scale-105 transition-all duration-300 ${
+        className={`fixed bottom-20 md:bottom-6 end-4 md:end-6 z-30 grid place-items-center w-12 h-12 md:w-14 md:h-14 rounded-full bg-ink text-white ring-2 ring-white shadow-lift hover:scale-105 transition-all duration-300 ${
           fabVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
         }`}
       >

@@ -122,7 +122,7 @@ export const Counter: React.FC<{ label: string; value: number; onChange: (n: num
   return (
     <div>
       <p className="label">{label}</p>
-      <div className="flex items-center justify-between h-13 rounded-xl border border-field-border bg-field px-2">
+      <div className="flex items-center justify-between h-13 rounded-2xl border border-field-border bg-field px-2">
         <button type="button" onClick={() => onChange(Math.max(min, value - 1))} aria-label={tx('أقل', 'Less')} className="grid place-items-center w-9 h-9 rounded-full hover:bg-paper disabled:opacity-30" disabled={value <= min}>
           <Minus className="w-4 h-4" />
         </button>
@@ -145,7 +145,7 @@ export const Toggle: React.FC<{ label: string; hint?: string; on: boolean; onCha
 }) => {
   const bg = on ? (tone === 'danger' ? 'bg-danger-soft border-danger/20' : tone === 'accent' ? 'bg-accent-soft border-accent/20' : 'bg-brand-soft border-brand/20') : 'bg-surface border-line';
   return (
-    <div className={`rounded-xl border p-4 transition-colors ${bg}`}>
+    <div className={`rounded-2xl border p-4 transition-colors ${bg}`}>
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="font-semibold text-ink">{label}</p>
@@ -170,7 +170,7 @@ export const Toggle: React.FC<{ label: string; hint?: string; on: boolean; onCha
 export const CheckBox: React.FC<{ checked: boolean; onChange: (v: boolean) => void; children: React.ReactNode }> = ({ checked, onChange, children }) => (
   <label className="flex items-start gap-3 cursor-pointer">
     <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="sr-only peer" />
-    <span className={`mt-0.5 grid place-items-center w-6 h-6 rounded-xl border-2 shrink-0 transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-brand ${checked ? 'bg-brand border-brand text-white' : 'border-field-border bg-surface'}`}>
+    <span className={`mt-0.5 grid place-items-center w-6 h-6 rounded-lg border-2 shrink-0 transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-brand ${checked ? 'bg-brand border-brand text-white' : 'border-field-border bg-surface'}`}>
       {checked && <Check className="w-4 h-4" strokeWidth={3} />}
     </span>
     <span className="text-[15px] text-ink leading-relaxed">{children}</span>
@@ -178,7 +178,7 @@ export const CheckBox: React.FC<{ checked: boolean; onChange: (v: boolean) => vo
 );
 
 export const FilePick: React.FC<{ label: string; hint: string; value: string; onChange: (name: string) => void }> = ({ label, hint, value, onChange }) => (
-  <label className={`flex items-center gap-4 rounded-xl border-2 border-dashed p-4 cursor-pointer transition-colors ${value ? 'border-brand bg-brand-soft/50' : 'border-field-border hover:border-brand'}`}>
+  <label className={`flex items-center gap-4 rounded-2xl border-2 border-dashed p-4 cursor-pointer transition-colors ${value ? 'border-brand bg-brand-soft/50' : 'border-field-border hover:border-ink'}`}>
     <span className={`grid place-items-center w-11 h-11 rounded-xl shrink-0 ${value ? 'bg-brand text-white' : 'bg-brand-soft text-brand'}`}>
       {value ? <Check className="w-5 h-5" /> : <Upload className="w-5 h-5" />}
     </span>

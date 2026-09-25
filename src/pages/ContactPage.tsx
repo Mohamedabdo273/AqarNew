@@ -51,7 +51,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onSent }) 
   return (
     <div className="page-wrap py-8 sm:py-14">
       <div className="max-w-2xl">
-        <h1 className="text-4xl sm:text-5xl font-bold leading-tight text-ink">{tx('كلمنا', 'Talk to us')}</h1>
+        <h1 className="text-4xl sm:text-5xl font-extrabold leading-tight text-ink">{tx('كلمنا', 'Talk to us')}</h1>
         <p className="mt-3 text-lg text-ink-soft">{tx('بني آدم هيرد عليك، مش رد آلي.', "A real person will answer — not a bot.")}</p>
       </div>
 
@@ -65,7 +65,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onSent }) 
               {...(c.external ? { target: '_blank', rel: 'noreferrer' } : {})}
               className="card p-5 flex items-center gap-4 hover:shadow-lift transition-shadow"
             >
-              <span className="grid place-items-center w-12 h-12 rounded-xl bg-brand text-white shrink-0">
+              <span className="grid place-items-center w-12 h-12 rounded-xl bg-ink text-white shrink-0">
                 <c.icon className="w-5 h-5" />
               </span>
               <div className="min-w-0">

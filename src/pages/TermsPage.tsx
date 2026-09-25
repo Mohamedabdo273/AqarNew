@@ -172,7 +172,7 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
       summary={summary}
       sections={sections}
       footer={
-        <button onClick={() => onNavigate('rules')} className="w-full flex items-center gap-3 rounded-xl border border-line p-5 text-start hover:border-brand transition-colors">
+        <button onClick={() => onNavigate('rules')} className="w-full flex items-center gap-3 rounded-2xl border border-line p-5 text-start hover:border-brand transition-colors">
           <ScrollText className="w-6 h-6 text-brand shrink-0" />
           <span>
             <span className="block font-semibold text-ink">{tx('عاوز الكلام ده ببساطة؟', 'Want the plain version?')}</span>

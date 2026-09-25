@@ -142,9 +142,6 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
     <div className="page-wrap py-8 sm:py-12">
       <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-ink">{tx('وحدات بسعر زمان', 'Units at old prices')}</h1>
       <p className="mt-2 text-muted">{tx('ادفع اللي المالك دفعه بس، وكمّل الأقساط.', 'Pay only what the owner paid, then continue the plan.')}</p>
-      <a href="#sell" className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-ink underline min-h-11">
-        {tx('عندك وحدة ومش قادر تكمّل أقساطها؟ بيعها أو بدّلها', "Own a unit and can't keep up? Sell or swap it")}
-      </a>
 
       {/* Search */}
       <div className="mt-8 flex gap-3">
@@ -244,7 +241,7 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
             </>
           ) : (
             <div className="card p-6 sm:p-10">
-              <span className="grid place-items-center w-14 h-14 rounded-xl bg-brand text-white">
+              <span className="grid place-items-center w-14 h-14 rounded-xl bg-ink text-white">
                 <BellRing className="w-7 h-7" />
               </span>
               <p className="mt-5 font-display text-2xl font-bold text-ink">{tx('مفيش وحدة بالمواصفات دي النهارده', 'Nothing matches this search today')}</p>

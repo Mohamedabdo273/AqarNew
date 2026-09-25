@@ -200,7 +200,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
       <div className="mt-3 grid lg:grid-cols-[2fr_1fr] gap-2 sm:gap-3">
         <div className="relative rounded-card overflow-hidden bg-line">
           <img src={unit.images[imgIdx]} alt={compound} className="w-full aspect-[4/3] sm:aspect-[16/10] lg:aspect-auto lg:h-[460px] object-cover" />
-          <span className="absolute bottom-3 start-3 inline-flex items-center gap-1.5 rounded-full bg-brand/80 text-white px-3 py-1 text-xs font-semibold">
+          <span className="absolute bottom-3 start-3 inline-flex items-center gap-1.5 rounded-full bg-ink/80 text-white px-3 py-1 text-xs font-semibold">
             <Images className="w-3.5 h-3.5" />
             {imgIdx + 1} / {unit.images.length}
           </span>
@@ -222,7 +222,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
               key={src}
               onClick={() => setImgIdx(i)}
               aria-label={`${i + 1}`}
-              className={`shrink-0 w-20 h-14 rounded-xl overflow-hidden border-2 transition ${i === imgIdx ? 'border-brand' : 'border-transparent opacity-70 hover:opacity-100'}`}
+              className={`shrink-0 w-20 h-14 rounded-lg overflow-hidden border-2 transition ${i === imgIdx ? 'border-ink' : 'border-transparent opacity-70 hover:opacity-100'}`}
             >
               <img src={src} alt="" className="w-full h-full object-cover" />
             </button>
@@ -240,7 +240,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
               {unit.verificationCode}
             </span>
           </p>
-          <h1 className="mt-1 text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-ink">{compound}</h1>
+          <h1 className="mt-1 text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight text-ink">{compound}</h1>
           <p className="mt-2 flex items-center gap-1.5 text-ink-soft">
             <MapPin className="w-4 h-4 text-muted" />
             {pick(language, unit.location, unit.locationEn)}
@@ -256,7 +256,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
             {saved ? tx('محفوظة', 'Saved') : tx('احفظ', 'Save')}
           </button>
           {copied && (
-            <span className="absolute top-full mt-2 end-0 whitespace-nowrap rounded-full bg-brand text-white text-sm px-3 py-1.5 shadow-lift">
+            <span className="absolute top-full mt-2 end-0 whitespace-nowrap rounded-full bg-ink text-white text-sm px-3 py-1.5 shadow-lift">
               {tx('اتنسخ اللينك', 'Link copied')}
             </span>
           )}
@@ -266,7 +266,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
       <div className="mt-6 sm:mt-8 grid lg:grid-cols-[minmax(0,1fr)_380px] gap-6 lg:gap-10 items-start">
         {/* Price + booking — first on phones, sticky side column on desktop */}
         <aside className="lg:col-start-2 lg:row-start-1 lg:sticky lg:top-24 space-y-3">
-          <div className="rounded-card bg-brand text-white p-6 shadow-lift">
+          <div className="rounded-card bg-ink text-white p-6 shadow-lift">
             {isDeal(unit) && (
               <div className="-mt-6 -mx-6 mb-5 rounded-t-card bg-accent px-6 py-3 flex items-center gap-2 text-sm font-bold">
                 <Flame className="w-4 h-4 shrink-0" />
@@ -277,7 +277,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
               </div>
             )}
             <p className="text-sm text-white/60">{tx('تدفع كاش', 'Cash now')}</p>
-            <p className="num font-display mt-1 text-4xl font-bold">
+            <p className="num font-display mt-1 text-4xl font-extrabold">
               {money(cashPrice(unit), language)} <span className="text-base font-medium text-white/60">{currency(language)}</span>
             </p>
             {isDeal(unit) && (
@@ -363,9 +363,6 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
               </li>
             ))}
           </ul>
-          <button onClick={() => onNavigate('sell')} className="w-full text-center text-sm font-semibold text-ink underline min-h-11">
-            {tx('عندك وحدة ومش قادر تكمّل أقساطها؟', "Own a unit and can't keep up?")}
-          </button>
         </aside>
 
         <div className="lg:col-start-1 lg:row-start-1 space-y-5 sm:space-y-6 min-w-0">
@@ -384,7 +381,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
                   <span className="num font-bold text-ink">{fullMoney(unit.originalContractPrice, language)}</span>
                 </div>
                 <div className="h-3 rounded-full bg-line overflow-hidden">
-                  <div className="h-full rounded-full bg-brand" style={{ width: `${oldPct}%` }} />
+                  <div className="h-full rounded-full bg-ink" style={{ width: `${oldPct}%` }} />
                 </div>
               </div>
               <div>
@@ -491,7 +488,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
 
       {similar.length > 0 && (
         <section className="mt-14 sm:mt-20">
-          <h2 className="text-2xl sm:text-3xl font-bold text-ink">{tx('وحدات شبهها', 'Similar units')}</h2>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-ink">{tx('وحدات شبهها', 'Similar units')}</h2>
           <div className="mt-6 -mx-4 px-4 sm:mx-0 sm:px-0 flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 overflow-x-auto snap-x snap-mandatory no-scrollbar">
             {similar.map((u) => (
               <div key={u.id} className="w-[82%] shrink-0 snap-start sm:w-auto">
