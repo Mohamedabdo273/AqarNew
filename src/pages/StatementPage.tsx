@@ -78,10 +78,10 @@ export const StatementPage: React.FC<StatementPageProps> = ({ onNavigate, onSent
 
   return (
     <div id="statement-top" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-12 scroll-mt-20">
-      <span className="grid place-items-center w-12 h-12 rounded-xl bg-ink text-white">
+      <span className="grid place-items-center w-12 h-12 rounded-xl bg-brand text-white">
         <ClipboardCheck className="w-6 h-6" />
       </span>
-      <h1 className="mt-4 text-3xl sm:text-4xl font-extrabold text-ink">{tx('كشف حساب وحدتك — مجاناً', 'Your unit statement — free')}</h1>
+      <h1 className="mt-4 text-3xl sm:text-4xl font-bold text-ink">{tx('كشف حساب وحدتك — مجاناً', 'Your unit statement — free')}</h1>
       <p className="mt-3 max-w-2xl text-ink-soft leading-relaxed">
         {tx(
           'قبل ما تقرر أي حاجة: بنقولك لو لغيت هترجعلك كام وامتى، ولو بعت أو بدّلت هتقبض كام، ونصيحتنا الصريحة — حتى لو الأحسن إنك تكمّل.',
@@ -96,7 +96,7 @@ export const StatementPage: React.FC<StatementPageProps> = ({ onNavigate, onSent
       <div className="mt-8 grid lg:grid-cols-[1fr_20rem] gap-6 items-start">
         <form onSubmit={submit} noValidate className="card p-5 sm:p-8 space-y-6">
           {errors.length > 0 && (
-            <div role="alert" className="rounded-2xl bg-danger-soft p-4 flex gap-3">
+            <div role="alert" className="rounded-xl bg-danger-soft p-4 flex gap-3">
               <AlertTriangle className="w-5 h-5 text-danger shrink-0 mt-0.5" />
               <p className="text-sm text-ink-soft">
                 <span className="font-semibold text-danger">{tx('ناقص: ', 'Missing: ')}</span>
@@ -183,9 +183,9 @@ export const StatementPage: React.FC<StatementPageProps> = ({ onNavigate, onSent
                   <dd className="num font-display mt-1 text-2xl font-bold text-muted line-through decoration-2">{money(cancelBack, language)}</dd>
                   <p className="text-xs text-muted">{tx('وغالباً على أقساط لسنين', 'usually paid back over years')}</p>
                 </div>
-                <div className="rounded-xl bg-ink text-white p-3">
+                <div className="rounded-xl bg-brand text-white p-3">
                   <dt className="text-white/70">{tx('لو بعت عن طريقنا', 'Sell through us')}</dt>
-                  <dd className="num font-display mt-1 text-2xl font-extrabold">
+                  <dd className="num font-display mt-1 text-2xl font-bold">
                     {money(sellBack, language)} <span className="text-sm font-medium text-white/60">{currency(language)}</span>
                   </dd>
                   <p className="text-xs text-white/70">
@@ -199,7 +199,7 @@ export const StatementPage: React.FC<StatementPageProps> = ({ onNavigate, onSent
               <p className="mt-3 text-sm text-muted">{tx('اكتب سعر العقد والمدفوع وهنوريك الفرق', 'Enter the contract price and amount paid to see the difference')}</p>
             )}
           </div>
-          <div className="rounded-2xl bg-brand-soft p-4 text-sm text-ink space-y-2">
+          <div className="rounded-xl bg-brand-soft p-4 text-sm text-ink space-y-2">
             <p className="font-semibold">{tx('الكشف فيه إيه؟', "What's in it?")}</p>
             <ul className="space-y-1.5 text-ink-soft">
               <li>• {tx('الإلغاء هيرجعلك كام، وامتى', 'What cancelling returns, and when')}</li>
@@ -213,7 +213,7 @@ export const StatementPage: React.FC<StatementPageProps> = ({ onNavigate, onSent
             href={whatsappLink(tx('عايز كشف حساب لوحدتي', "I'd like a statement for my unit"))}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center justify-center gap-2 rounded-2xl border border-line py-3 text-sm font-semibold text-ink-soft hover:text-ink hover:border-ink-soft"
+            className="flex items-center justify-center gap-2 rounded-xl border border-line py-3 text-sm font-semibold text-ink-soft hover:text-ink hover:border-ink-soft"
           >
             <MessageCircle className="w-4 h-4" />
             {tx('أو اطلبه على واتساب', 'Or ask on WhatsApp')}

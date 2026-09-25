@@ -2,8 +2,8 @@
 export const BRAND = {
   nameAr: 'وحدتي',
   nameEn: 'Wahdety',
-  taglineAr: 'بيع وحدتك بفلوسك كاملة، أو اشتريها بسعر العقد القديم',
-  taglineEn: 'Sell your unit with every pound back, or buy at the old contract price',
+  taglineAr: 'مش قادر تكمّل الأقساط؟ بيع وحدتك واسترد فلوسك — حتى لو عليك متأخرات.',
+  taglineEn: "Can't keep up with the instalments? Sell your unit and get your money back — even with arrears.",
   hotline: '19822',
   /** International format without "+" — used for wa.me links. Placeholder until the real number is set. */
   whatsapp: '201000000000',

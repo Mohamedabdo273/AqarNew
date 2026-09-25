@@ -78,7 +78,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
 
   return (
     <div id="sell-top" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-12 scroll-mt-20">
-      <h1 className="text-3xl sm:text-4xl font-extrabold text-ink">{tx('اعرض وحدتك في دقيقة', 'List your unit in a minute')}</h1>
+      <h1 className="text-3xl sm:text-4xl font-bold text-ink">{tx('اعرض وحدتك في دقيقة', 'List your unit in a minute')}</h1>
       <p className="mt-2 flex items-center gap-2 text-muted">
         <Clock className="w-4 h-4" />
         {tx('مجاناً · من غير عمولة عليك · وباقي البيانات بعدين', 'Free · no fee for you · the rest later')}
@@ -99,7 +99,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
       </ul>
 
       {/* For owners who are already behind — the first worry, answered before the form. */}
-      <p className="mt-5 flex items-start gap-3 rounded-2xl border-2 border-ink bg-surface px-4 py-3.5 text-[15px] text-ink max-w-3xl">
+      <p className="mt-5 flex items-start gap-3 rounded-xl border-2 border-brand bg-surface px-4 py-3.5 text-[15px] text-ink max-w-3xl">
         <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
         <span>
           <b>{tx('اتأخرت في الأقساط أو عليك غرامات؟ ', 'Behind on installments or have fines? ')}</b>
@@ -110,7 +110,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
       <div className="mt-6 grid lg:grid-cols-[1fr_20rem] gap-6 items-start">
         <div className="card p-5 sm:p-8 space-y-7">
           {errors.length > 0 && (
-            <div role="alert" className="rounded-2xl bg-danger-soft p-4 flex gap-3">
+            <div role="alert" className="rounded-xl bg-danger-soft p-4 flex gap-3">
               <AlertTriangle className="w-5 h-5 text-danger shrink-0 mt-0.5" />
               <p className="text-sm text-ink-soft">
                 <span className="font-semibold text-danger">{tx('ناقص: ', 'Missing: ')}</span>
@@ -201,7 +201,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               on={form.negotiable}
               onChange={(v) => set('negotiable', v)}
             />
-            <button type="button" onClick={() => onNavigate('swap')} className="w-full flex items-center gap-3 rounded-2xl border border-line p-4 text-start hover:border-ink-soft transition-colors">
+            <button type="button" onClick={() => onNavigate('swap')} className="w-full flex items-center gap-3 rounded-xl border border-line p-4 text-start hover:border-ink-soft transition-colors">
               <span className="grid place-items-center w-10 h-10 rounded-xl bg-brand-soft text-ink shrink-0">
                 <Repeat className="w-5 h-5" />
               </span>
@@ -214,7 +214,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
           </div>
 
           {/* The three seller rules that matter most, agreed to right where they apply. */}
-          <div className="rounded-2xl bg-paper p-5 space-y-4">
+          <div className="rounded-xl bg-paper p-5 space-y-4">
             <div className="flex items-center justify-between gap-3">
               <p className="font-bold text-ink">{tx('3 قواعد لازم توافق عليها', '3 rules to agree to')}</p>
               <button type="button" onClick={onOpenRules} className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline">
@@ -251,7 +251,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
             href={whatsappLink(tx('عايز أعرض وحدتي', "I'd like to list my unit"))}
             target="_blank"
             rel="noreferrer"
-            className="flex items-center justify-center gap-2 rounded-2xl border border-line py-3 text-sm font-semibold text-ink-soft hover:text-ink hover:border-ink-soft transition-colors"
+            className="flex items-center justify-center gap-2 rounded-xl border border-line py-3 text-sm font-semibold text-ink-soft hover:text-ink hover:border-ink-soft transition-colors"
           >
             <MessageCircle className="w-4 h-4" />
             {tx('مش حابب تملا فورم؟ ابعتلنا على واتساب', "Rather not fill a form? Message us on WhatsApp")}
@@ -263,13 +263,13 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
             <p className="font-bold text-ink">{tx('هتسترد كام؟', "What you'll get back")}</p>
             {validMoney ? (
               <>
-                <p className="num font-display mt-3 text-4xl font-extrabold text-ink">{money(net, language)}</p>
+                <p className="num font-display mt-3 text-4xl font-bold text-ink">{money(net, language)}</p>
                 <p className="text-sm text-muted">
                   {currency(language)} · {tx('من غير عمولة', 'no fee')}
                   {discount > 0 && tx(` · بعد خصمك ${money(discount, language)}`, ` · after your ${money(discount, language)} discount`)}
                   {fines > 0 && tx(` · بعد المتأخرات ${money(fines, language)}`, ` · after ${money(fines, language)} arrears`)}
                 </p>
-                <div className="mt-5 rounded-2xl bg-danger-soft p-4 flex items-center gap-3">
+                <div className="mt-5 rounded-xl bg-danger-soft p-4 flex items-center gap-3">
                   <TrendingDown className="w-5 h-5 text-danger shrink-0" />
                   <p className="text-sm text-ink-soft">
                     {tx('لو لغيت مع المطور ممكن تخسر', 'Cancelling could cost you')}{' '}
@@ -281,7 +281,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               <p className="mt-3 text-sm text-muted">{tx('اكتب سعر العقد والمدفوع وهنحسبلك', 'Enter the contract price and amount paid')}</p>
             )}
           </div>
-          <div className="rounded-2xl bg-brand-soft p-4 text-sm text-brand-ink space-y-2">
+          <div className="rounded-xl bg-brand-soft p-4 text-sm text-brand-ink space-y-2">
             <p className="flex items-center gap-2 font-semibold">
               <ShieldCheck className="w-5 h-5 shrink-0" />
               {tx('إيه اللي هيحصل بعد كده؟', 'What happens next?')}

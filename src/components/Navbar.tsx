@@ -32,20 +32,20 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
   const rules: Link = { id: 'rules', label: tx('ضمان حقك', 'Your protection'), icon: ShieldCheck };
   const contact: Link = { id: 'contact', label: tx('كلمنا', 'Contact'), icon: Phone };
 
-  // Desktop: selling lives in the black button on the right, "about" lives in the footer.
-  const desktop: Link[] = [buy, swap, rules, contact];
+  // Desktop: selling lives in the black button on the right; "about" lives in the footer.
+  const desktop: Link[] = [swap, buy, rules, contact];
   const mobileTabs: (Link & { badge?: number })[] = [
     { id: 'home', label: tx('الرئيسية', 'Home'), icon: Home },
-    buy,
     { ...sell, label: tx('بيع', 'Sell') },
     { ...swap, label: tx('بدّل', 'Swap') },
+    buy,
     { id: 'requests', label: tx('طلباتي', 'Requests'), icon: ClipboardList, badge: requests.length },
   ];
   const menuLinks: Link[] = [
     { id: 'home', label: tx('الرئيسية', 'Home'), icon: Home },
-    buy,
     sell,
     swap,
+    buy,
     rules,
     contact,
     { id: 'saved', label: tx('المفضلة', 'Saved'), icon: Heart },
@@ -127,7 +127,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
                 <button
                   key={l.id}
                   onClick={() => go(l.id)}
-                  className={`flex items-center gap-3 rounded-2xl px-4 py-3.5 text-start text-base font-medium ${
+                  className={`flex items-center gap-3 rounded-xl px-4 py-3.5 text-start text-base font-medium ${
                     activePage === l.id ? 'bg-brand-soft text-brand-ink' : 'text-ink hover:bg-paper'
                   }`}
                 >

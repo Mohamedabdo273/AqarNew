@@ -3,12 +3,10 @@ import {
   ArrowLeft,
   ArrowRight,
   Tag,
-  Search,
   ShieldCheck,
   FileCheck2,
   UserCheck,
   Handshake,
-  Banknote,
   ChevronDown,
   TrendingDown,
   Ban,
@@ -18,7 +16,6 @@ import {
   Percent,
   Users,
   ScrollText,
-  Phone,
   Repeat,
   ArrowLeftRight,
   Headset,
@@ -27,9 +24,7 @@ import {
   ClipboardCheck,
   Landmark,
   Flame,
-  Check,
   Receipt,
-  AlertTriangle,
   MessageCircle,
 } from 'lucide-react';
 import { PageId, RealEstateUnit } from '../types';
@@ -64,7 +59,7 @@ const SectionTitle: React.FC<{ title: string; sub?: string; center?: boolean; li
         {kicker}
       </p>
     )}
-    <h2 className={`text-3xl sm:text-4xl font-extrabold leading-tight ${light ? 'text-white' : 'text-ink'}`}>{title}</h2>
+    <h2 className={`text-3xl sm:text-4xl font-bold leading-tight ${light ? 'text-white' : 'text-ink'}`}>{title}</h2>
     {sub && <p className={`mt-3 text-[15px] sm:text-base leading-relaxed ${light ? 'text-white/60' : 'text-muted'}`}>{sub}</p>}
   </div>
 );
@@ -112,187 +107,146 @@ export const HomePage: React.FC<HomePageProps> = ({
   onOpenRules,
   onOpenDeals,
 }) => {
-  const { language, tx, isRTL } = useLanguage();
+  const { tx, isRTL } = useLanguage();
   const Arrow = isRTL ? ArrowLeft : ArrowRight;
 
   const matching = useMemo(() => units.filter((u) => fitsBudget(u, budget)), [units, budget]);
   // Show what fits the budget above; fall back to the newest units so the row is never empty.
-  const featured = matching.length > 0 ? matching : units;
-  // Hero example — the calculator's default numbers, so both places agree.
-  const heroExample = useMemo(() => {
-    const contract = 6_000_000;
-    const paid = 1_500_000;
-    return { contract, paid, cancelBack: paid - cancellationLoss(contract, paid) };
-  }, []);
+  const featured = useMemo(
+    () => [...(matching.length > 0 ? matching : units)].sort((a, b) => sellerDiscount(b) - sellerDiscount(a)),
+    [matching, units],
+  );
   // Biggest seller discounts first.
   const deals = useMemo(() => units.filter(isDeal).sort((a, b) => sellerDiscount(b) - sellerDiscount(a)), [units]);
 
   return (
     <div>
-      {/* ───────── 1. Hero: two doors — the owner who's struggling, and the buyer with a budget ───────── */}
-      <section className="page-wrap pt-10 sm:pt-14 pb-12">
-        <p className="flex items-center gap-2 text-sm font-medium text-muted">
-          <span className="w-6 h-px bg-ink" />
-          {tx('تنازل رسمي عن وحدات التقسيط', 'Official transfers of installment units')}
-        </p>
-        <h1 className="mt-4 text-[2rem] sm:text-5xl lg:text-6xl font-extrabold leading-[1.15] text-ink max-w-4xl">
-          {tx('بيع من غير ما ', 'Sell without ')}
-          <span className="text-accent">{tx('تخسر.', 'losing.')}</span>
-          <br />
-          {tx('واشتري من غير أوفر.', 'Buy without overprice.')}
-        </h1>
-
-        <div className="mt-8 sm:mt-10 grid lg:grid-cols-2 gap-4 sm:gap-5 items-stretch">
-          {/* Door 1 — the owner who can't keep up. Plain words, no "defaulter" label. */}
-          <div className="rounded-card border-2 border-ink bg-surface p-6 sm:p-8 flex flex-col">
-            <p className="text-sm font-semibold text-muted">{tx('عندي وحدة', 'I own a unit')}</p>
-            <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold leading-tight text-ink">{tx('اتأخرت في الأقساط؟', 'Behind on installments?')}</h2>
-            <p className="mt-3 text-ink-soft leading-relaxed">
+      {/* ───────── 1. Hero — one message, for the owner who's behind ───────── */}
+      <section className="relative overflow-hidden bg-brand text-white">
+        {/* Soft light from one corner, so the dark band has depth without decoration. */}
+        <div aria-hidden="true" className="pointer-events-none absolute -top-40 -end-40 w-[36rem] h-[36rem] rounded-full bg-white/[0.06] blur-3xl" />
+        <div className="relative page-wrap pt-12 sm:pt-16 pb-12 sm:pb-16 grid lg:grid-cols-[1.05fr_1fr] gap-10 lg:gap-14 items-center">
+          <div>
+            <p className="hero-in inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-sm text-white/80">
+              <ShieldCheck className="w-4 h-4 text-accent-light" />
+              {tx('تنازل رسمي في مقر المطور · من غير عمولة عليك', 'Official transfer at the developer · no fee for you')}
+            </p>
+            <h1 style={{ animationDelay: '80ms' }} className="hero-in mt-6 text-[2.1rem] sm:text-5xl lg:text-[3.4rem] font-bold leading-[1.2]">
+              {tx('اتأخرت في الأقساط؟', 'Behind on installments?')}
+              <br />
+              <span className="text-accent-light">{tx('استرد اللي دفعته كامل.', 'Get back all you paid.')}</span>
+            </h1>
+            <p style={{ animationDelay: '160ms' }} className="hero-in mt-5 text-lg text-white/75 max-w-xl leading-relaxed">
               {tx(
-                'ما تلغيش وتخسر. بيع وحدتك واسترد اللي دفعته — حتى لو عليك متأخرات أو غرامات.',
-                "Don't cancel and lose. Sell your unit and get back what you paid — even with overdue installments or fines.",
+                'ما تلغيش وتخسر. بنبيع وحدتك بسعر اللي دفعته، حتى لو عليك متأخرات — بتتخصم يوم التنازل، ومحدش هيعرف إنك بتبيع.',
+                "Don't cancel and lose. We sell your unit for what you paid, even with arrears — deducted on transfer day — and nobody knows you're selling.",
               )}
             </p>
-            <p className="mt-4 flex items-start gap-2.5 rounded-xl bg-danger-soft px-4 py-3 text-sm text-ink">
-              <AlertTriangle className="w-4 h-4 text-danger shrink-0 mt-0.5" />
-              <span>
-                <b>{tx('جالك إنذار من المطور؟ ', 'Got a warning letter from the developer? ')}</b>
-                {tx('لسه في وقت. كلّمنا قبل ما يلغي، وإحنا نشوف معاك أسرع طريق.', "There's still time. Call us before they cancel and we'll find the fastest way out.")}
-              </span>
-            </p>
-            <ul className="mt-5 space-y-2.5 text-[15px] text-ink flex-1">
+            <ul style={{ animationDelay: '220ms' }} className="hero-in mt-6 grid grid-cols-3 gap-2 sm:gap-3 max-w-2xl">
               {[
-                tx('المتأخرات بتتخصم من فلوسك — مش مطلوب منك تدفع حاجة دلوقتي', 'Arrears come out of your payout — nothing to pay now'),
-                tx('اسمك ورقمك مش بيتنشروا، ومحدش هيعرف إنك بتبيع', "Your name and number stay private — nobody knows you're selling"),
-                tx('من غير عمولة عليك، وكشف حساب مجاني قبل ما تقرر', 'No fee for you, and a free statement before you decide'),
-              ].map((b) => (
-                <li key={b} className="flex items-start gap-2.5">
-                  <Check className="w-5 h-5 shrink-0 mt-0.5" strokeWidth={2.5} />
-                  {b}
+                { icon: Receipt, t: tx('عليك متأخرات؟', 'Behind?'), d: tx('بتتخصم يوم التنازل', 'Deducted on transfer day') },
+                { icon: EyeOff, t: tx('في سرية', 'Private'), d: tx('اسمك ورقمك مش بيتنشروا', 'Name and number never shown') },
+                { icon: Wallet, t: tx('صفر عمولة', 'Zero fee'), d: tx('وكاش بشيك مصرفي', 'Paid by bank cheque') },
+              ].map((x) => (
+                <li key={x.t} className="flex flex-col sm:flex-row items-start gap-1.5 sm:gap-2.5 rounded-xl bg-white/[0.06] border border-white/10 p-2.5 sm:p-3">
+                  <x.icon className="w-5 h-5 text-accent-light shrink-0 mt-0.5" />
+                  <span>
+                    <span className="block text-sm font-semibold">{x.t}</span>
+                    {/* Phones get the headline only, so the buttons stay on the first screen. */}
+                    <span className="hidden sm:block text-xs text-white/60 mt-0.5">{x.d}</span>
+                  </span>
                 </li>
               ))}
             </ul>
-            {/* Same maths as the calculator below, on its default example (6M contract, 1.5M paid). */}
-            <div className="mt-6 rounded-xl border border-line overflow-hidden">
-              <div className="grid grid-cols-2 text-center">
-                <div className="p-3 bg-paper">
-                  <p className="text-xs text-muted">{tx('لو لغيت مع المطور', 'Cancel with the developer')}</p>
-                  <p className="num font-display mt-1 text-xl font-bold text-muted line-through decoration-2">{money(heroExample.cancelBack, language)}</p>
-                  <p className="text-xs text-muted">{tx('على أقساط لسنين', 'paid back over years')}</p>
-                </div>
-                <div className="p-3 bg-ink text-white">
-                  <p className="text-xs text-white/70">{tx('لو بعت عن طريقنا', 'Sell through us')}</p>
-                  <p className="num font-display mt-1 text-xl font-extrabold">{money(heroExample.paid, language)}</p>
-                  <p className="text-xs text-white/70">{tx('كاش يوم التنازل', 'cash on transfer day')}</p>
-                </div>
-              </div>
-              <a
-                href="#seller-calc"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('seller-calc')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-                className="block border-t border-line px-3 py-2 text-center text-xs text-muted hover:text-ink"
-              >
-                {tx(`مثال: عقد ${money(heroExample.contract, language)} ودفعت ${money(heroExample.paid, language)} · احسب بأرقامك ←`, `e.g. ${money(heroExample.contract, language)} contract, ${money(heroExample.paid, language)} paid · try your numbers →`)}
-              </a>
-            </div>
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <button onClick={() => onNavigate('sell')} className="btn-primary min-h-13 px-6">
+            <div style={{ animationDelay: '280ms' }} className="hero-in mt-8 flex flex-wrap gap-3">
+              <button onClick={() => onNavigate('sell')} className="btn bg-white text-brand hover:bg-brand-soft min-h-14 px-7 text-base">
                 <Tag className="w-5 h-5" />
-                {tx('اعرض وحدتك — ببلاش', 'List your unit — free')}
+                {tx('اعرض وحدتك', 'List your unit')}
               </button>
-              <a href={`tel:${BRAND.hotline}`} className="btn-ghost min-h-13 px-5">
-                <Phone className="w-5 h-5" />
+              <button onClick={() => onNavigate('statement')} className="btn border border-white/30 text-white hover:bg-white/10 min-h-14 px-6 text-base">
+                <ClipboardCheck className="w-5 h-5" />
+                {tx('كشف حساب مجاني', 'Free statement')}
+              </button>
+            </div>
+            <p style={{ animationDelay: '340ms' }} className="hero-in mt-5 text-sm text-white/60">
+              {tx('جالك إنذار من المطور؟ ', 'Got a warning letter? ')}
+              <a href={`tel:${BRAND.hotline}`} className="font-semibold text-white underline underline-offset-4">
                 {tx(`كلّمنا ${BRAND.hotline}`, `Call ${BRAND.hotline}`)}
               </a>
-              <a
-                href={whatsappLink(tx('عندي وحدة ومتأخر في الأقساط', "I'm behind on installments for my unit"))}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={tx('واتساب', 'WhatsApp')}
-                className="btn-ghost min-h-13 px-4"
-              >
-                <MessageCircle className="w-5 h-5" />
-              </a>
-            </div>
+              {tx(' قبل ما يلغي.', ' before they cancel.')}
+            </p>
           </div>
 
-          {/* Door 2 — the buyer: search by cash and monthly. */}
-          <div className="rounded-card bg-ink text-white p-6 sm:p-8 shadow-lift flex flex-col">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold text-white/60">{tx('بدوّر على وحدة', "I'm looking for a unit")}</p>
-                <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold leading-tight">{tx('بسعر زمان، على قد ميزانيتك', 'Old prices, within your budget')}</h2>
+          <HeroCalculator />
+        </div>
+
+        {/* Policies, not marketing numbers — every one of these is true from day one. */}
+        <div className="relative border-t border-white/10">
+          <dl className="page-wrap py-5 grid grid-cols-3 [&>div+div]:border-s [&>div+div]:border-white/10">
+            {[
+              { v: tx('صفر', 'Zero'), l: tx('عمولة على البايع', 'seller fee') },
+              { v: tx('صفر', 'Zero'), l: tx('أوفر على المشتري', 'overprice') },
+              { v: tx('شيك مصرفي', 'Bank cheque'), l: tx('في مقر المطور', 'at the developer') },
+            ].map((x) => (
+              <div key={x.l} className="px-3 sm:px-8 first:ps-0 text-center sm:text-start">
+                <dt className="sr-only">{x.l}</dt>
+                <dd className="font-display text-lg sm:text-2xl font-bold whitespace-nowrap">{x.v}</dd>
+                <p className="text-xs sm:text-sm text-white/60 mt-0.5">{x.l}</p>
               </div>
-              <span className="grid place-items-center w-11 h-11 rounded-xl bg-white/10 text-white shrink-0">
-                <Banknote className="w-5 h-5" />
-              </span>
-            </div>
-            <div className="mt-6 flex-1">
-              <BudgetFinder dark budget={budget} onChange={onBudgetChange} />
-            </div>
-            <div className="mt-6 flex items-center gap-3">
-              <div className="flex -space-x-3 rtl:space-x-reverse">
-                {matching.slice(0, 3).map((u) => (
-                  <img key={u.id} src={u.images[0]} alt="" className="w-10 h-10 rounded-full object-cover border-2 border-ink" />
-                ))}
-              </div>
-              <p className="text-sm text-white/70">
-                {matching.length > 0 ? (
-                  <>
-                    <span className="num font-bold text-white text-base">{matching.length}</span> {tx('وحدة على قد ميزانيتك', 'units fit your budget')}
-                  </>
-                ) : (
-                  tx('زوّد الميزانية شوية', 'Try a higher budget')
-                )}
-              </p>
-            </div>
-            <button onClick={onBrowseWithBudget} className="btn bg-white text-ink hover:bg-brand-soft w-full mt-5 min-h-13">
+            ))}
+          </dl>
+        </div>
+      </section>
+
+      {/* ───────── 2. Buyers — one strip, not a second hero ───────── */}
+      <section className="page-wrap -mt-px pt-8 sm:pt-10">
+        <div className="card p-5 sm:p-7 grid lg:grid-cols-[16rem_1fr_15rem] gap-6 lg:gap-10 items-center">
+          <div>
+            <p className="text-sm font-semibold text-muted">{tx('بتدوّر على وحدة؟', 'Looking for a unit?')}</p>
+            <p className="font-display mt-1 text-2xl font-bold text-ink leading-snug">{tx('دوّر بقسطك، بسعر زمان', 'Search by monthly, at old prices')}</p>
+          </div>
+          <BudgetFinder budget={budget} onChange={onBudgetChange} />
+          <div>
+            <p className="text-sm text-ink-soft">
+              {matching.length > 0 ? (
+                <>
+                  <span className="num font-display text-2xl font-bold text-ink">{matching.length}</span> {tx('وحدة على قد ميزانيتك', 'units fit your budget')}
+                </>
+              ) : (
+                tx('زوّد الميزانية شوية', 'Try a higher budget')
+              )}
+            </p>
+            <button onClick={onBrowseWithBudget} className="btn-primary w-full mt-3 min-h-12">
               {tx('وريني الوحدات', 'Show me units')}
               <Arrow className="w-4 h-4" />
             </button>
           </div>
         </div>
-
-        {/* Policies, not marketing numbers — every one of these is true from day one. */}
-        <dl className="mt-8 flex flex-wrap gap-y-4 border-t border-line pt-5 [&>div+div]:border-s [&>div+div]:border-line">
-          {[
-            { v: tx('صفر', 'Zero'), l: tx('عمولة على البايع', 'seller fee') },
-            { v: tx('صفر', 'Zero'), l: tx('أوفر برايس على المشتري', 'overprice for buyers') },
-            { v: tx('شيك مصرفي', 'Bank cheque'), l: tx('في مقر المطور', 'at the developer') },
-          ].map((x) => (
-            <div key={x.l} className="px-4 sm:px-8 first:ps-0 last:pe-0">
-              <dt className="sr-only">{x.l}</dt>
-              <dd className="font-display text-xl sm:text-2xl font-extrabold text-ink whitespace-nowrap">{x.v}</dd>
-              <p className="text-sm text-muted mt-0.5">{x.l}</p>
-            </div>
-          ))}
-        </dl>
       </section>
 
-      {/* ───────── 1b. The owner's maths, right after the hero ───────── */}
-      <SellerSection onStatement={() => onNavigate('statement')} />
+      {/* ───────── 3. Why sell through us — the free statement and four promises ───────── */}
+      <SellerPromises onStatement={() => onNavigate('statement')} />
 
-      {/* ───────── 2. Units that fit the budget above ───────── */}
+      {/* ───────── 4. Units — budget matches, discounted ones first ───────── */}
       <section className="bg-surface border-y border-line">
         <div className="page-wrap py-12 sm:py-16">
-          <div className="flex items-end justify-between gap-4 mb-8">
+          <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
             <SectionTitle
               title={matching.length > 0 ? tx('على قد ميزانيتك', 'Within your budget') : tx('وحدات بسعر زمان', 'Units at old prices')}
-              sub={
-                matching.length > 0
-                  ? tx(
-                      `${money(budget.cash, language)} كاش و${money(budget.monthly, language)} في الشهر — كلها موثّقة ومراجَعة قبل النشر`,
-                      `${money(budget.cash, language)} cash and ${money(budget.monthly, language)} a month — all verified before listing`,
-                    )
-                  : tx('موثّقة ومراجَعة قبل النشر', 'Verified before listing')
-              }
+              sub={tx('موثّقة ومراجَعة قبل النشر — واللي عليها خصم من صاحبها الأول', 'Verified before listing — owner discounts first')}
             />
-            <button onClick={onBrowseWithBudget} className="hidden sm:inline-flex items-center gap-1.5 text-brand font-semibold hover:underline whitespace-nowrap">
-              {tx('شوف الكل', 'See all')}
-              <Arrow className="w-4 h-4" />
-            </button>
+            <div className="flex flex-wrap items-center gap-3">
+              {deals.length > 0 && (
+                <button onClick={onOpenDeals} className="chip bg-accent-soft border-accent/30 text-accent hover:border-accent">
+                  <Flame className="w-4 h-4" />
+                  {tx(`أقل من المدفوع (${deals.length})`, `Below what was paid (${deals.length})`)}
+                </button>
+              )}
+              <button onClick={onBrowseWithBudget} className="hidden sm:inline-flex items-center gap-1.5 text-brand font-semibold hover:underline whitespace-nowrap min-h-11">
+                {tx('شوف الكل', 'See all')}
+                <Arrow className="w-4 h-4" />
+              </button>
+            </div>
           </div>
           <div className="-mx-4 px-4 sm:mx-0 sm:px-0 flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 overflow-x-auto snap-x snap-mandatory no-scrollbar">
             {featured.slice(0, 6).map((u, i) => (
@@ -302,82 +256,87 @@ export const HomePage: React.FC<HomePageProps> = ({
             ))}
           </div>
           <button onClick={onBrowseWithBudget} className="btn-ghost w-full mt-6 sm:hidden">
-            {tx(`شوف كل الوحدات (${featured.length})`, `See all ${featured.length} units`)}
+            {tx('شوف كل الوحدات', 'See all units')}
           </button>
         </div>
       </section>
 
-      {/* ───────── 2b. Deals: sellers who took a discount to sell faster ───────── */}
-      {deals.length > 0 && (
-        <section className="page-wrap py-12 sm:py-16">
-          <div className="flex items-end justify-between gap-4 mb-8">
-            <div className="max-w-2xl">
-              <p className="inline-flex items-center gap-1.5 rounded-full bg-accent text-white px-3 py-1 text-sm font-bold">
-                <Flame className="w-4 h-4" />
-                {tx('أقل من المدفوع', 'Below what was paid')}
-              </p>
-              <h2 className="mt-3 text-3xl sm:text-4xl font-extrabold leading-tight text-ink">{tx('سعر زمان، وكمان بخصم', 'The old price — and then a discount')}</h2>
-              <p className="mt-3 text-[15px] sm:text-base text-muted leading-relaxed">
-                {tx('أصحاب الوحدات دي عاملين خصم من اللي دفعوه عشان يبيعوا أسرع.', 'The owners of these units took money off what they paid, to sell faster.')}
-              </p>
-            </div>
-            <button onClick={onOpenDeals} className="hidden sm:inline-flex items-center gap-1.5 text-brand font-semibold hover:underline whitespace-nowrap">
-              {tx(`شوف الكل (${deals.length})`, `See all (${deals.length})`)}
-              <Arrow className="w-4 h-4" />
-            </button>
-          </div>
-          <div className="-mx-4 px-4 sm:mx-0 sm:px-0 flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 overflow-x-auto snap-x snap-mandatory no-scrollbar">
-            {deals.slice(0, 3).map((u) => (
-              <div key={u.id} className="w-[82%] shrink-0 snap-start sm:w-auto">
-                <UnitCard unit={u} onOpen={onSelectUnit} />
-              </div>
-            ))}
-          </div>
-          <button onClick={onOpenDeals} className="btn-ghost w-full mt-6 sm:hidden">
-            {tx(`شوف الكل (${deals.length})`, `See all (${deals.length})`)}
-          </button>
-        </section>
-      )}
-
-      {/* ───────── 3. Swap — only on Wahdety ───────── */}
+      {/* ───────── 5. Swap — only on Wahdety ───────── */}
       <SwapFeature onSwap={() => onNavigate('swap')} />
 
-      {/* ───────── 5. Money safety — the rules on every transfer ───────── */}
+      {/* ───────── 6. Money safety ───────── */}
       <RulesPreview onOpenRules={onOpenRules} />
 
-      {/* ───────── 6. Steps ───────── */}
+      {/* ───────── 7. Steps ───────── */}
       <HowItWorks />
 
-      {/* ───────── 7. FAQ ───────── */}
+      {/* ───────── 8. FAQ ───────── */}
       <Faq />
 
-      {/* ───────── 8. Two closing paths ───────── */}
-      <section className="page-wrap pb-16 grid md:grid-cols-2 gap-4">
-        <div className="rounded-card bg-surface border border-line p-6 sm:p-10">
-          <p className="font-display text-2xl sm:text-3xl font-extrabold text-ink">{tx('قبل ما تلغي، اعرف موقفك', 'Before you cancel, know where you stand')}</p>
-          <p className="mt-2 text-ink-soft">{tx('كشف حساب مجاني لوحدتك، ونصيحة صريحة — من غير أي التزام.', 'A free statement for your unit and honest advice — no commitment.')}</p>
-          <button onClick={() => onNavigate('statement')} className="btn-primary mt-6">
-            <ClipboardCheck className="w-5 h-5" />
-            {tx('اطلب كشف الحساب', 'Get my statement')}
-          </button>
+      {/* ───────── 9. One closing call ───────── */}
+      <section className="page-wrap pb-16">
+        <div className="rounded-card bg-brand text-white p-7 sm:p-12 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="max-w-xl">
+            <p className="font-display text-2xl sm:text-3xl font-bold">{tx('قبل ما تلغي، اعرف موقفك', 'Before you cancel, know where you stand')}</p>
+            <p className="mt-2 text-white/70">{tx('كشف حساب مجاني لوحدتك ونصيحة صريحة — من غير أي التزام.', 'A free statement and honest advice — no commitment.')}</p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <button onClick={() => onNavigate('statement')} className="btn bg-white text-brand hover:bg-brand-soft min-h-13 px-6">
+              <ClipboardCheck className="w-5 h-5" />
+              {tx('اطلب كشف الحساب', 'Get my statement')}
+            </button>
+            <a
+              href={whatsappLink(tx('عندي وحدة ومتأخر في الأقساط', "I'm behind on installments for my unit"))}
+              target="_blank"
+              rel="noreferrer"
+              className="btn border border-white/30 text-white hover:bg-white/10 min-h-13 px-5"
+            >
+              <MessageCircle className="w-5 h-5" />
+              {tx('واتساب', 'WhatsApp')}
+            </a>
+          </div>
         </div>
-        <div className="rounded-card bg-surface border border-line p-6 sm:p-10">
-          <p className="font-display text-2xl sm:text-3xl font-extrabold text-ink">{tx('عايز تغيّر وحدتك؟', 'Want a different unit?')}</p>
-          <p className="mt-2 text-ink-soft">{tx('بدّلها بوحدة تانية، وادفع أو خد الفرق بس.', 'Swap it for another and settle only the difference.')}</p>
-          <button onClick={() => onNavigate('swap')} className="btn-ghost mt-6">
-            <Repeat className="w-5 h-5" />
-            {tx('جرّب التبديل', 'Try a swap')}
-          </button>
-        </div>
+        <p className="mt-6 text-center text-sm text-muted">{tx('الأرقام استرشادية، والمراجعة النهائية بتكون على العقد الفعلي.', 'Figures are indicative; final review is on the actual contract.')}</p>
       </section>
+    </div>
+  );
+};
 
-      <div className="page-wrap pb-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted">
-        <a href={`tel:${BRAND.hotline}`} className="inline-flex items-center gap-1.5 hover:text-ink min-h-11">
-          <Phone className="w-4 h-4" />
-          {BRAND.hotline}
-        </a>
-        <span>{tx('الأرقام استرشادية، والمراجعة النهائية بتكون على العقد الفعلي.', 'Figures are indicative; final review is on the actual contract.')}</span>
+/* The hero's right side: the owner's own numbers, cancel vs sell — the whole argument in one card. */
+const HeroCalculator: React.FC = () => {
+  const { language, tx } = useLanguage();
+  const [contract, setContract] = useState(6_000_000);
+  const [paid, setPaid] = useState(1_500_000);
+  const safePaid = Math.min(paid, contract);
+  const loss = cancellationLoss(contract, safePaid);
+  const cancelBack = safePaid - loss;
+  const lostPct = safePaid ? Math.round((loss / safePaid) * 100) : 0;
+
+  return (
+    <div id="seller-calc" style={{ animationDelay: '200ms' }} className="hero-in rounded-card bg-surface text-ink p-5 sm:p-7 shadow-lift scroll-mt-24">
+      <p className="font-display text-lg font-bold">{tx('احسب بأرقامك', 'Try your numbers')}</p>
+      <div className="mt-5 grid gap-5">
+        <Slider label={tx('سعر الوحدة في العقد', 'Contract price')} value={contract} min={1_000_000} max={15_000_000} step={100_000} onChange={setContract} />
+        <Slider label={tx('دفعت كام لحد دلوقتي؟', 'Paid so far')} value={safePaid} min={100_000} max={contract} step={50_000} onChange={setPaid} />
       </div>
+      <div className="mt-6 grid grid-cols-2 gap-3">
+        <div className="rounded-xl bg-paper border border-line p-4">
+          <p className="flex items-center gap-1.5 text-xs sm:text-sm text-muted">
+            <TrendingDown className="w-4 h-4" />
+            {tx('لو لغيت', 'If you cancel')}
+          </p>
+          <p className="num font-display mt-2 text-2xl sm:text-3xl font-bold text-muted line-through decoration-2">{money(cancelBack, language)}</p>
+          <p className="mt-1 text-xs text-muted">{tx('على أقساط لسنين', 'over years')}</p>
+        </div>
+        <div className="rounded-xl bg-brand text-white p-4">
+          <p className="text-xs sm:text-sm text-white/70">{tx('لو بعت عن طريقنا', 'Sell through us')}</p>
+          <p className="num font-display mt-2 text-2xl sm:text-3xl font-bold">{money(safePaid, language)}</p>
+          <p className="mt-1 text-xs text-white/70">{tx('كاش يوم التنازل', 'cash on transfer day')}</p>
+        </div>
+      </div>
+      <p className="mt-3 rounded-xl bg-danger-soft px-3 py-2 text-sm font-semibold text-danger">
+        {tx(`الإلغاء بيخسّرك ${money(loss, language)} — ${lostPct}% من اللي دفعته`, `Cancelling costs you ${money(loss, language)} — ${lostPct}% of what you paid`)}
+      </p>
     </div>
   );
 };
@@ -420,19 +379,19 @@ const SwapFeature: React.FC<{ onSwap: () => void }> = ({ onSwap }) => {
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-5">
           <div className="rounded-xl bg-paper border border-line p-3 sm:p-5">
             <p className="text-xs sm:text-sm text-muted">{tx('وحدتك — مدفوع فيها', 'Your unit — paid')}</p>
-            <p className="num font-display mt-2 text-lg sm:text-3xl font-extrabold text-ink whitespace-nowrap">{money(mine, language)}</p>
+            <p className="num font-display mt-2 text-lg sm:text-3xl font-bold text-ink whitespace-nowrap">{money(mine, language)}</p>
           </div>
-          <span className="grid place-items-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-ink text-white">
+          <span className="grid place-items-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-brand text-white">
             <ArrowLeftRight className="w-5 h-5" />
           </span>
           <div className="rounded-xl bg-paper border border-line p-3 sm:p-5">
             <p className="text-xs sm:text-sm text-muted">{tx('الوحدة الجديدة — مدفوع فيها', 'New unit — paid')}</p>
-            <p className="num font-display mt-2 text-lg sm:text-3xl font-extrabold text-ink whitespace-nowrap">{money(theirs, language)}</p>
+            <p className="num font-display mt-2 text-lg sm:text-3xl font-bold text-ink whitespace-nowrap">{money(theirs, language)}</p>
           </div>
         </div>
-        <div className="mt-5 rounded-xl bg-ink text-white p-5 flex items-center justify-between gap-4">
+        <div className="mt-5 rounded-xl bg-brand text-white p-5 flex items-center justify-between gap-4">
           <span className="text-white/70">{tx('تدفع الفرق بس', 'You pay only the difference')}</span>
-          <span className="num font-display text-2xl sm:text-3xl font-extrabold">
+          <span className="num font-display text-2xl sm:text-3xl font-bold">
             {money(theirs - mine, language)} <span className="text-sm font-medium text-white/60">{currency(language)}</span>
           </span>
         </div>
@@ -443,14 +402,8 @@ const SwapFeature: React.FC<{ onSwap: () => void }> = ({ onSwap }) => {
 };
 
 /* Sellers: the cancellation maths, then what we promise them. */
-const SellerSection: React.FC<{ onStatement: () => void }> = ({ onStatement }) => {
-  const { language, tx } = useLanguage();
-  const [contract, setContract] = useState(6_000_000);
-  const [paid, setPaid] = useState(1_500_000);
-  const safePaid = Math.min(paid, contract);
-  const loss = cancellationLoss(contract, safePaid);
-  const cancelBack = safePaid - loss;
-  const lostPct = safePaid ? Math.round((loss / safePaid) * 100) : 0;
+const SellerPromises: React.FC<{ onStatement: () => void }> = ({ onStatement }) => {
+  const { tx } = useLanguage();
 
   const promises = [
     {
@@ -476,78 +429,37 @@ const SellerSection: React.FC<{ onStatement: () => void }> = ({ onStatement }) =
   ];
 
   return (
-    <section id="seller-calc" className="bg-surface border-y border-line scroll-mt-20">
-      <div className="page-wrap py-14 sm:py-20">
-        <SectionTitle
-          center
-          kicker={tx('لو مش قادر تكمّل', "If you can't keep up")}
-          title={tx('الإلغاء بيخسّرك كام؟', 'What does cancelling cost you?')}
-          sub={tx('الإلغاء بيخصم نسبة من سعر العقد كله، مش من اللي دفعته. حرّك وشوف الفرق.', 'Cancelling deducts a share of the whole contract price, not of what you paid. Slide to see.')}
-        />
-
-        <div className="mt-8 sm:mt-10 max-w-2xl mx-auto grid gap-6">
-          <Slider label={tx('سعر الوحدة في العقد', 'Contract price')} value={contract} min={1_000_000} max={15_000_000} step={100_000} onChange={setContract} />
-          <Slider label={tx('دفعت كام لحد دلوقتي؟', 'How much have you paid?')} value={safePaid} min={100_000} max={contract} step={50_000} onChange={setPaid} />
-        </div>
-
-        <div className="mt-8 sm:mt-10 grid sm:grid-cols-2 gap-3 sm:gap-4 max-w-4xl mx-auto">
-          <div className="rounded-card border border-line bg-paper p-5 sm:p-7">
-            <p className="flex items-center gap-2 text-sm sm:text-base font-semibold text-muted">
-              <TrendingDown className="w-5 h-5" />
-              {tx('لو لغيت مع المطور', 'Cancel with the developer')}
-            </p>
-            <p className="num font-display mt-3 sm:mt-4 text-3xl sm:text-4xl font-bold text-muted line-through decoration-2">{money(cancelBack, language)}</p>
-            <p className="mt-1 text-sm sm:text-base text-muted">{tx('وبترجعلك على أقساط، ممكن لسنين', 'And paid back in instalments, possibly over years')}</p>
-            <p className="mt-4 rounded-lg bg-danger-soft px-3 py-2 text-xs sm:text-sm text-danger font-semibold">
-              {tx(`بتخسر ${money(loss, language)} — يعني ${lostPct}% من اللي دفعته`, `You lose ${money(loss, language)} — ${lostPct}% of what you paid`)}
-            </p>
+    <section className="page-wrap py-14 sm:py-20">
+      <SectionTitle center kicker={tx('لو مش قادر تكمّل', "If you can't keep up")} title={tx('ليه تبيع عن طريقنا؟', 'Why sell through us?')} />
+      <div className="mt-10 grid lg:grid-cols-[1fr_1.4fr] gap-4 sm:gap-5 max-w-6xl mx-auto">
+        <div className="rounded-card border-2 border-brand bg-surface p-6 sm:p-8 flex flex-col">
+          <div className="flex items-center justify-between gap-3">
+            <span className="grid place-items-center w-12 h-12 rounded-xl bg-brand text-white">
+              <ClipboardCheck className="w-6 h-6" />
+            </span>
+            <span className="rounded-xl bg-accent-soft text-accent px-3 py-1 text-sm font-bold">{tx('مجاناً', 'Free')}</span>
           </div>
-          <div className="rounded-card bg-ink text-white p-5 sm:p-7 shadow-lift">
-            <p className="flex items-center gap-2 text-sm sm:text-base font-semibold text-white/70">
-              <ShieldCheck className="w-5 h-5 text-accent-light" />
-              {tx('لو اتنازلت عن طريقنا', 'Transfer through us')}
-            </p>
-            <p className="num font-display mt-3 sm:mt-4 text-4xl sm:text-5xl font-extrabold">{money(safePaid, language)}</p>
-            <p className="mt-1 text-sm sm:text-base text-white/70">{tx('كاش بشيك مصرفي يوم التنازل', 'Cash by bank cheque on transfer day')}</p>
-            <p className="mt-4 rounded-lg bg-white/10 px-3 py-2 text-xs sm:text-sm text-white font-semibold">
-              {tx('صفر عمولة عليك', 'Zero fee for you')}
-            </p>
-          </div>
+          <p className="font-display mt-5 text-2xl sm:text-3xl font-bold text-ink">{tx('ابدأ بكشف حساب', 'Start with a statement')}</p>
+          <p className="mt-3 text-ink-soft leading-relaxed flex-1">
+            {tx(
+              'بنراجع عقدك ومدفوعاتك والمتبقي، ونقولك بالأرقام وبصراحة: تبيع، ولا تبدّل، ولا تكمّل. من غير أي التزام.',
+              'We review your contract, payments and balance and tell you in numbers: sell, swap or keep going. No commitment.',
+            )}
+          </p>
+          <button onClick={onStatement} className="btn-primary mt-6 self-start">
+            {tx('اطلب كشف الحساب', 'Get my statement')}
+          </button>
         </div>
-
-        {/* The free statement + what we promise sellers */}
-        <div className="mt-12 sm:mt-16 grid lg:grid-cols-[1fr_1.4fr] gap-4 sm:gap-5 max-w-6xl mx-auto">
-          <div className="rounded-card border-2 border-ink p-6 sm:p-8 flex flex-col">
-            <div className="flex items-center justify-between gap-3">
-              <span className="grid place-items-center w-12 h-12 rounded-xl bg-ink text-white">
-                <ClipboardCheck className="w-6 h-6" />
+        <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
+          {promises.map((p) => (
+            <div key={p.t} className="rounded-card bg-surface border border-line p-5 sm:p-6">
+              <span className="grid place-items-center w-11 h-11 rounded-xl bg-brand-soft text-brand">
+                <p.icon className="w-5 h-5" />
               </span>
-              <span className="rounded-full bg-accent-soft text-accent px-3 py-1 text-sm font-bold">{tx('مجاناً', 'Free')}</span>
+              <p className="mt-4 font-bold text-lg text-ink">{p.t}</p>
+              <p className="mt-1 text-sm text-muted leading-relaxed">{p.d}</p>
             </div>
-            <p className="font-display mt-5 text-2xl sm:text-3xl font-extrabold text-ink">{tx('كشف حساب وحدتك', 'Your unit statement')}</p>
-            <p className="mt-3 text-ink-soft leading-relaxed flex-1">
-              {tx(
-                'بنراجع عقدك ومدفوعاتك والمتبقي، ونحسبلك الإلغاء قصاد التنازل بالأرقام، ونقولك بصراحة: تبيع، ولا تلغي، ولا تكمّل.',
-                'We review your contract, payments and balance, compare cancelling vs transferring in numbers, and tell you straight: sell, cancel, or keep going.',
-              )}
-            </p>
-            <button onClick={onStatement} className="btn-primary mt-6 self-start">
-              {tx('اطلب كشف الحساب', 'Get my statement')}
-            </button>
-          </div>
-          <div className="grid gap-3 sm:gap-4">
-            {promises.map((p) => (
-              <div key={p.t} className="rounded-card bg-paper border border-line p-5 sm:p-6 flex items-start gap-4">
-                <span className="grid place-items-center w-11 h-11 rounded-xl bg-surface border border-line text-ink shrink-0">
-                  <p.icon className="w-5 h-5" />
-                </span>
-                <div>
-                  <p className="font-bold text-lg text-ink">{p.t}</p>
-                  <p className="mt-1 text-muted leading-relaxed">{p.d}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+          ))}
         </div>
       </div>
     </section>
@@ -574,7 +486,7 @@ const HowItWorks: React.FC = () => {
         ];
 
   return (
-    <section className="bg-ink text-white">
+    <section className="bg-brand text-white">
       <div className="page-wrap py-14 sm:py-20">
         <SectionTitle light center title={tx('4 خطوات وبس', 'Four steps, that’s it')} />
         <div className="mt-6 flex justify-center">
@@ -593,7 +505,7 @@ const HowItWorks: React.FC = () => {
         <ol className="mt-8 sm:mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
           {steps.map((s, i) => (
             <li key={s.t} className="relative flex sm:block items-center gap-4 rounded-card border border-white/10 bg-white/[0.04] p-4 sm:p-6">
-              <span className="hidden sm:block absolute top-4 end-6 num font-display text-6xl font-extrabold text-white/10">{i + 1}</span>
+              <span className="hidden sm:block absolute top-4 end-6 num font-display text-6xl font-bold text-white/10">{i + 1}</span>
               <span className="relative grid place-items-center w-12 h-12 rounded-xl bg-white/10 text-white shrink-0">
                 <s.icon className="w-6 h-6" />
                 <span className="sm:hidden num absolute -top-1.5 -end-1.5 grid place-items-center w-5 h-5 rounded-full bg-accent text-white text-[11px] font-bold">{i + 1}</span>

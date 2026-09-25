@@ -98,7 +98,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ title, updated, summaryTit
 
           {footer}
 
-          <div className="rounded-2xl bg-paper p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="rounded-xl bg-paper p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <p className="font-semibold text-ink">{tx('عندك سؤال عن الكلام ده؟', 'Questions about this?')}</p>
             <div className="flex gap-3">
               <a href={`tel:${BRAND.hotline}`} className="btn-ghost min-h-11 px-4">

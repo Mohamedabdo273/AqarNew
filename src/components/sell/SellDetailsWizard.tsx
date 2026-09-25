@@ -91,7 +91,7 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
         {titles.map((t, i) => (
           <li key={t}>
             <button onClick={() => (i < step ? setStep(i) : i > step && saveAndGo(i))} className="w-full text-start" aria-current={i === step ? 'step' : undefined}>
-              <span className={`block h-1.5 rounded-full ${i === step ? 'bg-ink' : i < step ? 'bg-ink/35' : 'bg-line'}`} />
+              <span className={`block h-1.5 rounded-full ${i === step ? 'bg-brand' : i < step ? 'bg-brand/35' : 'bg-line'}`} />
               <span className={`mt-2 flex items-center gap-1 text-[11px] sm:text-sm truncate ${i === step ? 'font-bold text-ink' : i < step ? 'font-medium text-ink-soft' : 'text-muted'}`}>
                 {i < step && <Check className="w-3.5 h-3.5 shrink-0" strokeWidth={3} />}
                 <span className="truncate">{t}</span>
@@ -102,7 +102,7 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
       </ol>
 
       {errors.length > 0 && (
-        <div role="alert" className="mt-6 rounded-2xl bg-danger-soft p-4 flex gap-3">
+        <div role="alert" className="mt-6 rounded-xl bg-danger-soft p-4 flex gap-3">
           <AlertTriangle className="w-5 h-5 text-danger shrink-0 mt-0.5" />
           <p className="text-sm text-ink-soft">
             <span className="font-semibold text-danger">{tx('ناقص: ', 'Missing: ')}</span>
@@ -179,7 +179,7 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
 
         {DETAIL_SECTIONS[step] === 'installments' && (
           <div className="space-y-8">
-            <p className="rounded-2xl bg-paper px-4 py-3 text-sm text-ink-soft">
+            <p className="rounded-xl bg-paper px-4 py-3 text-sm text-ink-soft">
               {tx('باقي للمطور', 'Left to developer')}: <span className="num font-bold text-ink">{fullMoney(remaining, language)}</span>
             </p>
             <Group title={tx('الأقساط الباقية', 'Remaining installments')}>

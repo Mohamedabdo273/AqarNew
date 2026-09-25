@@ -32,13 +32,13 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
   const problems = [
     { icon: TrendingDown, v: '10–15%', t: tx('غرامة لو لغيت مع المطور', 'Penalty if you cancel with the developer') },
     { icon: Clock, v: tx('لحد سنة', 'Up to a year'), t: tx('عشان فلوسك ترجعلك', 'To get your money back') },
-    { icon: Ban, v: tx('أوفر برايس', 'Overprice'), t: tx('بيخلّي المشتري يدفع أكتر من اللازم', 'Makes buyers pay more than they should') },
+    { icon: Ban, v: tx('إنذار', 'A warning letter'), t: tx('وبعده إلغاء لو اتأخرت في القسط', 'then cancellation if you fall behind') },
   ];
 
   const what = [
-    { icon: Tag, t: tx('للبايع', 'For sellers'), d: tx('تخرج من وحدتك وتاخد كل اللي دفعته، من غير عمولة.', 'Exit your unit and get back everything you paid, no fee.'), page: 'sell' as PageId },
+    { icon: Tag, t: tx('للبايع', 'For sellers'), d: tx('مش قادر تكمّل؟ تخرج من وحدتك وتاخد اللي دفعته — حتى لو عليك متأخرات — من غير عمولة.', "Can't keep up? Exit with what you paid — even with arrears — no fee."), page: 'sell' as PageId },
     { icon: Search, t: tx('للمشتري', 'For buyers'), d: tx('تشتري بسعر العقد القديم وتكمّل الأقساط.', 'Buy at the old contract price and continue the plan.'), page: 'opportunities' as PageId },
-    { icon: Repeat, t: tx('للي عاوز يغيّر', 'For switchers'), d: tx('تبدّل وحدتك بوحدة تانية وتدفع أو تاخد الفرق.', 'Swap your unit for another and settle the difference.'), page: 'swap' as PageId },
+    { icon: Repeat, t: tx('للي عاوز يغيّر', 'For switchers'), d: tx('تبدّل وحدتك بوحدة قسطها يريحك، وتدفع أو تاخد الفرق.', 'Swap for a unit with a monthly you can manage, and settle the difference.'), page: 'swap' as PageId },
   ];
 
   const different = [
@@ -72,14 +72,14 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* The problem */}
-      <section className="bg-ink text-white">
+      <section className="bg-brand text-white">
         <div className="page-wrap py-16">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-center">{tx('المشكلة', 'The problem')}</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold text-center">{tx('المشكلة', 'The problem')}</h2>
           <div className="mt-10 grid sm:grid-cols-3 gap-4">
             {problems.map((p) => (
               <div key={p.t} className="rounded-card border border-white/10 bg-white/[0.04] p-7 text-center">
                 <p.icon className="mx-auto w-7 h-7 text-accent-light" />
-                <p className="num font-display mt-4 text-4xl font-extrabold">{p.v}</p>
+                <p className="num font-display mt-4 text-4xl font-bold">{p.v}</p>
                 <p className="mt-2 text-white/60">{p.t}</p>
               </div>
             ))}
@@ -89,11 +89,11 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
 
       {/* What we do */}
       <section className="page-wrap py-14">
-        <h2 className="text-3xl sm:text-4xl font-extrabold text-ink text-center">{tx('بنعمل إيه؟', 'What we do')}</h2>
+        <h2 className="text-3xl sm:text-4xl font-bold text-ink text-center">{tx('بنعمل إيه؟', 'What we do')}</h2>
         <div className="mt-8 grid md:grid-cols-3 gap-4">
           {what.map((w) => (
             <button key={w.t} onClick={() => onNavigate(w.page)} className="card p-7 text-start transition-all hover:shadow-lift hover:-translate-y-0.5">
-              <span className="grid place-items-center w-14 h-14 rounded-2xl bg-brand text-white">
+              <span className="grid place-items-center w-14 h-14 rounded-xl bg-brand text-white">
                 <w.icon className="w-7 h-7" />
               </span>
               <p className="mt-5 text-xl font-bold text-ink">{w.t}</p>
@@ -106,7 +106,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
       {/* How we're different */}
       <section className="bg-surface border-y border-line">
         <div className="page-wrap py-14">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-ink text-center">{tx('إيه اللي يميّزنا؟', 'What makes us different')}</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold text-ink text-center">{tx('إيه اللي يميّزنا؟', 'What makes us different')}</h2>
           <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {different.map((d) => (
               <div key={d.t} className="rounded-card bg-paper p-6">
@@ -121,11 +121,11 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
 
       {/* Promises */}
       <section className="page-wrap py-14">
-        <h2 className="text-3xl sm:text-4xl font-extrabold text-ink text-center">{tx('وعدنا ليك', 'Our promise')}</h2>
+        <h2 className="text-3xl sm:text-4xl font-bold text-ink text-center">{tx('وعدنا ليك', 'Our promise')}</h2>
         <div className="mt-8 grid sm:grid-cols-2 gap-4">
           {promises.map((p) => (
             <div key={p.t} className="card p-6 flex gap-4">
-              <span className="grid place-items-center w-12 h-12 rounded-2xl bg-brand-soft text-brand shrink-0">
+              <span className="grid place-items-center w-12 h-12 rounded-xl bg-brand-soft text-brand shrink-0">
                 <p.icon className="w-6 h-6" />
               </span>
               <div>
