@@ -168,8 +168,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   <x.icon className="w-5 h-5 text-accent-light shrink-0 mt-0.5" />
                   <span>
                     <span className="block text-sm font-bold">{x.t}</span>
-                    {/* Phones get the headline only, so the buttons stay on the first screen. */}
-                    <span className="hidden sm:block text-xs font-medium text-white/80 mt-0.5">{x.d}</span>
+                    <span className="block text-[11px] sm:text-xs leading-snug font-medium text-white/80 mt-0.5">{x.d}</span>
                   </span>
                 </li>
               ))}
