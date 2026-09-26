@@ -5,8 +5,8 @@ import { useLanguage } from '../context/LanguageContext';
 /** Brand mark: a building with one lit window — "your unit". Keep in sync with public/favicon.svg.
  *  `light` swaps black and white so the mark still reads on the dark footer. */
 export const LogoMark: React.FC<{ size?: number; className?: string; light?: boolean }> = ({ size = 36, className, light }) => {
-  const bg = light ? '#ffffff' : '#1f3d36';
-  const fg = light ? '#1f3d36' : '#ffffff';
+  const bg = light ? '#ffffff' : '#1e3a5f';
+  const fg = light ? '#1e3a5f' : '#ffffff';
   return (
     <svg width={size} height={size} viewBox="0 0 40 40" className={className} aria-hidden="true">
       <rect width="40" height="40" rx="9" fill={bg} />
@@ -21,7 +21,7 @@ export const LogoMark: React.FC<{ size?: number; className?: string; light?: boo
         <rect x="22.8" y="22.7" width="3.4" height="3.4" rx="0.8" />
         <rect x="18.3" y="25.5" width="3.4" height="6.5" rx="0.8" />
       </g>
-      <rect x="22.8" y="17.6" width="3.4" height="3.4" rx="0.8" fill="#8a6d3b" />
+      <rect x="22.8" y="17.6" width="3.4" height="3.4" rx="0.8" fill="#b5562f" />
       <rect x="8" y="31.2" width="24" height="1.8" rx="0.9" fill={fg} />
     </svg>
   );

@@ -26,6 +26,9 @@ import {
   Flame,
   Receipt,
   MessageCircle,
+  Share2,
+  Check,
+  X,
 } from 'lucide-react';
 import { PageId, RealEstateUnit } from '../types';
 import { useLanguage } from '../context/LanguageContext';
@@ -128,8 +131,8 @@ export const HomePage: React.FC<HomePageProps> = ({
         {/* A real place behind the message, washed in brand green so the text always reads. */}
         <img src={BRAND.heroImage} alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover scale-105 blur-[3px]" fetchPriority="high" />
         {/* Near-solid behind the words, lighter only behind the calculator. */}
-        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-l from-brand from-45% via-brand/92 to-brand/65 rtl:bg-gradient-to-r" />
-        <div aria-hidden="true" className="absolute inset-0 pattern-mashrabiya" />
+        <div aria-hidden="true" className="absolute inset-0 ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-brand from-45% via-brand/92 to-brand/65" />
+        
         <div className="relative page-wrap pt-12 sm:pt-16 pb-12 sm:pb-16 grid lg:grid-cols-[1.05fr_1fr] gap-10 lg:gap-14 items-center">
           <div>
             <p className="hero-in inline-flex items-center gap-2 rounded-xl border border-white/20 bg-brand-ink/60 px-3 py-1.5 text-sm font-medium text-white/90">
@@ -240,6 +243,9 @@ export const HomePage: React.FC<HomePageProps> = ({
       {/* ───────── 3. Why sell through us — the free statement and four promises ───────── */}
       <SellerPromises onStatement={() => onNavigate('statement')} />
 
+      {/* ───────── 3b. The three ways out, side by side ───────── */}
+      <ThreeWays onSell={() => onNavigate('sell')} />
+
       {/* ───────── 4. Units — budget matches, discounted ones first ───────── */}
       <section className="bg-surface border-y border-line">
         <div className="page-wrap py-12 sm:py-16">
@@ -328,6 +334,24 @@ const HeroCalculator: React.FC = () => {
   const shownPaid = useAnimatedNumber(safePaid);
   const shownLoss = useAnimatedNumber(loss);
 
+  // Native share sheet on phones (WhatsApp is usually first); WhatsApp link elsewhere.
+  const share = async () => {
+    const url = `${window.location.origin}${window.location.pathname}`;
+    const text = tx(
+      `وحدتي بـ ${money(contract, language)} ودفعت ${money(safePaid, language)}.\nلو لغيت مع المطور: ترجعلي ${money(cancelBack, language)} على أقساط — يعني هخسر ${money(loss, language)}.\nلو بعتها عن طريق وحدتي: هقبض ${money(safePaid, language)} كاش.\nإيه رأيك؟`,
+      `My unit is ${money(contract, language)} and I've paid ${money(safePaid, language)}.\nCancelling returns ${money(cancelBack, language)} over years — I'd lose ${money(loss, language)}.\nSelling through Wahdety: ${money(safePaid, language)} cash.\nWhat do you think?`,
+    );
+    if (navigator.share) {
+      try {
+        await navigator.share({ text, url });
+        return;
+      } catch {
+        /* dismissed — fall through */
+      }
+    }
+    window.open(`https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`, '_blank', 'noreferrer');
+  };
+
   return (
     <div id="seller-calc" style={{ animationDelay: '200ms' }} className="hero-in rounded-card bg-surface text-ink p-5 sm:p-7 shadow-lift scroll-mt-24">
       <p className="font-display text-lg font-bold">{tx('احسب بأرقامك', 'Try your numbers')}</p>
@@ -353,7 +377,125 @@ const HeroCalculator: React.FC = () => {
       <p className="mt-3 rounded-xl bg-danger-soft px-3 py-2 text-sm font-semibold text-danger">
         {tx(`الإلغاء بيخسّرك ${money(shownLoss, language)} — ${lostPct}% من اللي دفعته`, `Cancelling costs you ${money(loss, language)} — ${lostPct}% of what you paid`)}
       </p>
+      <button onClick={share} className="mt-3 w-full inline-flex items-center justify-center gap-2 min-h-11 text-sm font-semibold text-brand hover:underline">
+        <Share2 className="w-4 h-4" />
+        {tx('ابعت الحسبة دي لحد تستشيره', 'Send this to someone you trust')}
+      </button>
     </div>
+  );
+};
+
+/* Cancel vs a broker vs us — the three options an owner who's behind actually weighs. */
+const ThreeWays: React.FC<{ onSell: () => void }> = ({ onSell }) => {
+  const { tx } = useLanguage();
+  const cols = [tx('تلغي مع المطور', 'Cancel with the developer'), tx('تبيع عن طريق سمسار', 'Sell through a broker'), tx('تبيع عن طريقنا', 'Sell through us')];
+  const rows: { k: string; v: [string, string, string]; bad?: [boolean, boolean] }[] = [
+    {
+      k: tx('هتقبض كام؟', 'What you get'),
+      v: [tx('اللي دفعته ناقص 10–15% من سعر العقد كله', 'What you paid, minus 10–15% of the whole contract'), tx('اللي دفعته ناقص عمولة السمسار', "What you paid, minus the broker's fee"), tx('اللي دفعته كامل — صفر عمولة', 'Everything you paid — zero fee')],
+      bad: [true, true],
+    },
+    {
+      k: tx('امتى؟', 'When'),
+      v: [tx('على أقساط، ممكن تاخد سنين', 'In instalments, possibly years'), tx('لما يلاقي مشتري', 'Whenever he finds a buyer'), tx('كاش يوم التنازل، بشيك مصرفي', 'Cash on transfer day, by bank cheque')],
+      bad: [true, false],
+    },
+    {
+      k: tx('عليك متأخرات؟', 'Behind on payments?'),
+      v: [tx('بتتخصم، وممكن غرامات زيادة', 'Deducted, possibly with extra fines'), tx('غالباً لازم تسددها الأول', 'Often must be paid first'), tx('بتتخصم يوم التنازل — مش محتاج تدفع حاجة دلوقتي', 'Deducted on transfer day — nothing to pay now')],
+      bad: [true, true],
+    },
+    {
+      k: tx('خصوصيتك', 'Your privacy'),
+      v: [tx('—', '—'), tx('إعلانات، ورقمك مع ناس كتير', 'Ads, and your number with many people'), tx('اسمك ورقمك مش بيتنشروا', 'Your name and number stay private')],
+      bad: [false, true],
+    },
+    {
+      k: tx('فلوسك في أمان؟', 'Is the money safe?'),
+      v: [tx('—', '—'), tx('عربون وكاش في إيد', 'Deposits and cash in hand'), tx('مفيش فلوس قبل التنازل، في مقر المطور', 'No money before transfer, at the developer')],
+      bad: [false, true],
+    },
+    {
+      k: tx('اختيارات تانية', 'Other options'),
+      v: [tx('لأ', 'No'), tx('لأ', 'No'), tx('تبدّلها بوحدة قسطها أقل', 'Swap for a lower monthly')],
+      bad: [true, true],
+    },
+  ];
+
+  const Cell: React.FC<{ text: string; tone: 'bad' | 'neutral' | 'good' }> = ({ text, tone }) => (
+    <span className={`flex items-start gap-2 ${tone === 'good' ? 'text-ink font-semibold' : 'text-muted'}`}>
+      {tone === 'good' ? (
+        <Check className="w-4 h-4 text-brand shrink-0 mt-1" strokeWidth={3} />
+      ) : tone === 'bad' ? (
+        <X className="w-4 h-4 text-danger/70 shrink-0 mt-1" />
+      ) : (
+        <span className="w-4 shrink-0" />
+      )}
+      {text}
+    </span>
+  );
+
+  return (
+    <section className="bg-surface border-y border-line">
+      <div className="page-wrap py-14 sm:py-20">
+        <SectionTitle center kicker={tx('قبل ما تقرر', 'Before you decide')} title={tx('قدامك 3 طرق. قارن بنفسك.', 'You have three ways out. Compare.')} />
+
+        {/* Desktop: one table */}
+        <div className="mt-10 hidden md:block max-w-5xl mx-auto overflow-hidden rounded-card border border-line">
+          <div className="grid grid-cols-[11rem_1fr_1fr_1.15fr] bg-paper text-sm font-bold">
+            <div className="p-4" />
+            <div className="p-4 text-muted">{cols[0]}</div>
+            <div className="p-4 text-muted">{cols[1]}</div>
+            <div className="p-4 bg-brand text-white">{cols[2]}</div>
+          </div>
+          {rows.map((r) => (
+            <div key={r.k} className="grid grid-cols-[11rem_1fr_1fr_1.15fr] border-t border-line text-[15px]">
+              <div className="p-4 font-bold text-ink">{r.k}</div>
+              <div className="p-4">
+                <Cell text={r.v[0]} tone={r.bad?.[0] ? 'bad' : 'neutral'} />
+              </div>
+              <div className="p-4">
+                <Cell text={r.v[1]} tone={r.bad?.[1] ? 'bad' : 'neutral'} />
+              </div>
+              <div className="p-4 bg-brand-soft">
+                <Cell text={r.v[2]} tone="good" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Phones: one block per question, ours first */}
+        <div className="mt-8 md:hidden rounded-card border border-line divide-y divide-line bg-surface">
+          {rows.map((r) => (
+            <div key={r.k} className="p-4">
+              <p className="font-bold text-ink">{r.k}</p>
+              <div className="mt-2 rounded-xl bg-brand-soft px-3 py-2">
+                <p className="text-xs text-muted">{cols[2]}</p>
+                <Cell text={r.v[2]} tone="good" />
+              </div>
+              <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <p className="text-xs text-muted">{cols[0]}</p>
+                  <Cell text={r.v[0]} tone={r.bad?.[0] ? 'bad' : 'neutral'} />
+                </div>
+                <div>
+                  <p className="text-xs text-muted">{cols[1]}</p>
+                  <Cell text={r.v[1]} tone={r.bad?.[1] ? 'bad' : 'neutral'} />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-8 text-center">
+          <button onClick={onSell} className="btn-primary">
+            <Tag className="w-5 h-5" />
+            {tx('اعرض وحدتك', 'List your unit')}
+          </button>
+          <p className="mt-3 text-xs text-muted">{tx('نسب الإلغاء والعمولات بتختلف من مطور ومن سمسار للتاني.', 'Cancellation rates and fees vary by developer and broker.')}</p>
+        </div>
+      </div>
+    </section>
   );
 };
 
@@ -509,7 +651,7 @@ const HowItWorks: React.FC = () => {
         ];
 
   return (
-    <section className="bg-brand text-white pattern-mashrabiya">
+    <section className="bg-brand text-white">
       <div className="page-wrap py-14 sm:py-20">
         <SectionTitle light center title={tx('4 خطوات وبس', 'Four steps, that’s it')} />
         <div className="mt-6 flex justify-center">

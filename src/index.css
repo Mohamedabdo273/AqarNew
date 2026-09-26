@@ -20,17 +20,17 @@
   /* Field fill, a step off the white card behind it. */
   --color-field: #fbfaf7;
 
-  /* "brand" is a deep olive green: buttons, selected states, dark cards and sections, footer.
-     Body text stays near-black (ink) for reading. White on brand: 11.9:1. */
-  --color-brand: #1f3d36;
-  --color-brand-hover: #2a5048;
-  --color-brand-soft: #eaf0ed;
-  --color-brand-ink: #172e28;
+  /* "brand" is a deep royal blue: buttons, selected states, dark cards and sections, footer.
+     Body text stays near-black (ink) for reading. White on brand: 11.6:1. */
+  --color-brand: #1e3a5f;
+  --color-brand-hover: #2a4d78;
+  --color-brand-soft: #e8eef5;
+  --color-brand-ink: #162c47;
 
-  /* The single accent: a muted brass/gold. At most one or two touches per screen. */
-  --color-accent: #8a6d3b; /* white text 4.9:1 */
-  --color-accent-soft: #f3ede1;
-  --color-accent-light: #d4b77c; /* for accent text on the dark sections */
+  /* The single accent: terracotta. At most one or two touches per screen. */
+  --color-accent: #b5562f; /* white text 4.6:1 */
+  --color-accent-soft: #f6e9e2;
+  --color-accent-light: #f0a27f; /* for accent text on the dark sections */
 
   --color-danger: #b42318;
   --color-danger-soft: #fdecea;
@@ -191,12 +191,6 @@ input[type='range'] {
 }
 
 /* ── Character: small touches that make the site feel made by people ── */
-
-/* Mashrabiya-style lattice for the dark green sections. Barely there — texture, not decoration. */
-.pattern-mashrabiya {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.07' stroke-width='1'%3E%3Cpath d='M28 6l6.5 15.5L50 28l-15.5 6.5L28 50l-6.5-15.5L6 28l15.5-6.5z'/%3E%3Crect x='17' y='17' width='22' height='22' transform='rotate(45 28 28)'/%3E%3Ccircle cx='28' cy='28' r='3'/%3E%3C/g%3E%3C/svg%3E");
-  background-size: 56px 56px;
-}
 
 /* Hand-drawn underline that draws itself once. */
 .underline-draw path {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, ArrowUp } from 'lucide-react';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { DEFAULT_BUDGET, Budget } from './components/BudgetFinder';
@@ -59,12 +59,16 @@ export default function App() {
   useScrollReveal(`${activePage}:${unitId ?? ''}`);
   // The floating WhatsApp button steps aside while you scroll down (it sits over content on phones) and comes back on scroll up.
   const [fabVisible, setFabVisible] = useState(true);
+  // "Back to top" shows once you're well down a long page and scrolling back up — when you'd actually want it.
+  const [topVisible, setTopVisible] = useState(false);
   useEffect(() => {
     let lastY = window.scrollY;
     const onScroll = () => {
       const y = window.scrollY;
       if (Math.abs(y - lastY) < 8) return;
-      setFabVisible(y < lastY || y < 200);
+      const goingUp = y < lastY;
+      setFabVisible(goingUp || y < 200);
+      setTopVisible(goingUp && y > window.innerHeight * 1.5);
       lastY = y;
     };
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -242,6 +246,17 @@ export default function App() {
       >
         <MessageCircle className="w-6 h-6" />
       </a>
+
+      <button
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        aria-label={tx('ارجع لفوق', 'Back to top')}
+        tabIndex={topVisible ? 0 : -1}
+        className={`fixed bottom-20 md:bottom-6 start-4 md:start-6 z-30 grid place-items-center w-11 h-11 md:w-12 md:h-12 rounded-full bg-surface text-brand border border-line shadow-lift hover:bg-brand-soft transition-all duration-300 ${
+          topVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+        }`}
+      >
+        <ArrowUp className="w-5 h-5" />
+      </button>
     </div>
   );
 }
