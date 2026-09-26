@@ -93,7 +93,7 @@ export const ThanksPage: React.FC<ThanksPageProps> = ({ kind, code, unit, sugges
   return (
     <div className="page-wrap py-10 sm:py-16">
       <div className="max-w-3xl mx-auto">
-        <span className="grid place-items-center w-16 h-16 rounded-full bg-brand text-white">
+        <span className="pop-in grid place-items-center w-16 h-16 rounded-full bg-brand text-white">
           <Check className="w-8 h-8" strokeWidth={2.5} />
         </span>
         <h1 className="mt-6 text-4xl sm:text-5xl font-bold leading-tight text-ink">{content.title}</h1>
@@ -130,6 +130,9 @@ export const ThanksPage: React.FC<ThanksPageProps> = ({ kind, code, unit, sugges
         {/* What happens next */}
         {content.steps.length > 0 && (
           <div className="mt-10">
+            {(kind === 'sell' || kind === 'statement' || kind === 'swap') && (
+              <img src={BRAND.keysImage} alt="" loading="lazy" className="mb-8 w-full h-40 sm:h-52 object-cover rounded-card" />
+            )}
             <h2 className="text-xl sm:text-2xl font-bold text-ink">{tx('اللي هيحصل بعد كده', 'What happens next')}</h2>
             <ol className="mt-5 relative space-y-5 before:absolute before:top-2 before:bottom-2 before:start-5 before:w-px before:bg-line-strong">
               {content.steps.map((s, i) => (

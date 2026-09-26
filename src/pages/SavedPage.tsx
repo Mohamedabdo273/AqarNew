@@ -1,5 +1,6 @@
 import React from 'react';
-import { Heart, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
+import { IlloEmpty } from '../components/Illustrations';
 import { PageId, RealEstateUnit } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useUnits } from '../context/UnitsContext';
@@ -32,9 +33,7 @@ export const SavedPage: React.FC<SavedPageProps> = ({ onSelectUnit, onNavigate }
         </div>
       ) : (
         <div className="mt-8 card p-12 text-center">
-          <span className="mx-auto grid place-items-center w-14 h-14 rounded-xl bg-danger-soft text-danger">
-            <Heart className="w-7 h-7" />
-          </span>
+          <IlloEmpty className="mx-auto w-20 h-20 text-brand" />
           <p className="mt-4 font-bold text-lg text-ink">{tx('لسه ما حفظتش حاجة', 'Nothing saved yet')}</p>
           <p className="mt-1 text-muted">{tx('دوس على ❤️ في أي وحدة عشان ترجعلها بعدين', 'Tap ❤️ on any unit to come back to it later')}</p>
           <button onClick={() => onNavigate('opportunities')} className="btn-primary mt-6">

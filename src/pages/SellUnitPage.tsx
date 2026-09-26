@@ -78,6 +78,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
 
   return (
     <div id="sell-top" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-12 scroll-mt-20">
+      <p className="mb-3 text-accent font-semibold">{tx('إحنا فاهمين إن الموقف صعب — وناس كتير قبلك عدّوا بيه. خطوة خطوة، ومعاك.', "We know this is hard — many have been here before you. One step at a time, with you.")}</p>
       <h1 className="text-3xl sm:text-4xl font-bold text-ink">{tx('اعرض وحدتك في دقيقة', 'List your unit in a minute')}</h1>
       <p className="mt-2 flex items-center gap-2 text-muted">
         <Clock className="w-4 h-4" />

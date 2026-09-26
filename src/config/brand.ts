@@ -11,6 +11,11 @@ export const BRAND = {
   buyerFeePercent: 1.25,
   /** Prefix for listing / request codes shown to users. */
   codePrefix: 'WHD',
+  /** Home hero background. Placeholder stock photo — swap for a real photo of a compound or one of our units. */
+  /** People photos used around the site. Placeholder stock photos — replace with your own team and handovers. */
+  peopleImage: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=1200&q=70',
+  keysImage: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=70',
+  heroImage: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2000&q=70',
   /** Contact page details. Placeholders until the real ones are set — an empty value hides that line. */
   email: 'hello@wahdety.com',
   addressAr: 'القاهرة الجديدة، التجمع الخامس',

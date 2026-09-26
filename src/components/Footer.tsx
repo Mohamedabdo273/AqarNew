@@ -20,6 +20,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
         { id: 'swap', l: tx('بدّل وحدتك', 'Swap your unit') },
         { id: 'saved', l: tx('المفضلة', 'Saved') },
         { id: 'requests', l: tx('طلباتي', 'My requests') },
+        { id: 'compare', l: tx('قارن الوحدات', 'Compare units') },
       ],
     },
     {
@@ -27,6 +28,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
       links: [
         { id: 'about', l: tx('احنا مين', 'About us') },
         { id: 'rules', l: tx('ضمان حقك', 'Your protection') },
+        { id: 'verify', l: tx('اتأكد من وحدة', 'Verify a unit') },
         { id: 'contact', l: tx('كلمنا', 'Contact us') },
         { id: 'terms', l: tx('الشروط والأحكام', 'Terms & conditions') },
         { id: 'privacy', l: tx('سياسة الخصوصية', 'Privacy policy') },
@@ -35,7 +37,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   ];
 
   return (
-    <footer className="bg-brand-ink text-white/80 pb-20 md:pb-0">
+    <footer className="bg-brand-ink pattern-mashrabiya text-white/80 pb-20 md:pb-0">
       <div className="page-wrap py-10 sm:py-12 grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4">
         <div className="col-span-2 md:col-span-1">
           <Logo light onClick={() => onNavigate('home')} />

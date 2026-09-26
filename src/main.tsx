@@ -5,6 +5,7 @@ import { LanguageProvider } from './context/LanguageContext';
 import { AuthProvider } from './context/AuthContext';
 import { UnitsProvider } from './context/UnitsContext';
 import { RequestsProvider } from './context/RequestsContext';
+import { CompareProvider } from './context/CompareContext';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(
@@ -13,7 +14,9 @@ createRoot(document.getElementById('root')!).render(
       <AuthProvider>
         <UnitsProvider>
           <RequestsProvider>
-            <App />
+            <CompareProvider>
+              <App />
+            </CompareProvider>
           </RequestsProvider>
         </UnitsProvider>
       </AuthProvider>

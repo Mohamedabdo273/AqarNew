@@ -30,6 +30,8 @@ import {
 import { PageId, RealEstateUnit } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { UnitCard } from '../components/UnitCard';
+import { IlloForm, IlloKeys, IlloPeople, IlloReview } from '../components/Illustrations';
+import { useAnimatedNumber } from '../lib/useAnimatedNumber';
 import { BRAND, whatsappLink } from '../config/brand';
 import { Budget, BudgetFinder, fitsBudget } from '../components/BudgetFinder';
 import { cancellationLoss, currency, isDeal, money, sellerDiscount } from '../lib/unitHelpers';
@@ -123,20 +125,31 @@ export const HomePage: React.FC<HomePageProps> = ({
     <div>
       {/* ───────── 1. Hero — one message, for the owner who's behind ───────── */}
       <section className="relative overflow-hidden bg-brand text-white">
-        {/* Soft light from one corner, so the dark band has depth without decoration. */}
-        <div aria-hidden="true" className="pointer-events-none absolute -top-40 -end-40 w-[36rem] h-[36rem] rounded-full bg-white/[0.06] blur-3xl" />
+        {/* A real place behind the message, washed in brand green so the text always reads. */}
+        <img src={BRAND.heroImage} alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover scale-105 blur-[3px]" fetchPriority="high" />
+        {/* Near-solid behind the words, lighter only behind the calculator. */}
+        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-l from-brand from-45% via-brand/92 to-brand/65 rtl:bg-gradient-to-r" />
+        <div aria-hidden="true" className="absolute inset-0 pattern-mashrabiya" />
         <div className="relative page-wrap pt-12 sm:pt-16 pb-12 sm:pb-16 grid lg:grid-cols-[1.05fr_1fr] gap-10 lg:gap-14 items-center">
           <div>
-            <p className="hero-in inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-3 py-1.5 text-sm text-white/80">
+            <p className="hero-in inline-flex items-center gap-2 rounded-xl border border-white/20 bg-brand-ink/60 px-3 py-1.5 text-sm font-medium text-white/90">
               <ShieldCheck className="w-4 h-4 text-accent-light" />
               {tx('تنازل رسمي في مقر المطور · من غير عمولة عليك', 'Official transfer at the developer · no fee for you')}
             </p>
-            <h1 style={{ animationDelay: '80ms' }} className="hero-in mt-6 text-[2.1rem] sm:text-5xl lg:text-[3.4rem] font-bold leading-[1.2]">
+            <h1 style={{ animationDelay: '80ms' }} className="hero-in mt-6 text-[2.1rem] sm:text-5xl lg:text-[3.4rem] font-extrabold leading-[1.2]">
               {tx('اتأخرت في الأقساط؟', 'Behind on installments?')}
               <br />
-              <span className="text-accent-light">{tx('استرد اللي دفعته كامل.', 'Get back all you paid.')}</span>
+              <span className="text-accent-light">
+                {tx('استرد اللي دفعته ', 'Get back all ')}
+                <span className="relative inline-block">
+                  {tx('كامل.', 'you paid.')}
+                  <svg aria-hidden="true" viewBox="0 0 200 20" preserveAspectRatio="none" className="underline-draw absolute -bottom-2 inset-x-0 w-full h-3 sm:h-4">
+                    <path d="M4 14C40 6 90 4 130 7s56 6 66 4" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" />
+                  </svg>
+                </span>
+              </span>
             </h1>
-            <p style={{ animationDelay: '160ms' }} className="hero-in mt-5 text-lg text-white/75 max-w-xl leading-relaxed">
+            <p style={{ animationDelay: '160ms' }} className="hero-in mt-5 text-lg font-medium text-white/90 max-w-xl leading-relaxed">
               {tx(
                 'ما تلغيش وتخسر. بنبيع وحدتك بسعر اللي دفعته، حتى لو عليك متأخرات — بتتخصم يوم التنازل، ومحدش هيعرف إنك بتبيع.',
                 "Don't cancel and lose. We sell your unit for what you paid, even with arrears — deducted on transfer day — and nobody knows you're selling.",
@@ -148,12 +161,12 @@ export const HomePage: React.FC<HomePageProps> = ({
                 { icon: EyeOff, t: tx('في سرية', 'Private'), d: tx('اسمك ورقمك مش بيتنشروا', 'Name and number never shown') },
                 { icon: Wallet, t: tx('صفر عمولة', 'Zero fee'), d: tx('وكاش بشيك مصرفي', 'Paid by bank cheque') },
               ].map((x) => (
-                <li key={x.t} className="flex flex-col sm:flex-row items-start gap-1.5 sm:gap-2.5 rounded-xl bg-white/[0.06] border border-white/10 p-2.5 sm:p-3">
+                <li key={x.t} className="flex flex-col sm:flex-row items-start gap-1.5 sm:gap-2.5 rounded-xl bg-brand-ink/75 border border-white/15 p-2.5 sm:p-3">
                   <x.icon className="w-5 h-5 text-accent-light shrink-0 mt-0.5" />
                   <span>
-                    <span className="block text-sm font-semibold">{x.t}</span>
+                    <span className="block text-sm font-bold">{x.t}</span>
                     {/* Phones get the headline only, so the buttons stay on the first screen. */}
-                    <span className="hidden sm:block text-xs text-white/60 mt-0.5">{x.d}</span>
+                    <span className="hidden sm:block text-xs font-medium text-white/80 mt-0.5">{x.d}</span>
                   </span>
                 </li>
               ))}
@@ -168,7 +181,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 {tx('كشف حساب مجاني', 'Free statement')}
               </button>
             </div>
-            <p style={{ animationDelay: '340ms' }} className="hero-in mt-5 text-sm text-white/60">
+            <p style={{ animationDelay: '340ms' }} className="hero-in mt-5 text-sm font-medium text-white/85">
               {tx('جالك إنذار من المطور؟ ', 'Got a warning letter? ')}
               <a href={`tel:${BRAND.hotline}`} className="font-semibold text-white underline underline-offset-4">
                 {tx(`كلّمنا ${BRAND.hotline}`, `Call ${BRAND.hotline}`)}
@@ -191,7 +204,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               <div key={x.l} className="px-3 sm:px-8 first:ps-0 text-center sm:text-start">
                 <dt className="sr-only">{x.l}</dt>
                 <dd className="font-display text-lg sm:text-2xl font-bold whitespace-nowrap">{x.v}</dd>
-                <p className="text-xs sm:text-sm text-white/60 mt-0.5">{x.l}</p>
+                <p className="text-xs sm:text-sm font-medium text-white/80 mt-0.5">{x.l}</p>
               </div>
             ))}
           </dl>
@@ -311,6 +324,9 @@ const HeroCalculator: React.FC = () => {
   const loss = cancellationLoss(contract, safePaid);
   const cancelBack = safePaid - loss;
   const lostPct = safePaid ? Math.round((loss / safePaid) * 100) : 0;
+  const shownCancel = useAnimatedNumber(cancelBack);
+  const shownPaid = useAnimatedNumber(safePaid);
+  const shownLoss = useAnimatedNumber(loss);
 
   return (
     <div id="seller-calc" style={{ animationDelay: '200ms' }} className="hero-in rounded-card bg-surface text-ink p-5 sm:p-7 shadow-lift scroll-mt-24">
@@ -325,17 +341,17 @@ const HeroCalculator: React.FC = () => {
             <TrendingDown className="w-4 h-4" />
             {tx('لو لغيت', 'If you cancel')}
           </p>
-          <p className="num font-display mt-2 text-2xl sm:text-3xl font-bold text-muted line-through decoration-2">{money(cancelBack, language)}</p>
+          <p className="num font-display mt-2 text-2xl sm:text-3xl font-bold text-muted line-through decoration-2">{money(shownCancel, language)}</p>
           <p className="mt-1 text-xs text-muted">{tx('على أقساط لسنين', 'over years')}</p>
         </div>
         <div className="rounded-xl bg-brand text-white p-4">
           <p className="text-xs sm:text-sm text-white/70">{tx('لو بعت عن طريقنا', 'Sell through us')}</p>
-          <p className="num font-display mt-2 text-2xl sm:text-3xl font-bold">{money(safePaid, language)}</p>
+          <p className="num font-display mt-2 text-2xl sm:text-3xl font-bold">{money(shownPaid, language)}</p>
           <p className="mt-1 text-xs text-white/70">{tx('كاش يوم التنازل', 'cash on transfer day')}</p>
         </div>
       </div>
       <p className="mt-3 rounded-xl bg-danger-soft px-3 py-2 text-sm font-semibold text-danger">
-        {tx(`الإلغاء بيخسّرك ${money(loss, language)} — ${lostPct}% من اللي دفعته`, `Cancelling costs you ${money(loss, language)} — ${lostPct}% of what you paid`)}
+        {tx(`الإلغاء بيخسّرك ${money(shownLoss, language)} — ${lostPct}% من اللي دفعته`, `Cancelling costs you ${money(loss, language)} — ${lostPct}% of what you paid`)}
       </p>
     </div>
   );
@@ -432,7 +448,13 @@ const SellerPromises: React.FC<{ onStatement: () => void }> = ({ onStatement }) 
     <section className="page-wrap py-14 sm:py-20">
       <SectionTitle center kicker={tx('لو مش قادر تكمّل', "If you can't keep up")} title={tx('ليه تبيع عن طريقنا؟', 'Why sell through us?')} />
       <div className="mt-10 grid lg:grid-cols-[1fr_1.4fr] gap-4 sm:gap-5 max-w-6xl mx-auto">
-        <div className="rounded-card border-2 border-brand bg-surface p-6 sm:p-8 flex flex-col">
+        <div className="rounded-card border-2 border-brand bg-surface overflow-hidden flex flex-col">
+          <div className="relative h-44 sm:h-52">
+            <img src={BRAND.peopleImage} alt="" loading="lazy" className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-brand/70 to-transparent" />
+            <p className="absolute bottom-3 inset-x-4 text-white text-sm font-semibold">{tx('مستشار واحد معاك من أول مكالمة لحد ما تقبض', 'One advisor with you from the first call until you’re paid')}</p>
+          </div>
+          <div className="p-6 sm:p-8 flex flex-col flex-1">
           <div className="flex items-center justify-between gap-3">
             <span className="grid place-items-center w-12 h-12 rounded-xl bg-brand text-white">
               <ClipboardCheck className="w-6 h-6" />
@@ -449,6 +471,7 @@ const SellerPromises: React.FC<{ onStatement: () => void }> = ({ onStatement }) 
           <button onClick={onStatement} className="btn-primary mt-6 self-start">
             {tx('اطلب كشف الحساب', 'Get my statement')}
           </button>
+          </div>
         </div>
         <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
           {promises.map((p) => (
@@ -473,20 +496,20 @@ const HowItWorks: React.FC = () => {
   const steps =
     tab === 'sell'
       ? [
-          { icon: FileCheck2, t: tx('ابعت بيانات وحدتك', 'Send your unit details'), d: tx('دقيقة واحدة، ومجاناً', 'One minute, free') },
-          { icon: ClipboardCheck, t: tx('كشف حساب مجاني', 'Free statement'), d: tx('نراجع العقد والمديونية ونقولك موقفك', 'We check contract and dues, and tell you where you stand') },
-          { icon: Users, t: tx('نوصلك بمشتري جاد', 'We find a serious buyer'), d: tx('واسمك ورقمك مش بيظهروا', 'Your name and number stay hidden') },
-          { icon: Handshake, t: tx('تتنازل وتقبض', 'Transfer & get paid'), d: tx('في مقر المطور بشيك مصرفي', 'At the developer, by bank cheque') },
+          { illo: IlloForm, icon: FileCheck2, t: tx('ابعت بيانات وحدتك', 'Send your unit details'), d: tx('دقيقة واحدة، ومجاناً', 'One minute, free') },
+          { illo: IlloReview, icon: ClipboardCheck, t: tx('كشف حساب مجاني', 'Free statement'), d: tx('نراجع العقد والمديونية ونقولك موقفك', 'We check contract and dues, and tell you where you stand') },
+          { illo: IlloPeople, icon: Users, t: tx('نوصلك بمشتري جاد', 'We find a serious buyer'), d: tx('واسمك ورقمك مش بيظهروا', 'Your name and number stay hidden') },
+          { illo: IlloKeys, icon: Handshake, t: tx('تتنازل وتقبض', 'Transfer & get paid'), d: tx('في مقر المطور بشيك مصرفي', 'At the developer, by bank cheque') },
         ]
       : [
-          { icon: Wallet, t: tx('حدد ميزانيتك', 'Set your budget'), d: tx('الكاش اللي معاك والقسط اللي يريحك', 'Your cash and a comfortable monthly') },
-          { icon: UserCheck, t: tx('عاين ببلاش', 'Free viewing'), d: tx('بنرتبها معاك', 'We arrange it') },
-          { icon: ShieldCheck, t: tx('اطمن على الورق', 'Check the papers'), d: tx('العقد والمديونية متراجعين', 'Contract & dues verified') },
-          { icon: Handshake, t: tx('استلم باسمك', 'Take it over'), d: tx('تنازل رسمي وتكمّل الأقساط', 'Official transfer, continue the plan') },
+          { illo: IlloForm, icon: Wallet, t: tx('حدد ميزانيتك', 'Set your budget'), d: tx('الكاش اللي معاك والقسط اللي يريحك', 'Your cash and a comfortable monthly') },
+          { illo: IlloPeople, icon: UserCheck, t: tx('عاين ببلاش', 'Free viewing'), d: tx('بنرتبها معاك', 'We arrange it') },
+          { illo: IlloReview, icon: ShieldCheck, t: tx('اطمن على الورق', 'Check the papers'), d: tx('العقد والمديونية متراجعين', 'Contract & dues verified') },
+          { illo: IlloKeys, icon: Handshake, t: tx('استلم باسمك', 'Take it over'), d: tx('تنازل رسمي وتكمّل الأقساط', 'Official transfer, continue the plan') },
         ];
 
   return (
-    <section className="bg-brand text-white">
+    <section className="bg-brand text-white pattern-mashrabiya">
       <div className="page-wrap py-14 sm:py-20">
         <SectionTitle light center title={tx('4 خطوات وبس', 'Four steps, that’s it')} />
         <div className="mt-6 flex justify-center">
@@ -506,8 +529,8 @@ const HowItWorks: React.FC = () => {
           {steps.map((s, i) => (
             <li key={s.t} className="relative flex sm:block items-center gap-4 rounded-card border border-white/10 bg-white/[0.04] p-4 sm:p-6">
               <span className="hidden sm:block absolute top-4 end-6 num font-display text-6xl font-bold text-white/10">{i + 1}</span>
-              <span className="relative grid place-items-center w-12 h-12 rounded-xl bg-white/10 text-white shrink-0">
-                <s.icon className="w-6 h-6" />
+              <span className="relative grid place-items-center w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-white/[0.06] text-white shrink-0">
+                <s.illo className="w-11 h-11 sm:w-14 sm:h-14" />
                 <span className="sm:hidden num absolute -top-1.5 -end-1.5 grid place-items-center w-5 h-5 rounded-full bg-accent text-white text-[11px] font-bold">{i + 1}</span>
               </span>
               <div>
@@ -559,6 +582,15 @@ const RulesPreview: React.FC<{ onOpenRules: (tab: 'seller' | 'buyer') => void }>
           {tx('قواعد المشتري', 'Buyer rules')}
         </button>
       </div>
+      <a href="#verify" className="mt-6 mx-auto flex max-w-xl items-center gap-3 rounded-xl border border-line bg-surface p-4 hover:border-brand transition-colors">
+        <span className="grid place-items-center w-11 h-11 rounded-xl bg-brand text-white shrink-0">
+          <ShieldCheck className="w-5 h-5" />
+        </span>
+        <span className="flex-1">
+          <span className="block font-bold text-ink">{tx('حد بعتلك وحدة باسمنا؟ اتأكد منها', 'Sent a unit in our name? Verify it')}</span>
+          <span className="block text-sm text-muted">{tx('اكتب الكود اللي عليها وشوف إنها عندنا فعلاً', 'Enter its code and see it is really ours')}</span>
+        </span>
+      </a>
     </section>
   );
 };

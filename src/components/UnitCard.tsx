@@ -1,9 +1,10 @@
 import React from 'react';
-import { Heart, MapPin, BadgeCheck, Flame, ArrowDown } from 'lucide-react';
+import { Heart, MapPin, BadgeCheck, Flame, ArrowDown, Scale } from 'lucide-react';
 import { RealEstateUnit } from '../types';
 import { BRAND } from '../config/brand';
 import { useLanguage } from '../context/LanguageContext';
 import { useUnits } from '../context/UnitsContext';
+import { COMPARE_MAX, useCompare } from '../context/CompareContext';
 import {
   cashPrice,
   currency,
@@ -36,6 +37,8 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
   const { language, tx } = useLanguage();
   const { isUnitSaved, toggleSaveUnit } = useUnits();
   const saved = isUnitSaved(unit.id);
+  const { isCompared, toggleCompare } = useCompare();
+  const compared = isCompared(unit.id);
   const deal = isDeal(unit);
   const cur = currency(language);
 
@@ -70,16 +73,30 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
             )}
             {fitsBudget && <span className="rounded-full bg-brand px-2.5 py-1 text-xs font-semibold text-white">{tx('في ميزانيتك', 'In budget')}</span>}
           </div>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleSaveUnit(unit.id);
-            }}
-            aria-label={tx('حفظ', 'Save')}
-            className="grid place-items-center w-11 h-11 rounded-full bg-surface/95 hover:bg-surface"
-          >
-            <Heart className={`w-4 h-4 ${saved ? 'fill-danger text-danger' : 'text-ink-soft'}`} />
-          </button>
+          <div className="flex gap-1.5">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!toggleCompare(unit.id)) window.alert(tx(`تقدر تقارن ${COMPARE_MAX} وحدات بس في المرة.`, `You can compare up to ${COMPARE_MAX} units.`));
+              }}
+              aria-pressed={compared}
+              aria-label={compared ? tx('شيلها من المقارنة', 'Remove from comparison') : tx('قارن', 'Compare')}
+              title={compared ? tx('في المقارنة', 'In comparison') : tx('قارن', 'Compare')}
+              className={`grid place-items-center w-11 h-11 rounded-full transition-colors ${compared ? 'bg-brand text-white' : 'bg-surface/95 text-ink-soft hover:bg-surface'}`}
+            >
+              <Scale className="w-4 h-4" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleSaveUnit(unit.id);
+              }}
+              aria-label={tx('حفظ', 'Save')}
+              className="grid place-items-center w-11 h-11 rounded-full bg-surface/95 hover:bg-surface"
+            >
+              <Heart key={String(saved)} className={`w-4 h-4 ${saved ? 'fill-danger text-danger heart-pop' : 'text-ink-soft'}`} />
+            </button>
+          </div>
         </div>
         <div className="absolute inset-x-3 bottom-3 flex items-end justify-between gap-2">
           {/* The one place the accent colour shows up in a list: a seller discount. */}

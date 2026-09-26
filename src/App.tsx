@@ -20,6 +20,10 @@ import { ThanksPage, ThanksKind } from './pages/ThanksPage';
 import { ContactPage } from './pages/ContactPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { StatementPage } from './pages/StatementPage';
+import { ComparePage } from './pages/ComparePage';
+import { VerifyPage } from './pages/VerifyPage';
+import { useCompare } from './context/CompareContext';
+import { Scale } from 'lucide-react';
 import { whatsappLink } from './config/brand';
 import { hasAdminSession } from './services/adminAuth';
 import { useScrollReveal } from './lib/useScrollReveal';
@@ -28,7 +32,7 @@ import { useUnits } from './context/UnitsContext';
 import { useLanguage } from './context/LanguageContext';
 
 /** Pages reachable by a bare hash (#sell, #contact, …). */
-const PAGES: PageId[] = ['home', 'opportunities', 'sell', 'statement', 'swap', 'contact', 'about', 'rules', 'saved', 'requests', 'privacy', 'terms', 'admin'];
+const PAGES: PageId[] = ['home', 'opportunities', 'sell', 'statement', 'compare', 'verify', 'swap', 'contact', 'about', 'rules', 'saved', 'requests', 'privacy', 'terms', 'admin'];
 const THANKS: ThanksKind[] = ['sell', 'statement', 'viewing', 'swap', 'contact', 'alert'];
 
 /*
@@ -72,6 +76,8 @@ export default function App() {
   // Opens the listings with "deals only" on; any other navigation turns it back off.
   const [dealsOn, setDealsOn] = useState(false);
   const [rulesTab, setRulesTab] = useState<RulesTab>('seller');
+  const [verifyCode, setVerifyCode] = useState<string | null>(null);
+  const { compareIds } = useCompare();
 
   // True once the visitor has moved around inside the app, so "back" can use browser history.
   const navigatedInApp = useRef(false);
@@ -87,6 +93,10 @@ export default function App() {
       setRequestCode(head === 'requests' && tail ? tail : null);
 
       if (head === 'unit' && tail) return setActivePage('unit');
+      if (head === 'verify') {
+        setVerifyCode(tail || null);
+        return setActivePage('verify');
+      }
       if (head === 'thanks' && THANKS.includes(rest[0] as ThanksKind)) {
         setThanks({ kind: rest[0] as ThanksKind, ref: rest[1] ?? null });
         return setActivePage('thanks');
@@ -197,6 +207,8 @@ export default function App() {
         {activePage === 'swap' && <PropertySwapPage units={units} onSelectUnit={openUnit} onRequested={(u) => go(`thanks/swap/${u.id}`)} />}
         {activePage === 'saved' && <SavedPage onSelectUnit={openUnit} onNavigate={handleNavigate} />}
         {activePage === 'requests' && <MyRequestsPage code={requestCode} onOpenRequest={openRequest} onNavigate={handleNavigate} />}
+        {activePage === 'compare' && <ComparePage units={units} onSelectUnit={openUnit} onNavigate={handleNavigate} />}
+        {activePage === 'verify' && <VerifyPage units={units} initialCode={verifyCode} onSelectUnit={openUnit} />}
         {activePage === 'statement' && <StatementPage onNavigate={handleNavigate} onSent={() => go('thanks/statement')} />}
         {activePage === 'contact' && <ContactPage onNavigate={handleNavigate} onSent={() => go('thanks/contact')} />}
         {activePage === 'about' && <AboutPage onNavigate={handleNavigate} />}
@@ -207,6 +219,17 @@ export default function App() {
       </main>
 
       <Footer onNavigate={handleNavigate} />
+
+      {/* Compare tray: shows once a unit is added, until you're on the compare page. */}
+      {compareIds.length > 0 && activePage !== 'compare' && (
+        <button
+          onClick={() => handleNavigate('compare')}
+          className="fixed bottom-20 md:bottom-6 start-1/2 -translate-x-1/2 rtl:translate-x-1/2 z-30 btn-primary min-h-12 px-5 shadow-lift"
+        >
+          <Scale className="w-5 h-5" />
+          {tx(`قارن (${compareIds.length})`, `Compare (${compareIds.length})`)}
+        </button>
+      )}
 
       <a
         href={whatsappLink(tx('مرحباً، عندي سؤال', 'Hi, I have a question'))}

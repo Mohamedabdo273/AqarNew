@@ -19,6 +19,7 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import { PageId } from '../types';
+import { IlloEmpty } from '../components/Illustrations';
 import { useLanguage } from '../context/LanguageContext';
 import { REQUEST_STAGES, SellRequest, useRequests } from '../context/RequestsContext';
 import { DETAIL_SECTIONS, DetailSection, completeness, netToSeller, sectionDone } from '../lib/sellForm';
@@ -83,9 +84,7 @@ export const MyRequestsPage: React.FC<MyRequestsPageProps> = ({ code, onOpenRequ
 
       {requests.length === 0 ? (
         <div className="mt-8 card p-10 text-center">
-          <span className="mx-auto grid place-items-center w-14 h-14 rounded-xl bg-brand-soft text-brand">
-            <Inbox className="w-7 h-7" />
-          </span>
+          <IlloEmpty className="mx-auto w-20 h-20 text-brand" />
           <p className="mt-4 font-bold text-lg text-ink">{tx('لسه ما بعتّش طلبات', 'No requests yet')}</p>
           <p className="mt-1 text-muted">{tx('اعرض وحدتك في دقيقة وتابعها من هنا', 'List your unit in a minute and track it here')}</p>
           <button onClick={() => onNavigate('sell')} className="btn-primary mt-6">

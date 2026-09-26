@@ -68,6 +68,8 @@ export type PageId =
   | 'swap'
   | 'contact'
   | 'statement'
+  | 'compare'
+  | 'verify'
   | 'unit'
   | 'thanks'
   | 'notfound'

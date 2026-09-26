@@ -239,6 +239,9 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
             <span className="num ms-2 text-xs" dir="ltr">
               {unit.verificationCode}
             </span>
+            <a href={`#verify/${encodeURIComponent(unit.verificationCode)}`} className="ms-1 text-xs font-semibold text-brand underline">
+              {tx('اتأكد منها', 'Verify')}
+            </a>
           </p>
           <h1 className="mt-1 text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-ink">{compound}</h1>
           <p className="mt-2 flex items-center gap-1.5 text-ink-soft">
@@ -252,7 +255,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
             {tx('شارك', 'Share')}
           </button>
           <button onClick={() => toggleSaveUnit(unit.id)} aria-pressed={saved} className="btn-ghost min-h-11 px-4 text-sm">
-            <Heart className={`w-4 h-4 ${saved ? 'fill-danger text-danger' : ''}`} />
+            <Heart key={String(saved)} className={`w-4 h-4 ${saved ? 'fill-danger text-danger heart-pop' : ''}`} />
             {saved ? tx('محفوظة', 'Saved') : tx('احفظ', 'Save')}
           </button>
           {copied && (

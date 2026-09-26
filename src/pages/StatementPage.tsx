@@ -82,6 +82,7 @@ export const StatementPage: React.FC<StatementPageProps> = ({ onNavigate, onSent
         <ClipboardCheck className="w-6 h-6" />
       </span>
       <h1 className="mt-4 text-3xl sm:text-4xl font-bold text-ink">{tx('كشف حساب وحدتك — مجاناً', 'Your unit statement — free')}</h1>
+      <p className="mt-2 text-accent font-semibold">{tx('مش لازم تقرر النهارده. اعرف موقفك الأول، وبعدين نتكلم.', "You don't have to decide today. Know where you stand first, then we talk.")}</p>
       <p className="mt-3 max-w-2xl text-ink-soft leading-relaxed">
         {tx(
           'قبل ما تقرر أي حاجة: بنقولك لو لغيت هترجعلك كام وامتى، ولو بعت أو بدّلت هتقبض كام، ونصيحتنا الصريحة — حتى لو الأحسن إنك تكمّل.',
