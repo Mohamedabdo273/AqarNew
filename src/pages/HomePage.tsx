@@ -522,28 +522,26 @@ const AREA_SHORT: Record<string, [string, string]> = {
   'البحر الأحمر': ['البحر الأحمر', 'Red Sea'],
 };
 
-/* Placeholder photo per area until it has a listed unit to show. Swap for real photos of each area. */
+/* One photo per area that says "this place" at a glance (not a unit's interior). Stock photos — swap for real ones of each area. */
+const areaPhoto = (id: string) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=320&h=320&q=70`;
 const AREA_PHOTOS: Record<string, string> = {
-  'القاهرة الجديدة': 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=70',
-  'الشيخ زايد وأكتوبر': 'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=400&q=70',
-  'العاصمة الإدارية': 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=400&q=70',
-  'المستقبل والشروق': 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=400&q=70',
-  'مدينة نصر ومصر الجديدة': 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=400&q=70',
-  'الساحل الشمالي': 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=400&q=70',
-  'العلمين الجديدة': 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=400&q=70',
-  'العين السخنة': 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=400&q=70',
-  'البحر الأحمر': 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=400&q=70',
+  'القاهرة الجديدة': areaPhoto('1613490493576-7fde63acd811'), // modern villa compound
+  'الشيخ زايد وأكتوبر': areaPhoto('1613977257363-707ba9348227'), // villa with pool
+  'العاصمة الإدارية': areaPhoto('1512453979798-5ea266f8880c'), // towers skyline
+  'المستقبل والشروق': areaPhoto('1545324418-cc1a3fa10c00'), // new apartment blocks
+  'مدينة نصر ومصر الجديدة': areaPhoto('1572252009286-268acec5ca0a'), // Cairo cityscape
+  'الساحل الشمالي': areaPhoto('1507525428034-b723cf961d3e'), // white sand and sea
+  'العلمين الجديدة': areaPhoto('1582719508461-905c673771fd'), // sea-view terrace
+  'العين السخنة': areaPhoto('1519046904884-53103b34b206'), // beach under the mountains
+  'البحر الأحمر': areaPhoto('1544551763-46a013bb70d5'), // diving the reef
 };
 
 const RegionsRow: React.FC<{ units: RealEstateUnit[]; onPick: (region: string) => void }> = ({ units, onPick }) => {
   const { tx } = useLanguage();
-  // Every area, busiest first; each with one of its own unit photos when it has one.
+  // Every area, busiest first, each with its own area photo.
   const areas = useMemo(
     () =>
-      REGIONS.map((r) => {
-        const inArea = units.filter((u) => u.region === r.ar);
-        return { ...r, count: inArea.length, photo: inArea[0]?.images[0] ?? AREA_PHOTOS[r.ar] };
-      }).sort((a, b) => b.count - a.count),
+      REGIONS.map((r) => ({ ...r, count: units.filter((u) => u.region === r.ar).length, photo: AREA_PHOTOS[r.ar] })).sort((a, b) => b.count - a.count),
     [units],
   );
   return (
