@@ -4,7 +4,7 @@ export const BRAND = {
   nameEn: 'Wahdety',
   taglineAr: 'مش قادر تكمّل الأقساط؟ بيع وحدتك واسترد فلوسك — حتى لو عليك متأخرات.',
   taglineEn: "Can't keep up with the instalments? Sell your unit and get your money back — even with arrears.",
-  hotline: '19822',
+  hotline: '17143',
   /** International format without "+" — used for wa.me links. Placeholder until the real number is set. */
   whatsapp: '201000000000',
   /** Platform fee charged to the buyer only, as % of the contract price, paid after the transfer is signed. */

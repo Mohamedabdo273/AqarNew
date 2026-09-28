@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MessageCircle, ArrowUp } from 'lucide-react';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
-import { DEFAULT_BUDGET, Budget } from './components/BudgetFinder';
-import { HomePage } from './pages/HomePage';
+import { DEFAULT_BUDGET, Budget, CASH_RANGE, MONTHLY_RANGE } from './components/BudgetFinder';
+import { HomePage, HomeSearch } from './pages/HomePage';
 import { SellUnitPage } from './pages/SellUnitPage';
 import { OpportunitiesPage } from './pages/OpportunitiesPage';
 import { PropertySwapPage } from './pages/PropertySwapPage';
@@ -79,6 +79,8 @@ export default function App() {
   const [budgetOn, setBudgetOn] = useState(false);
   // Opens the listings with "deals only" on; any other navigation turns it back off.
   const [dealsOn, setDealsOn] = useState(false);
+  // Filters the listings open with after a search from the home page; cleared on any other navigation.
+  const [listPreset, setListPreset] = useState<HomeSearch | null>(null);
   const [rulesTab, setRulesTab] = useState<RulesTab>('seller');
   const [verifyCode, setVerifyCode] = useState<string | null>(null);
   const { compareIds } = useCompare();
@@ -122,7 +124,16 @@ export default function App() {
 
   const handleNavigate = (page: PageId) => {
     setDealsOn(false);
+    setListPreset(null);
     go(page === 'home' ? '' : page);
+  };
+  const searchFromHome = (s: HomeSearch) => {
+    handleNavigate('opportunities');
+    setListPreset(s);
+    if (s.monthly) {
+      setBudget({ cash: CASH_RANGE.max, monthly: Math.min(Math.max(s.monthly, MONTHLY_RANGE.min), MONTHLY_RANGE.max) });
+      setBudgetOn(true);
+    }
   };
   const openDeals = () => {
     handleNavigate('opportunities');
@@ -166,6 +177,7 @@ export default function App() {
             onSelectUnit={openUnit}
             onOpenRules={openRules}
             onOpenDeals={openDeals}
+            onSearch={searchFromHome}
           />
         )}
         {activePage === 'opportunities' && (
@@ -177,6 +189,7 @@ export default function App() {
             onBudgetOnChange={setBudgetOn}
             onSelectUnit={openUnit}
             dealsOnly={dealsOn}
+            preset={listPreset}
             onAlertRequested={() => go('thanks/alert')}
           />
         )}

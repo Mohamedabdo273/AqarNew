@@ -80,6 +80,7 @@ export const PROPERTY_TYPES: { ar: RealEstateUnit['propertyType']; en: string }[
   { ar: 'شقة', en: 'Apartment' },
   { ar: 'دوبلكس', en: 'Duplex' },
   { ar: 'تاون هاوس', en: 'Townhouse' },
+  { ar: 'توين هاوس', en: 'Twin house' },
   { ar: 'فيلا مستقلة', en: 'Villa' },
   { ar: 'شاليه ساحلي', en: 'Chalet' },
   { ar: 'عيادة / إداري', en: 'Office / Clinic' },

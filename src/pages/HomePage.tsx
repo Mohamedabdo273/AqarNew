@@ -29,7 +29,10 @@ import {
   Share2,
   Check,
   X,
+  Search,
+  KeyRound,
 } from 'lucide-react';
+import { Filters, SortKey } from '../lib/unitFilters';
 import { PageId, RealEstateUnit } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { UnitCard } from '../components/UnitCard';
@@ -37,7 +40,7 @@ import { IlloForm, IlloKeys, IlloPeople, IlloReview } from '../components/Illust
 import { useAnimatedNumber } from '../lib/useAnimatedNumber';
 import { BRAND, whatsappLink } from '../config/brand';
 import { Budget, BudgetFinder, fitsBudget } from '../components/BudgetFinder';
-import { cancellationLoss, currency, isDeal, money, sellerDiscount } from '../lib/unitHelpers';
+import { PROPERTY_TYPES, REGIONS, cancellationLoss, currency, isDeal, money, sellerDiscount } from '../lib/unitHelpers';
 
 interface HomePageProps {
   units: RealEstateUnit[];
@@ -49,7 +52,20 @@ interface HomePageProps {
   onOpenRules: (tab: 'seller' | 'buyer') => void;
   /** Opens the listings filtered to deals only. */
   onOpenDeals: () => void;
+  /** Opens the listings with these filters (hero search, quick chips, areas). */
+  onSearch: (s: HomeSearch) => void;
 }
+
+/** What the listings page should open with after a search on the home page. */
+export interface HomeSearch {
+  filters?: Partial<Filters>;
+  sort?: SortKey;
+  /** Most the buyer can pay a month; turns the budget filter on. */
+  monthly?: number;
+}
+
+/** The hero search block is wider than the rest of the page, like a search site: ~78% of the screen on desktop. */
+const WIDE = 'w-full mx-auto px-4 sm:px-6 lg:px-0 lg:w-[78%] max-w-[110rem]';
 
 const SectionTitle: React.FC<{ title: string; sub?: string; center?: boolean; light?: boolean; kicker?: string }> = ({
   title,
@@ -60,11 +76,15 @@ const SectionTitle: React.FC<{ title: string; sub?: string; center?: boolean; li
 }) => (
   <div className={center ? 'text-center max-w-2xl mx-auto' : 'max-w-2xl'}>
     {kicker && (
-      <p className={`flex items-center gap-2 text-sm font-semibold mb-3 ${center ? 'justify-center' : ''} ${light ? 'text-accent-light' : 'text-accent'}`}>
+      <p
+        className={`inline-flex items-center rounded-full px-3 py-1 text-xs sm:text-sm font-semibold mb-3 ${
+          light ? 'bg-white/10 text-accent-light' : 'bg-sky text-brand'
+        }`}
+      >
         {kicker}
       </p>
     )}
-    <h2 className={`text-3xl sm:text-4xl font-bold leading-tight ${light ? 'text-white' : 'text-ink'}`}>{title}</h2>
+    <h2 className={`text-2xl sm:text-[2rem] font-bold leading-tight ${light ? 'text-white' : 'text-brand'}`}>{title}</h2>
     {sub && <p className={`mt-3 text-[15px] sm:text-base leading-relaxed ${light ? 'text-white/60' : 'text-muted'}`}>{sub}</p>}
   </div>
 );
@@ -111,6 +131,7 @@ export const HomePage: React.FC<HomePageProps> = ({
   onSelectUnit,
   onOpenRules,
   onOpenDeals,
+  onSearch,
 }) => {
   const { tx, isRTL } = useLanguage();
   const Arrow = isRTL ? ArrowLeft : ArrowRight;
@@ -127,21 +148,22 @@ export const HomePage: React.FC<HomePageProps> = ({
   return (
     <div>
       {/* ───────── 1. Hero — one message, for the owner who's behind ───────── */}
-      <section className="relative overflow-hidden bg-brand text-white">
-        {/* A real place behind the message, washed in brand green so the text always reads. */}
-        <img src={BRAND.heroImage} alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover scale-105 blur-[3px]" fetchPriority="high" />
-        {/* Near-solid behind the words, lighter only behind the calculator. */}
-        <div aria-hidden="true" className="absolute inset-0 ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-brand from-45% via-brand/92 to-brand/65" />
-        
-        <div className="relative page-wrap pt-12 sm:pt-16 pb-12 sm:pb-16 grid lg:grid-cols-[1.05fr_1fr] gap-10 lg:gap-14 items-center">
-          <div>
-            <p className="hero-in inline-flex items-center gap-2 rounded-xl border border-white/20 bg-brand-ink/60 px-3 py-1.5 text-sm font-medium text-white/90">
+      <section className="relative overflow-hidden bg-brand-ink text-white">
+        {/* A real home behind the message; two washes keep the words readable over any photo. */}
+        <img src={BRAND.heroImage} alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover" fetchPriority="high" />
+        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-brand-ink/75 via-brand-ink/25 to-brand-ink/5" />
+        <div aria-hidden="true" className="absolute inset-0 ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-brand-ink/55 via-brand-ink/15 to-transparent" />
+
+        {/* Short band like a search site: title and one line at the bottom, the search card overlapping it. */}
+        <div className={`relative ${WIDE} min-h-[23rem] sm:min-h-[25rem] lg:min-h-[27rem] flex flex-col justify-end pt-10 pb-24 sm:pb-36`}>
+          <div className="w-full">
+            <p className="hero-in inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 backdrop-blur px-3 py-1 text-xs sm:text-sm font-medium text-white">
               <ShieldCheck className="w-4 h-4 text-accent-light" />
               {tx('تنازل رسمي في مقر المطور · من غير عمولة عليك', 'Official transfer at the developer · no fee for you')}
             </p>
-            <h1 style={{ animationDelay: '80ms' }} className="hero-in mt-6 text-[2.1rem] sm:text-5xl lg:text-[3.4rem] font-extrabold leading-[1.2]">
-              {tx('اتأخرت في الأقساط؟', 'Behind on installments?')}
-              <br />
+            <h1 style={{ animationDelay: '80ms' }} className="hero-in mt-3 text-[1.9rem] sm:text-4xl lg:text-5xl font-extrabold leading-[1.25] text-white drop-shadow">
+              {tx('اتأخرت في الأقساط؟', 'Behind on installments?')}{' '}
+              <br className="sm:hidden" />
               <span className="text-accent-light">
                 {tx('استرد اللي دفعته ', 'Get back all ')}
                 <span className="relative inline-block">
@@ -152,66 +174,63 @@ export const HomePage: React.FC<HomePageProps> = ({
                 </span>
               </span>
             </h1>
-            <p style={{ animationDelay: '160ms' }} className="hero-in mt-5 text-lg font-medium text-white/90 max-w-xl leading-relaxed">
+            <p style={{ animationDelay: '160ms' }} className="hero-in mt-3 text-sm sm:text-lg font-medium text-white/90 max-w-4xl leading-relaxed drop-shadow">
               {tx(
                 'ما تلغيش وتخسر. بنبيع وحدتك بسعر اللي دفعته، حتى لو عليك متأخرات — بتتخصم يوم التنازل، ومحدش هيعرف إنك بتبيع.',
                 "Don't cancel and lose. We sell your unit for what you paid, even with arrears — deducted on transfer day — and nobody knows you're selling.",
               )}
             </p>
-            <ul style={{ animationDelay: '220ms' }} className="hero-in mt-6 grid grid-cols-3 gap-2 sm:gap-3 max-w-2xl">
-              {[
-                { icon: Receipt, t: tx('عليك متأخرات؟', 'Behind?'), d: tx('بتتخصم يوم التنازل', 'Deducted on transfer day') },
-                { icon: EyeOff, t: tx('في سرية', 'Private'), d: tx('اسمك ورقمك مش بيتنشروا', 'Name and number never shown') },
-                { icon: Wallet, t: tx('صفر عمولة', 'Zero fee'), d: tx('وكاش بشيك مصرفي', 'Paid by bank cheque') },
-              ].map((x) => (
-                <li key={x.t} className="flex flex-col sm:flex-row items-start gap-1.5 sm:gap-2.5 rounded-xl bg-brand-ink/75 border border-white/15 p-2.5 sm:p-3">
-                  <x.icon className="w-5 h-5 text-accent-light shrink-0 mt-0.5" />
-                  <span>
-                    <span className="block text-sm font-bold">{x.t}</span>
-                    <span className="block text-[11px] sm:text-xs leading-snug font-medium text-white/80 mt-0.5">{x.d}</span>
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <div style={{ animationDelay: '280ms' }} className="hero-in mt-8 flex flex-wrap gap-3">
-              <button onClick={() => onNavigate('sell')} className="btn bg-white text-brand hover:bg-brand-soft min-h-14 px-7 text-base">
+          </div>
+        </div>
+      </section>
+
+      {/* ───────── 1b. One search card over the band: buy · sell · swap ───────── */}
+      <HeroSearch onSearch={onSearch} onNavigate={onNavigate} />
+
+      {/* ───────── 1b'. For the owner who's behind: the promises and the two ways to start ───────── */}
+      <section className={`${WIDE} pt-5`}>
+        <div className="rounded-card border border-line bg-surface shadow-soft p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-6">
+          <ul className="flex-1 grid sm:grid-cols-3 gap-2 sm:gap-3">
+            {[
+              { icon: Receipt, t: tx('عليك متأخرات؟', 'Behind?'), d: tx('بتتخصم يوم التنازل', 'Deducted on transfer day') },
+              { icon: EyeOff, t: tx('في سرية', 'Private'), d: tx('اسمك ورقمك مش بيتنشروا', 'Name and number never shown') },
+              { icon: Wallet, t: tx('صفر عمولة', 'Zero fee'), d: tx('وكاش بشيك مصرفي', 'Paid by bank cheque') },
+            ].map((x) => (
+              <li key={x.t} className="flex items-center gap-3">
+                <span className="grid place-items-center w-10 h-10 rounded-full bg-accent-soft text-accent shrink-0">
+                  <x.icon className="w-5 h-5" />
+                </span>
+                <span>
+                  <span className="block text-sm font-bold text-ink">{x.t}</span>
+                  <span className="block text-xs text-muted">{x.d}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 lg:border-s lg:border-line lg:ps-6">
+            <div className="flex gap-2">
+              <button onClick={() => onNavigate('sell')} className="btn-primary flex-1 sm:flex-none px-5">
                 <Tag className="w-5 h-5" />
                 {tx('اعرض وحدتك', 'List your unit')}
               </button>
-              <button onClick={() => onNavigate('statement')} className="btn border border-white/30 text-white hover:bg-white/10 min-h-14 px-6 text-base">
-                <ClipboardCheck className="w-5 h-5" />
+              <button onClick={() => onNavigate('statement')} className="btn-ghost flex-1 sm:flex-none px-5">
+                <ClipboardCheck className="w-5 h-5 text-brand" />
                 {tx('كشف حساب مجاني', 'Free statement')}
               </button>
             </div>
-            <p style={{ animationDelay: '340ms' }} className="hero-in mt-5 text-sm font-medium text-white/85">
+            <p className="text-xs sm:text-sm text-muted lg:max-w-[11rem] leading-snug">
               {tx('جالك إنذار من المطور؟ ', 'Got a warning letter? ')}
-              <a href={`tel:${BRAND.hotline}`} className="font-semibold text-white underline underline-offset-4">
+              <a href={`tel:${BRAND.hotline}`} className="font-semibold text-brand underline underline-offset-4">
                 {tx(`كلّمنا ${BRAND.hotline}`, `Call ${BRAND.hotline}`)}
               </a>
               {tx(' قبل ما يلغي.', ' before they cancel.')}
             </p>
           </div>
-
-          <HeroCalculator />
-        </div>
-
-        {/* Policies, not marketing numbers — every one of these is true from day one. */}
-        <div className="relative border-t border-white/10">
-          <dl className="page-wrap py-5 grid grid-cols-3 [&>div+div]:border-s [&>div+div]:border-white/10">
-            {[
-              { v: tx('صفر', 'Zero'), l: tx('عمولة على البايع', 'seller fee') },
-              { v: tx('صفر', 'Zero'), l: tx('أوفر على المشتري', 'overprice') },
-              { v: tx('شيك مصرفي', 'Bank cheque'), l: tx('في مقر المطور', 'at the developer') },
-            ].map((x) => (
-              <div key={x.l} className="px-3 sm:px-8 first:ps-0 text-center sm:text-start">
-                <dt className="sr-only">{x.l}</dt>
-                <dd className="font-display text-lg sm:text-2xl font-bold whitespace-nowrap">{x.v}</dd>
-                <p className="text-xs sm:text-sm font-medium text-white/80 mt-0.5">{x.l}</p>
-              </div>
-            ))}
-          </dl>
         </div>
       </section>
+
+      {/* ───────── 1c. Areas, as photos ───────── */}
+      <RegionsRow units={units} onPick={(r) => onSearch({ filters: { regions: [r] } })} />
 
       {/* ───────── 2. Buyers — one strip, not a second hero ───────── */}
       <section className="page-wrap -mt-px pt-8 sm:pt-10">
@@ -239,6 +258,27 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </section>
 
+      {/* ───────── 2b. Sellers: the cancel-vs-sell calculator, compact ───────── */}
+      <section className="mt-14 sm:mt-20 bg-surface border-y border-line">
+        <div className="page-wrap py-14 sm:py-20 grid lg:grid-cols-[1fr_1.1fr] gap-8 lg:gap-14 items-center">
+          <div>
+            <SectionTitle
+              kicker={tx('لو بتفكر تلغي', 'Thinking of cancelling?')}
+              title={tx('احسب هتخسر كام لو لغيت', 'See what cancelling would cost you')}
+              sub={tx(
+                'المطور بيخصم 10–15% من سعر العقد كله لو لغيت، وبيرجعلك الباقي على أقساط. حط أرقامك وشوف الفرق.',
+                'Developers deduct 10–15% of the whole contract on cancellation and refund the rest in instalments. Try your numbers.',
+              )}
+            />
+            <button onClick={() => onNavigate('sell')} className="btn-primary rounded-full mt-6">
+              <Tag className="w-5 h-5" />
+              {tx('اعرض وحدتك', 'List your unit')}
+            </button>
+          </div>
+          <HeroCalculator />
+        </div>
+      </section>
+
       {/* ───────── 3. Why sell through us — the free statement and four promises ───────── */}
       <SellerPromises onStatement={() => onNavigate('statement')} />
 
@@ -246,8 +286,8 @@ export const HomePage: React.FC<HomePageProps> = ({
       <ThreeWays onSell={() => onNavigate('sell')} />
 
       {/* ───────── 4. Units — budget matches, discounted ones first ───────── */}
-      <section className="bg-surface border-y border-line">
-        <div className="page-wrap py-12 sm:py-16">
+      <section>
+        <div className="page-wrap py-14 sm:py-20">
           <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
             <SectionTitle
               title={matching.length > 0 ? tx('على قد ميزانيتك', 'Within your budget') : tx('وحدات بسعر زمان', 'Units at old prices')}
@@ -293,12 +333,15 @@ export const HomePage: React.FC<HomePageProps> = ({
 
       {/* ───────── 9. One closing call ───────── */}
       <section className="page-wrap pb-16">
-        <div className="rounded-card bg-brand text-white p-7 sm:p-12 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="max-w-xl">
+        {/* Same photo-and-wash treatment as the hero, so the page opens and closes the same way. */}
+        <div className="relative overflow-hidden rounded-card bg-brand-ink text-white p-7 sm:p-12 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <img src={BRAND.keysImage} alt="" aria-hidden="true" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+          <div aria-hidden="true" className="absolute inset-0 ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-brand-ink/95 via-brand-ink/80 to-brand-ink/50" />
+          <div className="relative max-w-xl">
             <p className="font-display text-2xl sm:text-3xl font-bold">{tx('قبل ما تلغي، اعرف موقفك', 'Before you cancel, know where you stand')}</p>
-            <p className="mt-2 text-white/70">{tx('كشف حساب مجاني لوحدتك ونصيحة صريحة — من غير أي التزام.', 'A free statement and honest advice — no commitment.')}</p>
+            <p className="mt-2 text-white/80">{tx('كشف حساب مجاني لوحدتك ونصيحة صريحة — من غير أي التزام.', 'A free statement and honest advice — no commitment.')}</p>
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="relative flex flex-wrap gap-3">
             <button onClick={() => onNavigate('statement')} className="btn bg-white text-brand hover:bg-brand-soft min-h-13 px-6">
               <ClipboardCheck className="w-5 h-5" />
               {tx('اطلب كشف الحساب', 'Get my statement')}
@@ -317,6 +360,190 @@ export const HomePage: React.FC<HomePageProps> = ({
         <p className="mt-6 text-center text-sm text-muted">{tx('الأرقام استرشادية، والمراجعة النهائية بتكون على العقد الفعلي.', 'Figures are indicative; final review is on the actual contract.')}</p>
       </section>
     </div>
+  );
+};
+
+/* Buy · sell · swap in one card that sits over the bottom of the hero band. */
+const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (page: PageId) => void }> = ({ onSearch, onNavigate }) => {
+  const { language, tx } = useLanguage();
+  const [mode, setMode] = useState<'buy' | 'sell' | 'swap'>('buy');
+  const [query, setQuery] = useState('');
+  const [region, setRegion] = useState('');
+  const [type, setType] = useState('');
+  const [monthly, setMonthly] = useState('');
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const m = Number(monthly.replace(/\D/g, ''));
+    const filters: Partial<Filters> = {};
+    if (query.trim()) filters.query = query.trim();
+    if (region) filters.regions = [region];
+    if (type) filters.types = [type];
+    onSearch({ filters, monthly: m > 0 ? m : undefined });
+  };
+
+  const quick: { icon: React.ElementType; label: string; s: HomeSearch }[] = [
+    { icon: Flame, label: tx('فيها خصم', 'Discounted'), s: { filters: { discounted: true }, sort: 'deals' } },
+    { icon: KeyRound, label: tx('استلام فوري', 'Ready now'), s: { filters: { delivery: ['استلام فوري'] } } },
+    { icon: Wallet, label: tx('قسط قليل', 'Low monthly'), s: { sort: 'monthly' } },
+  ];
+
+  return (
+    <section className={`relative -mt-16 sm:-mt-28 ${WIDE}`}>
+      <div className="card shadow-lift overflow-hidden">
+        <div className="px-4 sm:px-8 pt-3 sm:pt-4">
+          {/* Underline tabs, full width. */}
+          <div role="tablist" className="grid grid-cols-3 border-b-2 border-line">
+            {([
+              ['buy', tx('اشتري', 'Buy'), Search],
+              ['sell', tx('بيع', 'Sell'), Tag],
+              ['swap', tx('بدل', 'Swap'), Repeat],
+            ] as const).map(([k, label, Icon]) => (
+              <button
+                key={k}
+                role="tab"
+                aria-selected={mode === k}
+                onClick={() => setMode(k)}
+                className={`relative -mb-[2px] inline-flex items-center justify-center gap-2 min-h-13 text-base font-bold border-b-2 transition-colors ${
+                  mode === k ? 'border-brand text-brand' : 'border-transparent text-muted hover:text-ink'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="p-4 sm:p-8 sm:pt-6">
+          {mode === 'buy' && (
+            <form onSubmit={submit} className="grid gap-3">
+              <label className="relative block">
+                <Search className="absolute top-1/2 -translate-y-1/2 start-4 w-5 h-5 text-muted pointer-events-none" />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder={tx('دوّر بالكمبوند، المطور أو المنطقة', 'Search by compound, developer or area')}
+                  aria-label={tx('بحث', 'Search')}
+                  className="field h-14 ps-12 text-base"
+                />
+              </label>
+              <div className="grid grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_12rem] gap-3">
+                <select value={region} onChange={(e) => setRegion(e.target.value)} aria-label={tx('المنطقة', 'Area')} className="field h-14">
+                  <option value="">{tx('كل المناطق', 'All areas')}</option>
+                  {REGIONS.map((r) => (
+                    <option key={r.ar} value={r.ar}>
+                      {language === 'ar' ? r.ar : r.en}
+                    </option>
+                  ))}
+                </select>
+                <select value={type} onChange={(e) => setType(e.target.value)} aria-label={tx('نوع الوحدة', 'Unit type')} className="field h-14">
+                  <option value="">{tx('كل الأنواع', 'All types')}</option>
+                  {PROPERTY_TYPES.map((p) => (
+                    <option key={p.ar} value={p.ar}>
+                      {language === 'ar' ? p.ar : p.en}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  value={monthly}
+                  onChange={(e) => setMonthly(e.target.value)}
+                  inputMode="numeric"
+                  placeholder={tx('أقصى قسط في الشهر', 'Max monthly')}
+                  aria-label={tx('أقصى قسط في الشهر', 'Max monthly')}
+                  className="field h-14 num col-span-2 lg:col-span-1"
+                />
+                <button type="submit" className="btn-primary h-14 text-base col-span-2 lg:col-span-1">
+                  <Search className="w-5 h-5" />
+                  {tx('دوّر', 'Search')}
+                </button>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <span className="text-sm text-muted">{tx('بحث سريع:', 'Quick:')}</span>
+                {quick.map((q) => (
+                  <button key={q.label} type="button" onClick={() => onSearch(q.s)} className="chip-off">
+                    <q.icon className="w-4 h-4 text-brand" />
+                    {q.label}
+                  </button>
+                ))}
+              </div>
+            </form>
+          )}
+          {mode !== 'buy' && (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 min-h-[8.5rem]">
+              <div>
+                <p className="text-lg font-bold text-ink">
+                  {mode === 'sell' ? tx('بيع وحدتك باللي دفعته', 'Sell your unit for what you paid') : tx('بدّل وحدتك بوحدة تانية', 'Swap your unit for another')}
+                </p>
+                <p className="mt-1 text-ink-soft">
+                  {mode === 'sell'
+                    ? tx('صفر عمولة عليك، في سرية، وحتى لو عليك متأخرات.', 'Zero fee, fully private — even with arrears.')
+                    : tx('أي وحدة على الموقع، وتدفع أو تاخد الفرق بس.', 'Any listed unit — pay or receive only the difference.')}
+                </p>
+              </div>
+              <button onClick={() => onNavigate(mode === 'sell' ? 'sell' : 'swap')} className="btn-primary h-14 px-8 text-base shrink-0">
+                {mode === 'sell' ? <Tag className="w-5 h-5" /> : <Repeat className="w-5 h-5" />}
+                {mode === 'sell' ? tx('اعرض وحدتك', 'List your unit') : tx('جرّب التبديل', 'Try a swap')}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Policies, not marketing numbers — every one of these is true from day one. */}
+        <dl className="grid grid-cols-3 border-t border-line bg-sky-soft [&>div+div]:border-s [&>div+div]:border-line">
+          {[
+            { v: tx('صفر', 'Zero'), l: tx('عمولة على البايع', 'seller fee') },
+            { v: tx('صفر', 'Zero'), l: tx('أوفر على المشتري', 'overprice') },
+            { v: tx('شيك مصرفي', 'Bank cheque'), l: tx('في مقر المطور', 'at the developer') },
+          ].map((x) => (
+            <div key={x.l} className="px-2 py-2.5 flex flex-col sm:flex-row items-center justify-center gap-x-1.5 text-center">
+              <dt className="sr-only">{x.l}</dt>
+              <dd className="font-bold text-brand text-sm sm:text-base whitespace-nowrap">{x.v}</dd>
+              <p className="text-xs sm:text-sm text-muted">{x.l}</p>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </section>
+  );
+};
+
+/* Soft tones behind each area photo (and in place of it, until an area has one). */
+const AREA_TINTS = ['#c9d9ea', '#dcd2c4', '#c9dac6', '#bfd6dc', '#e2d3da', '#d6d9c3'];
+const AREA_SHORT: Record<string, [string, string]> = {
+  'القاهرة الجديدة': ['التجمع', 'New Cairo'],
+  'الشيخ زايد وأكتوبر': ['زايد', 'Zayed'],
+  'العاصمة الإدارية': ['العاصمة', 'New Capital'],
+  'الساحل الشمالي': ['الساحل', 'North Coast'],
+  'المستقبل والشروق': ['المستقبل', 'Mostakbal'],
+  'البحر الأحمر': ['البحر الأحمر', 'Red Sea'],
+};
+
+const RegionsRow: React.FC<{ units: RealEstateUnit[]; onPick: (region: string) => void }> = ({ units, onPick }) => {
+  const { tx } = useLanguage();
+  // Only areas that have units, each shown with one of its own photos.
+  const areas = useMemo(
+    () => REGIONS.map((r) => ({ ...r, photo: units.find((u) => u.region === r.ar)?.images[0] })).filter((r) => units.some((u) => u.region === r.ar)),
+    [units],
+  );
+  if (areas.length === 0) return null;
+  return (
+    <section className="page-wrap pt-10 sm:pt-12">
+      <h2 className="text-2xl sm:text-[2rem] font-bold text-brand">{tx('المناطق', 'Areas')}</h2>
+      <div className="mt-5 -mx-4 px-4 sm:mx-0 sm:px-0 flex gap-5 sm:gap-8 overflow-x-auto no-scrollbar pb-1">
+        {areas.map((r, i) => (
+          <button key={r.ar} onClick={() => onPick(r.ar)} className="group flex flex-col items-center gap-2 shrink-0">
+            <span
+              className="block w-20 h-20 sm:w-28 sm:h-28 rounded-full overflow-hidden ring-2 ring-transparent ring-offset-2 ring-offset-paper group-hover:ring-brand transition"
+              style={{ backgroundColor: AREA_TINTS[i % AREA_TINTS.length] }}
+            >
+              {r.photo && <img src={r.photo} alt="" loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />}
+            </span>
+            <span className="text-sm font-semibold text-ink-soft group-hover:text-brand">{tx(AREA_SHORT[r.ar]?.[0] ?? r.ar, AREA_SHORT[r.ar]?.[1] ?? r.en)}</span>
+          </button>
+        ))}
+      </div>
+    </section>
   );
 };
 
@@ -352,24 +579,24 @@ const HeroCalculator: React.FC = () => {
   };
 
   return (
-    <div id="seller-calc" style={{ animationDelay: '200ms' }} className="hero-in rounded-card bg-surface text-ink p-5 sm:p-7 shadow-lift scroll-mt-24">
+    <div id="seller-calc" className="card text-ink p-5 sm:p-6 shadow-lift scroll-mt-24 w-full max-w-xl lg:justify-self-end">
       <p className="font-display text-lg font-bold">{tx('احسب بأرقامك', 'Try your numbers')}</p>
-      <div className="mt-5 grid gap-5">
+      <div className="mt-4 grid gap-4">
         <Slider label={tx('سعر الوحدة في العقد', 'Contract price')} value={contract} min={1_000_000} max={15_000_000} step={100_000} onChange={setContract} />
         <Slider label={tx('دفعت كام لحد دلوقتي؟', 'Paid so far')} value={safePaid} min={100_000} max={contract} step={50_000} onChange={setPaid} />
       </div>
-      <div className="mt-6 grid grid-cols-2 gap-3">
-        <div className="rounded-xl bg-paper border border-line p-4">
+      <div className="mt-5 grid grid-cols-2 gap-3">
+        <div className="rounded-xl bg-paper border border-line p-3.5">
           <p className="flex items-center gap-1.5 text-xs sm:text-sm text-muted">
             <TrendingDown className="w-4 h-4" />
             {tx('لو لغيت', 'If you cancel')}
           </p>
-          <p className="num font-display mt-2 text-2xl sm:text-3xl font-bold text-muted line-through decoration-2">{money(shownCancel, language)}</p>
+          <p className="num font-display mt-1.5 text-xl sm:text-2xl font-bold text-muted line-through decoration-2">{money(shownCancel, language)}</p>
           <p className="mt-1 text-xs text-muted">{tx('على أقساط لسنين', 'over years')}</p>
         </div>
-        <div className="rounded-xl bg-brand text-white p-4">
+        <div className="rounded-xl bg-brand text-white p-3.5">
           <p className="text-xs sm:text-sm text-white/70">{tx('لو بعت عن طريقنا', 'Sell through us')}</p>
-          <p className="num font-display mt-2 text-2xl sm:text-3xl font-bold">{money(shownPaid, language)}</p>
+          <p className="num font-display mt-1.5 text-xl sm:text-2xl font-bold">{money(shownPaid, language)}</p>
           <p className="mt-1 text-xs text-white/70">{tx('كاش يوم التنازل', 'cash on transfer day')}</p>
         </div>
       </div>
@@ -440,7 +667,7 @@ const ThreeWays: React.FC<{ onSell: () => void }> = ({ onSell }) => {
         <SectionTitle center kicker={tx('قبل ما تقرر', 'Before you decide')} title={tx('قدامك 3 طرق. قارن بنفسك.', 'You have three ways out. Compare.')} />
 
         {/* Desktop: one table */}
-        <div className="mt-10 hidden md:block max-w-5xl mx-auto overflow-hidden rounded-card border border-line">
+        <div className="mt-10 hidden md:block overflow-hidden rounded-card border border-line shadow-soft">
           <div className="grid grid-cols-[11rem_1fr_1fr_1.15fr] bg-paper text-sm font-bold">
             <div className="p-4" />
             <div className="p-4 text-muted">{cols[0]}</div>
@@ -504,7 +731,8 @@ const SwapFeature: React.FC<{ onSwap: () => void }> = ({ onSwap }) => {
   const mine = 1_500_000;
   const theirs = 2_000_000;
   return (
-    <section className="page-wrap py-14 sm:py-20 grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+    <section className="bg-sky-soft border-y border-line">
+      <div className="page-wrap py-14 sm:py-20 grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
       <div>
         <SectionTitle
           kicker={tx('حصري على وحدتي', 'Only on Wahdety')}
@@ -532,7 +760,7 @@ const SwapFeature: React.FC<{ onSwap: () => void }> = ({ onSwap }) => {
         </button>
       </div>
 
-      <div className="rounded-card border border-line bg-surface p-5 sm:p-8">
+      <div className="rounded-card border border-line bg-surface shadow-lift p-5 sm:p-8">
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-5">
           <div className="rounded-xl bg-paper border border-line p-3 sm:p-5">
             <p className="text-xs sm:text-sm text-muted">{tx('وحدتك — مدفوع فيها', 'Your unit — paid')}</p>
@@ -553,6 +781,7 @@ const SwapFeature: React.FC<{ onSwap: () => void }> = ({ onSwap }) => {
           </span>
         </div>
         <p className="mt-3 text-xs text-muted">{tx('مثال توضيحي. الفرق الفعلي بيتحدد بعد مراجعة العقدين.', 'Illustrative. The actual difference is set after both contracts are reviewed.')}</p>
+      </div>
       </div>
     </section>
   );
@@ -588,8 +817,8 @@ const SellerPromises: React.FC<{ onStatement: () => void }> = ({ onStatement }) 
   return (
     <section className="page-wrap py-14 sm:py-20">
       <SectionTitle center kicker={tx('لو مش قادر تكمّل', "If you can't keep up")} title={tx('ليه تبيع عن طريقنا؟', 'Why sell through us?')} />
-      <div className="mt-10 grid lg:grid-cols-[1fr_1.4fr] gap-4 sm:gap-5 max-w-6xl mx-auto">
-        <div className="rounded-card border-2 border-brand bg-surface overflow-hidden flex flex-col">
+      <div className="mt-10 grid lg:grid-cols-[1fr_1.4fr] gap-4 sm:gap-5">
+        <div className="rounded-card border border-line bg-surface shadow-soft overflow-hidden flex flex-col">
           <div className="relative h-44 sm:h-52">
             <img src={BRAND.peopleImage} alt="" loading="lazy" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-brand/70 to-transparent" />
@@ -616,7 +845,7 @@ const SellerPromises: React.FC<{ onStatement: () => void }> = ({ onStatement }) 
         </div>
         <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
           {promises.map((p) => (
-            <div key={p.t} className="rounded-card bg-surface border border-line p-5 sm:p-6">
+            <div key={p.t} className="rounded-card bg-surface border border-line shadow-soft p-5 sm:p-6 hover:shadow-lift hover:-translate-y-0.5 transition">
               <span className="grid place-items-center w-11 h-11 rounded-xl bg-brand-soft text-brand">
                 <p.icon className="w-5 h-5" />
               </span>
@@ -650,16 +879,16 @@ const HowItWorks: React.FC = () => {
         ];
 
   return (
-    <section className="bg-brand text-white">
+    <section className="bg-surface border-y border-line">
       <div className="page-wrap py-14 sm:py-20">
-        <SectionTitle light center title={tx('4 خطوات وبس', 'Four steps, that’s it')} />
+        <SectionTitle center kicker={tx('إزاي بنشتغل', 'How it works')} title={tx('4 خطوات وبس', 'Four steps, that’s it')} />
         <div className="mt-6 flex justify-center">
-          <div className="inline-flex p-1 rounded-full bg-white/5 border border-white/10">
+          <div className="inline-flex p-1 rounded-full bg-paper border border-line">
             {(['sell', 'buy'] as const).map((k) => (
               <button
                 key={k}
                 onClick={() => setTab(k)}
-                className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-colors ${tab === k ? 'bg-white text-ink' : 'text-white/70 hover:text-white'}`}
+                className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-colors ${tab === k ? 'bg-brand text-white' : 'text-ink-soft hover:text-brand'}`}
               >
                 {k === 'sell' ? tx('للبايع', 'Sellers') : tx('للمشتري', 'Buyers')}
               </button>
@@ -668,15 +897,15 @@ const HowItWorks: React.FC = () => {
         </div>
         <ol className="mt-8 sm:mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
           {steps.map((s, i) => (
-            <li key={s.t} className="relative flex sm:block items-center gap-4 rounded-card border border-white/10 bg-white/[0.04] p-4 sm:p-6">
-              <span className="hidden sm:block absolute top-4 end-6 num font-display text-6xl font-bold text-white/10">{i + 1}</span>
-              <span className="relative grid place-items-center w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-white/[0.06] text-white shrink-0">
+            <li key={s.t} className="relative flex sm:block items-center gap-4 rounded-card border border-line bg-paper p-4 sm:p-6">
+              <span className="hidden sm:block absolute top-4 end-6 num font-display text-6xl font-bold text-brand/10">{i + 1}</span>
+              <span className="relative grid place-items-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-sky text-brand shrink-0">
                 <s.illo className="w-11 h-11 sm:w-14 sm:h-14" />
                 <span className="sm:hidden num absolute -top-1.5 -end-1.5 grid place-items-center w-5 h-5 rounded-full bg-accent text-white text-[11px] font-bold">{i + 1}</span>
               </span>
               <div>
-                <p className="sm:mt-6 font-bold sm:text-lg text-white">{s.t}</p>
-                <p className="sm:mt-1 text-sm sm:text-base text-white/60">{s.d}</p>
+                <p className="sm:mt-6 font-bold sm:text-lg text-ink">{s.t}</p>
+                <p className="sm:mt-1 text-sm sm:text-base text-muted">{s.d}</p>
               </div>
             </li>
           ))}

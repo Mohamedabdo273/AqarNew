@@ -18,6 +18,8 @@ interface OpportunitiesPageProps {
   onSelectUnit: (unit: RealEstateUnit) => void;
   /** Open with the "deals only" filter on (from the home page deals section). */
   dealsOnly?: boolean;
+  /** Filters and sort to open with (from the home page search and chips). */
+  preset?: { filters?: Partial<Filters>; sort?: SortKey } | null;
   /** Called when a buyer asks to be told about new matching units. */
   onAlertRequested: () => void;
 }
@@ -32,14 +34,15 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   onBudgetOnChange,
   onSelectUnit,
   dealsOnly = false,
+  preset = null,
   onAlertRequested,
 }) => {
   const { language, tx, isRTL } = useLanguage();
-  const [filters, setFilters] = useState<Filters>(() => ({ ...EMPTY_FILTERS, discounted: dealsOnly }));
+  const [filters, setFilters] = useState<Filters>(() => ({ ...EMPTY_FILTERS, discounted: dealsOnly, ...preset?.filters }));
   const [alertPhone, setAlertPhone] = useState('');
   const [alertTried, setAlertTried] = useState(false);
   const dealsCount = useMemo(() => units.filter(isDeal).length, [units]);
-  const [sort, setSort] = useState<SortKey>('newest');
+  const [sort, setSort] = useState<SortKey>(preset?.sort ?? 'newest');
   const [page, setPage] = useState(1);
   const [sheetOpen, setSheetOpen] = useState(false);
   const resultsTop = useRef<HTMLDivElement>(null);
