@@ -86,7 +86,7 @@ export interface RealEstateUnit {
   compoundEn?: string;
   location: string;
   locationEn?: string;
-  region: 'القاهرة الجديدة' | 'الشيخ زايد وأكتوبر' | 'العاصمة الإدارية' | 'الساحل الشمالي' | 'المستقبل والشروق' | 'البحر الأحمر';
+  region: 'القاهرة الجديدة' | 'الشيخ زايد وأكتوبر' | 'العاصمة الإدارية' | 'الساحل الشمالي' | 'المستقبل والشروق' | 'البحر الأحمر' | 'مدينة نصر ومصر الجديدة' | 'العلمين الجديدة' | 'العين السخنة';
   regionEn?: string;
   propertyType: PropertyType;
   propertyTypeEn?: string;

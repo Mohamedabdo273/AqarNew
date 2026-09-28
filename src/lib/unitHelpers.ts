@@ -72,7 +72,10 @@ export const REGIONS: { ar: RealEstateUnit['region']; en: string }[] = [
   { ar: 'الشيخ زايد وأكتوبر', en: 'Zayed & October' },
   { ar: 'العاصمة الإدارية', en: 'New Capital' },
   { ar: 'المستقبل والشروق', en: 'Mostakbal & Shorouk' },
+  { ar: 'مدينة نصر ومصر الجديدة', en: 'Nasr City & Heliopolis' },
   { ar: 'الساحل الشمالي', en: 'North Coast' },
+  { ar: 'العلمين الجديدة', en: 'New Alamein' },
+  { ar: 'العين السخنة', en: 'Ain Sokhna' },
   { ar: 'البحر الأحمر', en: 'Red Sea' },
 ];
 

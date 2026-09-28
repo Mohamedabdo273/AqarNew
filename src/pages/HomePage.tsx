@@ -78,7 +78,7 @@ const SectionTitle: React.FC<{ title: string; sub?: string; center?: boolean; li
     {kicker && (
       <p
         className={`inline-flex items-center rounded-full px-3 py-1 text-xs sm:text-sm font-semibold mb-3 ${
-          light ? 'bg-white/10 text-accent-light' : 'bg-sky text-brand'
+          light ? 'bg-white/10 text-accent-light' : 'bg-sand text-brand'
         }`}
       >
         {kicker}
@@ -490,7 +490,7 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
         </div>
 
         {/* Policies, not marketing numbers — every one of these is true from day one. */}
-        <dl className="grid grid-cols-3 border-t border-line bg-sky-soft [&>div+div]:border-s [&>div+div]:border-line">
+        <dl className="grid grid-cols-3 border-t border-line bg-sand-soft [&>div+div]:border-s [&>div+div]:border-line">
           {[
             { v: tx('صفر', 'Zero'), l: tx('عمولة على البايع', 'seller fee') },
             { v: tx('صفر', 'Zero'), l: tx('أوفر على المشتري', 'overprice') },
@@ -509,37 +509,59 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
 };
 
 /* Soft tones behind each area photo (and in place of it, until an area has one). */
-const AREA_TINTS = ['#c9d9ea', '#dcd2c4', '#c9dac6', '#bfd6dc', '#e2d3da', '#d6d9c3'];
+const AREA_TINTS = ['#e6dccb', '#dcd2c4', '#d9cfbd', '#e2d6c6', '#d4c8b4', '#e8dfd0'];
 const AREA_SHORT: Record<string, [string, string]> = {
   'القاهرة الجديدة': ['التجمع', 'New Cairo'],
   'الشيخ زايد وأكتوبر': ['زايد', 'Zayed'],
   'العاصمة الإدارية': ['العاصمة', 'New Capital'],
   'الساحل الشمالي': ['الساحل', 'North Coast'],
   'المستقبل والشروق': ['المستقبل', 'Mostakbal'],
+  'مدينة نصر ومصر الجديدة': ['مدينة نصر', 'Nasr City'],
+  'العلمين الجديدة': ['العلمين', 'Alamein'],
+  'العين السخنة': ['السخنة', 'Sokhna'],
   'البحر الأحمر': ['البحر الأحمر', 'Red Sea'],
+};
+
+/* Placeholder photo per area until it has a listed unit to show. Swap for real photos of each area. */
+const AREA_PHOTOS: Record<string, string> = {
+  'القاهرة الجديدة': 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=400&q=70',
+  'الشيخ زايد وأكتوبر': 'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=400&q=70',
+  'العاصمة الإدارية': 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=400&q=70',
+  'المستقبل والشروق': 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=400&q=70',
+  'مدينة نصر ومصر الجديدة': 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=400&q=70',
+  'الساحل الشمالي': 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=400&q=70',
+  'العلمين الجديدة': 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=400&q=70',
+  'العين السخنة': 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=400&q=70',
+  'البحر الأحمر': 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=400&q=70',
 };
 
 const RegionsRow: React.FC<{ units: RealEstateUnit[]; onPick: (region: string) => void }> = ({ units, onPick }) => {
   const { tx } = useLanguage();
-  // Only areas that have units, each shown with one of its own photos.
+  // Every area, busiest first; each with one of its own unit photos when it has one.
   const areas = useMemo(
-    () => REGIONS.map((r) => ({ ...r, photo: units.find((u) => u.region === r.ar)?.images[0] })).filter((r) => units.some((u) => u.region === r.ar)),
+    () =>
+      REGIONS.map((r) => {
+        const inArea = units.filter((u) => u.region === r.ar);
+        return { ...r, count: inArea.length, photo: inArea[0]?.images[0] ?? AREA_PHOTOS[r.ar] };
+      }).sort((a, b) => b.count - a.count),
     [units],
   );
-  if (areas.length === 0) return null;
   return (
     <section className="page-wrap pt-10 sm:pt-12">
       <h2 className="text-2xl sm:text-[2rem] font-bold text-brand">{tx('المناطق', 'Areas')}</h2>
-      <div className="mt-5 -mx-4 px-4 sm:mx-0 sm:px-0 flex gap-5 sm:gap-8 overflow-x-auto no-scrollbar pb-1">
+      <div className="mt-5 -mx-4 px-4 sm:mx-0 sm:px-0 flex lg:justify-between gap-5 sm:gap-7 overflow-x-auto no-scrollbar pb-1">
         {areas.map((r, i) => (
-          <button key={r.ar} onClick={() => onPick(r.ar)} className="group flex flex-col items-center gap-2 shrink-0">
+          <button key={r.ar} onClick={() => onPick(r.ar)} className="group flex flex-col items-center gap-1.5 shrink-0">
             <span
               className="block w-20 h-20 sm:w-28 sm:h-28 rounded-full overflow-hidden ring-2 ring-transparent ring-offset-2 ring-offset-paper group-hover:ring-brand transition"
               style={{ backgroundColor: AREA_TINTS[i % AREA_TINTS.length] }}
             >
               {r.photo && <img src={r.photo} alt="" loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />}
             </span>
-            <span className="text-sm font-semibold text-ink-soft group-hover:text-brand">{tx(AREA_SHORT[r.ar]?.[0] ?? r.ar, AREA_SHORT[r.ar]?.[1] ?? r.en)}</span>
+            <span className="mt-0.5 text-sm font-semibold text-ink-soft group-hover:text-brand">{tx(AREA_SHORT[r.ar]?.[0] ?? r.ar, AREA_SHORT[r.ar]?.[1] ?? r.en)}</span>
+            <span className="text-xs text-muted">
+              {r.count > 0 ? tx(r.count === 1 ? 'وحدة واحدة' : r.count === 2 ? 'وحدتين' : `${r.count} ${r.count > 10 ? 'وحدة' : 'وحدات'}`, `${r.count} ${r.count === 1 ? 'unit' : 'units'}`) : tx('قريباً', 'Soon')}
+            </span>
           </button>
         ))}
       </div>
@@ -731,7 +753,7 @@ const SwapFeature: React.FC<{ onSwap: () => void }> = ({ onSwap }) => {
   const mine = 1_500_000;
   const theirs = 2_000_000;
   return (
-    <section className="bg-sky-soft border-y border-line">
+    <section className="bg-sand-soft border-y border-line">
       <div className="page-wrap py-14 sm:py-20 grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
       <div>
         <SectionTitle
@@ -899,7 +921,7 @@ const HowItWorks: React.FC = () => {
           {steps.map((s, i) => (
             <li key={s.t} className="relative flex sm:block items-center gap-4 rounded-card border border-line bg-paper p-4 sm:p-6">
               <span className="hidden sm:block absolute top-4 end-6 num font-display text-6xl font-bold text-brand/10">{i + 1}</span>
-              <span className="relative grid place-items-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-sky text-brand shrink-0">
+              <span className="relative grid place-items-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-sand text-brand shrink-0">
                 <s.illo className="w-11 h-11 sm:w-14 sm:h-14" />
                 <span className="sm:hidden num absolute -top-1.5 -end-1.5 grid place-items-center w-5 h-5 rounded-full bg-accent text-white text-[11px] font-bold">{i + 1}</span>
               </span>

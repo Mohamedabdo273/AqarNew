@@ -8,7 +8,7 @@ export interface NewUnitInput {
   title?: string;
   developer: string;
   compound: string;
-  region: 'القاهرة الجديدة' | 'الشيخ زايد وأكتوبر' | 'العاصمة الإدارية' | 'الساحل الشمالي' | 'المستقبل والشروق' | 'البحر الأحمر';
+  region: 'القاهرة الجديدة' | 'الشيخ زايد وأكتوبر' | 'العاصمة الإدارية' | 'الساحل الشمالي' | 'المستقبل والشروق' | 'البحر الأحمر' | 'مدينة نصر ومصر الجديدة' | 'العلمين الجديدة' | 'العين السخنة';
   propertyType: PropertyType;
   location?: string;
   areaM2: number;

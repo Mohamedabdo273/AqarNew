@@ -8,18 +8,17 @@
   /* One family everywhere: headings are IBM Plex Sans Arabic too, just heavier. */
   --font-display: 'IBM Plex Sans Arabic', system-ui, sans-serif;
 
-  /* Cool neutrals, tuned to sit with the brand blue and the sky band. */
-  --color-paper: #f5f7fa;
+  --color-paper: #f7f5ef;
   --color-surface: #ffffff;
-  --color-ink: #131b26;
-  --color-ink-soft: #37414f;
-  --color-muted: #545e6b; /* 6.4:1 on paper — secondary text has to stay readable on phones */
-  --color-line: #e3e8ee;
-  --color-line-strong: #cfd7e0;
+  --color-ink: #121210;
+  --color-ink-soft: #3a3935;
+  --color-muted: #595852; /* 6.6:1 on paper — secondary text has to stay readable on phones */
+  --color-line: #e7e5df;
+  --color-line-strong: #d6d3cb;
   /* Borders of things you type in or tap: 3.4:1 on white, so an empty field still reads as a field. */
-  --color-field-border: #8a94a1;
+  --color-field-border: #8f8b82;
   /* Field fill, a step off the white card behind it. */
-  --color-field: #fafbfd;
+  --color-field: #fbfaf7;
 
   /* "brand" is a deep royal blue: buttons, selected states, dark cards and sections, footer.
      Body text stays near-black (ink) for reading. White on brand: 11.6:1. */
@@ -27,9 +26,9 @@
   --color-brand-hover: #2a4d78;
   --color-brand-soft: #e8eef5;
   --color-brand-ink: #162c47;
-  /* Light sky blue: the home hero band and light sections. Brand text on sky: 8.9:1. */
-  --color-sky: #cadbeb;
-  --color-sky-soft: #eaf1f7;
+  /* Deeper beige, a step darker than paper: light bands, label pills, icon circles. Brand text on sand: 9:1. */
+  --color-sand: #e6dccb;
+  --color-sand-soft: #efe9dd;
 
   /* The single accent: terracotta. At most one or two touches per screen. */
   --color-accent: #b5562f; /* white text 4.6:1 */
@@ -47,8 +46,8 @@
   --text-xs--line-height: 1.45;
   --text-sm: 0.9375rem; /* 15px */
   --text-sm--line-height: 1.55;
-  --shadow-soft: 0 1px 2px rgb(19 27 38 / 0.05);
-  --shadow-lift: 0 2px 6px rgb(19 27 38 / 0.05), 0 24px 48px -24px rgb(30 58 95 / 0.3);
+  --shadow-soft: 0 1px 2px rgb(18 18 16 / 0.04);
+  --shadow-lift: 0 2px 4px rgb(18 18 16 / 0.04), 0 20px 40px -20px rgb(18 18 16 / 0.25);
 }
 
 @layer base {
