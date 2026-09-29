@@ -72,7 +72,8 @@ export const NumberInput: React.FC<{ id: string; value: number; onChange: (n: nu
   );
 };
 
-export function ChipSelect<T extends string>({ options, value, onChange }: { options: { value: T; label: string }[]; value: T; onChange: (v: T) => void }) {
+// value can be '' — "nothing picked yet" is a real state for every chip group in the form.
+export function ChipSelect<T extends string>({ options, value, onChange }: { options: { value: T; label: string }[]; value: T | ''; onChange: (v: T) => void }) {
   return (
     <div className="flex flex-wrap gap-2">
       {options.map((o) => (

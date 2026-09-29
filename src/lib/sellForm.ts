@@ -12,6 +12,7 @@ export interface SellForm {
   developer: string;
   compound: string;
   region: RealEstateUnit['region'] | '';
+  subArea: string;
   propertyType: PropertyType | '';
   contractPrice: number;
   paidAmount: number;
@@ -75,6 +76,7 @@ export const EMPTY_SELL_FORM: SellForm = {
   developer: '',
   compound: '',
   region: '',
+  subArea: '',
   propertyType: '',
   contractPrice: 0,
   paidAmount: 0,

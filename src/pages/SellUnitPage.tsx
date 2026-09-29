@@ -3,7 +3,7 @@ import { AlertTriangle, ShieldCheck, TrendingDown, Clock, ScrollText, Send, Chec
 import { PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useRequests } from '../context/RequestsContext';
-import { PROPERTY_TYPES, REGIONS, cancellationLoss, currency, money } from '../lib/unitHelpers';
+import { PROPERTY_TYPES, REGIONS, SUB_AREAS, cancellationLoss, currency, money } from '../lib/unitHelpers';
 import { EMPTY_SELL_FORM, SellForm, isValidPhone, netToSeller } from '../lib/sellForm';
 import { ChipSelect, CheckBox, Field, MoneyInput, Toggle } from '../components/sell/FormBits';
 import { whatsappLink } from '../config/brand';
@@ -33,6 +33,53 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
     }
   });
   const [errors, setErrors] = useState<string[]>([]);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+
+  const STEPS = [
+    { n: 1 as const, label: tx('الوحدة', 'The unit') },
+    { n: 2 as const, label: tx('الفلوس', 'The money') },
+    { n: 3 as const, label: tx('بياناتك', 'Your details') },
+  ];
+
+  /** كل خطوة بتتحقق من حقولها هي بس — عشان محدش يتقالّه "ناقص" على حاجة لسه مشفهاش. */
+  const stepErrors = (target: 1 | 2 | 3): string[] => {
+    const e: string[] = [];
+    if (target === 1) {
+      if (!form.developer.trim()) e.push(tx('المطور', 'Developer'));
+      if (!form.compound.trim()) e.push(tx('الكمبوند', 'Compound'));
+      if (!form.region) e.push(tx('المنطقة', 'Area'));
+      if (form.region && !form.subArea) e.push(tx('المنطقة بالتحديد', 'Which part'));
+      if (!form.propertyType) e.push(tx('النوع', 'Type'));
+    }
+    if (target === 2) {
+      if (!form.contractPrice) e.push(tx('سعر العقد', 'Contract price'));
+      if (!form.paidAmount) e.push(tx('المدفوع', 'Amount paid'));
+      if (form.paidAmount > form.contractPrice && form.contractPrice) e.push(tx('المدفوع أكبر من سعر العقد', 'Paid is more than contract price'));
+    }
+    if (target === 3) {
+      if (!form.ownerName.trim()) e.push(tx('اسمك', 'Your name'));
+      if (!isValidPhone(form.ownerPhone)) e.push(tx('موبايل صحيح (01xxxxxxxxx)', 'Valid mobile (01xxxxxxxxx)'));
+      if (form.willingToDiscount && !form.discountAmount) e.push(tx('قيمة الخصم', 'Discount amount'));
+      if (form.willingToDiscount && form.discountAmount >= form.paidAmount && form.paidAmount) e.push(tx('الخصم أكبر من المدفوع', 'Discount is more than what you paid'));
+      if (!form.ackOwner || !form.ackNoOverprice || !form.ackDeclareDues) e.push(tx('الموافقة على القواعد التلاتة', 'Agree to the three rules'));
+    }
+    return e;
+  };
+
+  const backToTop = () => document.getElementById('sell-top')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  const goTo = (target: 1 | 2 | 3) => {
+    setErrors([]);
+    setStep(target);
+    backToTop();
+  };
+
+  const goNext = () => {
+    const e = stepErrors(step);
+    setErrors(e);
+    backToTop();
+    if (!e.length && step < 3) setStep((step + 1) as 1 | 2 | 3);
+  };
 
   useEffect(() => {
     try {
@@ -46,24 +93,17 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
   const L = <T extends string>(list: { ar: T; en: string }[]) => list.map((o) => ({ value: o.ar, label: language === 'ar' ? o.ar : o.en }));
 
   const submit = () => {
-    const e: string[] = [];
-    if (!form.developer.trim()) e.push(tx('المطور', 'Developer'));
-    if (!form.compound.trim()) e.push(tx('الكمبوند', 'Compound'));
-    if (!form.region) e.push(tx('المنطقة', 'Area'));
-    if (!form.propertyType) e.push(tx('النوع', 'Type'));
-    if (!form.contractPrice) e.push(tx('سعر العقد', 'Contract price'));
-    if (!form.paidAmount) e.push(tx('المدفوع', 'Amount paid'));
-    if (form.paidAmount > form.contractPrice && form.contractPrice) e.push(tx('المدفوع أكبر من سعر العقد', 'Paid is more than contract price'));
-    if (!form.ownerName.trim()) e.push(tx('اسمك', 'Your name'));
-    if (!isValidPhone(form.ownerPhone)) e.push(tx('موبايل صحيح (01xxxxxxxxx)', 'Valid mobile (01xxxxxxxxx)'));
-    if (form.willingToDiscount && !form.discountAmount) e.push(tx('قيمة الخصم', 'Discount amount'));
-    if (form.willingToDiscount && form.discountAmount >= form.paidAmount && form.paidAmount) e.push(tx('الخصم أكبر من المدفوع', 'Discount is more than what you paid'));
-    if (!form.ackOwner || !form.ackNoOverprice || !form.ackDeclareDues) e.push(tx('الموافقة على القواعد التلاتة', 'Agree to the three rules'));
-    setErrors(e);
-    if (e.length) {
-      document.getElementById('sell-top')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      return;
+    // لو فيه نقص في خطوة سابقة، نوديه لها بدل ما نقوله "ناقص" على شاشة مش شايفها
+    for (const target of [1, 2, 3] as const) {
+      const e = stepErrors(target);
+      if (e.length) {
+        setStep(target);
+        setErrors(e);
+        backToTop();
+        return;
+      }
     }
+    setErrors([]);
     const req = createRequest({ ...form, developer: form.developer.trim(), compound: form.compound.trim(), ownerName: form.ownerName.trim() });
     try {
       localStorage.removeItem(DRAFT_KEY);
@@ -120,6 +160,41 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
             </div>
           )}
 
+          {/* شريط الخطوات — تقدر ترجع لأي خطوة عدّيتها، مش للي قدامك */}
+          <ol className="flex items-center gap-2">
+            {STEPS.map((st, i) => (
+              <React.Fragment key={st.n}>
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => st.n < step && goTo(st.n)}
+                    disabled={st.n > step}
+                    aria-current={st.n === step ? 'step' : undefined}
+                    className={`flex items-center gap-2 rounded-full py-1.5 pe-3 ps-1.5 transition-colors ${
+                      st.n === step
+                        ? 'bg-brand text-white'
+                        : st.n < step
+                          ? 'text-brand hover:bg-brand-soft cursor-pointer'
+                          : 'text-muted cursor-default'
+                    }`}
+                  >
+                    <span
+                      className={`grid place-items-center w-7 h-7 rounded-full text-sm font-bold shrink-0 ${
+                        st.n === step ? 'bg-white text-brand' : st.n < step ? 'bg-brand text-white' : 'bg-line text-muted'
+                      }`}
+                    >
+                      {st.n < step ? <Check className="w-4 h-4" strokeWidth={3} /> : st.n}
+                    </span>
+                    <span className="text-sm font-bold whitespace-nowrap">{st.label}</span>
+                  </button>
+                </li>
+                {i < STEPS.length - 1 && <li aria-hidden className="h-px flex-1 bg-line" />}
+              </React.Fragment>
+            ))}
+          </ol>
+
+          {step === 1 && (
+          <div className="space-y-7">
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label={tx('المطور', 'Developer')} required htmlFor="dev">
               <input id="dev" value={form.developer} onChange={(e) => set('developer', e.target.value)} placeholder={tx('مثلاً: بالم هيلز', 'e.g. Palm Hills')} className="field" />
@@ -130,12 +205,33 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
           </div>
 
           <Field label={tx('المنطقة', 'Area')} required>
-            <ChipSelect options={L(REGIONS)} value={form.region} onChange={(v) => set('region', v)} />
+            <ChipSelect
+              options={L(REGIONS)}
+              value={form.region}
+              onChange={(v) => {
+                set('region', v);
+                set('subArea', ''); // الإقليم اتغير، فالاختيار التفصيلي القديم مابقاش صالح
+              }}
+            />
           </Field>
+          {form.region && (
+            <Field label={tx('المنطقة بالتحديد', 'Which part')} required>
+              <ChipSelect
+                options={(SUB_AREAS[form.region] ?? []).map((o) => ({ value: o.ar, label: language === 'ar' ? o.ar : o.en }))}
+                value={form.subArea}
+                onChange={(v) => set('subArea', v)}
+              />
+            </Field>
+          )}
           <Field label={tx('النوع', 'Type')} required>
             <ChipSelect options={L(PROPERTY_TYPES)} value={form.propertyType} onChange={(v) => set('propertyType', v)} />
           </Field>
 
+          </div>
+          )}
+
+          {step === 2 && (
+          <div className="space-y-7">
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label={tx('سعر الوحدة في العقد', 'Contract price')} required htmlFor="price">
               <MoneyInput id="price" value={form.contractPrice} onChange={(n) => set('contractPrice', n)} placeholder="5,000,000" />
@@ -163,6 +259,11 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
             <MoneyInput id="market" value={form.currentMarketPrice} onChange={(n) => set('currentMarketPrice', n)} placeholder="9,000,000" />
           </Field>
 
+          </div>
+          )}
+
+          {step === 3 && (
+          <div className="space-y-7">
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label={tx('اسمك زي العقد', 'Name as in contract')} required htmlFor="oname">
               <input id="oname" value={form.ownerName} onChange={(e) => set('ownerName', e.target.value)} className="field" />
@@ -234,10 +335,29 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
             </CheckBox>
           </div>
 
-          <button onClick={submit} className="btn-primary w-full min-h-14 text-base">
-            <Send className="w-5 h-5" />
-            {tx('ابعت طلبي', 'Send my request')}
-          </button>
+          </div>
+          )}
+
+          <div className="flex items-center gap-3">
+            {step > 1 && (
+              <button type="button" onClick={() => goTo((step - 1) as 1 | 2 | 3)} className="btn-ghost min-h-14 px-5">
+                {tx('رجوع', 'Back')}
+              </button>
+            )}
+            {step < 3 ? (
+              <button type="button" onClick={goNext} className="btn-primary flex-1 min-h-14 text-base">
+                {tx('التالي', 'Next')}
+                <Arrow className="w-5 h-5" />
+              </button>
+            ) : (
+              <button onClick={submit} className="btn-primary flex-1 min-h-14 text-base">
+                <Send className="w-5 h-5" />
+                {tx('ابعت طلبي', 'Send my request')}
+              </button>
+            )}
+          </div>
+
+          {step === 3 && (
           <p className="-mt-3 text-center text-sm text-muted">
             {tx('بإرسال الطلب إنت موافق على ', 'By sending you agree to the ')}
             <button type="button" onClick={() => onNavigate('terms')} className="text-brand font-semibold hover:underline">
@@ -248,6 +368,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               {tx('سياسة الخصوصية', 'Privacy policy')}
             </button>
           </p>
+          )}
           <a
             href={whatsappLink(tx('عايز أعرض وحدتي', "I'd like to list my unit"))}
             target="_blank"
@@ -287,7 +408,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               <ShieldCheck className="w-5 h-5 shrink-0" />
               {tx('إيه اللي هيحصل بعد كده؟', 'What happens next?')}
             </p>
-            <p>{tx('هنكلمك خلال ساعتين، وتقدر تكمّل باقي البيانات من "طلباتي" أو مع المستشار في التليفون.', "We'll call within 2 hours. Finish the details from \"My requests\" or with your advisor on the phone.")}</p>
+            <p>{tx('هنكلمك خلال يومين، وتقدر تكمّل باقي البيانات من "طلباتي" أو مع المستشار في التليفون.', "We'll call within 2 days. Finish the details from \"My requests\" or with your advisor on the phone.")}</p>
           </div>
         </aside>
       </div>

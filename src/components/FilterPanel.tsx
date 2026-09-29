@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import { ChevronDown, Search, Check } from 'lucide-react';
+import { ChevronDown, Search, Check, SlidersHorizontal } from 'lucide-react';
 import { RealEstateUnit } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { Budget, BudgetFinder } from './BudgetFinder';
 import { Filters } from '../lib/unitFilters';
-import { DELIVERY_OPTIONS, FINISHING_OPTIONS, FREQUENCY_OPTIONS, PROPERTY_TYPES, REGIONS, pick } from '../lib/unitHelpers';
+import { DELIVERY_OPTIONS, FINISHING_OPTIONS, FREQUENCY_OPTIONS, PROPERTY_TYPES, REGIONS, subAreasFor, pick } from '../lib/unitHelpers';
 
 interface FilterPanelProps {
   units: RealEstateUnit[];
@@ -103,6 +103,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
 }) => {
   const { language, tx } = useLanguage();
   const [devQuery, setDevQuery] = useState('');
+  const [moreOpen, setMoreOpen] = useState(false);
 
   const developers = useMemo(() => {
     const map = new Map<string, { value: string; label: string; count: number }>();
@@ -115,6 +116,20 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
   }, [units, language]);
 
   const shownDevs = developers.filter((d) => d.label.toLowerCase().includes(devQuery.trim().toLowerCase()));
+
+  // كام فلتر شغال جوه "فلاتر أكتر" — عشان يبان على الزرار وهو مقفول
+  const moreCount =
+    f.developers.length +
+    (f.bedrooms !== null ? 1 : 0) +
+    (f.areaMin || f.areaMax ? 1 : 0) +
+    f.delivery.length +
+    f.finishing.length +
+    f.frequency.length +
+    (f.discounted ? 1 : 0) +
+    (f.negotiable ? 1 : 0) +
+    (f.swappable ? 1 : 0) +
+    (f.noTransferFee ? 1 : 0) +
+    (f.noPenalties ? 1 : 0);
   const L = (o: { ar: string; en: string }) => ({ value: o.ar, label: language === 'ar' ? o.ar : o.en });
 
   const extras: { key: 'discounted' | 'negotiable' | 'swappable' | 'noTransferFee' | 'noPenalties'; label: string }[] = [
@@ -138,13 +153,52 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
       </Section>
 
       <Section title={tx('المنطقة', 'Area')} active={f.regions.length} defaultOpen>
-        <Chips options={REGIONS.map(L)} selected={f.regions} onToggle={(v) => onChange({ regions: toggle(f.regions, v) })} />
+        <Chips
+          options={REGIONS.map(L)}
+          selected={f.regions}
+          onToggle={(v) => {
+            const regions = toggle(f.regions, v);
+            // نشيل أي منطقة تفصيلية بقت تابعة لإقليم مش مختار
+            const allowed = new Set(subAreasFor(regions).map((s) => s.ar));
+            onChange({ regions, subAreas: f.subAreas.filter((s) => allowed.has(s)) });
+          }}
+        />
       </Section>
+
+      {/* من غير إقليم مختار دي بتبقى 46 خيار مخلوطين — مالهاش لازمة قبل الاختيار */}
+      {f.regions.length > 0 && (
+        <Section title={tx('المنطقة بالتحديد', 'Which part')} active={f.subAreas.length} defaultOpen>
+          <Chips
+            options={subAreasFor(f.regions).map((o) => ({ value: o.ar, label: tx(o.ar, o.en) }))}
+            selected={f.subAreas}
+            onToggle={(v) => onChange({ subAreas: toggle(f.subAreas, v) })}
+          />
+        </Section>
+      )}
 
       <Section title={tx('النوع', 'Type')} active={f.types.length} defaultOpen>
         <Chips options={PROPERTY_TYPES.map(L)} selected={f.types} onToggle={(v) => onChange({ types: toggle(f.types, v) })} />
       </Section>
 
+      {/* الباقي فلاتر تفصيلية: المشتري هنا بيسأل عن الكاش والقسط والمكان الأول */}
+      <button
+        type="button"
+        onClick={() => setMoreOpen((v) => !v)}
+        aria-expanded={moreOpen}
+        className="w-full flex items-center justify-between gap-3 py-4 text-start font-bold text-brand"
+      >
+        <span className="flex items-center gap-2">
+          <SlidersHorizontal className="w-4 h-4" />
+          {moreOpen ? tx('فلاتر أقل', 'Fewer filters') : tx('فلاتر أكتر', 'More filters')}
+          {!moreOpen && moreCount > 0 && (
+            <span className="num grid place-items-center min-w-5 h-5 px-1.5 rounded-full bg-brand text-white text-xs">{moreCount}</span>
+          )}
+        </span>
+        <ChevronDown className={`w-4 h-4 transition-transform ${moreOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {moreOpen && (
+      <>
       <Section title={tx('المطور', 'Developer')} active={f.developers.length}>
         {developers.length > 6 && (
           <div className="relative mb-3">
@@ -195,10 +249,6 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
         <RangeFields min={f.areaMin} max={f.areaMax} unit={tx('م²', 'm²')} onChange={(areaMin, areaMax) => onChange({ areaMin, areaMax })} />
       </Section>
 
-      <Section title={tx('سعر العقد', 'Contract price')} active={f.priceMin || f.priceMax ? 1 : 0}>
-        <RangeFields money min={f.priceMin} max={f.priceMax} unit={tx('ج.م', 'EGP')} onChange={(priceMin, priceMax) => onChange({ priceMin, priceMax })} />
-      </Section>
-
       <Section title={tx('الاستلام', 'Delivery')} active={f.delivery.length}>
         <Chips
           options={DELIVERY_OPTIONS.map((d) => ({ value: d.ar, label: language === 'ar' ? d.short : d.en }))}
@@ -225,6 +275,8 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
           ))}
         </div>
       </Section>
+      </>
+      )}
     </div>
   );
 };

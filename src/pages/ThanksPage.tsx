@@ -40,9 +40,9 @@ export const ThanksPage: React.FC<ThanksPageProps> = ({ kind, code, unit, sugges
   const content = {
     sell: {
       title: tx('وصلنا طلبك.', 'We got your request.'),
-      sub: tx('مستشارك هيكلمك خلال ساعتين عشان يبدأ كشف الحساب المجاني.', 'Your advisor will call within two hours to start your free statement.'),
+      sub: tx('مستشارك هيكلمك خلال يومين عشان يبدأ كشف الحساب المجاني.', 'Your advisor will call within two days to start your free statement.'),
       steps: [
-        { icon: PhoneCall, t: tx('مكالمة من مستشارك', 'A call from your advisor'), d: tx('خلال ساعتين، في مواعيد الشغل', 'Within two hours, during working hours') },
+        { icon: PhoneCall, t: tx('مكالمة من مستشارك', 'A call from your advisor'), d: tx('خلال يومين، في مواعيد الشغل', 'Within two days, during working hours') },
         { icon: ClipboardCheck, t: tx('كشف حساب وحدتك', 'Your unit statement'), d: tx('نراجع العقد والمديونية ونقولك موقفك بصراحة', 'We check contract and dues and tell you straight') },
         { icon: Users, t: tx('نوصلك بمشتري جاد', 'We find a serious buyer'), d: tx('لو قررت تبيع، واسمك ورقمك مش بيظهروا', 'If you decide to sell; your name and number stay hidden') },
         { icon: Handshake, t: tx('تتنازل وتقبض', 'Transfer & get paid'), d: tx('في مقر المطور بشيك مصرفي', 'At the developer, by bank cheque') },
@@ -50,9 +50,9 @@ export const ThanksPage: React.FC<ThanksPageProps> = ({ kind, code, unit, sugges
     },
     viewing: {
       title: tx('المعاينة اتسجلت.', 'Viewing requested.'),
-      sub: tx('هنكلمك خلال ساعتين نحدد معاك ميعاد يناسبك.', "We'll call within two hours to set a time that suits you."),
+      sub: tx('هنكلمك خلال يومين نحدد معاك ميعاد يناسبك.', "We'll call within two days to set a time that suits you."),
       steps: [
-        { icon: PhoneCall, t: tx('نكلمك نحدد الميعاد', 'We call to set the time'), d: tx('خلال ساعتين، في مواعيد الشغل', 'Within two hours, during working hours') },
+        { icon: PhoneCall, t: tx('نكلمك نحدد الميعاد', 'We call to set the time'), d: tx('خلال يومين، في مواعيد الشغل', 'Within two days, during working hours') },
         { icon: CalendarCheck, t: tx('تعاين ببلاش', 'Free viewing'), d: tx('ومعاك حد مننا', 'With one of our team') },
         { icon: FileSearch, t: tx('تطمن على الورق', 'Check the papers'), d: tx('العقد والمديونية متراجعين قبلها', 'Contract and dues already verified') },
         { icon: Handshake, t: tx('تنازل رسمي', 'Official transfer'), d: tx(`ومفيش ولا جنيه قبله. عمولتنا ${BRAND.buyerFeePercent}% بعد التوقيع`, `No money before it. Our ${BRAND.buyerFeePercent}% is after signing`) },
@@ -62,7 +62,7 @@ export const ThanksPage: React.FC<ThanksPageProps> = ({ kind, code, unit, sugges
       title: tx('طلب كشف الحساب وصل.', 'Statement request received.'),
       sub: tx('ومفيش أي التزام — وحدتك مش هتتعرض لحد ما إنت تقرر.', "No commitment — your unit isn't listed unless you decide to."),
       steps: [
-        { icon: PhoneCall, t: tx('مكالمة من مستشارك', 'A call from your advisor'), d: tx('خلال ساعتين، في مواعيد الشغل', 'Within two hours, during working hours') },
+        { icon: PhoneCall, t: tx('مكالمة من مستشارك', 'A call from your advisor'), d: tx('خلال يومين، في مواعيد الشغل', 'Within two days, during working hours') },
         { icon: FileSearch, t: tx('نراجع عقدك والمديونية', 'We check your contract and dues'), d: tx('ونحسب كل اختيار بالأرقام', 'And work out every option in numbers') },
         { icon: ClipboardCheck, t: tx('الكشف يوصلك على واتساب', 'Your statement on WhatsApp'), d: tx('إلغاء، بيع، تبديل، أو تكمّل — ونصيحتنا', 'Cancel, sell, swap or keep — with our advice') },
         { icon: Handshake, t: tx('القرار ليك', 'Your call'), d: tx('ولو قررت تبيع، بياناتك جاهزة', 'And if you sell, your details are ready') },
@@ -70,9 +70,9 @@ export const ThanksPage: React.FC<ThanksPageProps> = ({ kind, code, unit, sugges
     },
     swap: {
       title: tx('طلب التبديل وصل.', 'Swap request received.'),
-      sub: tx('مستشارك هيكلمك خلال ساعتين يراجع معاك الأرقام.', 'Your advisor will call within two hours to go over the numbers.'),
+      sub: tx('مستشارك هيكلمك خلال يومين يراجع معاك الأرقام.', 'Your advisor will call within two days to go over the numbers.'),
       steps: [
-        { icon: PhoneCall, t: tx('مكالمة من مستشارك', 'A call from your advisor'), d: tx('خلال ساعتين، في مواعيد الشغل', 'Within two hours, during working hours') },
+        { icon: PhoneCall, t: tx('مكالمة من مستشارك', 'A call from your advisor'), d: tx('خلال يومين، في مواعيد الشغل', 'Within two days, during working hours') },
         { icon: FileSearch, t: tx('نراجع العقدين', 'We check both contracts'), d: tx('عقد وحدتك وعقد الوحدة الجديدة، والفرق الفعلي', 'Yours and the new one, and the real difference') },
         { icon: Users, t: tx('نلاقي مشتري لوحدتك', 'We find a buyer for yours'), d: tx('باللي دفعته، واسمك ورقمك مش بيظهروا', 'At what you paid; your name and number stay hidden') },
         { icon: Handshake, t: tx('تنازلين مترتبين مع بعض', 'Two transfers, arranged together'), d: tx('تدفع أو تاخد الفرق بس', 'You just settle the difference') },

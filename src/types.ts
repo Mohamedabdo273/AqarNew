@@ -42,13 +42,13 @@ export interface User {
 
 export type PropertyType = 
   | 'شقة'
-  | 'فيلا مستقلة'
+  | 'شاليه'
+  | 'دوبلكس'
   | 'تاون هاوس'
   | 'توين هاوس'
-  | 'دوبلكس'
+  | 'فيلا'
   | 'تجاري / محل'
-  | 'عيادة / إداري'
-  | 'شاليه ساحلي';
+  | 'عيادة / إداري';
 
 export type InstallmentFrequency = 'شهري' | 'ربع سنوي' | 'نصف سنوي' | 'سنوي';
 
@@ -86,7 +86,9 @@ export interface RealEstateUnit {
   compoundEn?: string;
   location: string;
   locationEn?: string;
-  region: 'القاهرة الجديدة' | 'الشيخ زايد وأكتوبر' | 'العاصمة الإدارية' | 'الساحل الشمالي' | 'المستقبل والشروق' | 'البحر الأحمر' | 'مدينة نصر ومصر الجديدة' | 'العلمين الجديدة' | 'العين السخنة';
+  region: 'القاهرة الكبرى' | 'إسكندرية' | 'دلتا' | 'الصعيد' | 'مدن القناة' | 'الساحل الشمالي';
+  /** المنطقة التفصيلية جوه الإقليم — من SUB_AREAS */
+  subArea?: string;
   regionEn?: string;
   propertyType: PropertyType;
   propertyTypeEn?: string;

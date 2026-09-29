@@ -5,6 +5,7 @@ import { cashPrice, isDeal, isNegotiable, monthlyInstallment, savingsPercent, se
 export interface Filters {
   query: string;
   regions: string[];
+  subAreas: string[];
   types: string[];
   developers: string[];
   bedrooms: number | null; // 5 means 5+
@@ -27,6 +28,7 @@ export interface Filters {
 export const EMPTY_FILTERS: Filters = {
   query: '',
   regions: [],
+  subAreas: [],
   types: [],
   developers: [],
   bedrooms: null,
@@ -70,6 +72,7 @@ export const applyFilters = (
   const list = units.filter((u) => {
     if (budget && !fitsBudget(u, budget)) return false;
     if (f.regions.length && !f.regions.includes(u.region)) return false;
+    if (f.subAreas.length && !f.subAreas.includes(u.subArea ?? '')) return false;
     if (f.types.length && !f.types.includes(u.propertyType)) return false;
     if (f.developers.length && !f.developers.includes(u.developer)) return false;
     if (f.bedrooms !== null && (f.bedrooms >= 5 ? u.bedrooms < 5 : u.bedrooms !== f.bedrooms)) return false;

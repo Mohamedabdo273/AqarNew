@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, ArrowUp } from 'lucide-react';
+import { MessageCircle, ArrowUp, Headset } from 'lucide-react';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { DEFAULT_BUDGET, Budget, CASH_RANGE, MONTHLY_RANGE } from './components/BudgetFinder';
@@ -24,7 +24,7 @@ import { ComparePage } from './pages/ComparePage';
 import { VerifyPage } from './pages/VerifyPage';
 import { useCompare } from './context/CompareContext';
 import { Scale } from 'lucide-react';
-import { whatsappLink } from './config/brand';
+import { BRAND, whatsappLink } from './config/brand';
 import { hasAdminSession } from './services/adminAuth';
 import { useScrollReveal } from './lib/useScrollReveal';
 import { PageId, RealEstateUnit } from './types';
@@ -260,11 +260,23 @@ export default function App() {
         <MessageCircle className="w-6 h-6" />
       </a>
 
+      {/* Hotline, mirroring WhatsApp on the other side: the two ways to reach a human. */}
+      <a
+        href={`tel:${BRAND.hotline}`}
+        aria-label={tx(`الخط الساخن ${BRAND.hotline}`, `Hotline ${BRAND.hotline}`)}
+        className={`fixed bottom-20 md:bottom-6 start-4 md:start-6 z-30 grid place-items-center w-12 h-12 md:w-14 md:h-14 rounded-full bg-brand text-white ring-2 ring-white shadow-lift hover:scale-105 transition-all duration-300 ${
+          fabVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+        }`}
+      >
+        <Headset className="w-6 h-6" />
+      </a>
+
+      {/* Back to top sits above the hotline so the two never overlap. */}
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         aria-label={tx('ارجع لفوق', 'Back to top')}
         tabIndex={topVisible ? 0 : -1}
-        className={`fixed bottom-20 md:bottom-6 start-4 md:start-6 z-30 grid place-items-center w-11 h-11 md:w-12 md:h-12 rounded-full bg-surface text-brand border border-line shadow-lift hover:bg-brand-soft transition-all duration-300 ${
+        className={`fixed bottom-36 md:bottom-24 start-4 md:start-6 z-30 grid place-items-center w-11 h-11 md:w-12 md:h-12 rounded-full bg-surface text-brand border border-line shadow-lift hover:bg-brand-soft transition-all duration-300 ${
           topVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
         }`}
       >

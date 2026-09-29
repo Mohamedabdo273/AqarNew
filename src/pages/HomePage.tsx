@@ -196,13 +196,16 @@ export const HomePage: React.FC<HomePageProps> = ({
               { icon: EyeOff, t: tx('في سرية', 'Private'), d: tx('اسمك ورقمك مش بيتنشروا', 'Name and number never shown') },
               { icon: Wallet, t: tx('صفر عمولة', 'Zero fee'), d: tx('وكاش بشيك مصرفي', 'Paid by bank cheque') },
             ].map((x) => (
-              <li key={x.t} className="flex items-center gap-3">
-                <span className="grid place-items-center w-10 h-10 rounded-full bg-accent-soft text-accent shrink-0">
-                  <x.icon className="w-5 h-5" />
+              <li
+                key={x.t}
+                className="flex items-center gap-3 rounded-card border border-line/70 bg-sand-soft/55 backdrop-blur-md px-3 py-3 shadow-soft"
+              >
+                <span className="grid place-items-center w-12 h-12 rounded-full bg-accent-soft/80 backdrop-blur-sm text-accent shrink-0">
+                  <x.icon className="w-6 h-6" />
                 </span>
                 <span>
-                  <span className="block text-sm font-bold text-ink">{x.t}</span>
-                  <span className="block text-xs text-muted">{x.d}</span>
+                  <span className="block text-base sm:text-lg font-bold text-ink">{x.t}</span>
+                  <span className="block text-sm text-ink">{x.d}</span>
                 </span>
               </li>
             ))}
@@ -220,10 +223,14 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
             <p className="text-xs sm:text-sm text-muted lg:max-w-[11rem] leading-snug">
               {tx('جالك إنذار من المطور؟ ', 'Got a warning letter? ')}
-              <a href={`tel:${BRAND.hotline}`} className="font-semibold text-brand underline underline-offset-4">
+              <a
+                href={`tel:${BRAND.hotline}`}
+                className="inline-flex items-center gap-1.5 font-semibold text-brand underline underline-offset-4"
+              >
+                <Headset className="w-4 h-4 shrink-0" />
                 {tx(`كلّمنا ${BRAND.hotline}`, `Call ${BRAND.hotline}`)}
               </a>
-              {tx(' قبل ما يلغي.', ' before they cancel.')}
+              {tx(' قبل الألغاء.', ' before they cancel.')}
             </p>
           </div>
         </div>
@@ -383,9 +390,9 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
   };
 
   const quick: { icon: React.ElementType; label: string; s: HomeSearch }[] = [
-    { icon: Flame, label: tx('فيها خصم', 'Discounted'), s: { filters: { discounted: true }, sort: 'deals' } },
+    { icon: Flame, label: tx('فرص مميزة', 'Top deals'), s: { filters: { discounted: true }, sort: 'deals' } },
     { icon: KeyRound, label: tx('استلام فوري', 'Ready now'), s: { filters: { delivery: ['استلام فوري'] } } },
-    { icon: Wallet, label: tx('قسط قليل', 'Low monthly'), s: { sort: 'monthly' } },
+    { icon: Wallet, label: tx('أقل قسط', 'Low monthly'), s: { sort: 'monthly' } },
   ];
 
   return (
@@ -423,7 +430,7 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder={tx('دوّر بالكمبوند، المطور أو المنطقة', 'Search by compound, developer or area')}
+                  placeholder={tx('ابحث بالكمبوند أو المطور', 'Search by compound, developer or area')}
                   aria-label={tx('بحث', 'Search')}
                   className="field h-14 ps-12 text-base"
                 />
@@ -455,7 +462,7 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
                 />
                 <button type="submit" className="btn-primary h-14 text-base col-span-2 lg:col-span-1">
                   <Search className="w-5 h-5" />
-                  {tx('دوّر', 'Search')}
+                  {tx('أبحث', 'Search')}
                 </button>
               </div>
               <div className="flex flex-wrap items-center gap-2 pt-1">
@@ -490,16 +497,16 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
         </div>
 
         {/* Policies, not marketing numbers — every one of these is true from day one. */}
-        <dl className="grid grid-cols-3 border-t border-line bg-sand-soft [&>div+div]:border-s [&>div+div]:border-line">
+        <dl className="grid grid-cols-3 border-t border-line bg-sand-soft/60 backdrop-blur-md [&>div+div]:border-s [&>div+div]:border-line/70">
           {[
             { v: tx('صفر', 'Zero'), l: tx('عمولة على البايع', 'seller fee') },
             { v: tx('صفر', 'Zero'), l: tx('أوفر على المشتري', 'overprice') },
             { v: tx('شيك مصرفي', 'Bank cheque'), l: tx('في مقر المطور', 'at the developer') },
           ].map((x) => (
-            <div key={x.l} className="px-2 py-2.5 flex flex-col sm:flex-row items-center justify-center gap-x-1.5 text-center">
+            <div key={x.l} className="px-2 py-3.5 flex flex-col sm:flex-row items-center justify-center gap-x-2 text-center">
               <dt className="sr-only">{x.l}</dt>
-              <dd className="font-bold text-brand text-sm sm:text-base whitespace-nowrap">{x.v}</dd>
-              <p className="text-xs sm:text-sm text-muted">{x.l}</p>
+              <dd className="font-bold text-brand text-base sm:text-xl whitespace-nowrap">{x.v}</dd>
+              <p className="text-sm sm:text-base text-ink">{x.l}</p>
             </div>
           ))}
         </dl>
@@ -511,29 +518,23 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
 /* Soft tones behind each area photo (and in place of it, until an area has one). */
 const AREA_TINTS = ['#e6dccb', '#dcd2c4', '#d9cfbd', '#e2d6c6', '#d4c8b4', '#e8dfd0'];
 const AREA_SHORT: Record<string, [string, string]> = {
-  'القاهرة الجديدة': ['التجمع', 'New Cairo'],
-  'الشيخ زايد وأكتوبر': ['زايد', 'Zayed'],
-  'العاصمة الإدارية': ['العاصمة', 'New Capital'],
-  'الساحل الشمالي': ['الساحل', 'North Coast'],
-  'المستقبل والشروق': ['المستقبل', 'Mostakbal'],
-  'مدينة نصر ومصر الجديدة': ['مدينة نصر', 'Nasr City'],
-  'العلمين الجديدة': ['العلمين', 'Alamein'],
-  'العين السخنة': ['السخنة', 'Sokhna'],
-  'البحر الأحمر': ['البحر الأحمر', 'Red Sea'],
+  'القاهرة الكبرى': ['القاهرة الكبرى', 'Greater Cairo'],
+  'إسكندرية': ['إسكندرية', 'Alexandria'],
+  'دلتا': ['دلتا', 'Delta'],
+  'الصعيد': ['الصعيد', 'Upper Egypt'],
+  'مدن القناة': ['مدن القناة', 'Canal cities'],
+  'الساحل الشمالي': ['الساحل الشمالي', 'North Coast'],
 };
 
 /* One photo per area that says "this place" at a glance (not a unit's interior). Stock photos — swap for real ones of each area. */
 const areaPhoto = (id: string) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=320&h=320&q=70`;
 const AREA_PHOTOS: Record<string, string> = {
-  'القاهرة الجديدة': areaPhoto('1613490493576-7fde63acd811'), // modern villa compound
-  'الشيخ زايد وأكتوبر': areaPhoto('1613977257363-707ba9348227'), // villa with pool
-  'العاصمة الإدارية': areaPhoto('1512453979798-5ea266f8880c'), // towers skyline
-  'المستقبل والشروق': areaPhoto('1545324418-cc1a3fa10c00'), // new apartment blocks
-  'مدينة نصر ومصر الجديدة': areaPhoto('1572252009286-268acec5ca0a'), // Cairo cityscape
+  'القاهرة الكبرى': areaPhoto('1572252009286-268acec5ca0a'), // Cairo cityscape
+  'إسكندرية': areaPhoto('1552465011-b4e21bf6e79a'), // seafront city
+  'دلتا': areaPhoto('1500382017468-9049fed747ef'), // green farmland
+  'الصعيد': areaPhoto('1568322445389-f64ac2515020'), // Nile and desert
+  'مدن القناة': areaPhoto('1519046904884-53103b34b206'), // sea under the mountains
   'الساحل الشمالي': areaPhoto('1507525428034-b723cf961d3e'), // white sand and sea
-  'العلمين الجديدة': areaPhoto('1582719508461-905c673771fd'), // sea-view terrace
-  'العين السخنة': areaPhoto('1519046904884-53103b34b206'), // beach under the mountains
-  'البحر الأحمر': areaPhoto('1544551763-46a013bb70d5'), // diving the reef
 };
 
 const RegionsRow: React.FC<{ units: RealEstateUnit[]; onPick: (region: string) => void }> = ({ units, onPick }) => {
@@ -602,7 +603,7 @@ const HeroCalculator: React.FC = () => {
     <div id="seller-calc" className="card text-ink p-5 sm:p-6 shadow-lift scroll-mt-24 w-full max-w-xl lg:justify-self-end">
       <p className="font-display text-lg font-bold">{tx('احسب بأرقامك', 'Try your numbers')}</p>
       <div className="mt-4 grid gap-4">
-        <Slider label={tx('سعر الوحدة في العقد', 'Contract price')} value={contract} min={1_000_000} max={15_000_000} step={100_000} onChange={setContract} />
+        <Slider label={tx('سعر الوحدة في العقد', 'Contract price')} value={contract} min={1_000_000} max={400_000_000} step={100_000} onChange={setContract} />
         <Slider label={tx('دفعت كام لحد دلوقتي؟', 'Paid so far')} value={safePaid} min={100_000} max={contract} step={50_000} onChange={setPaid} />
       </div>
       <div className="mt-5 grid grid-cols-2 gap-3">
@@ -668,67 +669,59 @@ const ThreeWays: React.FC<{ onSell: () => void }> = ({ onSell }) => {
     },
   ];
 
-  const Cell: React.FC<{ text: string; tone: 'bad' | 'neutral' | 'good' }> = ({ text, tone }) => (
-    <span className={`flex items-start gap-2 ${tone === 'good' ? 'text-ink font-semibold' : 'text-muted'}`}>
-      {tone === 'good' ? (
-        <Check className="w-4 h-4 text-brand shrink-0 mt-1" strokeWidth={3} />
-      ) : tone === 'bad' ? (
-        <X className="w-4 h-4 text-danger/70 shrink-0 mt-1" />
-      ) : (
-        <span className="w-4 shrink-0" />
-      )}
-      {text}
-    </span>
-  );
+  /* A card per way out, not a grid of cells: you're choosing a path, not reading a spreadsheet.
+     Same markup on phone and desktop — ours just moves to the top on a phone. */
+  const ways = cols.map((title, i) => ({
+    title,
+    ours: i === 2,
+    points: rows.map((r) => ({ k: r.k, v: r.v[i], bad: i < 2 && !!r.bad?.[i] })),
+  }));
 
   return (
     <section className="bg-surface border-y border-line">
       <div className="page-wrap py-14 sm:py-20">
         <SectionTitle center kicker={tx('قبل ما تقرر', 'Before you decide')} title={tx('قدامك 3 طرق. قارن بنفسك.', 'You have three ways out. Compare.')} />
 
-        {/* Desktop: one table */}
-        <div className="mt-10 hidden md:block overflow-hidden rounded-card border border-line shadow-soft">
-          <div className="grid grid-cols-[11rem_1fr_1fr_1.15fr] bg-paper text-sm font-bold">
-            <div className="p-4" />
-            <div className="p-4 text-muted">{cols[0]}</div>
-            <div className="p-4 text-muted">{cols[1]}</div>
-            <div className="p-4 bg-brand text-white">{cols[2]}</div>
-          </div>
-          {rows.map((r) => (
-            <div key={r.k} className="grid grid-cols-[11rem_1fr_1fr_1.15fr] border-t border-line text-[15px]">
-              <div className="p-4 font-bold text-ink">{r.k}</div>
-              <div className="p-4">
-                <Cell text={r.v[0]} tone={r.bad?.[0] ? 'bad' : 'neutral'} />
+        <div className="mt-10 grid gap-4 md:grid-cols-3 md:gap-5 items-start">
+          {ways.map((w) => (
+            <div
+              key={w.title}
+              className={`rounded-card border p-5 sm:p-6 ${
+                w.ours
+                  ? 'order-first md:order-none border-brand bg-brand-soft shadow-lift md:-translate-y-3'
+                  : 'border-line bg-paper shadow-soft'
+              }`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <h3 className={`font-display text-lg sm:text-xl font-bold ${w.ours ? 'text-brand' : 'text-ink'}`}>
+                  {w.title}
+                </h3>
+                {w.ours && (
+                  <span className="rounded-full bg-brand px-2.5 py-1 text-xs font-bold text-white whitespace-nowrap">
+                    {tx('الأفضل ليك', 'Best for you')}
+                  </span>
+                )}
               </div>
-              <div className="p-4">
-                <Cell text={r.v[1]} tone={r.bad?.[1] ? 'bad' : 'neutral'} />
-              </div>
-              <div className="p-4 bg-brand-soft">
-                <Cell text={r.v[2]} tone="good" />
-              </div>
-            </div>
-          ))}
-        </div>
 
-        {/* Phones: one block per question, ours first */}
-        <div className="mt-8 md:hidden rounded-card border border-line divide-y divide-line bg-surface">
-          {rows.map((r) => (
-            <div key={r.k} className="p-4">
-              <p className="font-bold text-ink">{r.k}</p>
-              <div className="mt-2 rounded-xl bg-brand-soft px-3 py-2">
-                <p className="text-xs text-muted">{cols[2]}</p>
-                <Cell text={r.v[2]} tone="good" />
-              </div>
-              <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <p className="text-xs text-muted">{cols[0]}</p>
-                  <Cell text={r.v[0]} tone={r.bad?.[0] ? 'bad' : 'neutral'} />
-                </div>
-                <div>
-                  <p className="text-xs text-muted">{cols[1]}</p>
-                  <Cell text={r.v[1]} tone={r.bad?.[1] ? 'bad' : 'neutral'} />
-                </div>
-              </div>
+              <ul className="mt-5 space-y-3.5">
+                {w.points.map((pt) => (
+                  <li key={pt.k} className="flex items-start gap-2.5">
+                    {w.ours ? (
+                      <Check className="w-4 h-4 text-brand shrink-0 mt-1.5" strokeWidth={3} />
+                    ) : pt.bad ? (
+                      <X className="w-4 h-4 text-danger/70 shrink-0 mt-1.5" />
+                    ) : (
+                      <span className="w-4 shrink-0" />
+                    )}
+                    <span className="min-w-0">
+                      <span className="block text-xs text-muted">{pt.k}</span>
+                      <span className={`block text-[15px] ${w.ours ? 'font-semibold text-ink' : 'text-ink-soft'}`}>
+                        {pt.v}
+                      </span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </div>
           ))}
         </div>

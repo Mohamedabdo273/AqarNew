@@ -68,26 +68,91 @@ export const cancellationLoss = (contractPrice: number, paid: number) =>
   Math.min(paid, Math.round(contractPrice * CANCELLATION_PENALTY_RATE));
 
 export const REGIONS: { ar: RealEstateUnit['region']; en: string }[] = [
-  { ar: 'القاهرة الجديدة', en: 'New Cairo' },
-  { ar: 'الشيخ زايد وأكتوبر', en: 'Zayed & October' },
-  { ar: 'العاصمة الإدارية', en: 'New Capital' },
-  { ar: 'المستقبل والشروق', en: 'Mostakbal & Shorouk' },
-  { ar: 'مدينة نصر ومصر الجديدة', en: 'Nasr City & Heliopolis' },
+  { ar: 'القاهرة الكبرى', en: 'Greater Cairo' },
+  { ar: 'إسكندرية', en: 'Alexandria' },
+  { ar: 'دلتا', en: 'Delta' },
+  { ar: 'الصعيد', en: 'Upper Egypt' },
+  { ar: 'مدن القناة', en: 'Canal cities' },
   { ar: 'الساحل الشمالي', en: 'North Coast' },
-  { ar: 'العلمين الجديدة', en: 'New Alamein' },
-  { ar: 'العين السخنة', en: 'Ain Sokhna' },
-  { ar: 'البحر الأحمر', en: 'Red Sea' },
 ];
+
+/** المناطق التفصيلية تحت كل إقليم. عدّل القوايم دي وبس — الفلاتر والفورم بيقروا منها. */
+export const SUB_AREAS: Record<RealEstateUnit['region'], { ar: string; en: string }[]> = {
+  'القاهرة الكبرى': [
+    { ar: 'التجمع والقاهرة الجديدة', en: 'New Cairo & Fifth Settlement' },
+    { ar: 'العاصمة الإدارية', en: 'New Capital' },
+    { ar: 'مدينة نصر ومصر الجديدة', en: 'Nasr City & Heliopolis' },
+    { ar: 'المعادي وحلوان', en: 'Maadi & Helwan' },
+    { ar: 'مدينتي والشروق والعبور', en: 'Madinaty, Shorouk & Obour' },
+    { ar: 'المستقبل سيتي', en: 'Mostakbal City' },
+    { ar: 'الشيخ زايد', en: 'Sheikh Zayed' },
+    { ar: '6 أكتوبر وحدائق أكتوبر', en: '6th of October & October Gardens' },
+    { ar: 'الشيخ زايد الجديدة', en: 'New Zayed' },
+    { ar: 'المهندسين والدقي والزمالك', en: 'Mohandessin, Dokki & Zamalek' },
+    { ar: 'الهرم وفيصل', en: 'Haram & Faisal' },
+    { ar: 'شبرا والقليوبية', en: 'Shubra & Qalyubia' },
+  ],
+  'إسكندرية': [
+    { ar: 'سموحة وسيدي جابر', en: 'Smouha & Sidi Gaber' },
+    { ar: 'سان ستيفانو وجليم', en: 'San Stefano & Gleem' },
+    { ar: 'المنتزه والمعمورة', en: 'Montaza & Maamoura' },
+    { ar: 'ميامي وسيدي بشر', en: 'Miami & Sidi Bishr' },
+    { ar: 'العجمي والبيطاش', en: 'Agami & Bitash' },
+    { ar: 'برج العرب الجديدة', en: 'New Borg El Arab' },
+    { ar: 'كينج مريوط', en: 'King Mariout' },
+  ],
+  'دلتا': [
+    { ar: 'المنصورة', en: 'Mansoura' },
+    { ar: 'طنطا', en: 'Tanta' },
+    { ar: 'المحلة الكبرى', en: 'Mahalla' },
+    { ar: 'دمياط ورأس البر', en: 'Damietta & Ras El Bar' },
+    { ar: 'الزقازيق', en: 'Zagazig' },
+    { ar: 'بنها', en: 'Banha' },
+    { ar: 'دمنهور', en: 'Damanhour' },
+    { ar: 'كفر الشيخ', en: 'Kafr El Sheikh' },
+  ],
+  'الصعيد': [
+    { ar: 'الفيوم', en: 'Fayoum' },
+    { ar: 'بني سويف', en: 'Beni Suef' },
+    { ar: 'المنيا', en: 'Minya' },
+    { ar: 'أسيوط', en: 'Asyut' },
+    { ar: 'سوهاج', en: 'Sohag' },
+    { ar: 'قنا', en: 'Qena' },
+    { ar: 'الأقصر', en: 'Luxor' },
+    { ar: 'أسوان', en: 'Aswan' },
+  ],
+  'مدن القناة': [
+    { ar: 'بورسعيد', en: 'Port Said' },
+    { ar: 'الإسماعيلية', en: 'Ismailia' },
+    { ar: 'السويس', en: 'Suez' },
+    { ar: 'العين السخنة', en: 'Ain Sokhna' },
+  ],
+  'الساحل الشمالي': [
+    { ar: 'سيدي عبد الرحمن', en: 'Sidi Abdel Rahman' },
+    { ar: 'رأس الحكمة', en: 'Ras El Hekma' },
+    { ar: 'العلمين الجديدة', en: 'New Alamein' },
+    { ar: 'مارينا', en: 'Marina' },
+    { ar: 'الضبعة وفوكا', en: 'Dabaa & Fouka' },
+    { ar: 'سيدي كرير والهانوفيل', en: 'Sidi Krir' },
+    { ar: 'مرسى مطروح', en: 'Marsa Matrouh' },
+  ],
+};
+
+/** المناطق التفصيلية للأقاليم المختارة — لو مفيش اختيار، بتجيب الكل. */
+export const subAreasFor = (regions: string[]) => {
+  const keys = regions.length ? regions : Object.keys(SUB_AREAS);
+  return keys.flatMap((r) => SUB_AREAS[r as RealEstateUnit['region']] ?? []);
+};
 
 export const PROPERTY_TYPES: { ar: RealEstateUnit['propertyType']; en: string }[] = [
   { ar: 'شقة', en: 'Apartment' },
+  { ar: 'شاليه', en: 'Chalet' },
   { ar: 'دوبلكس', en: 'Duplex' },
   { ar: 'تاون هاوس', en: 'Townhouse' },
   { ar: 'توين هاوس', en: 'Twin house' },
-  { ar: 'فيلا مستقلة', en: 'Villa' },
-  { ar: 'شاليه ساحلي', en: 'Chalet' },
-  { ar: 'عيادة / إداري', en: 'Office / Clinic' },
+  { ar: 'فيلا', en: 'Villa' },
   { ar: 'تجاري / محل', en: 'Retail' },
+  { ar: 'عيادة / إداري', en: 'Office / Clinic' },
 ];
 
 export const DELIVERY_OPTIONS: { ar: RealEstateUnit['deliveryStatus']; en: string; short: string }[] = [
