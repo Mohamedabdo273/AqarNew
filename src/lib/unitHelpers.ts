@@ -74,6 +74,7 @@ export const REGIONS: { ar: RealEstateUnit['region']; en: string }[] = [
   { ar: 'الصعيد', en: 'Upper Egypt' },
   { ar: 'مدن القناة', en: 'Canal cities' },
   { ar: 'الساحل الشمالي', en: 'North Coast' },
+  { ar: 'العين السخنة', en: 'Ain Sokhna' },
 ];
 
 /** المناطق التفصيلية تحت كل إقليم. عدّل القوايم دي وبس — الفلاتر والفورم بيقروا منها. */
@@ -125,7 +126,12 @@ export const SUB_AREAS: Record<RealEstateUnit['region'], { ar: string; en: strin
     { ar: 'بورسعيد', en: 'Port Said' },
     { ar: 'الإسماعيلية', en: 'Ismailia' },
     { ar: 'السويس', en: 'Suez' },
-    { ar: 'العين السخنة', en: 'Ain Sokhna' },
+  ],
+  'العين السخنة': [
+    { ar: 'الجلالة', en: 'Galala' },
+    { ar: 'بورتو السخنة', en: 'Porto Sokhna' },
+    { ar: 'العين الباردة', en: 'Ain Sokhna Bay' },
+    { ar: 'الزعفرانة', en: 'Zaafarana' },
   ],
   'الساحل الشمالي': [
     { ar: 'سيدي عبد الرحمن', en: 'Sidi Abdel Rahman' },

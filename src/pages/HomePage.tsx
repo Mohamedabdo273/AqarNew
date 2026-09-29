@@ -326,7 +326,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </section>
 
-      {/* ───────── 5. Swap — only on Wahdety ───────── */}
+      {/* ───────── 5. Swap — only on Forsa ───────── */}
       <SwapFeature onSwap={() => onNavigate('swap')} />
 
       {/* ───────── 6. Money safety ───────── */}
@@ -411,11 +411,11 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
                 role="tab"
                 aria-selected={mode === k}
                 onClick={() => setMode(k)}
-                className={`relative -mb-[2px] inline-flex items-center justify-center gap-2 min-h-13 text-base font-bold border-b-2 transition-colors ${
+                className={`relative -mb-[2px] inline-flex items-center justify-center gap-2.5 min-h-15 text-xl sm:text-2xl font-bold border-b-2 transition-colors ${
                   mode === k ? 'border-brand text-brand' : 'border-transparent text-muted hover:text-ink'
                 }`}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
                 {label}
               </button>
             ))}
@@ -430,7 +430,7 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder={tx('ابحث بالكمبوند أو المطور', 'Search by compound, developer or area')}
+                  placeholder={tx('ابحث باسم الكمبوند أو المطور', 'Search by compound or developer name')}
                   aria-label={tx('بحث', 'Search')}
                   className="field h-14 ps-12 text-base"
                 />
@@ -524,6 +524,7 @@ const AREA_SHORT: Record<string, [string, string]> = {
   'الصعيد': ['الصعيد', 'Upper Egypt'],
   'مدن القناة': ['مدن القناة', 'Canal cities'],
   'الساحل الشمالي': ['الساحل الشمالي', 'North Coast'],
+  'العين السخنة': ['العين السخنة', 'Ain Sokhna'],
 };
 
 /* One photo per area that says "this place" at a glance (not a unit's interior). Stock photos — swap for real ones of each area. */
@@ -535,6 +536,7 @@ const AREA_PHOTOS: Record<string, string> = {
   'الصعيد': areaPhoto('1568322445389-f64ac2515020'), // Nile and desert
   'مدن القناة': areaPhoto('1519046904884-53103b34b206'), // sea under the mountains
   'الساحل الشمالي': areaPhoto('1507525428034-b723cf961d3e'), // white sand and sea
+  'العين السخنة': areaPhoto('1519046904884-53103b34b206'), // sea under the mountains
 };
 
 const RegionsRow: React.FC<{ units: RealEstateUnit[]; onPick: (region: string) => void }> = ({ units, onPick }) => {
@@ -586,7 +588,7 @@ const HeroCalculator: React.FC = () => {
     const url = `${window.location.origin}${window.location.pathname}`;
     const text = tx(
       `وحدتي بـ ${money(contract, language)} ودفعت ${money(safePaid, language)}.\nلو لغيت مع المطور: ترجعلي ${money(cancelBack, language)} على أقساط — يعني هخسر ${money(loss, language)}.\nلو بعتها عن طريق وحدتي: هقبض ${money(safePaid, language)} كاش.\nإيه رأيك؟`,
-      `My unit is ${money(contract, language)} and I've paid ${money(safePaid, language)}.\nCancelling returns ${money(cancelBack, language)} over years — I'd lose ${money(loss, language)}.\nSelling through Wahdety: ${money(safePaid, language)} cash.\nWhat do you think?`,
+      `My unit is ${money(contract, language)} and I've paid ${money(safePaid, language)}.\nCancelling returns ${money(cancelBack, language)} over years — I'd lose ${money(loss, language)}.\nSelling through Forsa: ${money(safePaid, language)} cash.\nWhat do you think?`,
     );
     if (navigator.share) {
       try {
@@ -748,7 +750,7 @@ const SwapFeature: React.FC<{ onSwap: () => void }> = ({ onSwap }) => {
       <div className="page-wrap py-14 sm:py-20 grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
       <div>
         <SectionTitle
-          kicker={tx('حصري على وحدتي', 'Only on Wahdety')}
+          kicker={tx('حصري على فرصة', 'Only on Forsa')}
           title={tx('عايز تغيّر وحدتك؟ بدّلها.', 'Want a different unit? Swap it.')}
           sub={tx(
             'مش لازم تبيع الأول وتدوّر لوحدك. إحنا بنبيع وحدتك وبنشتريلك التانية مع بعض، وإنت تدفع أو تاخد الفرق بس.',

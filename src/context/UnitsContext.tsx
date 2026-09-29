@@ -8,7 +8,7 @@ export interface NewUnitInput {
   title?: string;
   developer: string;
   compound: string;
-  region: 'القاهرة الكبرى' | 'إسكندرية' | 'دلتا' | 'الصعيد' | 'مدن القناة' | 'الساحل الشمالي';
+  region: 'القاهرة الكبرى' | 'إسكندرية' | 'دلتا' | 'الصعيد' | 'مدن القناة' | 'الساحل الشمالي' | 'العين السخنة';
   propertyType: PropertyType;
   location?: string;
   areaM2: number;

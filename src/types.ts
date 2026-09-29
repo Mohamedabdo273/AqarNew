@@ -86,7 +86,7 @@ export interface RealEstateUnit {
   compoundEn?: string;
   location: string;
   locationEn?: string;
-  region: 'القاهرة الكبرى' | 'إسكندرية' | 'دلتا' | 'الصعيد' | 'مدن القناة' | 'الساحل الشمالي';
+  region: 'القاهرة الكبرى' | 'إسكندرية' | 'دلتا' | 'الصعيد' | 'مدن القناة' | 'الساحل الشمالي' | 'العين السخنة';
   /** المنطقة التفصيلية جوه الإقليم — من SUB_AREAS */
   subArea?: string;
   regionEn?: string;
