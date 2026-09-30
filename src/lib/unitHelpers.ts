@@ -150,16 +150,67 @@ export const subAreasFor = (regions: string[]) => {
   return keys.flatMap((r) => SUB_AREAS[r as RealEstateUnit['region']] ?? []);
 };
 
-export const PROPERTY_TYPES: { ar: RealEstateUnit['propertyType']; en: string }[] = [
-  { ar: 'شقة', en: 'Apartment' },
-  { ar: 'شاليه', en: 'Chalet' },
-  { ar: 'دوبلكس', en: 'Duplex' },
-  { ar: 'تاون هاوس', en: 'Townhouse' },
-  { ar: 'توين هاوس', en: 'Twin house' },
-  { ar: 'فيلا', en: 'Villa' },
-  { ar: 'تجاري / محل', en: 'Retail' },
-  { ar: 'عيادة / إداري', en: 'Office / Clinic' },
+/** تصنيف الوحدة — المستوى الأول. */
+export const PROPERTY_CATEGORIES: { ar: RealEstateUnit['propertyCategory']; en: string }[] = [
+  { ar: 'سكني', en: 'Residential' },
+  { ar: 'تجاري', en: 'Commercial' },
+  { ar: 'إداري', en: 'Administrative' },
+  { ar: 'فندقي', en: 'Hotel' },
+  { ar: 'طبي', en: 'Medical' },
 ];
+
+/** الأنواع تحت كل تصنيف. عدّل هنا وبس — الفلاتر والفورم بيقروا منها. */
+export const TYPES_BY_CATEGORY: Record<RealEstateUnit['propertyCategory'], { ar: RealEstateUnit['propertyType']; en: string }[]> = {
+  'سكني': [
+    { ar: 'شقة', en: 'Apartment' },
+    { ar: 'استوديو', en: 'Studio' },
+    { ar: 'شاليه', en: 'Chalet' },
+    { ar: 'دوبلكس', en: 'Duplex' },
+    { ar: 'تاون هاوس', en: 'Townhouse' },
+    { ar: 'توين هاوس', en: 'Twin house' },
+    { ar: 'فيلا', en: 'Villa' },
+    { ar: 'بنتهاوس', en: 'Penthouse' },
+  ],
+  'تجاري': [
+    { ar: 'محل', en: 'Retail shop' },
+    { ar: 'مساحة في مول', en: 'Mall space' },
+    { ar: 'مخزن', en: 'Warehouse' },
+  ],
+  'إداري': [
+    { ar: 'مكتب', en: 'Office' },
+    { ar: 'دور إداري', en: 'Office floor' },
+    { ar: 'مقر شركة', en: 'Company HQ' },
+  ],
+  'فندقي': [
+    { ar: 'غرفة فندقية', en: 'Hotel room' },
+    { ar: 'جناح فندقي', en: 'Hotel suite' },
+    { ar: 'شاليه فندقي', en: 'Serviced chalet' },
+  ],
+  'طبي': [
+    { ar: 'عيادة', en: 'Clinic' },
+    { ar: 'صيدلية', en: 'Pharmacy' },
+    { ar: 'معمل تحاليل', en: 'Lab' },
+    { ar: 'مركز أشعة', en: 'Imaging centre' },
+  ],
+};
+
+/** كل الأنواع في قايمة واحدة — للفلاتر اللي مش محتاجة التصنيف. */
+export const PROPERTY_TYPES: { ar: RealEstateUnit['propertyType']; en: string }[] =
+  PROPERTY_CATEGORIES.flatMap((c) => TYPES_BY_CATEGORY[c.ar]);
+
+/** الأنواع تحت التصنيفات المختارة — من غير اختيار بتجيب الكل. */
+export const typesFor = (categories: string[]) => {
+  const keys = categories.length ? categories : PROPERTY_CATEGORIES.map((c) => c.ar);
+  return keys.flatMap((c) => TYPES_BY_CATEGORY[c as RealEstateUnit['propertyCategory']] ?? []);
+};
+
+/** تصنيف أي نوع — بنشتقه بدل ما نخزنه مرتين في كل وحدة. */
+export const categoryOfType = (type: string): RealEstateUnit['propertyCategory'] | '' => {
+  for (const c of PROPERTY_CATEGORIES) {
+    if (TYPES_BY_CATEGORY[c.ar].some((t) => t.ar === type)) return c.ar;
+  }
+  return '';
+};
 
 export const DELIVERY_OPTIONS: { ar: RealEstateUnit['deliveryStatus']; en: string; short: string }[] = [
   { ar: 'استلام فوري', en: 'Ready', short: 'فوري' },

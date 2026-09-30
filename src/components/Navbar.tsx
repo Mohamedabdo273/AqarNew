@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Home, Search, Tag, Repeat, Globe, Menu, X, Info, ShieldCheck, MessageCircle, Heart, ClipboardList, Phone } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Home, Search, Tag, Repeat, Globe, Menu, X, Info, ShieldCheck, MessageCircle, Heart, ClipboardList, Phone, Bell, MoreHorizontal, UserRound, Scale } from 'lucide-react';
 import { PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useUnits } from '../context/UnitsContext';
@@ -24,16 +24,50 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
   const { savedUnitIds } = useUnits();
   const { requests } = useRequests();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [openPanel, setOpenPanel] = useState<null | 'bell' | 'more'>(null);
+  const panelsRef = useRef<HTMLDivElement>(null);
+
+  // أي قايمة منسدلة تتقفل لما تدوس بره أو تدوس Escape
+  useEffect(() => {
+    if (!openPanel) return;
+    const onDown = (e: MouseEvent) => {
+      if (panelsRef.current && !panelsRef.current.contains(e.target as Node)) setOpenPanel(null);
+    };
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpenPanel(null);
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [openPanel]);
+
+  // الإشعارات من الطلبات الحقيقية — كل طلب وآخر مرحلة وصلها
+  const STAGE_TEXT: Record<string, [string, string]> = {
+    received: ['طلبك وصلنا', 'Request received'],
+    reviewing: ['بنراجع عقدك ومدفوعاتك', 'Reviewing your contract'],
+    listed: ['وحدتك اتنشرت في السوق', 'Your unit is live'],
+    matched: ['فيه مشتري مهتم بوحدتك', 'A buyer is interested'],
+    transferred: ['تم التنازل — مبروك', 'Transfer complete'],
+  };
+  const notifications = [...requests]
+    .sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1))
+    .map((r) => ({
+      code: r.code,
+      text: tx(STAGE_TEXT[r.stage]?.[0] ?? r.stage, STAGE_TEXT[r.stage]?.[1] ?? r.stage),
+      at: new Date(r.updatedAt).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-GB', { day: 'numeric', month: 'short' }),
+    }));
 
   type Link = { id: PageId; label: string; icon: React.ElementType };
   const buy: Link = { id: 'opportunities', label: tx('اشتري', 'Buy'), icon: Search };
-  const sell: Link = { id: 'sell', label: tx('بيع وحدتك', 'Sell'), icon: Tag };
+  const sell: Link = { id: 'sell', label: tx('اعرض وحدتك', 'List your unit'), icon: Tag };
   const swap: Link = { id: 'swap', label: tx('بدّل وحدتك', 'Swap'), icon: Repeat };
   const rules: Link = { id: 'rules', label: tx('ضمان حقك', 'Your protection'), icon: ShieldCheck };
   const contact: Link = { id: 'contact', label: tx('كلمنا', 'Contact'), icon: Phone };
 
-  // Desktop: selling lives in the black button on the right; "about" lives in the footer.
-  const desktop: Link[] = [swap, buy, rules, contact];
+  // Desktop order as asked: list · buy · swap · protection · contact. "about" lives in the footer.
+  // `sell` keeps the filled-button look so the main action still stands out inside the row.
+  const desktop: Link[] = [sell, buy, swap, rules, contact];
   const mobileTabs: (Link & { badge?: number })[] = [
     { id: 'home', label: tx('الرئيسية', 'Home'), icon: Home },
     { ...sell, label: tx('بيع', 'Sell') },
@@ -64,16 +98,16 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
   return (
     <>
       <header className="sticky top-0 z-40 bg-paper/85 backdrop-blur-md border-b border-line">
-        <div className="page-wrap h-16 flex items-center justify-between gap-4">
+        <div className="page-wrap h-20 flex items-center justify-between gap-5">
           <Logo onClick={() => go('home')} />
 
-          <nav className="hidden lg:flex items-center gap-0.5">
+          <nav className="hidden lg:flex items-center gap-1">
             {desktop.map((l) => (
               <button
                 key={l.id}
                 onClick={() => go(l.id)}
-                className={`px-3.5 py-2 rounded-full text-[15px] font-medium whitespace-nowrap transition-colors ${
-                  activePage === l.id ? 'bg-brand-soft text-brand-ink' : 'text-ink-soft hover:text-ink'
+                className={`px-4 py-2.5 rounded-full text-lg font-semibold whitespace-nowrap transition-colors hover:bg-brand-soft ${
+                  activePage === l.id ? 'bg-brand-soft text-brand' : 'text-ink-soft hover:text-brand'
                 }`}
               >
                 {l.label}
@@ -81,28 +115,91 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
             ))}
           </nav>
 
-          <div className="flex items-center gap-1">
+          <div ref={panelsRef} className="flex items-center gap-1">
             <button onClick={() => go('saved')} aria-label={tx('المفضلة', 'Saved')} className={iconBtn('saved')}>
               <Heart className="w-5 h-5" />
               <Badge n={savedUnitIds.length} />
             </button>
-            <button
-              onClick={() => go('requests')}
-              className={`relative hidden md:inline-flex items-center gap-2 h-11 px-3 rounded-full text-sm font-medium transition-colors ${
-                activePage === 'requests' ? 'bg-brand-soft text-ink' : 'text-ink-soft hover:bg-surface'
-              }`}
-            >
-              <ClipboardList className="w-5 h-5" />
-              {tx('طلباتي', 'My requests')}
-              <Badge n={requests.length} />
-            </button>
+
+            <div className="relative">
+              <button
+                onClick={() => setOpenPanel((v) => (v === 'bell' ? null : 'bell'))}
+                aria-label={tx('الإشعارات', 'Notifications')}
+                aria-expanded={openPanel === 'bell'}
+                className={`relative grid place-items-center w-11 h-11 rounded-full transition-colors ${
+                  openPanel === 'bell' ? 'bg-brand-soft text-brand' : 'text-ink-soft hover:bg-surface'
+                }`}
+              >
+                <Bell className="w-5 h-5" />
+                <Badge n={notifications.length} />
+              </button>
+              {openPanel === 'bell' && (
+                <div className="absolute top-full mt-2 end-0 w-72 card p-2 shadow-lift z-50">
+                  <p className="px-2 py-1.5 text-sm font-bold text-ink">{tx('الإشعارات', 'Notifications')}</p>
+                  {notifications.length === 0 ? (
+                    <p className="px-2 pb-2 text-sm text-muted">{tx('مفيش إشعارات لسه', 'Nothing yet')}</p>
+                  ) : (
+                    <ul className="max-h-72 overflow-y-auto">
+                      {notifications.map((n) => (
+                        <li key={n.code}>
+                          <button
+                            onClick={() => {
+                              setOpenPanel(null);
+                              go('requests');
+                            }}
+                            className="w-full text-start rounded-xl px-2 py-2 hover:bg-paper"
+                          >
+                            <span className="block text-sm text-ink">{n.text}</span>
+                            <span className="block text-xs text-muted">
+                              <span className="num">{n.code}</span> · {n.at}
+                            </span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="relative">
+              <button
+                onClick={() => setOpenPanel((v) => (v === 'more' ? null : 'more'))}
+                aria-label={tx('المزيد', 'More')}
+                aria-expanded={openPanel === 'more'}
+                className={`relative grid place-items-center w-11 h-11 rounded-full transition-colors ${
+                  openPanel === 'more' ? 'bg-brand-soft text-brand' : 'text-ink-soft hover:bg-surface'
+                }`}
+              >
+                <MoreHorizontal className="w-5 h-5" />
+                <Badge n={requests.length} />
+              </button>
+              {openPanel === 'more' && (
+                <div className="absolute top-full mt-2 end-0 w-56 card p-2 shadow-lift z-50">
+                  {[
+                    { id: 'requests' as PageId, label: tx('طلباتي', 'My requests'), icon: ClipboardList, n: requests.length },
+                    { id: 'compare' as PageId, label: tx('المقارنة', 'Compare'), icon: Scale, n: 0 },
+                    { id: 'about' as PageId, label: tx('احنا مين', 'About us'), icon: Info, n: 0 },
+                  ].map((m) => (
+                    <button
+                      key={m.id}
+                      onClick={() => {
+                        setOpenPanel(null);
+                        go(m.id);
+                      }}
+                      className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-start hover:bg-paper"
+                    >
+                      <m.icon className="w-5 h-5 text-brand shrink-0" />
+                      <span className="flex-1 text-sm font-medium text-ink">{m.label}</span>
+                      {m.n > 0 && <span className="num text-xs text-muted">{m.n}</span>}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <button onClick={toggleLanguage} className="h-11 px-3 rounded-full text-sm font-medium text-ink-soft hover:bg-surface flex items-center gap-1.5">
               <Globe className="w-4 h-4" />
               {language === 'ar' ? 'EN' : 'عربي'}
-            </button>
-            <button onClick={() => go('sell')} className="btn-primary hidden lg:inline-flex min-h-10 px-5 text-sm ms-1 whitespace-nowrap">
-              <Tag className="w-4 h-4" />
-              {tx('اعرض وحدتك', 'List your unit')}
             </button>
             <button onClick={() => setMenuOpen(true)} aria-label={tx('القائمة', 'Menu')} className="lg:hidden grid place-items-center w-11 h-11 rounded-full hover:bg-surface">
               <Menu className="w-5 h-5" />

@@ -40,7 +40,7 @@ import { IlloForm, IlloKeys, IlloPeople, IlloReview } from '../components/Illust
 import { useAnimatedNumber } from '../lib/useAnimatedNumber';
 import { BRAND, whatsappLink } from '../config/brand';
 import { Budget, BudgetFinder, fitsBudget } from '../components/BudgetFinder';
-import { PROPERTY_TYPES, REGIONS, cancellationLoss, currency, isDeal, money, sellerDiscount } from '../lib/unitHelpers';
+import { PROPERTY_TYPES, PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, categoryOfType, REGIONS, SUB_AREAS, subAreasFor, cancellationLoss, currency, isDeal, money, sellerDiscount } from '../lib/unitHelpers';
 
 interface HomePageProps {
   units: RealEstateUnit[];
@@ -122,6 +122,63 @@ const Slider: React.FC<{ label: string; value: number; min: number; max: number;
   );
 };
 
+/* قايمة فلتر واحدة. بتتخفي لو مفيش غير خيار واحد — فلتر بخيار واحد مالوش لازمة. */
+const FilterSelect: React.FC<{
+  label: string;
+  allLabel: string;
+  allCount: number;
+  value: string;
+  onPick: (v: string) => void;
+  options: { value: string; label: string; count: number }[];
+}> = ({ label, allLabel, allCount, value, onPick, options }) => {
+  if (options.length < 2) return null;
+  return (
+    <label className="block">
+      <span className="block mb-1.5 text-sm font-semibold text-muted">{label}</span>
+      <select value={value} onChange={(e) => onPick(e.target.value)} className="field h-12 w-full">
+        <option value="">
+          {allLabel} ({allCount})
+        </option>
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label} ({o.count})
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+};
+
+/* صف فلتر واحد: عنوانه، وخيار "الكل"، وباقي الخيارات وكل واحد وعدده. */
+const ChipRow: React.FC<{
+  label: string;
+  allLabel: string;
+  allCount: number;
+  value: string;
+  onPick: (v: string) => void;
+  options: { value: string; label: string; count: number }[];
+}> = ({ label, allLabel, allCount, value, onPick, options }) => (
+  <div className="flex flex-wrap items-center gap-2">
+    <span className="text-sm font-semibold text-muted w-20 shrink-0">{label}</span>
+    <button type="button" onClick={() => onPick('')} aria-pressed={value === ''} className={value === '' ? 'chip chip-on' : 'chip chip-off'}>
+      {allLabel}
+      <span className="num text-xs opacity-70">{allCount}</span>
+    </button>
+    {options.map((o) => (
+      <button
+        key={o.value}
+        type="button"
+        onClick={() => onPick(o.value)}
+        aria-pressed={value === o.value}
+        className={value === o.value ? 'chip chip-on' : 'chip chip-off'}
+      >
+        {o.label}
+        <span className="num text-xs opacity-70">{o.count}</span>
+      </button>
+    ))}
+  </div>
+);
+
 export const HomePage: React.FC<HomePageProps> = ({
   units,
   budget,
@@ -133,7 +190,7 @@ export const HomePage: React.FC<HomePageProps> = ({
   onOpenDeals,
   onSearch,
 }) => {
-  const { tx, isRTL } = useLanguage();
+  const { language, tx, isRTL } = useLanguage();
   const Arrow = isRTL ? ArrowLeft : ArrowRight;
 
   const matching = useMemo(() => units.filter((u) => fitsBudget(u, budget)), [units, budget]);
@@ -145,23 +202,87 @@ export const HomePage: React.FC<HomePageProps> = ({
   // Biggest seller discounts first.
   const deals = useMemo(() => units.filter(isDeal).sort((a, b) => sellerDiscount(b) - sellerDiscount(a)), [units]);
 
+  // فلاتر فوق الكروت. كل قايمة بتتبني من الوحدات اللي فاضلة بعد الفلاتر اللي قبلها،
+  // فأي خيار بتشوفه قدامك مضمون إنه هيرجّع نتيجة.
+  const [cardRegion, setCardRegion] = useState('');
+  const [cardSubArea, setCardSubArea] = useState('');
+  const [cardCategory, setCardCategory] = useState('');
+  const [cardType, setCardType] = useState('');
+
+  /** بيعدّ وحدات كل خيار، ويرجّع اللي فيها وحدات بس — بالترتيب الرسمي للقايمة. */
+  type Opt = { ar: string; en: string };
+  const tally = (list: RealEstateUnit[], key: (u: RealEstateUnit) => string | undefined, order: readonly Opt[]) => {
+    const counts = new Map<string, number>();
+    list.forEach((u) => {
+      const k = key(u);
+      if (k) counts.set(k, (counts.get(k) ?? 0) + 1);
+    });
+    return order.filter((o) => counts.has(o.ar)).map((o) => ({ o, count: counts.get(o.ar) as number }));
+  };
+
+  const regionsShown = useMemo(() => tally(featured, (u) => u.region, REGIONS), [featured]);
+
+  const afterRegion = useMemo(
+    () => (cardRegion ? featured.filter((u) => u.region === cardRegion) : featured),
+    [featured, cardRegion],
+  );
+  // من غير اختيار إقليم بنعرض المناطق الموجودة في المعروض كله — لما كل الوحدات
+  // في إقليم واحد، الفلتر المفيد هو التفصيلي مش الإقليم.
+  const subAreasShown = useMemo(
+    () => tally(afterRegion, (u) => u.subArea, cardRegion ? SUB_AREAS[cardRegion as keyof typeof SUB_AREAS] ?? [] : subAreasFor([])),
+    [afterRegion, cardRegion],
+  );
+
+  const afterSubArea = useMemo(
+    () => (cardSubArea ? afterRegion.filter((u) => u.subArea === cardSubArea) : afterRegion),
+    [afterRegion, cardSubArea],
+  );
+  const categoriesShown = useMemo(
+    () => tally(afterSubArea, (u) => categoryOfType(u.propertyType), PROPERTY_CATEGORIES),
+    [afterSubArea],
+  );
+
+  const afterCategory = useMemo(
+    () => (cardCategory ? afterSubArea.filter((u) => categoryOfType(u.propertyType) === cardCategory) : afterSubArea),
+    [afterSubArea, cardCategory],
+  );
+  const typesShown = useMemo(
+    () => tally(afterCategory, (u) => u.propertyType, cardCategory ? TYPES_BY_CATEGORY[cardCategory as keyof typeof TYPES_BY_CATEGORY] ?? [] : PROPERTY_TYPES),
+    [afterCategory, cardCategory],
+  );
+
+  const shownCards = useMemo(
+    () => (cardType ? afterCategory.filter((u) => u.propertyType === cardType) : afterCategory).slice(0, 6),
+    [afterCategory, cardType],
+  );
+
+  // اختيار إقليم جديد بيلغي اللي اتختار جواه، عشان مايفضلش فلتر شغال على حاجة مش ظاهرة
+  const pickRegion = (r: string) => {
+    setCardRegion(r);
+    setCardSubArea('');
+    setCardCategory('');
+    setCardType('');
+  };
+
   return (
     <div>
       {/* ───────── 1. Hero — one message, for the owner who's behind ───────── */}
       <section className="relative overflow-hidden bg-brand-ink text-white">
         {/* A real home behind the message; two washes keep the words readable over any photo. */}
         <img src={BRAND.heroImage} alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover" fetchPriority="high" />
-        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-brand-ink/75 via-brand-ink/25 to-brand-ink/5" />
-        <div aria-hidden="true" className="absolute inset-0 ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-brand-ink/55 via-brand-ink/15 to-transparent" />
+        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-brand-ink/90 via-brand-ink/50 to-brand-ink/20" />
+        <div aria-hidden="true" className="absolute inset-0 ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-brand-ink/70 via-brand-ink/30 to-transparent" />
 
         {/* Short band like a search site: title and one line at the bottom, the search card overlapping it. */}
         <div className={`relative ${WIDE} min-h-[23rem] sm:min-h-[25rem] lg:min-h-[27rem] flex flex-col justify-end pt-10 pb-24 sm:pb-36`}>
-          <div className="w-full">
+          {/* لوح غامق ورا الكلام: بيضمن إن النص يفضل مقروء مهما كانت صورة الخلفية —
+              أأمن من الاعتماد على لون النص، لأن الصورة فيها مناطق فاتحة وغامقة مع بعض. */}
+          <div className="w-full max-w-4xl rounded-3xl bg-brand-ink/50 backdrop-blur-[3px] p-6 sm:p-8 -ms-1">
             <p className="hero-in inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 backdrop-blur px-3 py-1 text-xs sm:text-sm font-medium text-white">
               <ShieldCheck className="w-4 h-4 text-accent-light" />
               {tx('تنازل رسمي في مقر المطور · من غير عمولة عليك', 'Official transfer at the developer · no fee for you')}
             </p>
-            <h1 style={{ animationDelay: '80ms' }} className="hero-in mt-3 text-[1.9rem] sm:text-4xl lg:text-5xl font-extrabold leading-[1.25] text-white drop-shadow">
+            <h1 style={{ animationDelay: '80ms' }} className="hero-in mt-4 text-[2.4rem] sm:text-5xl lg:text-6xl font-extrabold leading-[1.22] text-white [text-shadow:0_2px_16px_rgb(0_0_0/0.55)]">
               {tx('اتأخرت في الأقساط؟', 'Behind on installments?')}{' '}
               <br className="sm:hidden" />
               <span className="text-accent-light">
@@ -174,7 +295,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 </span>
               </span>
             </h1>
-            <p style={{ animationDelay: '160ms' }} className="hero-in mt-3 text-sm sm:text-lg font-medium text-white/90 max-w-4xl leading-relaxed drop-shadow">
+            <p style={{ animationDelay: '160ms' }} className="hero-in mt-5 text-xl sm:text-2xl lg:text-[1.75rem] font-semibold text-white max-w-5xl leading-relaxed [text-shadow:0_2px_12px_rgb(0_0_0/0.6)]">
               {tx(
                 'ما تلغيش وتخسر. بنبيع وحدتك بسعر اللي دفعته، حتى لو عليك متأخرات — بتتخصم يوم التنازل، ومحدش هيعرف إنك بتبيع.',
                 "Don't cancel and lose. We sell your unit for what you paid, even with arrears — deducted on transfer day — and nobody knows you're selling.",
@@ -225,9 +346,9 @@ export const HomePage: React.FC<HomePageProps> = ({
               {tx('جالك إنذار من المطور؟ ', 'Got a warning letter? ')}
               <a
                 href={`tel:${BRAND.hotline}`}
-                className="inline-flex items-center gap-1.5 font-semibold text-brand underline underline-offset-4"
+                className="inline-flex items-center gap-1.5 rounded-lg px-1.5 py-0.5 text-lg font-bold text-brand underline underline-offset-4 decoration-2 transition-colors hover:bg-brand-soft hover:text-brand-ink"
               >
-                <Headset className="w-4 h-4 shrink-0" />
+                <Headset className="w-5 h-5 shrink-0" />
                 {tx(`كلّمنا ${BRAND.hotline}`, `Call ${BRAND.hotline}`)}
               </a>
               {tx(' قبل الألغاء.', ' before they cancel.')}
@@ -244,7 +365,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className="card p-5 sm:p-7 grid lg:grid-cols-[16rem_1fr_15rem] gap-6 lg:gap-10 items-center">
           <div>
             <p className="text-sm font-semibold text-muted">{tx('بتدوّر على وحدة؟', 'Looking for a unit?')}</p>
-            <p className="font-display mt-1 text-2xl font-bold text-ink leading-snug">{tx('دوّر بقسطك، بسعر زمان', 'Search by monthly, at old prices')}</p>
+            <p className="font-display mt-1 text-2xl font-bold text-ink leading-snug">{tx('اختار القسط بسعر زمان', 'Pick your monthly, at old prices')}</p>
           </div>
           <BudgetFinder budget={budget} onChange={onBudgetChange} />
           <div>
@@ -257,9 +378,9 @@ export const HomePage: React.FC<HomePageProps> = ({
                 tx('زوّد الميزانية شوية', 'Try a higher budget')
               )}
             </p>
-            <button onClick={onBrowseWithBudget} className="btn-primary w-full mt-3 min-h-12">
-              {tx('وريني الوحدات', 'Show me units')}
-              <Arrow className="w-4 h-4" />
+            <button onClick={onBrowseWithBudget} className="btn-primary w-full mt-3 min-h-14 text-lg">
+              {tx('عرض الوحدات', 'Show units')}
+              <Arrow className="w-5 h-5" />
             </button>
           </div>
         </div>
@@ -286,16 +407,10 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </section>
 
-      {/* ───────── 3. Why sell through us — the free statement and four promises ───────── */}
-      <SellerPromises onStatement={() => onNavigate('statement')} />
-
-      {/* ───────── 3b. The three ways out, side by side ───────── */}
-      <ThreeWays onSell={() => onNavigate('sell')} />
-
-      {/* ───────── 4. Units — budget matches, discounted ones first ───────── */}
+      {/* ───────── 3. Units first — the owner wants to see real units before any pitch ───────── */}
       <section>
         <div className="page-wrap py-14 sm:py-20">
-          <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
+          <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
             <SectionTitle
               title={matching.length > 0 ? tx('على قد ميزانيتك', 'Within your budget') : tx('وحدات بسعر زمان', 'Units at old prices')}
               sub={tx('موثّقة ومراجَعة قبل النشر — واللي عليها خصم من صاحبها الأول', 'Verified before listing — owner discounts first')}
@@ -313,9 +428,53 @@ export const HomePage: React.FC<HomePageProps> = ({
               </button>
             </div>
           </div>
-          <div className="-mx-4 px-4 sm:mx-0 sm:px-0 flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 overflow-x-auto snap-x snap-mandatory no-scrollbar">
-            {featured.slice(0, 6).map((u, i) => (
-              <div key={u.id} className={`w-[82%] shrink-0 snap-start sm:w-auto ${i >= 3 ? 'sm:hidden' : ''}`}>
+
+          {/* فلاتر الكروت — قوايم منسدلة عشان ما تاخدش نص الشاشة.
+              كل قايمة بتتبني من اللي فاضل بعد اللي قبلها، فأي خيار فيها مضمون يرجّع نتيجة. */}
+          <div className="mb-6 grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <FilterSelect
+              label={tx('المنطقة', 'Area')}
+              allLabel={tx('كل المناطق', 'All areas')}
+              allCount={featured.length}
+              value={cardRegion}
+              onPick={pickRegion}
+              options={regionsShown.map((x) => ({ value: x.o.ar, label: language === 'ar' ? x.o.ar : x.o.en, count: x.count }))}
+            />
+            <FilterSelect
+              label={tx('بالتحديد', 'Which part')}
+              allLabel={tx('كلها', 'All')}
+              allCount={afterRegion.length}
+              value={cardSubArea}
+              onPick={(v) => {
+                setCardSubArea(v);
+                setCardType('');
+              }}
+              options={subAreasShown.map((x) => ({ value: x.o.ar, label: language === 'ar' ? x.o.ar : x.o.en, count: x.count }))}
+            />
+            <FilterSelect
+              label={tx('التصنيف', 'Category')}
+              allLabel={tx('كل التصنيفات', 'All categories')}
+              allCount={afterSubArea.length}
+              value={cardCategory}
+              onPick={(v) => {
+                setCardCategory(v);
+                setCardType('');
+              }}
+              options={categoriesShown.map((x) => ({ value: x.o.ar, label: language === 'ar' ? x.o.ar : x.o.en, count: x.count }))}
+            />
+            <FilterSelect
+              label={tx('النوع', 'Type')}
+              allLabel={tx('كل الأنواع', 'All types')}
+              allCount={afterCategory.length}
+              value={cardType}
+              onPick={setCardType}
+              options={typesShown.map((x) => ({ value: x.o.ar, label: language === 'ar' ? x.o.ar : x.o.en, count: x.count }))}
+            />
+          </div>
+
+          <div className="-mx-4 px-4 sm:mx-0 sm:px-0 flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 overflow-x-auto snap-x snap-mandatory no-scrollbar items-stretch">
+            {shownCards.map((u, i) => (
+              <div key={u.id} className={`w-[82%] shrink-0 snap-start sm:w-auto h-full ${i >= 3 ? 'sm:hidden' : ''}`}>
                 <UnitCard unit={u} onOpen={onSelectUnit} fitsBudget={matching.length > 0} />
               </div>
             ))}
@@ -325,6 +484,12 @@ export const HomePage: React.FC<HomePageProps> = ({
           </button>
         </div>
       </section>
+
+      {/* ───────── 4. Why sell through us — the free statement and four promises ───────── */}
+      <SellerPromises onStatement={() => onNavigate('statement')} />
+
+      {/* ───────── 3b. The three ways out, side by side ───────── */}
+      <ThreeWays onSell={() => onNavigate('sell')} />
 
       {/* ───────── 5. Swap — only on Forsa ───────── */}
       <SwapFeature onSwap={() => onNavigate('swap')} />
@@ -376,6 +541,8 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
   const [mode, setMode] = useState<'buy' | 'sell' | 'swap'>('buy');
   const [query, setQuery] = useState('');
   const [region, setRegion] = useState('');
+  const [subArea, setSubArea] = useState('');
+  const [category, setCategory] = useState('');
   const [type, setType] = useState('');
   const [monthly, setMonthly] = useState('');
 
@@ -385,6 +552,8 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
     const filters: Partial<Filters> = {};
     if (query.trim()) filters.query = query.trim();
     if (region) filters.regions = [region];
+    if (subArea) filters.subAreas = [subArea];
+    if (category) filters.categories = [category];
     if (type) filters.types = [type];
     onSearch({ filters, monthly: m > 0 ? m : undefined });
   };
@@ -411,8 +580,10 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
                 role="tab"
                 aria-selected={mode === k}
                 onClick={() => setMode(k)}
-                className={`relative -mb-[2px] inline-flex items-center justify-center gap-2.5 min-h-15 text-xl sm:text-2xl font-bold border-b-2 transition-colors ${
-                  mode === k ? 'border-brand text-brand' : 'border-transparent text-muted hover:text-ink'
+                className={`relative -mb-[2px] inline-flex items-center justify-center gap-2.5 min-h-15 text-xl sm:text-2xl font-bold border-b-2 rounded-t-xl cursor-pointer transition-colors ${
+                  mode === k
+                    ? 'border-brand text-brand bg-brand-soft'
+                    : 'border-transparent text-ink-soft bg-transparent hover:bg-paper hover:text-brand hover:border-line-strong'
                 }`}
               >
                 <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -435,8 +606,16 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
                   className="field h-14 ps-12 text-base"
                 />
               </label>
-              <div className="grid grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_12rem] gap-3">
-                <select value={region} onChange={(e) => setRegion(e.target.value)} aria-label={tx('المنطقة', 'Area')} className="field h-14">
+              <div className={`grid grid-cols-2 gap-3 ${region ? 'lg:grid-cols-[1fr_1fr_1fr_1fr_10rem]' : 'lg:grid-cols-[1fr_1fr_1fr_12rem]'}`}>
+                <select
+                  value={region}
+                  onChange={(e) => {
+                    setRegion(e.target.value);
+                    setSubArea(''); // الإقليم اتغير، فاللي كان متختار جواه مابقاش صالح
+                  }}
+                  aria-label={tx('المنطقة', 'Area')}
+                  className="field h-14"
+                >
                   <option value="">{tx('كل المناطق', 'All areas')}</option>
                   {REGIONS.map((r) => (
                     <option key={r.ar} value={r.ar}>
@@ -444,14 +623,48 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
                     </option>
                   ))}
                 </select>
-                <select value={type} onChange={(e) => setType(e.target.value)} aria-label={tx('نوع الوحدة', 'Unit type')} className="field h-14">
-                  <option value="">{tx('كل الأنواع', 'All types')}</option>
-                  {PROPERTY_TYPES.map((p) => (
-                    <option key={p.ar} value={p.ar}>
-                      {language === 'ar' ? p.ar : p.en}
+                {region && (
+                  <select
+                    value={subArea}
+                    onChange={(e) => setSubArea(e.target.value)}
+                    aria-label={tx('المنطقة بالتحديد', 'Which part')}
+                    className="field h-14"
+                  >
+                    <option value="">{tx('كل مناطق ', 'All of ') + (language === 'ar' ? region : region)}</option>
+                    {(SUB_AREAS[region as keyof typeof SUB_AREAS] ?? []).map((a) => (
+                      <option key={a.ar} value={a.ar}>
+                        {language === 'ar' ? a.ar : a.en}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {/* التصنيف الأول، وقايمة الأنواع بتتفتح بعده — زي المنطقة بالظبط */}
+                <select
+                  value={category}
+                  onChange={(e) => {
+                    setCategory(e.target.value);
+                    setType(''); // التصنيف اتغير، فالنوع القديم مابقاش تحته
+                  }}
+                  aria-label={tx('التصنيف', 'Category')}
+                  className="field h-14"
+                >
+                  <option value="">{tx('كل التصنيفات', 'All categories')}</option>
+                  {PROPERTY_CATEGORIES.map((c) => (
+                    <option key={c.ar} value={c.ar}>
+                      {language === 'ar' ? c.ar : c.en}
                     </option>
                   ))}
                 </select>
+                {category && (
+                  <select value={type} onChange={(e) => setType(e.target.value)} aria-label={tx('نوع الوحدة', 'Unit type')} className="field h-14">
+                    <option value="">{tx('كل أنواع ', 'All ') + category}</option>
+                    {(TYPES_BY_CATEGORY[category as keyof typeof TYPES_BY_CATEGORY] ?? []).map((p) => (
+                      <option key={p.ar} value={p.ar}>
+                        {language === 'ar' ? p.ar : p.en}
+                      </option>
+                    ))}
+                  </select>
+                )}
                 <input
                   value={monthly}
                   onChange={(e) => setMonthly(e.target.value)}
@@ -623,9 +836,18 @@ const HeroCalculator: React.FC = () => {
           <p className="mt-1 text-xs text-white/70">{tx('كاش يوم التنازل', 'cash on transfer day')}</p>
         </div>
       </div>
-      <p className="mt-3 rounded-xl bg-danger-soft px-3 py-2 text-sm font-semibold text-danger">
-        {tx(`الإلغاء بيخسّرك ${money(shownLoss, language)} — ${lostPct}% من اللي دفعته`, `Cancelling costs you ${money(loss, language)} — ${lostPct}% of what you paid`)}
-      </p>
+      {/* الرقم الكبير أول حاجة، وتحته من فين جه: الخصم نسبته من سعر العقد مش من اللي دفعته. */}
+      <div className="mt-3 rounded-xl bg-danger-soft px-4 py-3.5 text-danger">
+        <p className="text-xl sm:text-2xl font-extrabold leading-snug">
+          {tx(`الإلغاء بيخسّرك ${money(shownLoss, language)}`, `Cancelling costs you ${money(loss, language)}`)}
+        </p>
+        <p className="mt-1.5 text-sm sm:text-base font-semibold leading-relaxed text-danger/90">
+          {tx(
+            `المطور بيخصم 10–15% من سعر العقد كله — يعني ${lostPct}% من اللي دفعته`,
+            `The developer deducts 10–15% of the whole contract — that's ${lostPct}% of what you paid`,
+          )}
+        </p>
+      </div>
       <button onClick={share} className="mt-3 w-full inline-flex items-center justify-center gap-2 min-h-11 text-sm font-semibold text-brand hover:underline">
         <Share2 className="w-4 h-4" />
         {tx('ابعت الحسبة دي لحد تستشيره', 'Send this to someone you trust')}
@@ -831,7 +1053,11 @@ const SellerPromises: React.FC<{ onStatement: () => void }> = ({ onStatement }) 
 
   return (
     <section className="page-wrap py-14 sm:py-20">
-      <SectionTitle center kicker={tx('لو مش قادر تكمّل', "If you can't keep up")} title={tx('ليه تبيع عن طريقنا؟', 'Why sell through us?')} />
+      <SectionTitle
+        center
+        kicker={tx('لو مش قادر تكمّل', "If you can't keep up")}
+        title={tx(`ليه تبيع عن طريق ${BRAND.nameAr}؟`, `Why sell through ${BRAND.nameEn}?`)}
+      />
       <div className="mt-10 grid lg:grid-cols-[1fr_1.4fr] gap-4 sm:gap-5">
         <div className="rounded-card border border-line bg-surface shadow-soft overflow-hidden flex flex-col">
           <div className="relative h-44 sm:h-52">

@@ -53,7 +53,8 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
   return (
     <article
       onClick={() => onOpen(unit)}
-      className={`group card overflow-hidden cursor-pointer transition-all hover:shadow-lift hover:-translate-y-0.5 flex flex-col ${deal ? 'border-accent/50 ring-1 ring-accent/20' : ''}`}
+      /* h-full: في الشبكة الكروت بتتمد لطول أطول واحد فيهم، فالصفوف تفضل مستوية */
+      className={`group card overflow-hidden cursor-pointer transition-all hover:shadow-lift hover:-translate-y-0.5 flex flex-col h-full ${deal ? 'border-accent/50 ring-1 ring-accent/20' : ''}`}
     >
       <div className="relative aspect-[16/10] overflow-hidden bg-line">
         <img

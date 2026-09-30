@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, Minus, Plus, Upload } from 'lucide-react';
+import { Check, Minus, Plus, Upload, X } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { currency } from '../../lib/unitHelpers';
 
@@ -190,6 +190,62 @@ export const FilePick: React.FC<{ label: string; hint: string; value: string; on
     <input type="file" accept="image/*,.pdf" className="sr-only" onChange={(e) => onChange(e.target.files?.[0]?.name || '')} />
   </label>
 );
+
+/** رفع أكتر من صورة لنفس المستند — صفحات العقد مثلاً. */
+export const FilePickMany: React.FC<{
+  label: string;
+  hint: string;
+  max: number;
+  value: string[];
+  onChange: (names: string[]) => void;
+}> = ({ label, hint, max, value, onChange }) => {
+  const full = value.length >= max;
+  return (
+    <div className={`rounded-xl border-2 border-dashed p-4 transition-colors ${value.length ? 'border-brand bg-brand-soft/50' : 'border-field-border'}`}>
+      <label className={`flex items-center gap-4 ${full ? 'cursor-default' : 'cursor-pointer'}`}>
+        <span className={`grid place-items-center w-11 h-11 rounded-xl shrink-0 ${value.length ? 'bg-brand text-white' : 'bg-brand-soft text-brand'}`}>
+          {value.length ? <Check className="w-5 h-5" /> : <Upload className="w-5 h-5" />}
+        </span>
+        <span className="min-w-0">
+          <span className="block font-semibold text-ink">
+            {label} <span className="num text-sm font-normal text-muted">({value.length}/{max})</span>
+          </span>
+          <span className="block text-sm text-muted truncate">{hint}</span>
+        </span>
+        <input
+          type="file"
+          accept="image/*,.pdf"
+          multiple
+          disabled={full}
+          className="sr-only"
+          onChange={(e) => {
+            const picked = [...(e.target.files ?? [])].map((f) => f.name);
+            onChange([...value, ...picked].slice(0, max));
+            e.target.value = ''; // عشان تقدر ترفع نفس الملف تاني لو شيلته
+          }}
+        />
+      </label>
+      {value.length > 0 && (
+        <ul className="mt-3 space-y-1.5">
+          {value.map((name, i) => (
+            <li key={name + i} className="flex items-center gap-2 rounded-lg bg-surface px-3 py-2 text-sm">
+              <span className="num text-xs text-muted shrink-0">{i + 1}</span>
+              <span className="flex-1 truncate text-ink">{name}</span>
+              <button
+                type="button"
+                onClick={() => onChange(value.filter((_, j) => j !== i))}
+                className="grid place-items-center w-8 h-8 rounded-lg text-muted hover:bg-danger-soft hover:text-danger shrink-0"
+                aria-label="شيل الملف"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+};
 
 export const Group: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
   <fieldset className="space-y-5">

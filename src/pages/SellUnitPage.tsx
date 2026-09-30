@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { AlertTriangle, ShieldCheck, TrendingDown, Clock, ScrollText, Send, Check, Repeat, MessageCircle, ArrowLeft, ArrowRight } from 'lucide-react';
+import { AlertTriangle, ShieldCheck, TrendingDown, Clock, ScrollText, Send, Check, Repeat, MessageCircle, ArrowLeft, ArrowRight, Coins, EyeOff } from 'lucide-react';
 import { PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useRequests } from '../context/RequestsContext';
-import { PROPERTY_TYPES, REGIONS, SUB_AREAS, cancellationLoss, currency, money } from '../lib/unitHelpers';
+import { PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, REGIONS, SUB_AREAS, cancellationLoss, currency, money } from '../lib/unitHelpers';
 import { EMPTY_SELL_FORM, SellForm, isValidPhone, netToSeller } from '../lib/sellForm';
-import { ChipSelect, CheckBox, Field, MoneyInput, Toggle } from '../components/sell/FormBits';
+import { ChipSelect, CheckBox, Field, FilePick, FilePickMany, MoneyInput, Toggle } from '../components/sell/FormBits';
 import { whatsappLink } from '../config/brand';
 
 interface SellUnitPageProps {
@@ -33,16 +33,17 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
     }
   });
   const [errors, setErrors] = useState<string[]>([]);
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
 
   const STEPS = [
     { n: 1 as const, label: tx('الوحدة', 'The unit') },
     { n: 2 as const, label: tx('الفلوس', 'The money') },
-    { n: 3 as const, label: tx('بياناتك', 'Your details') },
+    { n: 3 as const, label: tx('المستندات', 'Documents') },
+    { n: 4 as const, label: tx('بياناتك', 'Your details') },
   ];
 
   /** كل خطوة بتتحقق من حقولها هي بس — عشان محدش يتقالّه "ناقص" على حاجة لسه مشفهاش. */
-  const stepErrors = (target: 1 | 2 | 3): string[] => {
+  const stepErrors = (target: 1 | 2 | 3 | 4): string[] => {
     const e: string[] = [];
     if (target === 1) {
       if (!form.developer.trim()) e.push(tx('المطور', 'Developer'));
@@ -56,7 +57,8 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
       if (!form.paidAmount) e.push(tx('المدفوع', 'Amount paid'));
       if (form.paidAmount > form.contractPrice && form.contractPrice) e.push(tx('المدفوع أكبر من سعر العقد', 'Paid is more than contract price'));
     }
-    if (target === 3) {
+    // المستندات (خطوة 3) اختيارية — مش هنوقف البايع عشان صورة
+    if (target === 4) {
       if (!form.ownerName.trim()) e.push(tx('اسمك', 'Your name'));
       if (!isValidPhone(form.ownerPhone)) e.push(tx('موبايل صحيح (01xxxxxxxxx)', 'Valid mobile (01xxxxxxxxx)'));
       if (form.willingToDiscount && !form.discountAmount) e.push(tx('قيمة الخصم', 'Discount amount'));
@@ -68,7 +70,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
 
   const backToTop = () => document.getElementById('sell-top')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-  const goTo = (target: 1 | 2 | 3) => {
+  const goTo = (target: 1 | 2 | 3 | 4) => {
     setErrors([]);
     setStep(target);
     backToTop();
@@ -78,7 +80,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
     const e = stepErrors(step);
     setErrors(e);
     backToTop();
-    if (!e.length && step < 3) setStep((step + 1) as 1 | 2 | 3);
+    if (!e.length && step < 4) setStep((step + 1) as 1 | 2 | 3 | 4);
   };
 
   useEffect(() => {
@@ -94,7 +96,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
 
   const submit = () => {
     // لو فيه نقص في خطوة سابقة، نوديه لها بدل ما نقوله "ناقص" على شاشة مش شايفها
-    for (const target of [1, 2, 3] as const) {
+    for (const target of [1, 2, 3, 4] as const) {
       const e = stepErrors(target);
       if (e.length) {
         setStep(target);
@@ -118,35 +120,53 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
 
   return (
     <div id="sell-top" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-12 scroll-mt-20">
-      <p className="mb-3 text-accent font-semibold">{tx('إحنا فاهمين إن الموقف صعب — وناس كتير قبلك عدّوا بيه. خطوة خطوة، ومعاك.', "We know this is hard — many have been here before you. One step at a time, with you.")}</p>
-      <h1 className="text-3xl sm:text-4xl font-bold text-ink">{tx('اعرض وحدتك في دقيقة', 'List your unit in a minute')}</h1>
-      <p className="mt-2 flex items-center gap-2 text-muted">
-        <Clock className="w-4 h-4" />
-        {tx('مجاناً · من غير عمولة عليك · وباقي البيانات بعدين', 'Free · no fee for you · the rest later')}
-      </p>
+      {/* العنوان الأول، وتحته سطر الطمأنة — مش العكس. اللي داخل الصفحة دي عايز يعرف بيعمل إيه قبل أي كلام. */}
+      <header className="max-w-3xl">
+        <span className="inline-flex items-center gap-2 rounded-full bg-accent-soft px-3.5 py-1.5 text-sm font-bold text-accent">
+          <Clock className="w-4 h-4" />
+          {tx('دقيقة واحدة · مجاناً · من غير عمولة عليك', 'One minute · free · no fee for you')}
+        </span>
+        <h1 className="mt-4 text-4xl sm:text-5xl font-extrabold leading-tight text-ink">
+          {tx('اعرض وحدتك في دقيقة', 'List your unit in a minute')}
+        </h1>
+        <p className="mt-3 text-lg text-ink-soft leading-relaxed">
+          {tx(
+            'إحنا فاهمين إن الموقف صعب — وناس كتير قبلك عدّوا بيه. املا البيانات الأساسية بس، والباقي بعدين.',
+            "We know this is hard — many have been here before you. Fill in the basics; the rest comes later.",
+          )}
+        </p>
+      </header>
 
-      {/* What the seller can do here — one glanceable line, so the form starts on the first screen. */}
-      <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-ink-soft">
+      {/* الثلاثة دول مكاسب مش تفاصيل — كل واحد في كارت لوحده عشان يتقروا بنظرة. */}
+      <ul className="mt-6 grid sm:grid-cols-3 gap-3">
         {[
-          tx('تبيع باللي دفعته، أو تبدّلها بوحدة تانية', 'Sell for what you paid, or swap it'),
-          tx('تعمل خصم أو تخليها قابلة للتفاوض عشان تتباع أسرع', 'Add a discount or accept offers to sell faster'),
-          tx('اسمك ورقمك مش بيتنشروا', 'Your name and number stay private'),
+          { icon: Coins, t: tx('باللي دفعته', 'What you paid'), d: tx('تبيع بسعرك، أو تبدّلها بوحدة تانية', 'Sell at your price, or swap it') },
+          { icon: TrendingDown, t: tx('تتباع أسرع', 'Sells faster'), d: tx('تقدر تعمل خصم أو تقبل التفاوض', 'Add a discount or accept offers') },
+          { icon: EyeOff, t: tx('في سرية', 'Private'), d: tx('اسمك ورقمك مش بيتنشروا', 'Your name and number stay private') },
         ].map((b) => (
-          <li key={b} className="flex items-center gap-1.5">
-            <Check className="w-4 h-4 text-ink shrink-0" strokeWidth={2.5} />
-            {b}
+          <li key={b.t} className="flex items-start gap-3 rounded-card border border-line bg-surface p-4 shadow-soft">
+            <span className="grid place-items-center w-10 h-10 rounded-xl bg-brand-soft text-brand shrink-0">
+              <b.icon className="w-5 h-5" />
+            </span>
+            <span>
+              <span className="block font-bold text-ink">{b.t}</span>
+              <span className="block mt-0.5 text-sm text-ink-soft leading-snug">{b.d}</span>
+            </span>
           </li>
         ))}
       </ul>
 
-      {/* For owners who are already behind — the first worry, answered before the form. */}
-      <p className="mt-5 flex items-start gap-3 rounded-xl border-2 border-brand bg-surface px-4 py-3.5 text-[15px] text-ink max-w-3xl">
-        <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
-        <span>
-          <b>{tx('اتأخرت في الأقساط أو عليك غرامات؟ ', 'Behind on installments or have fines? ')}</b>
-          {tx('عادي، بنبيعها برضه. المتأخرات بتتخصم من فلوسك يوم التنازل، ومش مطلوب منك تدفع حاجة دلوقتي.', "That's fine — we still sell it. Arrears come out of your payout on transfer day; nothing to pay now.")}
-        </span>
-      </p>
+      {/* أكتر سؤال بيقلق البايع — بنرد عليه قبل ما يبدأ. طمأنة مش تحذير، فاللون كحلي مش أحمر. */}
+      <div className="mt-4 flex items-start gap-3 rounded-card bg-brand-soft px-5 py-4">
+        <ShieldCheck className="w-6 h-6 shrink-0 text-brand" />
+        <p className="text-[15px] leading-relaxed text-brand-ink">
+          <b className="block text-base text-ink">{tx('اتأخرت في الأقساط أو عليك غرامات؟', 'Behind on installments or have fines?')}</b>
+          {tx(
+            'عادي، بنبيعها برضه. المتأخرات بتتخصم من فلوسك يوم التنازل، ومش مطلوب منك تدفع حاجة دلوقتي.',
+            "That's fine — we still sell it. Arrears come out of your payout on transfer day; nothing to pay now.",
+          )}
+        </p>
+      </div>
 
       <div className="mt-6 grid lg:grid-cols-[1fr_20rem] gap-6 items-start">
         <div className="card p-5 sm:p-8 space-y-7">
@@ -223,9 +243,25 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               />
             </Field>
           )}
-          <Field label={tx('النوع', 'Type')} required>
-            <ChipSelect options={L(PROPERTY_TYPES)} value={form.propertyType} onChange={(v) => set('propertyType', v)} />
+          <Field label={tx('التصنيف', 'Category')} required>
+            <ChipSelect
+              options={L(PROPERTY_CATEGORIES)}
+              value={form.propertyCategory}
+              onChange={(v) => {
+                set('propertyCategory', v);
+                set('propertyType', ''); // التصنيف اتغير، فالنوع القديم مابقاش تحته
+              }}
+            />
           </Field>
+          {form.propertyCategory && (
+            <Field label={tx('النوع', 'Type')} required>
+              <ChipSelect
+                options={(TYPES_BY_CATEGORY[form.propertyCategory] ?? []).map((o) => ({ value: o.ar, label: language === 'ar' ? o.ar : o.en }))}
+                value={form.propertyType}
+                onChange={(v) => set('propertyType', v)}
+              />
+            </Field>
+          )}
 
           </div>
           )}
@@ -263,6 +299,37 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
           )}
 
           {step === 3 && (
+          <div className="space-y-7">
+            <p className="rounded-xl bg-brand-soft px-4 py-3 text-[15px] leading-relaxed text-brand-ink">
+              {tx(
+                'المستندات دي بتخلّي المراجعة أسرع، ومش بتظهر لأي مشتري ولا بتتنشر. تقدر تعديها دلوقتي وترفعها بعدين من "طلباتي".',
+                "These speed up the review. They are never shown to buyers or published — you can skip now and upload later from \"My requests\".",
+              )}
+            </p>
+
+            <FilePickMany
+              label={tx('أول 4 صور في العقد', 'First 4 pages of the contract')}
+              hint={tx('الصفحات اللي فيها بياناتك وبيانات الوحدة والسعر', 'The pages with your details, the unit and the price')}
+              max={4}
+              value={form.contractPages}
+              onChange={(v) => set('contractPages', v)}
+            />
+            <FilePick
+              label={tx('جدول سداد الأقساط', 'Payment schedule')}
+              hint={tx('الملحق بالعقد', 'The contract annex')}
+              value={form.paymentScheduleFile}
+              onChange={(v) => set('paymentScheduleFile', v)}
+            />
+            <FilePick
+              label={tx('صورة بلان الوحدة', 'Unit plan')}
+              hint={tx('الملحق بالعقد', 'The contract annex')}
+              value={form.unitPlanFile}
+              onChange={(v) => set('unitPlanFile', v)}
+            />
+          </div>
+          )}
+
+          {step === 4 && (
           <div className="space-y-7">
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label={tx('اسمك زي العقد', 'Name as in contract')} required htmlFor="oname">
@@ -303,15 +370,35 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               on={form.negotiable}
               onChange={(v) => set('negotiable', v)}
             />
-            <button type="button" onClick={() => onNavigate('swap')} className="w-full flex items-center gap-3 rounded-xl border border-line p-4 text-start hover:border-ink-soft transition-colors">
-              <span className="grid place-items-center w-10 h-10 rounded-xl bg-brand-soft text-ink shrink-0">
-                <Repeat className="w-5 h-5" />
-              </span>
-              <span className="flex-1">
-                <span className="block font-semibold text-ink">{tx('ولا تحب تبدّلها بوحدة تانية؟', 'Rather swap it for another unit?')}</span>
-                <span className="block text-sm text-muted">{tx('من غير ما تبيع الأول — تدفع أو تاخد الفرق بس', 'No selling first — just settle the difference')}</span>
-              </span>
-              <Arrow className="w-4 h-4 text-muted" />
+            {/* خيار جوه الفورم مش لينك بيخرّجه منه — البايع يقول إنه يقبل التبديل ويكمّل. */}
+            <Toggle
+              label={tx('أقبل أبدّلها بوحدة تانية', 'Open to swapping it')}
+              hint={tx('من غير ما تبيع الأول — تدفع أو تاخد الفرق بس', 'No selling first — just settle the difference')}
+              on={form.eligibleForSwap}
+              onChange={(v) => set('eligibleForSwap', v)}
+            >
+              <Field
+                label={tx('عايز تبدّلها بإيه؟', 'What would you swap into?')}
+                htmlFor="swapwish"
+                hint={tx('اختياري — اكتبها بكلامك: نوع الوحدة أو المنطقة أو قد إيه القسط', 'Optional — in your words: type, area, or the monthly you want')}
+              >
+                <input
+                  id="swapwish"
+                  value={form.swapTargetType}
+                  onChange={(e) => set('swapTargetType', e.target.value)}
+                  placeholder={tx('مثلاً: شقة أصغر بقسط أقل في أكتوبر', 'e.g. a smaller flat with a lower monthly in October')}
+                  className="field"
+                />
+              </Field>
+            </Toggle>
+            <button
+              type="button"
+              onClick={() => onNavigate('swap')}
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline min-h-11"
+            >
+              <Repeat className="w-4 h-4" />
+              {tx('شوف التبديل شغال إزاي', 'See how swapping works')}
+              <Arrow className="w-4 h-4" />
             </button>
           </div>
 
@@ -340,11 +427,11 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
 
           <div className="flex items-center gap-3">
             {step > 1 && (
-              <button type="button" onClick={() => goTo((step - 1) as 1 | 2 | 3)} className="btn-ghost min-h-14 px-5">
+              <button type="button" onClick={() => goTo((step - 1) as 1 | 2 | 3 | 4)} className="btn-ghost min-h-14 px-5">
                 {tx('رجوع', 'Back')}
               </button>
             )}
-            {step < 3 ? (
+            {step < 4 ? (
               <button type="button" onClick={goNext} className="btn-primary flex-1 min-h-14 text-base">
                 {tx('التالي', 'Next')}
                 <Arrow className="w-5 h-5" />
@@ -357,7 +444,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
             )}
           </div>
 
-          {step === 3 && (
+          {step === 4 && (
           <p className="-mt-3 text-center text-sm text-muted">
             {tx('بإرسال الطلب إنت موافق على ', 'By sending you agree to the ')}
             <button type="button" onClick={() => onNavigate('terms')} className="text-brand font-semibold hover:underline">

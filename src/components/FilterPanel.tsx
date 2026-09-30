@@ -4,7 +4,7 @@ import { RealEstateUnit } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { Budget, BudgetFinder } from './BudgetFinder';
 import { Filters } from '../lib/unitFilters';
-import { DELIVERY_OPTIONS, FINISHING_OPTIONS, FREQUENCY_OPTIONS, PROPERTY_TYPES, REGIONS, subAreasFor, pick } from '../lib/unitHelpers';
+import { DELIVERY_OPTIONS, FINISHING_OPTIONS, FREQUENCY_OPTIONS, PROPERTY_CATEGORIES, REGIONS, subAreasFor, typesFor, pick } from '../lib/unitHelpers';
 
 interface FilterPanelProps {
   units: RealEstateUnit[];
@@ -176,8 +176,21 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
         </Section>
       )}
 
-      <Section title={tx('النوع', 'Type')} active={f.types.length} defaultOpen>
-        <Chips options={PROPERTY_TYPES.map(L)} selected={f.types} onToggle={(v) => onChange({ types: toggle(f.types, v) })} />
+      <Section title={tx('التصنيف', 'Category')} active={f.categories.length} defaultOpen>
+        <Chips
+          options={PROPERTY_CATEGORIES.map(L)}
+          selected={f.categories}
+          onToggle={(v) => {
+            const categories = toggle(f.categories, v);
+            // نشيل أي نوع بقى تحت تصنيف مش مختار
+            const allowed = new Set<string>(typesFor(categories).map((t) => t.ar));
+            onChange({ categories, types: f.types.filter((t) => allowed.has(t)) });
+          }}
+        />
+      </Section>
+
+      <Section title={tx('النوع', 'Type')} active={f.types.length} defaultOpen={!!f.categories.length}>
+        <Chips options={typesFor(f.categories).map(L)} selected={f.types} onToggle={(v) => onChange({ types: toggle(f.types, v) })} />
       </Section>
 
       {/* الباقي فلاتر تفصيلية: المشتري هنا بيسأل عن الكاش والقسط والمكان الأول */}

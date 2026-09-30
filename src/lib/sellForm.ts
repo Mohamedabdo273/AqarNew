@@ -1,4 +1,4 @@
-import { DeliveryStatus, FinishingType, InstallmentFrequency, PropertyType, RealEstateUnit } from '../types';
+import { DeliveryStatus, FinishingType, InstallmentFrequency, PropertyCategory, PropertyType, RealEstateUnit } from '../types';
 
 export type View = 'بحري صريح' | 'بحري شرقي' | 'قبلي' | 'شرقي' | 'غربي';
 /** '' = the seller doesn't know (a valid answer, not a missing one). */
@@ -13,6 +13,7 @@ export interface SellForm {
   compound: string;
   region: RealEstateUnit['region'] | '';
   subArea: string;
+  propertyCategory: PropertyCategory | '';
   propertyType: PropertyType | '';
   contractPrice: number;
   paidAmount: number;
@@ -67,6 +68,12 @@ export interface SellForm {
   eligibleForSwap: boolean;
   swapTargetType: string;
   // Documents
+  /** أول 4 صفحات من العقد — أسماء الملفات. */
+  contractPages: string[];
+  /** جدول سداد الأقساط الملحق بالعقد. */
+  paymentScheduleFile: string;
+  /** بلان الوحدة الملحق بالعقد. */
+  unitPlanFile: string;
   contractFile: string;
   receiptFile: string;
   idFile: string;
@@ -77,6 +84,7 @@ export const EMPTY_SELL_FORM: SellForm = {
   compound: '',
   region: '',
   subArea: '',
+  propertyCategory: '',
   propertyType: '',
   contractPrice: 0,
   paidAmount: 0,
@@ -123,6 +131,9 @@ export const EMPTY_SELL_FORM: SellForm = {
   cashInstallmentNotes: '',
   eligibleForSwap: false,
   swapTargetType: '',
+  contractPages: [],
+  paymentScheduleFile: '',
+  unitPlanFile: '',
   contractFile: '',
   receiptFile: '',
   idFile: '',
@@ -130,7 +141,7 @@ export const EMPTY_SELL_FORM: SellForm = {
 
 export const isValidPhone = (phone: string) => /^01\d{9}$/.test(phone.replace(/\s/g, ''));
 
-export const isResidential = (type: PropertyType | '') => !['تجاري / محل', 'عيادة / إداري'].includes(type);
+export const isResidential = (type: PropertyType | '') => !['محل', 'مكتب'].includes(type);
 
 /** What the seller actually walks away with after deducted dues and any discount they offered. */
 export const netToSeller = (f: SellForm) => {

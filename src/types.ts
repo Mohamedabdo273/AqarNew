@@ -41,14 +41,34 @@ export interface User {
 }
 
 export type PropertyType = 
+  // سكني
   | 'شقة'
+  | 'استوديو'
   | 'شاليه'
   | 'دوبلكس'
   | 'تاون هاوس'
   | 'توين هاوس'
   | 'فيلا'
-  | 'تجاري / محل'
-  | 'عيادة / إداري';
+  | 'بنتهاوس'
+  // تجاري
+  | 'محل'
+  | 'مساحة في مول'
+  | 'مخزن'
+  // إداري
+  | 'مكتب'
+  | 'دور إداري'
+  | 'مقر شركة'
+  // فندقي
+  | 'غرفة فندقية'
+  | 'جناح فندقي'
+  | 'شاليه فندقي'
+  // طبي
+  | 'عيادة'
+  | 'صيدلية'
+  | 'معمل تحاليل'
+  | 'مركز أشعة';
+
+export type PropertyCategory = 'سكني' | 'تجاري' | 'إداري' | 'فندقي' | 'طبي';
 
 export type InstallmentFrequency = 'شهري' | 'ربع سنوي' | 'نصف سنوي' | 'سنوي';
 
@@ -91,6 +111,8 @@ export interface RealEstateUnit {
   subArea?: string;
   regionEn?: string;
   propertyType: PropertyType;
+  /** بيتشتق من النوع — مش بيتخزن في كل وحدة. */
+  propertyCategory?: PropertyCategory;
   propertyTypeEn?: string;
   originalContractPrice: number; // EGP
   currentMarketPrice: number; // EGP (shows huge savings)

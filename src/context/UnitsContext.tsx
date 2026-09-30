@@ -87,7 +87,7 @@ const UnitsContext = createContext<UnitsContextType | undefined>(undefined);
 
 // Bump the version whenever the mock data shape changes, so browsers drop the old cached copy.
 // v5: المناطق اتغيرت لمستوى المحافظات — الكاش القديم فيه أسامي مناطق مابقتش موجودة
-const STORAGE_KEY_UNITS = 'tanazul_units_data_v5';
+const STORAGE_KEY_UNITS = 'tanazul_units_data_v7';
 const STORAGE_KEY_SAVED = 'tanazul_saved_units_v1';
 const STORAGE_KEY_INQUIRIES = 'tanazul_inquiries_data_v1';
 
