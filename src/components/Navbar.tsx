@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Home, Search, Tag, Repeat, Globe, Menu, X, Info, ShieldCheck, MessageCircle, Heart, ClipboardList, Phone, Bell, MoreHorizontal, UserRound, Scale } from 'lucide-react';
+import { Home, Search, Tag, Repeat, Globe, Menu, X, Info, ShieldCheck, MessageCircle, Heart, ClipboardList, Phone, Bell, MoreHorizontal, UserRound, Scale, Sparkles } from 'lucide-react';
 import { PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useUnits } from '../context/UnitsContext';
 import { useRequests } from '../context/RequestsContext';
+import { useCompare } from '../context/CompareContext';
 import { Logo } from './Logo';
 import { whatsappLink } from '../config/brand';
 
@@ -23,6 +24,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
   const { language, toggleLanguage, tx } = useLanguage();
   const { savedUnitIds } = useUnits();
   const { requests } = useRequests();
+  const { compareIds } = useCompare();
   const [menuOpen, setMenuOpen] = useState(false);
   const [openPanel, setOpenPanel] = useState<null | 'bell' | 'more'>(null);
   const panelsRef = useRef<HTMLDivElement>(null);
@@ -82,6 +84,8 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
     buy,
     rules,
     contact,
+    { id: 'compare', label: tx('المقارنة', 'Compare'), icon: Scale },
+    { id: 'market-comparisons', label: tx('مقارنات السوق', 'Market Comparisons'), icon: Sparkles },
     { id: 'saved', label: tx('المفضلة', 'Saved'), icon: Heart },
     { id: 'requests', label: tx('طلباتي', 'My requests'), icon: ClipboardList },
     { id: 'about', label: tx('احنا مين', 'About us'), icon: Info },
@@ -178,7 +182,8 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
                 <div className="absolute top-full mt-2 end-0 w-56 card p-2 shadow-lift z-50">
                   {[
                     { id: 'requests' as PageId, label: tx('طلباتي', 'My requests'), icon: ClipboardList, n: requests.length },
-                    { id: 'compare' as PageId, label: tx('المقارنة', 'Compare'), icon: Scale, n: 0 },
+                    { id: 'compare' as PageId, label: tx('المقارنة', 'Compare'), icon: Scale, n: compareIds.length },
+                    { id: 'market-comparisons' as PageId, label: tx('مقارنات السوق', 'Market Comparisons'), icon: Sparkles, n: 0 },
                     { id: 'about' as PageId, label: tx('احنا مين', 'About us'), icon: Info, n: 0 },
                   ].map((m) => (
                     <button

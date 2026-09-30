@@ -21,6 +21,7 @@ import { ContactPage } from './pages/ContactPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { StatementPage } from './pages/StatementPage';
 import { ComparePage } from './pages/ComparePage';
+import { MarketComparisonsPage } from './pages/MarketComparisonsPage';
 import { VerifyPage } from './pages/VerifyPage';
 import { useCompare } from './context/CompareContext';
 import { Scale } from 'lucide-react';
@@ -32,7 +33,7 @@ import { useUnits } from './context/UnitsContext';
 import { useLanguage } from './context/LanguageContext';
 
 /** Pages reachable by a bare hash (#sell, #contact, …). */
-const PAGES: PageId[] = ['home', 'opportunities', 'sell', 'statement', 'compare', 'verify', 'swap', 'contact', 'about', 'rules', 'saved', 'requests', 'privacy', 'terms', 'admin'];
+const PAGES: PageId[] = ['home', 'opportunities', 'sell', 'statement', 'compare', 'market-comparisons', 'verify', 'swap', 'contact', 'about', 'rules', 'saved', 'requests', 'privacy', 'terms', 'admin'];
 const THANKS: ThanksKind[] = ['sell', 'statement', 'viewing', 'swap', 'contact', 'alert'];
 
 /*
@@ -225,6 +226,7 @@ export default function App() {
         {activePage === 'saved' && <SavedPage onSelectUnit={openUnit} onNavigate={handleNavigate} />}
         {activePage === 'requests' && <MyRequestsPage code={requestCode} onOpenRequest={openRequest} onNavigate={handleNavigate} />}
         {activePage === 'compare' && <ComparePage units={units} onSelectUnit={openUnit} onNavigate={handleNavigate} />}
+        {activePage === 'market-comparisons' && <MarketComparisonsPage units={units} onSelectUnit={openUnit} onNavigate={handleNavigate} />}
         {activePage === 'verify' && <VerifyPage units={units} initialCode={verifyCode} onSelectUnit={openUnit} />}
         {activePage === 'statement' && <StatementPage onNavigate={handleNavigate} onSent={() => go('thanks/statement')} />}
         {activePage === 'contact' && <ContactPage onNavigate={handleNavigate} onSent={() => go('thanks/contact')} />}

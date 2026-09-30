@@ -21,12 +21,15 @@ import {
   Images,
   Flame,
   ArrowDown,
+  Scale,
 } from 'lucide-react';
 import { PageId, RealEstateUnit } from '../types';
 import { BRAND, whatsappLink } from '../config/brand';
 import { useLanguage } from '../context/LanguageContext';
 import { useUnits } from '../context/UnitsContext';
+import { useCompare, COMPARE_MAX } from '../context/CompareContext';
 import { UnitCard } from '../components/UnitCard';
+import { AqarExitComparison } from '../components/AqarExitComparison';
 import {
   cashPrice,
   currency,
@@ -67,6 +70,7 @@ export const similarUnits = (unit: RealEstateUnit, units: RealEstateUnit[], n = 
 export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelectUnit, onOpenBuyerRules, onNavigate, onBooked }) => {
   const { language, tx, isRTL } = useLanguage();
   const { isUnitSaved, toggleSaveUnit, submitInquiry } = useUnits();
+  const { isCompared, toggleCompare } = useCompare();
   const [imgIdx, setImgIdx] = useState(0);
   const [booking, setBooking] = useState(false);
   const [name, setName] = useState('');
@@ -252,7 +256,21 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
             {pick(language, unit.location, unit.locationEn)}
           </p>
         </div>
-        <div className="relative flex gap-2">
+        <div className="relative flex items-center flex-wrap gap-2">
+          <button
+            onClick={() => {
+              if (!toggleCompare(unit.id)) {
+                window.alert(tx(`تقدر تقارن ${COMPARE_MAX} وحدات بس في المرة.`, `You can compare up to ${COMPARE_MAX} units.`));
+              }
+            }}
+            aria-pressed={isCompared(unit.id)}
+            className={`btn min-h-11 px-4 text-sm transition-colors ${
+              isCompared(unit.id) ? 'bg-brand text-white border-brand' : 'btn-ghost'
+            }`}
+          >
+            <Scale className="w-4 h-4" />
+            {isCompared(unit.id) ? tx('في المقارنة', 'In Compare') : tx('قارن', 'Compare')}
+          </button>
           <button onClick={share} className="btn-ghost min-h-11 px-4 text-sm">
             <Share2 className="w-4 h-4" />
             {tx('شارك', 'Share')}
@@ -274,28 +292,40 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
         <aside className="lg:col-start-2 lg:row-start-1 lg:sticky lg:top-24 space-y-3">
           <div className="rounded-card bg-brand text-white p-6 shadow-lift">
             {isDeal(unit) && (
-              <div className="-mt-6 -mx-6 mb-5 rounded-t-card bg-accent px-6 py-3 flex items-center gap-2 text-sm font-bold">
-                <Flame className="w-4 h-4 shrink-0" />
-                {tx(
-                  `أقل من المدفوع: صاحبها عامل خصم ${money(sellerDiscount(unit), language)} عشان يبيع أسرع`,
-                  `Below what was paid: the owner took ${money(sellerDiscount(unit), language)} off to sell faster`,
-                )}
+              <div className="-mt-6 -mx-6 mb-5 rounded-t-card bg-gradient-to-r from-amber-600 via-rose-600 to-red-600 px-6 py-3.5 flex items-center justify-between text-white font-black shadow-md">
+                <div className="flex items-center gap-2 text-sm sm:text-base">
+                  <Flame className="w-5 h-5 shrink-0 fill-current animate-pulse" />
+                  <span>
+                    {tx(
+                      `خصم خاص ${money(sellerDiscount(unit), language)} أقل من المدفوع!`,
+                      `Special discount ${money(sellerDiscount(unit), language)} below what owner paid!`,
+                    )}
+                  </span>
+                </div>
+                <span className="bg-white/20 text-white text-xs px-2.5 py-0.5 rounded-full font-bold">
+                  {tx('صفقة حقيقية', 'Hot Deal')}
+                </span>
               </div>
             )}
-            <p className="text-sm text-white/60">{tx('تدفع كاش', 'Cash now')}</p>
-            <p className="num font-display mt-1 text-4xl font-bold">
-              {money(cashPrice(unit), language)} <span className="text-base font-medium text-white/60">{currency(language)}</span>
+            <p className="text-sm text-white/70 font-medium">{tx('تدفع كاش دلوقتي', 'Cash now')}</p>
+            <p className="num font-display mt-1 text-4xl font-extrabold">
+              {money(cashPrice(unit), language)} <span className="text-base font-medium text-white/70">{currency(language)}</span>
             </p>
             {isDeal(unit) && (
-              <p className="num mt-1 text-sm text-white/50">
-                {tx('بدل', 'instead of')} <span className="line-through">{money(unit.paidCashAmount, language)}</span> {tx('— اللي صاحبها دفعه', '— what the owner paid')}
+              <p className="num mt-1 text-sm text-white/70 font-semibold">
+                {tx('بدل', 'instead of')} <span className="line-through decoration-rose-300 decoration-2">{money(unit.paidCashAmount, language)}</span> {tx('— اللي صاحبها دفعه', '— what the owner paid')}
               </p>
             )}
             {isNegotiable(unit) && (
-              <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-sm font-semibold">
-                <ArrowDown className="w-4 h-4" />
-                {tx('السعر قابل للتفاوض — اعرض سعرك في المعاينة', 'Negotiable — make your offer at the viewing')}
-              </p>
+              <div className="mt-3.5 flex items-center justify-between rounded-xl bg-emerald-500/25 border border-emerald-400/50 px-3.5 py-2.5 text-white font-bold text-sm shadow-xs">
+                <span className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-300 animate-pulse shrink-0" />
+                  <span>{tx('السعر قابل للتفاوض مع المالك', 'Price is negotiable with owner')}</span>
+                </span>
+                <span className="text-xs bg-white/20 px-2 py-0.5 rounded font-extrabold">
+                  {tx('يرحب بالعروض', 'Open to offers')}
+                </span>
+              </div>
             )}
             <div className="mt-4 pt-4 border-t border-white/10 flex items-baseline justify-between gap-3">
               <span className="text-white/60">{tx('وقسط شهري تقريباً', 'Monthly, roughly')}</span>
@@ -493,6 +523,15 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
             <p className="text-ink-soft leading-relaxed">{pick(language, unit.description, unit.descriptionEn)}</p>
           </div>
         </div>
+      </div>
+
+      {/* Unit Comparison Strip & Modal (Aqar Exit style) */}
+      <div className="mt-10 sm:mt-14">
+        <AqarExitComparison
+          currentUnit={unit}
+          allUnits={units}
+          onSelectUnit={onSelectUnit}
+        />
       </div>
 
       {similar.length > 0 && (

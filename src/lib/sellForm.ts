@@ -31,6 +31,7 @@ export interface SellForm {
   floor: string;
   viewOrientation: View | '';
   finishing: FinishingType | '';
+  alreadyDelivered: boolean | null;
   deliveryStatus: DeliveryStatus | '';
   /** Legacy — no longer asked (the delivery year is enough). */
   deliveryDate: string;
@@ -101,6 +102,7 @@ export const EMPTY_SELL_FORM: SellForm = {
   floor: '',
   viewOrientation: '',
   finishing: '',
+  alreadyDelivered: null,
   deliveryStatus: '',
   deliveryDate: '',
   gardenAreaM2: 0,

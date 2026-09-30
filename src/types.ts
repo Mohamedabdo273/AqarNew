@@ -90,6 +90,7 @@ export type PageId =
   | 'contact'
   | 'statement'
   | 'compare'
+  | 'market-comparisons'
   | 'verify'
   | 'unit'
   | 'thanks'

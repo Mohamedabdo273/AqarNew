@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Search, SlidersHorizontal, X, BellRing, Flame } from 'lucide-react';
+import { Search, SlidersHorizontal, X, BellRing, Flame, Sparkles } from 'lucide-react';
 import { RealEstateUnit } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { UnitCard } from '../components/UnitCard';
@@ -142,15 +142,37 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   const to = Math.min(current * PAGE_SIZE, results.length);
 
   return (
-    <div className="page-wrap py-8 sm:py-12">
-      <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-ink">{tx('وحدات بسعر زمان', 'Units at old prices')}</h1>
-      <p className="mt-2 text-muted">{tx('ادفع اللي المالك دفعه بس، وكمّل الأقساط.', 'Pay only what the owner paid, then continue the plan.')}</p>
-      <a href="#sell" className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-ink underline min-h-11">
-        {tx('عندك وحدة ومش قادر تكمّل أقساطها؟ بيعها أو بدّلها', "Own a unit and can't keep up? Sell or swap it")}
-      </a>
+    <div className="page-wrap py-6 sm:py-10">
+      {/* Sleek Hero Header */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-surface via-surface to-brand-soft/25 border border-line p-6 sm:p-8 shadow-xs mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full bg-brand-soft/90 border border-brand/20 px-3 py-1 text-xs font-bold text-brand mb-2.5">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>{tx('وحدات ريسيل واستلام فوري بدون أوفر', 'Resale & ready units with 0 overprice')}</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-ink">
+              {tx('تصفّح الوحدات والفرص المتاحة', 'Browse Available Units & Opportunities')}
+            </h1>
+            <p className="mt-2 text-sm sm:text-base text-ink-soft max-w-2xl leading-relaxed">
+              {tx(
+                'ادفع فقط ما دفعه المالك بالجنيه المصري، واستكمل باقي الأقساط المتبقية مباشرة مع المطور.',
+                'Pay only what the owner paid with zero markup, and continue remaining installments directly with developer.'
+              )}
+            </p>
+          </div>
+
+          <a
+            href="#sell"
+            className="btn-ghost self-start md:self-auto text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl border border-line hover:border-brand shrink-0"
+          >
+            <span>{tx('عندك وحدة وعايز تبيعها أو تبدلها؟', 'Want to sell or swap your unit?')}</span>
+          </a>
+        </div>
+      </div>
 
       {/* Search */}
-      <div className="mt-8 flex gap-3">
+      <div className="mt-6 flex gap-3">
         <div className="relative flex-1">
           <Search className="absolute top-1/2 -translate-y-1/2 start-4 w-5 h-5 text-muted" />
           <input
@@ -236,7 +258,7 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
 
           {results.length > 0 ? (
             <>
-              <div className="grid sm:grid-cols-2 2xl:grid-cols-3 gap-5">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {pageItems.map((u) => (
                   <UnitCard key={u.id} unit={u} onOpen={onSelectUnit} fitsBudget={budgetOn} />
                 ))}

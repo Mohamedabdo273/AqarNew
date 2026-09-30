@@ -150,7 +150,10 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
                 <ChipSelect
                   options={DELIVERY_OPTIONS.map((d) => ({ value: d.ar, label: language === 'ar' ? d.short : d.en }))}
                   value={form.deliveryStatus}
-                  onChange={(v) => set('deliveryStatus', v)}
+                  onChange={(v) => {
+                    set('deliveryStatus', v);
+                    set('alreadyDelivered', v === 'استلام فوري');
+                  }}
                 />
               </Field>
               <Field label={tx('الواجهة', 'Facing')}>

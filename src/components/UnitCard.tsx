@@ -1,7 +1,6 @@
 import React from 'react';
-import { Heart, MapPin, BadgeCheck, Flame, ArrowDown, Scale } from 'lucide-react';
+import { Heart, MapPin, BadgeCheck, Flame, Scale, ArrowDown } from 'lucide-react';
 import { RealEstateUnit } from '../types';
-import { BRAND } from '../config/brand';
 import { useLanguage } from '../context/LanguageContext';
 import { useUnits } from '../context/UnitsContext';
 import { COMPARE_MAX, useCompare } from '../context/CompareContext';
@@ -11,7 +10,6 @@ import {
   deliveryLabel,
   isDeal,
   isNegotiable,
-  money,
   monthlyInstallment,
   pick,
   savingsAmount,
@@ -26,11 +24,10 @@ interface UnitCardProps {
   fitsBudget?: boolean;
   /** Extra pill shown on the image (e.g. swap price difference). */
   tag?: { label: string; strong?: boolean };
-  /** Extra content at the bottom of the card (e.g. the swap page's monthly change and request button). */
+  /** Extra content at the bottom of the card. */
   footer?: React.ReactNode;
 }
 
-/** Full number with thousands separators — easier to read and compare than "1.7 مليون" on a price card. */
 const full = (n: number) => Math.round(n).toLocaleString('en-US');
 
 export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, tag, footer }) => {
@@ -40,146 +37,235 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
   const { isCompared, toggleCompare } = useCompare();
   const compared = isCompared(unit.id);
   const deal = isDeal(unit);
+  const discountVal = sellerDiscount(unit);
+  const negotiable = isNegotiable(unit);
   const cur = currency(language);
 
-  const specs = [
-    pick(language, unit.propertyType, unit.propertyTypeEn),
-    unit.bedrooms > 0 ? tx(`${unit.bedrooms} غرف`, `${unit.bedrooms} beds`) : null,
-    unit.bathrooms > 0 ? tx(`${unit.bathrooms} حمام`, `${unit.bathrooms} baths`) : null,
-    `${unit.areaM2} ${tx('م²', 'm²')}`,
-    tx(`استلام ${deliveryLabel(unit, language)}`, `Delivery ${deliveryLabel(unit, language)}`),
-  ].filter(Boolean);
+  const savings = savingsAmount(unit);
+  const savingsPct = savingsPercent(unit);
+  const cash = cashPrice(unit);
+  const monthly = monthlyInstallment(unit);
 
   return (
     <article
       onClick={() => onOpen(unit)}
-      /* h-full: في الشبكة الكروت بتتمد لطول أطول واحد فيهم، فالصفوف تفضل مستوية */
-      className={`group card overflow-hidden cursor-pointer transition-all hover:shadow-lift hover:-translate-y-0.5 flex flex-col h-full ${deal ? 'border-accent/50 ring-1 ring-accent/20' : ''}`}
+      className="group card overflow-hidden cursor-pointer transition-all duration-200 hover:shadow-lift hover:-translate-y-1 flex flex-col h-full rounded-2xl border border-line bg-surface hover:border-brand/40"
     >
+      {/* Image & Prominent Overlays */}
       <div className="relative aspect-[16/10] overflow-hidden bg-line">
         <img
           src={unit.images[0]}
           alt=""
           loading="lazy"
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
         />
-        <div className="absolute inset-x-0 top-0 p-3 flex items-start justify-between">
-          {/* Status pills live on the photo so the title gets the full width. */}
-          <div className="flex flex-wrap gap-1.5">
-            {unit.verifiedContract && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-surface/95 px-2.5 py-1 text-xs font-semibold text-brand-ink">
-                <BadgeCheck className="w-3.5 h-3.5 text-brand" />
-                {tx('موثّقة', 'Verified')}
+
+        {/* Top Badges & Actions */}
+        <div className="absolute inset-x-0 top-0 p-2.5 flex items-start justify-between gap-2 pointer-events-none">
+          {/* Prominent High-Contrast Badges */}
+          <div className="flex flex-col gap-1.5 items-start pointer-events-auto">
+            {/* 1. Ultra Prominent Discount Badge */}
+            {deal && (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-600 via-rose-600 to-red-600 text-white px-3 py-1 text-xs font-black shadow-md tracking-tight">
+                <Flame className="w-3.5 h-3.5 fill-current animate-pulse" />
+                <span>{tx(`خصم ${full(discountVal)} ج.م`, `Save ${full(discountVal)} EGP`)}</span>
               </span>
             )}
-            {fitsBudget && <span className="rounded-full bg-brand px-2.5 py-1 text-xs font-semibold text-white">{tx('في ميزانيتك', 'In budget')}</span>}
+
+            {/* 2. Ultra Prominent Negotiable Badge */}
+            {negotiable && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-600 text-white px-2.5 py-1 text-xs font-black shadow-md">
+                <ArrowDown className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>{tx('قابل للتفاوض', 'Negotiable')}</span>
+              </span>
+            )}
+
+            {/* Verified Contract */}
+            {unit.verifiedContract && !deal && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-surface/95 backdrop-blur-xs px-2.5 py-0.5 text-[11px] font-bold text-brand shadow-xs">
+                <BadgeCheck className="w-3.5 h-3.5 text-brand" />
+                <span>{tx('عقد موثّق', 'Verified')}</span>
+              </span>
+            )}
+
+            {fitsBudget && (
+              <span className="rounded-full bg-brand px-2 py-0.5 text-[11px] font-bold text-white shadow-xs">
+                {tx('في ميزانيتك', 'In budget')}
+              </span>
+            )}
           </div>
-          <div className="flex gap-1.5">
+
+          {/* Quick Action Buttons (Compare & Save) */}
+          <div className="flex items-center gap-1.5 pointer-events-auto">
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                if (!toggleCompare(unit.id)) window.alert(tx(`تقدر تقارن ${COMPARE_MAX} وحدات بس في المرة.`, `You can compare up to ${COMPARE_MAX} units.`));
+                if (!toggleCompare(unit.id)) {
+                  window.alert(tx(`تقدر تقارن ${COMPARE_MAX} وحدات بس في المرة.`, `You can compare up to ${COMPARE_MAX} units.`));
+                }
               }}
               aria-pressed={compared}
               aria-label={compared ? tx('شيلها من المقارنة', 'Remove from comparison') : tx('قارن', 'Compare')}
               title={compared ? tx('في المقارنة', 'In comparison') : tx('قارن', 'Compare')}
-              className={`grid place-items-center w-11 h-11 rounded-full transition-colors ${compared ? 'bg-brand text-white' : 'bg-surface/95 text-ink-soft hover:bg-surface'}`}
+              className={`grid place-items-center w-8 h-8 rounded-full transition-all shadow-xs ${
+                compared
+                  ? 'bg-brand text-white'
+                  : 'bg-surface/90 backdrop-blur-xs text-ink-soft hover:bg-surface hover:text-brand'
+              }`}
             >
-              <Scale className="w-4 h-4" />
+              <Scale className="w-3.5 h-3.5" />
             </button>
+
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 toggleSaveUnit(unit.id);
               }}
               aria-label={tx('حفظ', 'Save')}
-              className="grid place-items-center w-11 h-11 rounded-full bg-surface/95 hover:bg-surface"
+              className="grid place-items-center w-8 h-8 rounded-full bg-surface/90 backdrop-blur-xs text-ink-soft hover:bg-surface shadow-xs transition"
             >
-              <Heart key={String(saved)} className={`w-4 h-4 ${saved ? 'fill-danger text-danger heart-pop' : 'text-ink-soft'}`} />
+              <Heart
+                key={String(saved)}
+                className={`w-3.5 h-3.5 transition-colors ${
+                  saved ? 'fill-danger text-danger heart-pop' : 'text-ink-soft'
+                }`}
+              />
             </button>
           </div>
         </div>
-        <div className="absolute inset-x-3 bottom-3 flex items-end justify-between gap-2">
-          {/* The one place the accent colour shows up in a list: a seller discount. */}
-          {deal ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-accent text-white px-3 py-1 text-xs font-bold shadow">
-              <Flame className="w-3.5 h-3.5" />
-              {tx(`خصم ${money(sellerDiscount(unit), language)}`, `${money(sellerDiscount(unit), language)} off`)}
-            </span>
-          ) : (
-            <span />
-          )}
+
+        {/* Bottom image pills */}
+        <div className="absolute inset-x-2.5 bottom-2.5 flex items-end justify-between gap-2 pointer-events-none">
+          <span className="inline-flex items-center gap-1 rounded-md bg-ink/75 backdrop-blur-xs text-white px-2 py-0.5 text-[11px] font-medium" dir="ltr">
+            {unit.verificationCode}
+          </span>
+
           {tag && (
-            <span className={`rounded-full px-3 py-1 text-xs font-bold ${tag.strong ? 'bg-brand text-white' : 'bg-surface/95 text-ink'}`}>{tag.label}</span>
+            <span className={`rounded-md px-2 py-0.5 text-[11px] font-bold shadow-xs ${
+              tag.strong ? 'bg-brand text-white' : 'bg-surface/95 text-ink'
+            }`}>
+              {tag.label}
+            </span>
           )}
         </div>
       </div>
 
-      <div className="p-5 flex-1 flex flex-col">
-        {/* Who and where */}
-        <h3 className="font-bold text-lg leading-snug text-ink line-clamp-2">{pick(language, unit.compound, unit.compoundEn)}</h3>
-        {/* Wraps instead of truncating — on a narrow phone card the code drops to its own line. */}
-        <p className="mt-1 flex flex-wrap items-center gap-x-1 gap-y-0.5 text-sm text-muted">
-          <MapPin className="w-3.5 h-3.5 shrink-0" />
-          <span>{pick(language, unit.location, unit.locationEn)}</span>
-          <span className="num ms-auto text-xs" dir="ltr">
-            {unit.verificationCode}
-          </span>
-        </p>
-        <p className="mt-2 text-sm font-medium text-ink-soft">{specs.join(' · ')}</p>
+      {/* Card Content - Compact & High-Impact */}
+      <div className="p-4 flex-1 flex flex-col justify-between">
+        <div>
+          {/* Title & Compound */}
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="font-bold text-base text-ink line-clamp-1 group-hover:text-brand transition-colors">
+              {pick(language, unit.compound, unit.compoundEn)}
+            </h3>
+          </div>
 
-        {/* The headline number is the monthly — "within your budget" is the whole idea. Cash comes second. */}
-        <div className="mt-4">
-          <p className="text-sm text-muted">{tx('قسطك الشهري تقريباً', 'Your monthly, roughly')}</p>
-          <p className="num font-display mt-0.5 text-3xl font-bold text-ink whitespace-nowrap">
-            {full(monthlyInstallment(unit))} <span className="text-sm font-semibold text-muted">{tx(`${cur} / شهر`, `${cur} / mo`)}</span>
+          {/* Location & Developer */}
+          <p className="mt-1 flex items-center gap-1.5 text-xs text-muted truncate">
+            <MapPin className="w-3.5 h-3.5 shrink-0 text-brand/80" />
+            <span className="truncate">{pick(language, unit.location, unit.locationEn)}</span>
+            <span>·</span>
+            <span className="truncate">{pick(language, unit.developer, unit.developerEn)}</span>
           </p>
-        </div>
 
-        <div className="mt-3 rounded-xl border border-line px-4 py-3">
-          <div className="flex items-baseline justify-between gap-3">
-            <span className="text-sm text-muted">{tx('وتدفع كاش دلوقتي', 'Plus cash now')}</span>
-            <span className="num text-lg font-bold text-ink whitespace-nowrap">
-              {full(cashPrice(unit))} <span className="text-xs font-semibold text-muted">{cur}</span>
+          {/* Specs Micro-Strip */}
+          <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-xs text-ink-soft font-medium">
+            <span className="bg-paper px-2 py-0.5 rounded-md border border-line/60">
+              {unit.areaM2} {tx('م²', 'm²')}
+            </span>
+            {unit.bedrooms > 0 && (
+              <span className="bg-paper px-2 py-0.5 rounded-md border border-line/60">
+                {unit.bedrooms} {tx('غرف', 'beds')}
+              </span>
+            )}
+            {unit.bathrooms > 0 && (
+              <span className="bg-paper px-2 py-0.5 rounded-md border border-line/60">
+                {unit.bathrooms} {tx('حمام', 'baths')}
+              </span>
+            )}
+            <span className="bg-paper px-2 py-0.5 rounded-md border border-line/60 text-muted">
+              {deliveryLabel(unit, language)}
             </span>
           </div>
-          {deal && (
-            <p className="num text-end text-sm text-muted whitespace-nowrap">
-              {tx('كان', 'was')} <span className="line-through">{full(unit.paidCashAmount)}</span>
-            </p>
-          )}
-          {isNegotiable(unit) && (
-            <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-brand px-3 py-1 text-sm font-bold text-white whitespace-nowrap">
-              <ArrowDown className="w-4 h-4" strokeWidth={2.5} />
-              {tx('الكاش قابل للتفاوض', 'Cash negotiable')}
-            </p>
-          )}
         </div>
 
-        {/* What they gain */}
-        <div className="mt-3 rounded-xl bg-paper border border-line px-4 py-3">
-          <p className="text-xs text-muted">{tx('توفيرك عن سعر المطور النهارده', "Saving vs the developer's price today")}</p>
-          <p className="num mt-0.5 text-lg font-bold text-ink whitespace-nowrap">
-            + {full(savingsAmount(unit))} <span className="text-sm font-semibold text-muted">{cur}</span>
-            <span className="ms-2 text-sm font-semibold text-muted">{savingsPercent(unit)}%</span>
-          </p>
-          <p className="num mt-1 text-[11px] text-muted">
-            {tx(
-              `سعر المطور النهارده ${full(unit.currentMarketPrice)} · بعد عمولتنا ${BRAND.buyerFeePercent}%`,
-              `Developer's price today ${full(unit.currentMarketPrice)} · after our ${BRAND.buyerFeePercent}% fee`,
-            )}
-          </p>
-        </div>
+        {/* Pricing & Financials Block */}
+        <div className="mt-3.5 pt-3 border-t border-line/70">
+          <div className="grid grid-cols-2 gap-2 bg-paper/70 p-2.5 rounded-xl border border-line/70">
+            {/* Cash Now */}
+            <div>
+              <span className="text-[11px] font-medium text-muted block leading-none">
+                {tx('كاش دلوقتي', 'Cash now')}
+              </span>
+              <div className="mt-1">
+                {deal && (
+                  <span className="text-[10px] text-danger font-bold line-through block leading-tight">
+                    {tx('كان', 'was')} {full(unit.paidCashAmount)}
+                  </span>
+                )}
+                <span className="num font-black text-base sm:text-lg text-brand block leading-tight">
+                  {full(cash)}
+                </span>
+                <span className="text-[10px] text-muted font-medium">{cur}</span>
+              </div>
+            </div>
 
-        {/* What they take on */}
-        <dl className="mt-auto pt-4 space-y-2 text-sm">
-          <div className="flex items-baseline justify-between gap-3 border-t border-line pt-3">
-            <dt className="text-muted">{tx('باقي للمطور', 'Left to developer')}</dt>
-            <dd className="num font-semibold text-ink whitespace-nowrap">
-              {full(unit.remainingAmount)} <span className="text-xs text-muted">{cur}</span>
-            </dd>
+            {/* Monthly Installment */}
+            <div className="text-end border-s border-line/70 ps-2 flex flex-col justify-end">
+              <span className="text-[11px] font-medium text-muted block leading-none">
+                {tx('قسط شهري تقريباً', 'Monthly')}
+              </span>
+              <div className="mt-1">
+                <span className="num font-black text-base sm:text-lg text-ink block leading-tight">
+                  {full(monthly)}
+                </span>
+                <span className="text-[10px] text-muted font-medium">{tx(`${cur} / شهر`, `${cur}/mo`)}</span>
+              </div>
+            </div>
           </div>
-        </dl>
+
+          {/* Prominent High-Visibility Callout Banners */}
+          <div className="mt-2 space-y-1.5">
+            {/* 1. Explicit Seller Discount Callout */}
+            {deal && (
+              <div className="flex items-center gap-1.5 rounded-lg bg-rose-500/10 border border-rose-500/25 text-rose-700 dark:text-rose-400 px-2.5 py-1 text-xs font-black">
+                <Flame className="w-3.5 h-3.5 shrink-0 fill-current" />
+                <span>
+                  {tx(
+                    `خصم ${full(discountVal)} ج.م أقل من اللي دفعه المالك!`,
+                    `${full(discountVal)} EGP discount below what owner paid!`
+                  )}
+                </span>
+              </div>
+            )}
+
+            {/* 2. Explicit Negotiable Callout */}
+            {negotiable && (
+              <div className="flex items-center justify-between rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-800 dark:text-emerald-300 px-2.5 py-1 text-xs font-black">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                  <span>{tx('الكاش قابل للتفاوض مع المالك', 'Cash is negotiable')}</span>
+                </span>
+                <span className="text-[10px] bg-emerald-500/20 text-emerald-800 dark:text-emerald-200 px-1.5 py-0.5 rounded font-extrabold">
+                  {tx('يرحب بالعروض', 'Open to offers')}
+                </span>
+              </div>
+            )}
+
+            {/* 3. Overall Savings Row */}
+            <div className="flex items-center justify-between text-[11px] pt-1">
+              <span className="text-muted font-medium">
+                {tx('توفيرك عن المطور:', 'Savings vs dev:')}
+              </span>
+              <span className="font-extrabold text-emerald-700 bg-emerald-500/10 px-2 py-0.5 rounded">
+                +{full(savings)} {cur} ({savingsPct}%)
+              </span>
+            </div>
+          </div>
+        </div>
+
         {footer}
       </div>
     </article>

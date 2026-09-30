@@ -904,42 +904,60 @@ const ThreeWays: React.FC<{ onSell: () => void }> = ({ onSell }) => {
   return (
     <section className="bg-surface border-y border-line">
       <div className="page-wrap py-14 sm:py-20">
-        <SectionTitle center kicker={tx('قبل ما تقرر', 'Before you decide')} title={tx('قدامك 3 طرق. قارن بنفسك.', 'You have three ways out. Compare.')} />
+        <SectionTitle
+          center
+          kicker={tx('قبل ما تقرر', 'Before you decide')}
+          title={tx('قارن بنفسك.. وخد قرارك', 'Compare for yourself.. and make your decision')}
+        />
 
-        <div className="mt-10 grid gap-4 md:grid-cols-3 md:gap-5 items-start">
+        <div className="mt-12 grid gap-6 md:grid-cols-[1fr_1.18fr_1fr] items-center">
           {ways.map((w) => (
             <div
               key={w.title}
-              className={`rounded-card border p-5 sm:p-6 ${
+              className={`rounded-3xl border transition-all ${
                 w.ours
-                  ? 'order-first md:order-none border-brand bg-brand-soft shadow-lift md:-translate-y-3'
-                  : 'border-line bg-paper shadow-soft'
+                  ? 'order-first md:order-none border-2 border-brand bg-gradient-to-b from-brand-soft via-brand-soft/90 to-surface shadow-2xl p-6 sm:p-8 md:scale-[1.06] z-10 relative ring-4 ring-brand/10'
+                  : 'border-line bg-paper/90 shadow-soft p-5 sm:p-6'
               }`}
             >
-              <div className="flex items-center justify-between gap-2">
-                <h3 className={`font-display text-lg sm:text-xl font-bold ${w.ours ? 'text-brand' : 'text-ink'}`}>
+              {w.ours && (
+                <div className="absolute -top-3.5 inset-x-0 flex justify-center">
+                  <span className="rounded-full bg-brand px-4 py-1 text-xs sm:text-sm font-extrabold text-white shadow-md flex items-center gap-1.5 uppercase tracking-wide">
+                    ★ {tx('الأفضل ليك والأكثر أماناً', 'Best & Safest For You')}
+                  </span>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between gap-2 mt-1">
+                <h3 className={`font-display font-extrabold ${w.ours ? 'text-xl sm:text-2xl text-brand' : 'text-lg sm:text-xl text-ink'}`}>
                   {w.title}
                 </h3>
                 {w.ours && (
-                  <span className="rounded-full bg-brand px-2.5 py-1 text-xs font-bold text-white whitespace-nowrap">
-                    {tx('الأفضل ليك', 'Best for you')}
+                  <span className="hidden sm:inline-block rounded-full bg-brand/10 text-brand text-xs font-bold px-2.5 py-0.5">
+                    {tx('بدون عمولة', 'Zero Fee')}
                   </span>
                 )}
               </div>
 
-              <ul className="mt-5 space-y-3.5">
+              <ul className={`mt-6 ${w.ours ? 'space-y-4' : 'space-y-3.5'}`}>
                 {w.points.map((pt) => (
-                  <li key={pt.k} className="flex items-start gap-2.5">
+                  <li key={pt.k} className="flex items-start gap-3">
                     {w.ours ? (
-                      <Check className="w-4 h-4 text-brand shrink-0 mt-1.5" strokeWidth={3} />
+                      <div className="w-6 h-6 rounded-full bg-brand text-white flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+                        <Check className="w-3.5 h-3.5" strokeWidth={3.5} />
+                      </div>
                     ) : pt.bad ? (
-                      <X className="w-4 h-4 text-danger/70 shrink-0 mt-1.5" />
+                      <div className="w-5 h-5 rounded-full bg-danger/10 text-danger flex items-center justify-center shrink-0 mt-1">
+                        <X className="w-3.5 h-3.5" strokeWidth={2.5} />
+                      </div>
                     ) : (
-                      <span className="w-4 shrink-0" />
+                      <span className="w-5 shrink-0" />
                     )}
                     <span className="min-w-0">
-                      <span className="block text-xs text-muted">{pt.k}</span>
-                      <span className={`block text-[15px] ${w.ours ? 'font-semibold text-ink' : 'text-ink-soft'}`}>
+                      <span className={`block ${w.ours ? 'text-xs sm:text-sm font-bold text-brand-ink' : 'text-xs text-muted'}`}>
+                        {pt.k}
+                      </span>
+                      <span className={`block ${w.ours ? 'text-[15px] sm:text-base font-bold text-ink leading-snug mt-0.5' : 'text-[14px] sm:text-[15px] text-ink-soft'}`}>
                         {pt.v}
                       </span>
                     </span>
@@ -950,12 +968,17 @@ const ThreeWays: React.FC<{ onSell: () => void }> = ({ onSell }) => {
           ))}
         </div>
 
-        <div className="mt-8 text-center">
-          <button onClick={onSell} className="btn-primary">
+        <div className="mt-12 text-center flex flex-col items-center">
+          <button onClick={onSell} className="btn-primary min-h-13 px-8 text-base font-bold shadow-lg hover:shadow-xl transition">
             <Tag className="w-5 h-5" />
-            {tx('اعرض وحدتك', 'List your unit')}
+            <span>{tx('اعرض وحدتك الآن', 'List your unit now')}</span>
           </button>
-          <p className="mt-3 text-xs text-muted">{tx('نسب الإلغاء والعمولات بتختلف من مطور ومن سمسار للتاني.', 'Cancellation rates and fees vary by developer and broker.')}</p>
+
+          <div className="mt-6 inline-flex items-center justify-center gap-2 rounded-2xl bg-paper/90 border border-line px-5 py-3 shadow-xs max-w-2xl">
+            <span className="text-sm sm:text-base font-bold text-ink leading-relaxed">
+              ⚠️ {tx('نسب الإلغاء والعمولات بتختلف من مطور ومن سمسار للتاني.', 'Cancellation rates and commissions vary from one developer and broker to another.')}
+            </span>
+          </div>
         </div>
       </div>
     </section>
