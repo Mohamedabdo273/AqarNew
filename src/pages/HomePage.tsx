@@ -310,49 +310,85 @@ export const HomePage: React.FC<HomePageProps> = ({
 
       {/* ───────── 1b'. For the owner who's behind: the promises and the two ways to start ───────── */}
       <section className={`${WIDE} pt-5`}>
-        <div className="rounded-card border border-line bg-surface shadow-soft p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-6">
-          <ul className="flex-1 grid sm:grid-cols-3 gap-2 sm:gap-3">
+        <div className="rounded-3xl border border-line bg-surface shadow-sm p-4 sm:p-6">
+          {/* Top Row: 3 Trust Guarantees with ample horizontal room */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {[
-              { icon: Receipt, t: tx('عليك متأخرات؟', 'Behind?'), d: tx('بتتخصم يوم التنازل', 'Deducted on transfer day') },
-              { icon: EyeOff, t: tx('في سرية', 'Private'), d: tx('اسمك ورقمك مش بيتنشروا', 'Name and number never shown') },
-              { icon: Wallet, t: tx('صفر عمولة', 'Zero fee'), d: tx('وكاش بشيك مصرفي', 'Paid by bank cheque') },
+              {
+                icon: Receipt,
+                t: tx('عليك متأخرات؟', 'Behind on dues?'),
+                d: tx('بتتخصم تلقائياً يوم التنازل', 'Deducted directly on transfer day'),
+                color: 'text-amber-600 bg-amber-500/10',
+              },
+              {
+                icon: EyeOff,
+                t: tx('سرية تامة 100%', '100% Confidential'),
+                d: tx('اسمك ورقمك وبياناتك مش بيتنشروا', 'Name and number never published'),
+                color: 'text-brand bg-brand/10',
+              },
+              {
+                icon: Wallet,
+                t: tx('صفر عمولة على البايع', 'Zero fee for sellers'),
+                d: tx('استلم كاش بشيك مصرفي معتمد', 'Receive cash via bank cheque'),
+                color: 'text-emerald-600 bg-emerald-500/10',
+              },
             ].map((x) => (
-              <li
+              <div
                 key={x.t}
-                className="flex items-center gap-3 rounded-card border border-line/70 bg-sand-soft/55 backdrop-blur-md px-3 py-3 shadow-soft"
+                className="flex items-center gap-3.5 rounded-2xl border border-line bg-paper/60 p-3.5 sm:p-4 transition-all hover:bg-paper shadow-xs"
               >
-                <span className="grid place-items-center w-12 h-12 rounded-full bg-accent-soft/80 backdrop-blur-sm text-accent shrink-0">
-                  <x.icon className="w-6 h-6" />
-                </span>
-                <span>
-                  <span className="block text-base sm:text-lg font-bold text-ink">{x.t}</span>
-                  <span className="block text-sm text-ink">{x.d}</span>
-                </span>
-              </li>
+                <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${x.color}`}>
+                  <x.icon className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <span className="block text-sm sm:text-base font-extrabold text-ink leading-snug">
+                    {x.t}
+                  </span>
+                  <span className="block text-xs sm:text-sm text-ink-soft leading-snug mt-0.5">
+                    {x.d}
+                  </span>
+                </div>
+              </div>
             ))}
-          </ul>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 lg:border-s lg:border-line lg:ps-6">
-            <div className="flex gap-2">
-              <button onClick={() => onNavigate('sell')} className="btn-primary flex-1 sm:flex-none px-5">
-                <Tag className="w-5 h-5" />
-                {tx('اعرض وحدتك', 'List your unit')}
+          </div>
+
+          {/* Bottom Row / Action Bar: Buttons + Hotline Notice */}
+          <div className="mt-4 pt-4 border-t border-line/70 flex flex-col md:flex-row md:items-center justify-between gap-3.5">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <button
+                type="button"
+                onClick={() => onNavigate('sell')}
+                className="btn-primary min-h-11 px-5 text-sm font-bold shadow-xs"
+              >
+                <Tag className="w-4 h-4" />
+                <span>{tx('اعرض وحدتك', 'List your unit')}</span>
               </button>
-              <button onClick={() => onNavigate('statement')} className="btn-ghost flex-1 sm:flex-none px-5">
-                <ClipboardCheck className="w-5 h-5 text-brand" />
-                {tx('كشف حساب مجاني', 'Free statement')}
+              <button
+                type="button"
+                onClick={() => onNavigate('statement')}
+                className="btn-ghost min-h-11 px-4 text-sm font-bold border border-line hover:border-brand"
+              >
+                <ClipboardCheck className="w-4 h-4 text-brand" />
+                <span>{tx('كشف حساب مجاني', 'Free statement')}</span>
               </button>
             </div>
-            <p className="text-xs sm:text-sm text-muted lg:max-w-[11rem] leading-snug">
-              {tx('جالك إنذار من المطور؟ ', 'Got a warning letter? ')}
+
+            {/* Hotline Emergency Alert Pill */}
+            <div className="inline-flex items-center gap-2 rounded-2xl bg-brand-soft/60 border border-brand/20 px-3.5 py-2 text-xs sm:text-sm self-start md:self-auto">
+              <span className="text-ink font-medium">
+                {tx('جالك إنذار من المطور؟', 'Got a warning from developer?')}
+              </span>
               <a
                 href={`tel:${BRAND.hotline}`}
-                className="inline-flex items-center gap-1.5 rounded-lg px-1.5 py-0.5 text-lg font-bold text-brand underline underline-offset-4 decoration-2 transition-colors hover:bg-brand-soft hover:text-brand-ink"
+                className="inline-flex items-center gap-1.5 font-extrabold text-brand hover:underline"
               >
-                <Headset className="w-5 h-5 shrink-0" />
-                {tx(`كلّمنا ${BRAND.hotline}`, `Call ${BRAND.hotline}`)}
+                <Headset className="w-4 h-4 shrink-0 text-brand" />
+                <span>{tx(`كلّمنا ${BRAND.hotline}`, `Call ${BRAND.hotline}`)}</span>
               </a>
-              {tx(' قبل الألغاء.', ' before they cancel.')}
-            </p>
+              <span className="text-muted text-[11px] sm:text-xs">
+                {tx('قبل الإلغاء', 'before cancellation')}
+              </span>
+            </div>
           </div>
         </div>
       </section>
