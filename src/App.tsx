@@ -23,7 +23,6 @@ import { StatementPage } from './pages/StatementPage';
 import { ComparePage } from './pages/ComparePage';
 import { MarketComparisonsPage } from './pages/MarketComparisonsPage';
 import { VerifyPage } from './pages/VerifyPage';
-import { LogoPickerModal } from './components/LogoPickerModal';
 import { useCompare } from './context/CompareContext';
 import { Scale } from 'lucide-react';
 import { BRAND, whatsappLink } from './config/brand';
@@ -285,9 +284,6 @@ export default function App() {
       >
         <ArrowUp className="w-5 h-5" />
       </button>
-
-      {/* Interactive Logo Switcher Modal */}
-      <LogoPickerModal />
     </div>
   );
 }

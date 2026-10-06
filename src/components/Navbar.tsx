@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Home, Search, Tag, Repeat, Globe, Menu, X, Info, ShieldCheck, MessageCircle, Heart, ClipboardList, Phone, Bell, MoreHorizontal, UserRound, Scale, Sparkles, Palette } from 'lucide-react';
+import { Home, Search, Tag, Repeat, Globe, Menu, X, Info, ShieldCheck, MessageCircle, Heart, ClipboardList, Phone, Bell, MoreHorizontal, UserRound, Scale, Sparkles } from 'lucide-react';
 import { PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useUnits } from '../context/UnitsContext';
 import { useRequests } from '../context/RequestsContext';
 import { useCompare } from '../context/CompareContext';
-import { useLogo } from '../context/LogoContext';
 import { Logo } from './Logo';
 import { whatsappLink } from '../config/brand';
 
@@ -26,7 +25,6 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
   const { savedUnitIds } = useUnits();
   const { requests } = useRequests();
   const { compareIds } = useCompare();
-  const { setIsPickerOpen } = useLogo();
   const [menuOpen, setMenuOpen] = useState(false);
   const [openPanel, setOpenPanel] = useState<null | 'bell' | 'more'>(null);
   const panelsRef = useRef<HTMLDivElement>(null);
@@ -105,18 +103,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
     <>
       <header className="sticky top-0 z-40 bg-paper/85 backdrop-blur-md border-b border-line">
         <div className="page-wrap h-16 sm:h-20 flex items-center justify-between gap-3 sm:gap-5">
-          <div className="flex items-center gap-2 sm:gap-2.5">
-            <Logo onClick={() => go('home')} />
-            <button
-              type="button"
-              onClick={() => setIsPickerOpen(true)}
-              title={tx('اختر شكل اللوجو (Logo Showcase)', 'Choose Logo Design')}
-              className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-ink-soft hover:text-brand bg-surface/90 hover:bg-brand-soft border border-line px-2.5 py-1 rounded-xl transition shadow-xs"
-            >
-              <Palette className="w-3.5 h-3.5 text-brand" />
-              <span>{tx('أشكال الشعار', 'Logos')}</span>
-            </button>
-          </div>
+          <Logo onClick={() => go('home')} />
 
           <nav className="hidden lg:flex items-center gap-1">
             {desktop.map((l) => (
@@ -252,17 +239,6 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
                 >
                   <Globe className="w-3.5 h-3.5 text-brand" />
                   <span>{language === 'ar' ? 'English' : 'عربي'}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    setIsPickerOpen(true);
-                  }}
-                  className="inline-flex items-center gap-1 text-xs font-bold text-brand bg-brand-soft border border-brand/20 px-2.5 py-1.5 rounded-xl shadow-xs"
-                >
-                  <Palette className="w-3.5 h-3.5" />
-                  <span>{tx('الشعار', 'Logos')}</span>
                 </button>
                 <button onClick={() => setMenuOpen(false)} aria-label={tx('إغلاق', 'Close')} className="grid place-items-center w-10 h-10 rounded-full bg-paper hover:bg-line">
                   <X className="w-5 h-5" />

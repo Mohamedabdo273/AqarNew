@@ -275,9 +275,8 @@ export const HomePage: React.FC<HomePageProps> = ({
 
         {/* Short band like a search site: title and one line at the bottom, the search card overlapping it. */}
         <div className={`relative ${WIDE} min-h-[23rem] sm:min-h-[25rem] lg:min-h-[27rem] flex flex-col justify-end pt-10 pb-24 sm:pb-36`}>
-          {/* لوح غامق ورا الكلام: بيضمن إن النص يفضل مقروء مهما كانت صورة الخلفية —
-              أأمن من الاعتماد على لون النص، لأن الصورة فيها مناطق فاتحة وغامقة مع بعض. */}
-          <div className="w-full max-w-4xl rounded-3xl bg-brand-ink/50 backdrop-blur-[3px] p-6 sm:p-8 -ms-1">
+          {/* لوح غامق ورا الكلام: بيضمن إن النص يفضل مقروء مهما كانت صورة الخلفية */}
+          <div className="w-full rounded-3xl bg-brand-ink/55 backdrop-blur-[6px] border border-white/10 p-6 sm:p-8 lg:p-10 shadow-2xl">
             <p className="hero-in inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 backdrop-blur px-3 py-1 text-xs sm:text-sm font-medium text-white">
               <ShieldCheck className="w-4 h-4 text-accent-light" />
               {tx('تنازل رسمي في مقر المطور · من غير عمولة عليك', 'Official transfer at the developer · no fee for you')}
@@ -295,8 +294,8 @@ export const HomePage: React.FC<HomePageProps> = ({
                 </span>
               </span>
             </h1>
-            {/* The 3 key promises transformed into sleek micro-cards */}
-            <div style={{ animationDelay: '160ms' }} className="hero-in mt-6 grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 max-w-4xl">
+            {/* The 3 key promises transformed into sleek micro-cards spanning full width */}
+            <div style={{ animationDelay: '160ms' }} className="hero-in mt-6 sm:mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 w-full">
               <div className="flex items-center gap-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-md p-3 sm:p-3.5 transition shadow-sm">
                 <div className="w-10 h-10 rounded-xl bg-accent-light/20 border border-accent-light/30 flex items-center justify-center shrink-0 text-accent-light">
                   <ShieldCheck className="w-5 h-5" />

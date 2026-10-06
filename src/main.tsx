@@ -6,7 +6,6 @@ import { AuthProvider } from './context/AuthContext';
 import { UnitsProvider } from './context/UnitsContext';
 import { RequestsProvider } from './context/RequestsContext';
 import { CompareProvider } from './context/CompareContext';
-import { LogoProvider } from './context/LogoContext';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(
@@ -16,9 +15,7 @@ createRoot(document.getElementById('root')!).render(
         <UnitsProvider>
           <RequestsProvider>
             <CompareProvider>
-              <LogoProvider>
-                <App />
-              </LogoProvider>
+              <App />
             </CompareProvider>
           </RequestsProvider>
         </UnitsProvider>
