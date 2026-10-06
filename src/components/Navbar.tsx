@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Home, Search, Tag, Repeat, Globe, Menu, X, Info, ShieldCheck, MessageCircle, Heart, ClipboardList, Phone, Bell, MoreHorizontal, UserRound, Scale, Sparkles } from 'lucide-react';
+import { Home, Search, Tag, Repeat, Globe, Menu, X, Info, ShieldCheck, MessageCircle, Heart, ClipboardList, Phone, Bell, MoreHorizontal, UserRound, Scale, Sparkles, Palette } from 'lucide-react';
 import { PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useUnits } from '../context/UnitsContext';
 import { useRequests } from '../context/RequestsContext';
 import { useCompare } from '../context/CompareContext';
+import { useLogo } from '../context/LogoContext';
 import { Logo } from './Logo';
 import { whatsappLink } from '../config/brand';
 
@@ -25,6 +26,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
   const { savedUnitIds } = useUnits();
   const { requests } = useRequests();
   const { compareIds } = useCompare();
+  const { setIsPickerOpen } = useLogo();
   const [menuOpen, setMenuOpen] = useState(false);
   const [openPanel, setOpenPanel] = useState<null | 'bell' | 'more'>(null);
   const panelsRef = useRef<HTMLDivElement>(null);
@@ -102,8 +104,19 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
   return (
     <>
       <header className="sticky top-0 z-40 bg-paper/85 backdrop-blur-md border-b border-line">
-        <div className="page-wrap h-20 flex items-center justify-between gap-5">
-          <Logo onClick={() => go('home')} />
+        <div className="page-wrap h-16 sm:h-20 flex items-center justify-between gap-3 sm:gap-5">
+          <div className="flex items-center gap-2 sm:gap-2.5">
+            <Logo onClick={() => go('home')} />
+            <button
+              type="button"
+              onClick={() => setIsPickerOpen(true)}
+              title={tx('اختر شكل اللوجو (Logo Showcase)', 'Choose Logo Design')}
+              className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-ink-soft hover:text-brand bg-surface/90 hover:bg-brand-soft border border-line px-2.5 py-1 rounded-xl transition shadow-xs"
+            >
+              <Palette className="w-3.5 h-3.5 text-brand" />
+              <span>{tx('أشكال الشعار', 'Logos')}</span>
+            </button>
+          </div>
 
           <nav className="hidden lg:flex items-center gap-1">
             {desktop.map((l) => (
@@ -120,17 +133,19 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
           </nav>
 
           <div ref={panelsRef} className="flex items-center gap-1">
-            <button onClick={() => go('saved')} aria-label={tx('المفضلة', 'Saved')} className={iconBtn('saved')}>
+            {/* Saved: hidden on mobile (<sm) because it is in the thumb bottom bar */}
+            <button onClick={() => go('saved')} aria-label={tx('المفضلة', 'Saved')} className={`hidden sm:grid ${iconBtn('saved')}`}>
               <Heart className="w-5 h-5" />
               <Badge n={savedUnitIds.length} />
             </button>
 
+            {/* Notifications */}
             <div className="relative">
               <button
                 onClick={() => setOpenPanel((v) => (v === 'bell' ? null : 'bell'))}
                 aria-label={tx('الإشعارات', 'Notifications')}
                 aria-expanded={openPanel === 'bell'}
-                className={`relative grid place-items-center w-11 h-11 rounded-full transition-colors ${
+                className={`relative grid place-items-center w-10 h-10 sm:w-11 sm:h-11 rounded-full transition-colors ${
                   openPanel === 'bell' ? 'bg-brand-soft text-brand' : 'text-ink-soft hover:bg-surface'
                 }`}
               >
@@ -166,7 +181,8 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
               )}
             </div>
 
-            <div className="relative">
+            {/* More dropdown: only on desktop (lg:), mobile uses the Menu sheet */}
+            <div className="hidden lg:block relative">
               <button
                 onClick={() => setOpenPanel((v) => (v === 'more' ? null : 'more'))}
                 aria-label={tx('المزيد', 'More')}
@@ -202,11 +218,19 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
                 </div>
               )}
             </div>
-            <button onClick={toggleLanguage} className="h-11 px-3 rounded-full text-sm font-medium text-ink-soft hover:bg-surface flex items-center gap-1.5">
+
+            {/* Language toggle: hidden on mobile (<sm), accessible in mobile drawer */}
+            <button onClick={toggleLanguage} className="hidden sm:flex h-11 px-3 rounded-full text-sm font-medium text-ink-soft hover:bg-surface items-center gap-1.5">
               <Globe className="w-4 h-4" />
               {language === 'ar' ? 'EN' : 'عربي'}
             </button>
-            <button onClick={() => setMenuOpen(true)} aria-label={tx('القائمة', 'Menu')} className="lg:hidden grid place-items-center w-11 h-11 rounded-full hover:bg-surface">
+
+            {/* Mobile Hamburger Menu button */}
+            <button
+              onClick={() => setMenuOpen(true)}
+              aria-label={tx('القائمة', 'Menu')}
+              className="lg:hidden grid place-items-center w-10 h-10 rounded-xl hover:bg-surface border border-line/60 text-ink transition"
+            >
               <Menu className="w-5 h-5" />
             </button>
           </div>
@@ -220,9 +244,30 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
           <div className="absolute top-0 inset-x-0 max-h-[90vh] overflow-y-auto bg-surface rounded-b-card p-5 shadow-lift">
             <div className="flex items-center justify-between">
               <Logo onClick={() => go('home')} />
-              <button onClick={() => setMenuOpen(false)} aria-label={tx('إغلاق', 'Close')} className="grid place-items-center w-11 h-11 rounded-full bg-paper">
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={toggleLanguage}
+                  className="inline-flex items-center gap-1 text-xs font-bold text-ink-soft bg-paper hover:bg-surface border border-line px-2.5 py-1.5 rounded-xl shadow-xs"
+                >
+                  <Globe className="w-3.5 h-3.5 text-brand" />
+                  <span>{language === 'ar' ? 'English' : 'عربي'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setIsPickerOpen(true);
+                  }}
+                  className="inline-flex items-center gap-1 text-xs font-bold text-brand bg-brand-soft border border-brand/20 px-2.5 py-1.5 rounded-xl shadow-xs"
+                >
+                  <Palette className="w-3.5 h-3.5" />
+                  <span>{tx('الشعار', 'Logos')}</span>
+                </button>
+                <button onClick={() => setMenuOpen(false)} aria-label={tx('إغلاق', 'Close')} className="grid place-items-center w-10 h-10 rounded-full bg-paper hover:bg-line">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
             <nav className="mt-5 grid gap-1">
               {menuLinks.map((l) => (

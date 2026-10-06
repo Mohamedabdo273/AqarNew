@@ -295,12 +295,50 @@ export const HomePage: React.FC<HomePageProps> = ({
                 </span>
               </span>
             </h1>
-            <p style={{ animationDelay: '160ms' }} className="hero-in mt-5 text-xl sm:text-2xl lg:text-[1.75rem] font-semibold text-white max-w-5xl leading-relaxed [text-shadow:0_2px_12px_rgb(0_0_0/0.6)]">
-              {tx(
-                'ما تلغيش وتخسر. بنبيع وحدتك بسعر اللي دفعته، حتى لو عليك متأخرات — بتتخصم يوم التنازل، ومحدش هيعرف إنك بتبيع.',
-                "Don't cancel and lose. We sell your unit for what you paid, even with arrears — deducted on transfer day — and nobody knows you're selling.",
-              )}
-            </p>
+            {/* The 3 key promises transformed into sleek micro-cards */}
+            <div style={{ animationDelay: '160ms' }} className="hero-in mt-6 grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 max-w-4xl">
+              <div className="flex items-center gap-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-md p-3 sm:p-3.5 transition shadow-sm">
+                <div className="w-10 h-10 rounded-xl bg-accent-light/20 border border-accent-light/30 flex items-center justify-center shrink-0 text-accent-light">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="block text-sm sm:text-base font-extrabold text-white leading-tight">
+                    {tx('ما تلغيش وتخسر', "Don't cancel & lose")}
+                  </span>
+                  <span className="block text-xs sm:text-[13px] text-white/85 font-medium leading-snug mt-0.5">
+                    {tx('بنبيع وحدتك بسعر اللي دفعته', 'Sold for what you paid')}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-md p-3 sm:p-3.5 transition shadow-sm">
+                <div className="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-400/30 flex items-center justify-center shrink-0 text-amber-300">
+                  <Receipt className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="block text-sm sm:text-base font-extrabold text-white leading-tight">
+                    {tx('عليك متأخرات؟', 'Have arrears?')}
+                  </span>
+                  <span className="block text-xs sm:text-[13px] text-white/85 font-medium leading-snug mt-0.5">
+                    {tx('بتتخصم عادي يوم التنازل', 'Deducted on transfer day')}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-md p-3 sm:p-3.5 transition shadow-sm">
+                <div className="w-10 h-10 rounded-xl bg-emerald-400/20 border border-emerald-400/30 flex items-center justify-center shrink-0 text-emerald-300">
+                  <EyeOff className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="block text-sm sm:text-base font-extrabold text-white leading-tight">
+                    {tx('سرية وأمان', '100% Confidential')}
+                  </span>
+                  <span className="block text-xs sm:text-[13px] text-white/85 font-medium leading-snug mt-0.5">
+                    {tx('محدش هيعرف إنك بتبيع', 'No one knows you sell')}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

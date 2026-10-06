@@ -1,7 +1,8 @@
 import React from 'react';
-import { Phone, MessageCircle } from 'lucide-react';
+import { Phone, MessageCircle, Palette } from 'lucide-react';
 import { PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
+import { useLogo } from '../context/LogoContext';
 import { Logo } from './Logo';
 import { BRAND, whatsappLink } from '../config/brand';
 
@@ -11,6 +12,7 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   const { language, tx } = useLanguage();
+  const { setIsPickerOpen } = useLogo();
   const columns: { title: string; links: { id: PageId; l: string }[] }[] = [
     {
       title: tx('المنصة', 'Platform'),
@@ -42,6 +44,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
       <div className="page-wrap py-10 sm:py-12 grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-4">
         <div className="col-span-2 md:col-span-1">
           <Logo light onClick={() => onNavigate('home')} />
+          <button
+            type="button"
+            onClick={() => setIsPickerOpen(true)}
+            className="mt-2 text-xs text-white/70 hover:text-white flex items-center gap-1.5 transition underline underline-offset-4 decoration-white/30"
+          >
+            <Palette className="w-3.5 h-3.5 text-accent" />
+            <span>{tx('تغيير شكل الشعار (5 خيارات)', 'Change Logo Style (5 options)')}</span>
+          </button>
           <p className="mt-3 text-sm leading-relaxed max-w-xs">{language === 'ar' ? BRAND.taglineAr : BRAND.taglineEn}</p>
         </div>
         {columns.map((c) => (
