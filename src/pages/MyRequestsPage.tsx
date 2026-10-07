@@ -19,18 +19,23 @@ import {
   ArrowLeft,
   Loader2,
   LogIn,
-  LogOut,
+  Heart,
+  Scale,
+  ShieldCheck,
+  ExternalLink,
 } from 'lucide-react';
 import { PageId } from '../types';
 import { IlloEmpty } from '../components/Illustrations';
 import { useLanguage } from '../context/LanguageContext';
 import { REQUEST_STAGES, SellRequest, useRequests } from '../context/RequestsContext';
 import { useAuth } from '../context/AuthContext';
+import { useUnits } from '../context/UnitsContext';
+import { useCompare } from '../context/CompareContext';
 import { DETAIL_SECTIONS, DetailSection, completeness, netToSeller, sectionDone } from '../lib/sellForm';
 import { fullMoney, money, currency } from '../lib/unitHelpers';
 import { SellDetailsWizard } from '../components/sell/SellDetailsWizard';
-import { whatsappLink } from '../config/brand';
-import { ApiError, SellRequestTracker, trackSellRequest } from '../services/api';
+import { ADMIN_URL, whatsappLink } from '../config/brand';
+import { ApiError, SellRequestTracker, USER_ROLE, trackSellRequest } from '../services/api';
 
 interface MyRequestsPageProps {
   code: string | null;
@@ -47,7 +52,9 @@ const displayStage = (r: SellRequest) => Math.max(REQUEST_STAGES.indexOf(r.stage
 export const MyRequestsPage: React.FC<MyRequestsPageProps> = ({ code, onOpenRequest, onNavigate }) => {
   const { language, tx, isRTL } = useLanguage();
   const { requests, loading, getRequest } = useRequests();
-  const { user, checking, openSignIn, logout } = useAuth();
+  const { user, checking, openSignIn } = useAuth();
+  const { savedUnitIds } = useUnits();
+  const { compareIds } = useCompare();
   const [lookup, setLookup] = useState('');
   const [notFound, setNotFound] = useState(false);
   const [searching, setSearching] = useState(false);
@@ -72,34 +79,87 @@ export const MyRequestsPage: React.FC<MyRequestsPageProps> = ({ code, onOpenRequ
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
       <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-ink">{tx('حسابي', 'My account')}</h1>
-      <p className="mt-2 text-muted">{tx('تابع حالة مراجعة وعرض وحدتك للبيع خطوة بخطوة برقم الطلب', 'Track your unit review & listing status step by step with request code')}</p>
 
+      {/* Who's signed in — or an invitation to sign in */}
       {!checking &&
         (user ? (
-          <div className="mt-6 card p-4 flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <p className="font-bold text-ink truncate">{user.fullName}</p>
-              <p className="num text-sm text-muted" dir="ltr">
-                {user.phone}
-              </p>
+          <div className="mt-6 card overflow-hidden">
+            <div className="bg-brand px-5 py-5 sm:px-6 flex items-center gap-4">
+              <span className="grid place-items-center w-14 h-14 rounded-full bg-white/15 ring-2 ring-white/30 text-white text-2xl font-bold shrink-0">
+                {user.fullName.trim().charAt(0)}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-xl font-bold text-white truncate">{user.fullName}</p>
+                <p className="num text-sm text-white/75" dir="ltr">
+                  {user.phone}
+                </p>
+              </div>
+              {user.role >= USER_ROLE.ops && ADMIN_URL && (
+                <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold text-white">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  {user.role === USER_ROLE.admin ? tx('أدمن', 'Admin') : tx('من الفريق', 'Team')}
+                </span>
+              )}
             </div>
-            <button onClick={logout} className="btn-ghost min-h-11 px-4 text-sm">
-              <LogOut className="w-4 h-4" />
-              {tx('خروج', 'Sign out')}
-            </button>
+            <div className="px-5 py-3 sm:px-6 flex flex-wrap items-center justify-between gap-3 text-sm">
+              <span className="text-muted">
+                {tx('عضو من', 'Member since')} {formatDate(user.createdAt, language)}
+              </span>
+              {user.role >= USER_ROLE.ops && (
+                <a href={ADMIN_URL} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 font-semibold text-brand hover:underline">
+                  <ShieldCheck className="w-4 h-4" />
+                  {tx('لوحة التحكم', 'Dashboard')}
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              )}
+            </div>
           </div>
         ) : (
-          <div className="mt-6 rounded-xl bg-brand-soft p-4 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-brand-ink">{tx('سجّل دخول برقم موبايلك وتشوف طلباتك ومفضلتك من أي جهاز.', 'Sign in with your mobile to see your requests and saved units on any device.')}</p>
-            <button onClick={openSignIn} className="btn-primary min-h-11 px-4 text-sm">
+          <div className="mt-6 card p-5 flex flex-wrap items-center justify-between gap-4">
+            <div className="max-w-md">
+              <p className="font-bold text-ink">{tx('ادخل برقم موبايلك', 'Sign in with your mobile')}</p>
+              <p className="mt-1 text-sm text-muted">{tx('وتشوف طلباتك ومفضلتك من أي جهاز — من غير باسورد.', 'See your requests and saved units on any device — no password.')}</p>
+            </div>
+            <button onClick={openSignIn} className="btn-primary min-h-11 px-5 text-sm">
               <LogIn className="w-4 h-4" />
               {tx('دخول', 'Sign in')}
             </button>
           </div>
         ))}
 
+      {/* Quick counts — each opens its page */}
+      <div className="mt-4 grid grid-cols-3 gap-3">
+        {[
+          { icon: Tag, n: requests.length, l: tx('طلبات البيع', 'Sell requests'), go: () => onNavigate('sell') },
+          { icon: Heart, n: savedUnitIds.length, l: tx('المفضلة', 'Saved'), go: () => onNavigate('saved') },
+          { icon: Scale, n: compareIds.length, l: tx('في المقارنة', 'Comparing'), go: () => onNavigate('compare') },
+        ].map((t, i) => (
+          <button
+            key={t.l}
+            onClick={i === 0 ? () => document.getElementById('my-requests')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) : t.go}
+            className="card p-4 text-start transition-all hover:shadow-lift hover:border-brand/40"
+          >
+            <t.icon className="w-5 h-5 text-brand" />
+            <p className="num mt-2 text-2xl font-bold text-ink">{t.n}</p>
+            <p className="text-sm text-muted">{t.l}</p>
+          </button>
+        ))}
+      </div>
+
+      {/* Sell requests */}
+      <div id="my-requests" className="mt-10 scroll-mt-24 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-bold text-ink">{tx('طلبات البيع', 'Sell requests')}</h2>
+          <p className="mt-1 text-sm text-muted">{tx('تابع مراجعة وعرض وحدتك خطوة بخطوة', 'Follow your unit review and listing step by step')}</p>
+        </div>
+        <button onClick={() => onNavigate('sell')} className="btn-ghost min-h-11 px-4 text-sm">
+          <Tag className="w-4 h-4" />
+          {tx('اعرض وحدة', 'List a unit')}
+        </button>
+      </div>
+
       <form
-        className="mt-8 flex gap-3"
+        className="mt-4 flex gap-3"
         onSubmit={async (e) => {
           e.preventDefault();
           const wanted = lookup.trim().toUpperCase();

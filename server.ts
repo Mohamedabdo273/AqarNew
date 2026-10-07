@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import http from 'http';
 import https from 'https';
@@ -10,7 +11,7 @@ async function startServer() {
 
   // Everything under /api except the built-in admin mock goes to the real API (AqarApi, .NET).
   // Piped raw — before express.json() — so multipart uploads and bodies pass through untouched.
-  const apiUrl = new URL(process.env.API_URL || 'http://localhost:5080');
+  const apiUrl = new URL(process.env.API_URL || 'https://forsa-h3bmgghpcybshtfg.westus3-01.azurewebsites.net');
   app.use((req, res, next) => {
     const url = req.originalUrl || req.url || '';
     if (!url.startsWith('/api/') || url.startsWith('/api/admin') || url === '/api/health') return next();

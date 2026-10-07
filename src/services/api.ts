@@ -2,9 +2,11 @@ import { RealEstateUnit } from '../types';
 import { SellForm } from '../lib/sellForm';
 
 /**
- * Client for the public API (AqarApi). Requests go to /api on this origin; server.ts proxies them to API_URL.
+ * Client for the public API (AqarApi). With VITE_API_URL set, the browser calls that server directly (it must allow this
+ * site in its Cors:Origins); without it, requests go to /api on this origin and server.ts proxies them to API_URL.
  * Every error leaves the API as { message, errors } — ApiError carries both.
  */
+const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '');
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -62,7 +64,7 @@ let refreshing: Promise<boolean> | null = null;
 function refreshSession(): Promise<boolean> {
   const current = session;
   if (!current) return Promise.resolve(false);
-  refreshing ??= fetch('/api/auth/refresh', {
+  refreshing ??= fetch(`${API_BASE}/api/auth/refresh`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ refreshToken: current.refreshToken }),
@@ -96,7 +98,7 @@ async function request<T>(path: string, init: RequestInit = {}, retried = false)
   if (!retried && session && new Date(session.expiresAt).getTime() - Date.now() < 30_000) await refreshSession();
   let res: Response;
   try {
-    res = await fetch(`/api${path}`, withAuth(init));
+    res = await fetch(`${API_BASE}/api${path}`, withAuth(init));
   } catch {
     throw new ApiError(FALLBACK_MESSAGE, 0);
   }
@@ -108,7 +110,7 @@ async function request<T>(path: string, init: RequestInit = {}, retried = false)
   if (res.status === 204) return undefined as T;
   // An HTML page here means /api never reached the API (e.g. the dev server runs without the proxy in server.ts).
   if (!(res.headers.get('content-type') ?? '').includes('json')) {
-    console.error(`/api${path} returned ${res.headers.get('content-type') || 'no content type'} instead of JSON — is the API proxy running?`);
+    console.error(`${API_BASE}/api${path} returned ${res.headers.get('content-type') || 'no content type'} instead of JSON — is the API proxy running?`);
     throw new ApiError(FALLBACK_MESSAGE, 502);
   }
   return res.json() as Promise<T>;

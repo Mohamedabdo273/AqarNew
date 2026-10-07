@@ -7,8 +7,6 @@ import { HomePage, HomeSearch } from './pages/HomePage';
 import { SellUnitPage } from './pages/SellUnitPage';
 import { OpportunitiesPage } from './pages/OpportunitiesPage';
 import { PropertySwapPage } from './pages/PropertySwapPage';
-import { AdminPlatform } from './components/admin/AdminPlatform';
-import { AdminLogin } from './components/admin/AdminLogin';
 import { AboutPage } from './pages/AboutPage';
 import { RulesPage, RulesTab } from './pages/RulesPage';
 import { MyRequestsPage } from './pages/MyRequestsPage';
@@ -19,6 +17,8 @@ import { UnitPage, similarUnits } from './pages/UnitPage';
 import { ThanksPage, ThanksKind } from './pages/ThanksPage';
 import { ContactPage } from './pages/ContactPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { AdminPlatform } from './components/admin/AdminPlatform';
+import { AdminLogin } from './components/admin/AdminLogin';
 import { StatementPage } from './pages/StatementPage';
 import { ComparePage } from './pages/ComparePage';
 import { MarketComparisonsPage } from './pages/MarketComparisonsPage';
@@ -59,7 +59,6 @@ export default function App() {
   const [requestCode, setRequestCode] = useState<string | null>(null);
   const [unitId, setUnitId] = useState<string | null>(null);
   const [thanks, setThanks] = useState<{ kind: ThanksKind; ref: string | null }>({ kind: 'contact', ref: null });
-  const [adminIn, setAdminIn] = useState(hasAdminSession);
   // Sections and cards fade up as they scroll in; re-armed on every page change.
   useScrollReveal(`${activePage}:${unitId ?? ''}`);
   // The floating WhatsApp button steps aside while you scroll down (it sits over content on phones) and comes back on scroll up.
@@ -88,6 +87,7 @@ export default function App() {
   const [listPreset, setListPreset] = useState<HomeSearch | null>(null);
   const [rulesTab, setRulesTab] = useState<RulesTab>('seller');
   const [verifyCode, setVerifyCode] = useState<string | null>(null);
+  const [adminIn, setAdminIn] = useState(hasAdminSession);
   const { compareIds } = useCompare();
 
   // True once the visitor has moved around inside the app, so "back" can use browser history.

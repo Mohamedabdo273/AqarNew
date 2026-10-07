@@ -29,5 +29,8 @@ export const BRAND = {
 /** Shown on the privacy policy and terms pages. Update whenever either text changes. */
 export const LEGAL_UPDATED = '2026-09-24';
 
+/** The team's dashboard (AqarAdmin). Set VITE_ADMIN_URL in production; in development it runs on 5174. Empty = no link. */
+export const ADMIN_URL: string = import.meta.env.VITE_ADMIN_URL || (import.meta.env.DEV ? 'http://localhost:5174' : '');
+
 export const whatsappLink = (text?: string) =>
   `https://wa.me/${BRAND.whatsapp}${text ? `?text=${encodeURIComponent(text)}` : ''}`;
