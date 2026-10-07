@@ -10,6 +10,7 @@ import { PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, REGIONS, SUB_AREAS, CANCELLATIO
 import { DeliveryStatus } from '../types';
 import { EMPTY_SELL_FORM, SellForm, isValidPhone, netToSeller } from '../lib/sellForm';
 import { ChipSelect, CheckBox, Field, FilePick, FilePickMany, MoneyInput, Toggle } from '../components/sell/FormBits';
+import { DeveloperSelect } from '../components/sell/DeveloperSelect';
 import { whatsappLink } from '../config/brand';
 
 interface SellUnitPageProps {
@@ -45,7 +46,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
   const { language, tx, isRTL } = useLanguage();
   const Arrow = isRTL ? ArrowLeft : ArrowRight;
   const { createRequest } = useRequests();
-  const { showToast } = useUnits();
+  const { showToast, units } = useUnits();
   const { user } = useAuth();
   const [form, setForm] = useState<SellForm>(() => {
     try {
@@ -361,12 +362,23 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
           )}
 
           {/* 2. المطور والكمبوند */}
-          <div className="grid sm:grid-cols-2 gap-4">
-            <Field label={tx('المطور', 'Developer')} required htmlFor="dev">
-              <input id="dev" value={form.developer} onChange={(e) => set('developer', e.target.value)} placeholder={tx('مثلاً: بالم هيلز', 'e.g. Palm Hills')} className="field" />
-            </Field>
-            <Field label={tx('الكمبوند', 'Compound')} required htmlFor="cmp">
-              <input id="cmp" value={form.compound} onChange={(e) => set('compound', e.target.value)} placeholder={tx('مثلاً: بالم هيلز نيو كايرو', 'e.g. Palm Hills New Cairo')} className="field" />
+          <div className="space-y-4">
+            <DeveloperSelect
+              value={form.developer}
+              compoundValue={form.compound}
+              units={units}
+              onChange={(dev) => set('developer', dev)}
+              onCompoundChange={(cmp) => set('compound', cmp)}
+            />
+
+            <Field label={tx('الكمبوند / المشروع', 'Compound / Project')} required htmlFor="cmp">
+              <input
+                id="cmp"
+                value={form.compound}
+                onChange={(e) => set('compound', e.target.value)}
+                placeholder={tx('مثلاً: بالم هيلز نيو كايرو (أو اختر من الكمبوندات المقترحة أعلاه)', 'e.g. Palm Hills New Cairo')}
+                className="field"
+              />
             </Field>
           </div>
 
