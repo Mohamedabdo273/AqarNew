@@ -17,15 +17,20 @@ import {
   Tag,
   ArrowRight,
   ArrowLeft,
+  Loader2,
+  LogIn,
+  LogOut,
 } from 'lucide-react';
 import { PageId } from '../types';
 import { IlloEmpty } from '../components/Illustrations';
 import { useLanguage } from '../context/LanguageContext';
 import { REQUEST_STAGES, SellRequest, useRequests } from '../context/RequestsContext';
+import { useAuth } from '../context/AuthContext';
 import { DETAIL_SECTIONS, DetailSection, completeness, netToSeller, sectionDone } from '../lib/sellForm';
 import { fullMoney, money, currency } from '../lib/unitHelpers';
 import { SellDetailsWizard } from '../components/sell/SellDetailsWizard';
 import { whatsappLink } from '../config/brand';
+import { ApiError, SellRequestTracker, trackSellRequest } from '../services/api';
 
 interface MyRequestsPageProps {
   code: string | null;
@@ -41,29 +46,78 @@ const displayStage = (r: SellRequest) => Math.max(REQUEST_STAGES.indexOf(r.stage
 
 export const MyRequestsPage: React.FC<MyRequestsPageProps> = ({ code, onOpenRequest, onNavigate }) => {
   const { language, tx, isRTL } = useLanguage();
-  const { requests, getRequest } = useRequests();
+  const { requests, loading, getRequest } = useRequests();
+  const { user, checking, openSignIn, logout } = useAuth();
   const [lookup, setLookup] = useState('');
   const [notFound, setNotFound] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const [lookupError, setLookupError] = useState('');
+  // A request found by number that wasn't sent from this device: stage only, no personal details.
+  const [tracked, setTracked] = useState<SellRequestTracker | null>(null);
   const Chevron = isRTL ? ChevronLeft : ChevronRight;
 
   const current = code ? getRequest(code) : undefined;
   if (code && current) return <RequestDetail req={current} onBack={() => onOpenRequest(null)} />;
+  if (code && loading) {
+    return (
+      <div className="py-24 grid place-items-center text-muted" aria-busy="true">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    );
+  }
 
   const stageLabel = (i: number) =>
     [tx('استلمنا طلبك', 'Received'), tx('بنراجعه', 'In review'), tx('منشورة', 'Listed'), tx('لقينا مشتري', 'Buyer found'), tx('اتقبضت', 'Paid out')][i];
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-      <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-ink">{tx('متابعة طلباتي ووحداتي', 'Track My Requests & Units')}</h1>
+      <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-ink">{tx('حسابي', 'My account')}</h1>
       <p className="mt-2 text-muted">{tx('تابع حالة مراجعة وعرض وحدتك للبيع خطوة بخطوة برقم الطلب', 'Track your unit review & listing status step by step with request code')}</p>
+
+      {!checking &&
+        (user ? (
+          <div className="mt-6 card p-4 flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="font-bold text-ink truncate">{user.fullName}</p>
+              <p className="num text-sm text-muted" dir="ltr">
+                {user.phone}
+              </p>
+            </div>
+            <button onClick={logout} className="btn-ghost min-h-11 px-4 text-sm">
+              <LogOut className="w-4 h-4" />
+              {tx('خروج', 'Sign out')}
+            </button>
+          </div>
+        ) : (
+          <div className="mt-6 rounded-xl bg-brand-soft p-4 flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-brand-ink">{tx('سجّل دخول برقم موبايلك وتشوف طلباتك ومفضلتك من أي جهاز.', 'Sign in with your mobile to see your requests and saved units on any device.')}</p>
+            <button onClick={openSignIn} className="btn-primary min-h-11 px-4 text-sm">
+              <LogIn className="w-4 h-4" />
+              {tx('دخول', 'Sign in')}
+            </button>
+          </div>
+        ))}
 
       <form
         className="mt-8 flex gap-3"
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
-          const found = getRequest(lookup.trim().toUpperCase());
-          setNotFound(!found);
-          if (found) onOpenRequest(found.code);
+          const wanted = lookup.trim().toUpperCase();
+          if (!wanted || searching) return;
+          setTracked(null);
+          setLookupError('');
+          const found = getRequest(wanted);
+          if (found) return onOpenRequest(found.code);
+          setSearching(true);
+          try {
+            setTracked(await trackSellRequest(wanted));
+            setNotFound(false);
+          } catch (err) {
+            if (err instanceof ApiError && err.status === 404) setNotFound(true);
+            else setLookupError(tx('مش قادرين نوصل للسيرفر دلوقتي، جرّب تاني.', "Can't reach the server right now. Try again."));
+          } finally {
+            setSearching(false);
+          }
         }}
       >
         <input
@@ -71,18 +125,39 @@ export const MyRequestsPage: React.FC<MyRequestsPageProps> = ({ code, onOpenRequ
           onChange={(e) => {
             setLookup(e.target.value);
             setNotFound(false);
+            setLookupError('');
           }}
           dir="ltr"
           placeholder={tx('أدخل كود الطلب — مثلاً WHD-12345', 'Enter request code — e.g. WHD-12345')}
           className={`field flex-1 ${isRTL ? 'text-right' : 'text-left'}`}
         />
-        <button className="btn-ghost h-13" aria-label={tx('دوّر', 'Find')}>
-          <Search className="w-5 h-5" />
+        <button className="btn-ghost h-13" aria-label={tx('دوّر', 'Find')} disabled={searching}>
+          {searching ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
         </button>
       </form>
       {notFound && <p className="mt-2 text-sm text-danger">{tx('مش لاقيين الرقم ده. كلمنا واتساب ونساعدك.', "Couldn't find that. WhatsApp us and we'll help.")}</p>}
+      {lookupError && <p className="mt-2 text-sm text-danger">{lookupError}</p>}
+      {tracked && (
+        <div className="mt-4 card p-5">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="num text-sm font-bold text-muted" dir="ltr">{tracked.code}</span>
+            <span className="rounded-full bg-brand-soft text-brand-ink px-2.5 py-0.5 text-xs font-semibold">
+              {tracked.stage === 'closed' ? tx('مقفول', 'Closed') : stageLabel(Math.max(0, REQUEST_STAGES.indexOf(tracked.stage as SellRequest['stage'])))}
+            </span>
+          </div>
+          <p className="mt-1 font-bold text-lg text-ink">{tracked.compound}</p>
+          <p className="text-sm text-muted">
+            {tracked.developer} · {tx('آخر تحديث', 'Updated')} {formatDate(tracked.updatedAt, language)}
+          </p>
+          <p className="mt-3 text-xs text-muted">{tx('التفاصيل بتظهر بس على الجهاز اللي اتبعت منه الطلب، أو كلم مستشارك.', 'Full details show only on the device the request was sent from — or ask your advisor.')}</p>
+        </div>
+      )}
 
-      {requests.length === 0 ? (
+      {loading ? (
+        <div className="mt-8 py-16 grid place-items-center text-muted" aria-busy="true">
+          <Loader2 className="w-7 h-7 animate-spin" />
+        </div>
+      ) : requests.length === 0 ? (
         <div className="mt-8 card p-10 text-center">
           <IlloEmpty className="mx-auto w-20 h-20 text-brand" />
           <p className="mt-4 font-bold text-lg text-ink">{tx('لسه ما قدمتش طلب لعرض وحدتك', 'No unit requests submitted yet')}</p>
@@ -103,7 +178,12 @@ export const MyRequestsPage: React.FC<MyRequestsPageProps> = ({ code, onOpenRequ
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="num text-sm font-bold text-muted" dir="ltr">{r.code}</span>
-                      <span className="rounded-full bg-brand-soft text-brand-ink px-2.5 py-0.5 text-xs font-semibold">{stageLabel(st)}</span>
+                      <span className="rounded-full bg-brand-soft text-brand-ink px-2.5 py-0.5 text-xs font-semibold">
+                        {r.apiStage === 'closed' ? tx('مقفول', 'Closed') : stageLabel(st)}
+                      </span>
+                      {r.needsInfoReason && (
+                        <span className="rounded-full bg-danger-soft text-danger px-2.5 py-0.5 text-xs font-semibold">{tx('محتاجين منك حاجة', 'Action needed')}</span>
+                      )}
                     </div>
                     <p className="mt-1 font-bold text-lg text-ink truncate">{r.form.compound}</p>
                     <p className="text-sm text-muted">
@@ -125,7 +205,9 @@ export const MyRequestsPage: React.FC<MyRequestsPageProps> = ({ code, onOpenRequ
           })}
         </ul>
       )}
-      <p className="mt-6 text-center text-xs text-muted">{tx('الطلبات محفوظة على الجهاز ده', 'Requests are saved on this device')}</p>
+      <p className="mt-6 text-center text-xs text-muted">{user
+          ? tx('دي طلبات حسابك، واللي اتبعتت من الجهاز ده', 'Requests on your account, plus any sent from this device')
+          : tx('دي الطلبات اللي اتبعتت من الجهاز ده — سجّل دخول عشان تشوف طلباتك من أي جهاز', 'These are the requests sent from this device — sign in to see them on any device')}</p>
     </div>
   );
 };
@@ -134,7 +216,7 @@ export const MyRequestsPage: React.FC<MyRequestsPageProps> = ({ code, onOpenRequ
 
 const RequestDetail: React.FC<{ req: SellRequest; onBack: () => void }> = ({ req, onBack }) => {
   const { language, tx, isRTL } = useLanguage();
-  const { updateRequest } = useRequests();
+  const { updateRequest, uploadDocument } = useRequests();
   const [editing, setEditing] = useState<number | null>(null);
   const Back = isRTL ? ArrowRight : ArrowLeft;
 
@@ -166,6 +248,7 @@ const RequestDetail: React.FC<{ req: SellRequest; onBack: () => void }> = ({ req
           initial={f}
           startStep={editing}
           onSave={(form) => updateRequest(req.code, form)}
+          onUpload={(type, file) => uploadDocument(req.code, type, file)}
           onCancel={() => {
             setEditing(null);
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -200,10 +283,20 @@ const RequestDetail: React.FC<{ req: SellRequest; onBack: () => void }> = ({ req
         </a>
       </div>
 
+      {req.needsInfoReason && (
+        <div role="alert" className="mt-6 rounded-xl border border-danger/25 bg-danger-soft p-4 flex gap-3">
+          <AlertTriangle className="w-5 h-5 text-danger shrink-0 mt-0.5" />
+          <div>
+            <p className="font-semibold text-danger">{tx('فريق المراجعة محتاج منك:', 'The review team needs:')}</p>
+            <p className="mt-1 text-sm text-ink-soft">{req.needsInfoReason}</p>
+          </div>
+        </div>
+      )}
+
       <div className="mt-8 grid lg:grid-cols-[1fr_21rem] gap-6 items-start">
         <div className="space-y-6">
-          {/* What's missing */}
-          {pct < 100 && (
+          {/* What's missing — only while the request can still be edited */}
+          {pct < 100 && req.canEdit && (
             <div className="card p-6">
               <div className="flex items-center justify-between gap-3">
                 <p className="font-bold text-ink">{tx('كمّل بياناتك عشان المراجعة تبدأ', 'Complete your details to start review')}</p>

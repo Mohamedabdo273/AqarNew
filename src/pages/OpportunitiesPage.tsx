@@ -8,6 +8,7 @@ import { FilterPanel } from '../components/FilterPanel';
 import { Pagination } from '../components/Pagination';
 import { EMPTY_FILTERS, Filters, SortKey, applyFilters } from '../lib/unitFilters';
 import { DELIVERY_OPTIONS, FINISHING_OPTIONS, FREQUENCY_OPTIONS, PROPERTY_TYPES, REGIONS, isDeal, money, pick } from '../lib/unitHelpers';
+import { errorText, sendSearchAlert } from '../services/api';
 
 interface OpportunitiesPageProps {
   units: RealEstateUnit[];
@@ -41,6 +42,8 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   const [filters, setFilters] = useState<Filters>(() => ({ ...EMPTY_FILTERS, discounted: dealsOnly, ...preset?.filters }));
   const [alertPhone, setAlertPhone] = useState('');
   const [alertTried, setAlertTried] = useState(false);
+  const [alertSending, setAlertSending] = useState(false);
+  const [alertError, setAlertError] = useState('');
   const dealsCount = useMemo(() => units.filter(isDeal).length, [units]);
   const [sort, setSort] = useState<SortKey>(preset?.sort ?? 'newest');
   const [page, setPage] = useState(1);
@@ -290,12 +293,25 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
               )}
               <form
                 noValidate
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault();
                   setAlertTried(true);
-                  if (!/^01\d{9}$/.test(alertPhone.replace(/\s/g, ''))) return;
-                  // TODO(api): save { phone, filters, budget } as a saved search once the backend exists.
-                  onAlertRequested();
+                  const phone = alertPhone.replace(/\s/g, '');
+                  if (!/^01\d{9}$/.test(phone) || alertSending) return;
+                  setAlertSending(true);
+                  setAlertError('');
+                  try {
+                    await sendSearchAlert({
+                      phone,
+                      summary: pills.map((p) => p.label).join(' · ') || undefined,
+                      filters: { ...filters, budget: budgetOn ? budget : null, sort: effectiveSort },
+                    });
+                    onAlertRequested();
+                  } catch (err) {
+                    setAlertError(errorText(err));
+                  } finally {
+                    setAlertSending(false);
+                  }
                 }}
                 className="mt-6 flex flex-col sm:flex-row gap-3 max-w-xl"
               >
@@ -311,11 +327,12 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
                   placeholder="01xxxxxxxxx"
                   className={`field flex-1 ${isRTL ? 'text-right' : 'text-left'}`}
                 />
-                <button type="submit" className="btn-primary min-h-13 whitespace-nowrap">
+                <button type="submit" disabled={alertSending} className="btn-primary min-h-13 whitespace-nowrap">
                   <BellRing className="w-5 h-5" />
-                  {tx('نبّهني', 'Alert me')}
+                  {alertSending ? tx('بنبعت...', 'Sending...') : tx('نبّهني', 'Alert me')}
                 </button>
               </form>
+              {alertError && <p role="alert" className="mt-2 text-sm text-danger">{alertError}</p>}
               {alertTried && !/^01\d{9}$/.test(alertPhone.replace(/\s/g, '')) && (
                 <p className="mt-2 text-sm text-danger">{tx('رقم موبايل مصري صحيح، 11 رقم', 'A valid 11-digit Egyptian mobile')}</p>
               )}

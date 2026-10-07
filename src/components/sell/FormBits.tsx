@@ -178,7 +178,14 @@ export const CheckBox: React.FC<{ checked: boolean; onChange: (v: boolean) => vo
   </label>
 );
 
-export const FilePick: React.FC<{ label: string; hint: string; value: string; onChange: (name: string) => void }> = ({ label, hint, value, onChange }) => (
+/** `onFile` gets the picked File itself, for callers that upload it. */
+export const FilePick: React.FC<{ label: string; hint: string; value: string; onChange: (name: string) => void; onFile?: (file: File | null) => void }> = ({
+  label,
+  hint,
+  value,
+  onChange,
+  onFile,
+}) => (
   <label className={`flex items-center gap-4 rounded-xl border-2 border-dashed p-4 cursor-pointer transition-colors ${value ? 'border-brand bg-brand-soft/50' : 'border-field-border hover:border-brand'}`}>
     <span className={`grid place-items-center w-11 h-11 rounded-xl shrink-0 ${value ? 'bg-brand text-white' : 'bg-brand-soft text-brand'}`}>
       {value ? <Check className="w-5 h-5" /> : <Upload className="w-5 h-5" />}
@@ -187,7 +194,16 @@ export const FilePick: React.FC<{ label: string; hint: string; value: string; on
       <span className="block font-semibold text-ink">{label}</span>
       <span className="block text-sm text-muted truncate">{value || hint}</span>
     </span>
-    <input type="file" accept="image/*,.pdf" className="sr-only" onChange={(e) => onChange(e.target.files?.[0]?.name || '')} />
+    <input
+      type="file"
+      accept="image/*,.pdf"
+      className="sr-only"
+      onChange={(e) => {
+        const file = e.target.files?.[0] ?? null;
+        onChange(file?.name || '');
+        onFile?.(file);
+      }}
+    />
   </label>
 );
 
@@ -198,7 +214,10 @@ export const FilePickMany: React.FC<{
   max: number;
   value: string[];
   onChange: (names: string[]) => void;
-}> = ({ label, hint, max, value, onChange }) => {
+  /** The picked Files, kept in the same order as `value`. */
+  files?: File[];
+  onFilesChange?: (files: File[]) => void;
+}> = ({ label, hint, max, value, onChange, files = [], onFilesChange }) => {
   const full = value.length >= max;
   return (
     <div className={`rounded-xl border-2 border-dashed p-4 transition-colors ${value.length ? 'border-brand bg-brand-soft/50' : 'border-field-border'}`}>
@@ -219,8 +238,9 @@ export const FilePickMany: React.FC<{
           disabled={full}
           className="sr-only"
           onChange={(e) => {
-            const picked = [...(e.target.files ?? [])].map((f) => f.name);
-            onChange([...value, ...picked].slice(0, max));
+            const pickedFiles = [...(e.target.files ?? [])];
+            onChange([...value, ...pickedFiles.map((f) => f.name)].slice(0, max));
+            onFilesChange?.([...files, ...pickedFiles].slice(0, max));
             e.target.value = ''; // عشان تقدر ترفع نفس الملف تاني لو شيلته
           }}
         />
@@ -233,7 +253,10 @@ export const FilePickMany: React.FC<{
               <span className="flex-1 truncate text-ink">{name}</span>
               <button
                 type="button"
-                onClick={() => onChange(value.filter((_, j) => j !== i))}
+                onClick={() => {
+                  onChange(value.filter((_, j) => j !== i));
+                  onFilesChange?.(files.filter((_, j) => j !== i));
+                }}
                 className="grid place-items-center w-8 h-8 rounded-lg text-muted hover:bg-danger-soft hover:text-danger shrink-0"
                 aria-label="شيل الملف"
               >

@@ -27,6 +27,7 @@ import { PageId, RealEstateUnit } from '../types';
 import { BRAND, whatsappLink } from '../config/brand';
 import { useLanguage } from '../context/LanguageContext';
 import { useUnits } from '../context/UnitsContext';
+import { errorText } from '../services/api';
 import { useCompare, COMPARE_MAX } from '../context/CompareContext';
 import { UnitCard } from '../components/UnitCard';
 import { AqarExitComparison } from '../components/AqarExitComparison';
@@ -75,6 +76,8 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
   const [booking, setBooking] = useState(false);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState('');
   const [copied, setCopied] = useState(false);
   const Back = isRTL ? ArrowRight : ArrowLeft;
 
@@ -184,11 +187,19 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
     `Interested in ${unit.compoundEn || unit.compound} (${unit.verificationCode})`,
   );
 
-  const book = (e: React.FormEvent) => {
+  const book = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !phoneValid) return;
-    submitInquiry({ unitId: unit.id, clientName: name.trim(), clientPhone: phone, inquiryType: 'viewing' });
-    onBooked(unit);
+    if (!name.trim() || !phoneValid || sending) return;
+    setSending(true);
+    setSendError('');
+    try {
+      await submitInquiry({ unitId: unit.id, clientName: name.trim(), clientPhone: phone, inquiryType: 'viewing' });
+      onBooked(unit);
+    } catch (err) {
+      setSendError(errorText(err));
+    } finally {
+      setSending(false);
+    }
   };
 
   const side = unit.images.slice(1, 3);
@@ -370,9 +381,10 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
                   dir="ltr"
                   className={`field bg-white/10 border-white/15 text-white placeholder:text-white/50 focus:border-white ${language === 'ar' ? 'text-right' : 'text-left'}`}
                 />
-                <button type="submit" disabled={!name.trim() || !phoneValid} className="btn bg-white text-ink hover:bg-brand-soft min-h-13 w-full">
-                  {tx('أكّد المعاينة', 'Confirm viewing')}
+                <button type="submit" disabled={!name.trim() || !phoneValid || sending} className="btn bg-white text-ink hover:bg-brand-soft min-h-13 w-full">
+                  {sending ? tx('بنبعت...', 'Sending...') : tx('أكّد المعاينة', 'Confirm viewing')}
                 </button>
+                {sendError && <p role="alert" className="text-sm text-white bg-danger/80 rounded-lg px-3 py-2">{sendError}</p>}
                 <p className="text-center text-xs text-white/50">
                   {tx('بالتأكيد إنت موافق على ', 'By confirming you agree to the ')}
                   <button type="button" onClick={() => onNavigate('terms')} className="underline hover:text-white">

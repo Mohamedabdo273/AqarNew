@@ -1,0 +1,314 @@
+import { RealEstateUnit } from '../types';
+import { SellForm } from '../lib/sellForm';
+
+/**
+ * Client for the public API (AqarApi). Requests go to /api on this origin; server.ts proxies them to API_URL.
+ * Every error leaves the API as { message, errors } — ApiError carries both.
+ */
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+    public readonly errors: string[] = [],
+  ) {
+    super(message);
+  }
+}
+
+const FALLBACK_MESSAGE = 'حصلت مشكلة في الاتصال. جرّب تاني كمان شوية.';
+
+/* ───────────── Session (signed-in visitor) ───────────── */
+
+export interface Session {
+  accessToken: string;
+  refreshToken: string;
+  /** ISO time the access token stops working. */
+  expiresAt: string;
+}
+
+const SESSION_KEY = 'wahdety_session_v1';
+let session: Session | null = (() => {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    return raw ? (JSON.parse(raw) as Session) : null;
+  } catch {
+    return null;
+  }
+})();
+const sessionListeners = new Set<(s: Session | null) => void>();
+
+export const getSession = () => session;
+
+export function setSession(next: Session | null) {
+  session = next;
+  try {
+    if (next) localStorage.setItem(SESSION_KEY, JSON.stringify(next));
+    else localStorage.removeItem(SESSION_KEY);
+  } catch {
+    /* storage unavailable — the session lasts until the tab closes */
+  }
+  sessionListeners.forEach((fn) => fn(next));
+}
+
+/** AuthContext listens so a session that dies mid-request (refresh rejected) signs the visitor out everywhere. */
+export const onSessionChange = (fn: (s: Session | null) => void) => {
+  sessionListeners.add(fn);
+  return () => sessionListeners.delete(fn);
+};
+
+// Refresh tokens rotate: two parallel refreshes would present the same token twice and the API treats that as theft.
+// So every caller that hits a 401 waits on the same refresh.
+let refreshing: Promise<boolean> | null = null;
+function refreshSession(): Promise<boolean> {
+  const current = session;
+  if (!current) return Promise.resolve(false);
+  refreshing ??= fetch('/api/auth/refresh', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refreshToken: current.refreshToken }),
+  })
+    .then(async (res) => {
+      if (!res.ok) {
+        // Only a definite "no" ends the session; a network blip keeps it for the next try.
+        if (res.status === 401 || res.status === 400) setSession(null);
+        return false;
+      }
+      const auth = (await res.json()) as AuthResponse;
+      setSession({ accessToken: auth.accessToken, refreshToken: auth.refreshToken, expiresAt: auth.expiresAt });
+      return true;
+    })
+    .catch(() => false)
+    .finally(() => {
+      refreshing = null;
+    });
+  return refreshing;
+}
+
+const withAuth = (init: RequestInit): RequestInit => {
+  if (!session) return init;
+  const headers = new Headers(init.headers);
+  headers.set('Authorization', `Bearer ${session.accessToken}`);
+  return { ...init, headers };
+};
+
+async function request<T>(path: string, init: RequestInit = {}, retried = false): Promise<T> {
+  // Refresh a little before expiry rather than eat a 401 on every first call after a break.
+  if (!retried && session && new Date(session.expiresAt).getTime() - Date.now() < 30_000) await refreshSession();
+  let res: Response;
+  try {
+    res = await fetch(`/api${path}`, withAuth(init));
+  } catch {
+    throw new ApiError(FALLBACK_MESSAGE, 0);
+  }
+  if (res.status === 401 && session && !retried && (await refreshSession())) return request<T>(path, init, true);
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new ApiError(body?.message || FALLBACK_MESSAGE, res.status, Array.isArray(body?.errors) ? body.errors : []);
+  }
+  if (res.status === 204) return undefined as T;
+  // An HTML page here means /api never reached the API (e.g. the dev server runs without the proxy in server.ts).
+  if (!(res.headers.get('content-type') ?? '').includes('json')) {
+    console.error(`/api${path} returned ${res.headers.get('content-type') || 'no content type'} instead of JSON — is the API proxy running?`);
+    throw new ApiError(FALLBACK_MESSAGE, 502);
+  }
+  return res.json() as Promise<T>;
+}
+
+const json = (method: string, body: unknown, headers: Record<string, string> = {}): RequestInit => ({
+  method,
+  headers: { 'Content-Type': 'application/json', ...headers },
+  body: JSON.stringify(body),
+});
+
+/** Turns an error into one line for the user: the API's message plus its field errors. */
+export const errorText = (e: unknown) =>
+  e instanceof ApiError ? [e.message, ...e.errors].join(' — ') : FALLBACK_MESSAGE;
+
+/* ───────────── Units ───────────── */
+
+interface Paged<T> {
+  items: T[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+  hasNext: boolean;
+}
+
+/** The API sends the unit in the front end's own shape; ids come back as strings. */
+type UnitDto = RealEstateUnit & { publicCode?: string };
+
+/** Every published unit, all pages. The listing filters and sorts on the client. */
+export async function fetchAllUnits(): Promise<RealEstateUnit[]> {
+  const all: RealEstateUnit[] = [];
+  for (let page = 1; ; page++) {
+    const res = await request<Paged<UnitDto>>(`/units?page=${page}&pageSize=100&sort=newest`);
+    all.push(...res.items);
+    if (!res.hasNext) return all;
+  }
+}
+
+/** One unit by id or code — also counts a view. */
+export const fetchUnit = (idOrCode: string) => request<UnitDto>(`/units/${encodeURIComponent(idOrCode)}`);
+
+export interface VerifyResult {
+  found: boolean;
+  verified: boolean;
+  code: string | null;
+  unit: RealEstateUnit | null;
+  checks: { key: string; ok: boolean }[];
+}
+export const verifyCode = (code: string) => request<VerifyResult>(`/verify/${encodeURIComponent(code)}`);
+
+/* ───────────── Sell requests ───────────── */
+
+/** Matches DocumentType on the API. */
+export const DOC_TYPE = { contract: 1, receipts: 2, nationalId: 3, developerLetter: 4, statement: 5, schedule: 6, plan: 7, other: 99 } as const;
+export type DocType = (typeof DOC_TYPE)[keyof typeof DOC_TYPE];
+
+export interface SellRequestDocument {
+  id: number;
+  docType: DocType;
+  originalName: string;
+  fileSizeBytes: number;
+  scanStatus: number;
+  uploadedAt: string;
+}
+
+/** The API's SellFormDto: the form without the file-name fields (files are uploaded separately). */
+type SellFormBody = Omit<SellForm, 'contractPages' | 'paymentScheduleFile' | 'unitPlanFile' | 'contractFile' | 'receiptFile' | 'idFile'>;
+
+export interface SellRequestDto {
+  code: string;
+  createdAt: string;
+  updatedAt: string;
+  /** received | reviewing | listed | matched | transferred | closed */
+  stage: string;
+  status: number;
+  needsInfoReason: string | null;
+  verificationCode: string | null;
+  unitId: number;
+  canEdit: boolean;
+  form: SellFormBody;
+  documents: SellRequestDocument[];
+}
+
+export interface SellRequestTracker {
+  code: string;
+  stage: string;
+  compound: string;
+  developer: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const toBody = (f: SellForm): SellFormBody => {
+  const { contractPages, paymentScheduleFile, unitPlanFile, contractFile, receiptFile, idFile, ...rest } = f;
+  return rest;
+};
+
+/** Requests sent from this device carry their token; ones owned by the signed-in account don't need it. */
+const tokenHeader = (token?: string): Record<string, string> => (token ? { 'X-Request-Token': token } : {});
+
+export const createSellRequest = (form: SellForm) =>
+  request<{ code: string; accessToken: string; request: SellRequestDto }>('/sell-requests', json('POST', toBody(form)));
+
+export const getSellRequest = (code: string, token?: string) =>
+  request<SellRequestDto>(`/sell-requests/${encodeURIComponent(code)}`, { headers: tokenHeader(token) });
+
+export const updateSellRequest = (code: string, token: string | undefined, form: SellForm) =>
+  request<SellRequestDto>(`/sell-requests/${encodeURIComponent(code)}`, json('PUT', toBody(form), tokenHeader(token)));
+
+export const trackSellRequest = (code: string) => request<SellRequestTracker>(`/sell-requests/${encodeURIComponent(code)}/track`);
+
+export function uploadSellDocument(code: string, token: string | undefined, docType: DocType, file: File) {
+  const body = new FormData();
+  body.append('docType', String(docType));
+  body.append('file', file);
+  return request<SellRequestDocument>(`/sell-requests/${encodeURIComponent(code)}/documents`, { method: 'POST', headers: tokenHeader(token), body });
+}
+
+/* ───────────── Inquiries ───────────── */
+
+/** Matches InquiryType on the API. */
+export const INQUIRY_TYPE = { general: 1, viewing: 2, priceOffer: 3, investor: 5 } as const;
+
+interface InquiryCreated {
+  id: number;
+  status: number;
+  createdAt: string;
+}
+
+export const sendInquiry = (body: {
+  contactName: string;
+  contactPhone: string;
+  inquiryType: (typeof INQUIRY_TYPE)[keyof typeof INQUIRY_TYPE];
+  unitId?: number;
+  message?: string;
+  offerAmount?: number;
+  preferredDate?: string;
+}) => request<InquiryCreated>('/inquiries', json('POST', body));
+
+export const sendContact = (body: { topic: string; name: string; phone: string; message: string }) =>
+  request<InquiryCreated>('/inquiries/contact', json('POST', body));
+
+export const sendSwap = (body: { targetUnitId: number; name: string; phone: string; myPaid?: number; myMonthly?: number; notes?: string }) =>
+  request<InquiryCreated>('/inquiries/swap', json('POST', body));
+
+export const sendSearchAlert = (body: { phone: string; name?: string; summary?: string; filters?: unknown }) =>
+  request<InquiryCreated>('/inquiries/alert', json('POST', body));
+
+export function sendStatement(
+  fields: { name: string; phone: string; developer: string; compound?: string; contractPrice: number; paidAmount: number; hasLatePenalties: boolean; latePenaltiesAmount: number },
+  file?: File | null,
+) {
+  const body = new FormData();
+  Object.entries(fields).forEach(([k, v]) => v !== undefined && body.append(k, String(v)));
+  if (file) body.append('file', file);
+  return request<InquiryCreated>('/inquiries/statement', { method: 'POST', body });
+}
+
+/* ───────────── Sign-in (phone + WhatsApp code) ───────────── */
+
+/** Matches UserRole on the API. Visitors can only be buyer / seller / investor. */
+export const USER_ROLE = { buyer: 1, seller: 2, investor: 3, ops: 4, sales: 5, admin: 6 } as const;
+
+export interface AccountUser {
+  id: string;
+  fullName: string;
+  phone: string;
+  email: string | null;
+  role: number;
+  isPhoneVerified: boolean;
+  avatarUrl: string | null;
+  createdAt: string;
+}
+
+export interface AuthResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: string;
+  user: AccountUser;
+  isNewUser: boolean;
+}
+
+export const requestOtp = (phone: string) => request<{ success: boolean }>('/auth/otp/request', json('POST', { phone }));
+
+export const verifyOtp = (phone: string, code: string) => request<AuthResponse>('/auth/otp/verify', json('POST', { phone, code }));
+
+export const fetchMe = () => request<AccountUser>('/auth/me');
+
+export const updateMe = (body: { fullName: string; email?: string | null }) => request<AccountUser>('/auth/me', json('PUT', body));
+
+/** Revokes the refresh token on the server; the caller clears the session either way. */
+export const logoutSession = (refreshToken: string) => request<void>('/auth/logout', json('POST', { refreshToken }));
+
+/* ───────────── Account data ───────────── */
+
+export const fetchFavoriteIds = () => request<number[]>('/me/favorites');
+export const addFavorite = (unitId: number) => request<void>(`/me/favorites/${unitId}`, { method: 'PUT' });
+export const removeFavorite = (unitId: number) => request<void>(`/me/favorites/${unitId}`, { method: 'DELETE' });
+/** Merges favorites saved as a guest into the account; returns the full list. */
+export const syncFavorites = (unitIds: number[]) => request<number[]>('/me/favorites/sync', json('POST', { unitIds }));
+
+export const fetchMySellRequests = () => request<SellRequestDto[]>('/me/sell-requests');

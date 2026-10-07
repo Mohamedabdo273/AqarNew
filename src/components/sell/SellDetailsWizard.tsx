@@ -3,23 +3,30 @@ import { ArrowLeft, ArrowRight, Check, AlertTriangle, Lock, CheckCircle2 } from 
 import { useLanguage } from '../../context/LanguageContext';
 import { DELIVERY_OPTIONS, FINISHING_OPTIONS, FREQUENCY_OPTIONS, fullMoney } from '../../lib/unitHelpers';
 import { DETAIL_SECTIONS, FeeBearer, MONTHS_PER_PAYMENT, SellForm, TaxBearer, TaxCategory, View, isResidential } from '../../lib/sellForm';
+import { DOC_TYPE, DocType, errorText } from '../../services/api';
 import { ChipSelect, CheckBox, Counter, Field, FilePick, Group, MoneyInput, MonthYearInput, NumberInput, Toggle } from './FormBits';
 
 interface SellDetailsWizardProps {
   initial: SellForm;
   startStep?: number;
-  onSave: (form: SellForm) => void;
+  /** Persists the form; a rejected promise keeps the seller on the step with the error shown. */
+  onSave: (form: SellForm) => Promise<void> | void;
+  /** Uploads a document as soon as it's picked. Without it, pickers only record the file name. */
+  onUpload?: (docType: DocType, file: File) => Promise<void>;
   onCancel: () => void;
 }
 
 /** Phase 2 of listing: everything beyond the basics, saved section by section. */
-export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, startStep = 0, onSave, onCancel }) => {
+export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, startStep = 0, onSave, onUpload, onCancel }) => {
   const { language, tx, isRTL } = useLanguage();
   const Next = isRTL ? ArrowLeft : ArrowRight;
   const Back = isRTL ? ArrowRight : ArrowLeft;
   const [form, setForm] = useState<SellForm>(initial);
   const [step, setStep] = useState(startStep);
   const [errors, setErrors] = useState<string[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const [uploading, setUploading] = useState<string | null>(null);
 
   const set = <K extends keyof SellForm>(key: K, value: SellForm[K]) => setForm((f) => ({ ...f, [key]: value }));
   const remaining = Math.max(0, form.contractPrice - form.paidAmount);
@@ -56,7 +63,8 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
   };
 
   // Every step saves on the way forward, so leaving midway never loses what was entered.
-  const saveAndGo = (target: number | 'done') => {
+  const saveAndGo = async (target: number | 'done') => {
+    if (saving) return;
     const e = validate(step);
     if (e.length) {
       setErrors(e);
@@ -69,7 +77,16 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
     }
     setForm(next);
     setErrors([]);
-    onSave(next);
+    setSaving(true);
+    setSaveError('');
+    try {
+      await onSave(next);
+    } catch (err) {
+      setSaveError(errorText(err));
+      return;
+    } finally {
+      setSaving(false);
+    }
     if (target === 'done') onCancel();
     else {
       setStep(target);
@@ -359,13 +376,44 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
               )}
             </p>
             <div className="grid gap-3">
-              <FilePick label={tx('صورة العقد', 'Contract')} hint={tx('صورة أو PDF', 'Photo or PDF')} value={form.contractFile} onChange={(v) => set('contractFile', v)} />
-              <FilePick label={tx('كشف حساب أو آخر إيصال', 'Statement or last receipt')} hint={tx('من المطور', 'From the developer')} value={form.receiptFile} onChange={(v) => set('receiptFile', v)} />
-              <FilePick label={tx('البطاقة', 'National ID')} hint={tx('للتأكد إنك المالك', 'To confirm ownership')} value={form.idFile} onChange={(v) => set('idFile', v)} />
+              {(
+                [
+                  { key: 'contractFile', type: DOC_TYPE.contract, label: tx('صورة العقد', 'Contract'), hint: tx('صورة أو PDF', 'Photo or PDF') },
+                  { key: 'receiptFile', type: DOC_TYPE.receipts, label: tx('كشف حساب أو آخر إيصال', 'Statement or last receipt'), hint: tx('من المطور', 'From the developer') },
+                  { key: 'idFile', type: DOC_TYPE.nationalId, label: tx('البطاقة', 'National ID'), hint: tx('للتأكد إنك المالك', 'To confirm ownership') },
+                ] as const
+              ).map((d) => (
+                <FilePick
+                  key={d.key}
+                  label={d.label}
+                  hint={uploading === d.key ? tx('بيترفع...', 'Uploading...') : d.hint}
+                  value={uploading === d.key ? '' : form[d.key]}
+                  onChange={(v) => !onUpload && set(d.key, v)}
+                  onFile={async (file) => {
+                    if (!file || !onUpload) return;
+                    setUploading(d.key);
+                    setSaveError('');
+                    try {
+                      await onUpload(d.type, file);
+                      set(d.key, file.name);
+                    } catch (err) {
+                      setSaveError(errorText(err));
+                    } finally {
+                      setUploading(null);
+                    }
+                  }}
+                />
+              ))}
             </div>
           </Group>
         )}
       </div>
+
+      {saveError && (
+        <p role="alert" className="mt-6 rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger">
+          {saveError}
+        </p>
+      )}
 
       <div className="mt-10 flex gap-3">
         {step > 0 && (
@@ -373,7 +421,7 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
             <Back className="w-5 h-5" />
           </button>
         )}
-        <button onClick={() => saveAndGo(step < DETAIL_SECTIONS.length - 1 ? step + 1 : 'done')} className="btn-primary flex-1 min-h-13">
+        <button onClick={() => saveAndGo(step < DETAIL_SECTIONS.length - 1 ? step + 1 : 'done')} disabled={saving || !!uploading} className="btn-primary flex-1 min-h-13">
           {step < DETAIL_SECTIONS.length - 1 ? (
             <>
               {DETAIL_SECTIONS[step] === 'faster' ? tx('حفظ والتالي (أو عدّي)', 'Save & next (or skip)') : tx('حفظ والتالي', 'Save & next')}

@@ -19,6 +19,7 @@ import {
 import { PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { whatsappLink } from '../config/brand';
+import { errorText, sendStatement } from '../services/api';
 import { CANCELLATION_PENALTY_MIN_RATE, cancellationLoss, currency, money } from '../lib/unitHelpers';
 import { isValidPhone } from '../lib/sellForm';
 import { Field, FilePick, MoneyInput, Toggle } from '../components/sell/FormBits';
@@ -46,6 +47,9 @@ export const StatementPage: React.FC<StatementPageProps> = ({ onNavigate, onSent
   const [late, setLate] = useState(false);
   const [lateAmount, setLateAmount] = useState(0);
   const [contractFile, setContractFile] = useState('');
+  const [contractUpload, setContractUpload] = useState<File | null>(null);
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState('');
   const [errors, setErrors] = useState<string[]>([]);
 
   const validMoney = contract > 0 && paid > 0 && paid <= contract;
@@ -55,8 +59,9 @@ export const StatementPage: React.FC<StatementPageProps> = ({ onNavigate, onSent
   const cancelBack = validMoney ? paid - cancellationLoss(contract, paid, CANCELLATION_PENALTY_MIN_RATE) : 0;
   const sellBack = validMoney ? Math.max(0, paid - fines) : 0;
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (sending) return;
     const err: string[] = [];
     if (name.trim().length < 2) err.push(tx('اسمك', 'Your name'));
     if (!isValidPhone(phone)) err.push(tx('موبايل صحيح (01xxxxxxxxx)', 'Valid mobile (01xxxxxxxxx)'));
@@ -90,7 +95,28 @@ export const StatementPage: React.FC<StatementPageProps> = ({ onNavigate, onSent
     } catch {
       /* the draft is a convenience only */
     }
-    onSent();
+    setSending(true);
+    setSendError('');
+    try {
+      await sendStatement(
+        {
+          name: name.trim(),
+          phone: phone.replace(/\s/g, ''),
+          developer: developer.trim(),
+          compound: compound.trim() || undefined,
+          contractPrice: contract,
+          paidAmount: paid,
+          hasLatePenalties: late,
+          latePenaltiesAmount: late ? lateAmount : 0,
+        },
+        contractUpload,
+      );
+      onSent();
+    } catch (err) {
+      setSendError(errorText(err));
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -287,6 +313,7 @@ export const StatementPage: React.FC<StatementPageProps> = ({ onNavigate, onSent
               hint={tx('بتخلّي الكشف أدق وأسرع — وسريّة تماماً مش بتظهر لحد', 'Makes the statement faster and more accurate — 100% confidential')}
               value={contractFile}
               onChange={setContractFile}
+              onFile={setContractUpload}
             />
           </div>
 
@@ -334,10 +361,11 @@ export const StatementPage: React.FC<StatementPageProps> = ({ onNavigate, onSent
 
           {/* Submit Button */}
           <div className="pt-2">
-            <button type="submit" className="btn-primary w-full min-h-14 text-base font-bold shadow-md hover:shadow-lg transition">
+            <button type="submit" disabled={sending} className="btn-primary w-full min-h-14 text-base font-bold shadow-md hover:shadow-lg transition">
               <Send className="w-5 h-5" />
-              <span>{tx('ابعتلي كشف الحساب مجاناً', 'Send me my free statement')}</span>
+              <span>{sending ? tx('بنبعت...', 'Sending...') : tx('ابعتلي كشف الحساب مجاناً', 'Send me my free statement')}</span>
             </button>
+            {sendError && <p role="alert" className="mt-3 text-sm text-danger">{sendError}</p>}
             <p className="mt-3 text-center text-xs text-muted">
               {tx('بالإرسال إنت موافق على ', 'By submitting you agree to the ')}
               <button

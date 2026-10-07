@@ -3,6 +3,7 @@ import { Phone, MessageCircle, Mail, MapPin, Clock, ExternalLink, Send, ArrowLef
 import { BRAND, whatsappLink } from '../config/brand';
 import { useLanguage } from '../context/LanguageContext';
 import { PageId } from '../types';
+import { errorText, sendContact } from '../services/api';
 
 interface ContactPageProps {
   onNavigate: (page: PageId) => void;
@@ -20,6 +21,8 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onSent }) 
   const [phone, setPhone] = useState('');
   const [message, setMessage] = useState('');
   const [tried, setTried] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState('');
 
   const phoneValid = /^01\d{9}$/.test(phone.replace(/\s/g, ''));
   const valid = name.trim().length > 1 && phoneValid && message.trim().length > 3;
@@ -40,12 +43,20 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onSent }) 
     BRAND.email && { icon: Mail, t: tx('الإيميل', 'Email'), v: BRAND.email, href: `mailto:${BRAND.email}`, ltr: true },
   ].filter(Boolean) as { icon: React.ElementType; t: string; v: string; href: string; ltr?: boolean; external?: boolean }[];
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTried(true);
-    if (!valid) return;
-    // TODO(api): send { topic, name, phone, message } to the backend once it exists.
-    onSent();
+    if (!valid || sending) return;
+    setSending(true);
+    setSendError('');
+    try {
+      await sendContact({ topic, name: name.trim(), phone: phone.replace(/\s/g, ''), message: message.trim() });
+      onSent();
+    } catch (err) {
+      setSendError(errorText(err));
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -174,10 +185,11 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onSent }) 
             {tried && message.trim().length <= 3 && <p className="mt-1.5 text-sm text-danger">{tx('اكتب رسالتك', 'Write your message')}</p>}
           </div>
 
-          <button type="submit" className="btn-primary w-full mt-6 min-h-13">
+          <button type="submit" disabled={sending} className="btn-primary w-full mt-6 min-h-13">
             <Send className="w-5 h-5" />
-            {tx('ابعت', 'Send')}
+            {sending ? tx('بنبعت...', 'Sending...') : tx('ابعت', 'Send')}
           </button>
+          {sendError && <p role="alert" className="mt-3 text-sm text-danger">{sendError}</p>}
           <p className="mt-3 text-center text-xs text-muted">
             {tx('بالإرسال إنت موافق على ', 'By sending you agree to the ')}
             <button type="button" onClick={() => onNavigate('privacy')} className="font-semibold text-ink hover:underline">

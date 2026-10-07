@@ -3,6 +3,9 @@ import { AlertTriangle, ShieldCheck, TrendingDown, Clock, ScrollText, Send, Chec
 import { PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useRequests } from '../context/RequestsContext';
+import { useUnits } from '../context/UnitsContext';
+import { useAuth } from '../context/AuthContext';
+import { errorText } from '../services/api';
 import { PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, REGIONS, SUB_AREAS, CANCELLATION_PENALTY_MIN_RATE, cancellationLoss, currency, money } from '../lib/unitHelpers';
 import { DeliveryStatus } from '../types';
 import { EMPTY_SELL_FORM, SellForm, isValidPhone, netToSeller } from '../lib/sellForm';
@@ -42,14 +45,32 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
   const { language, tx, isRTL } = useLanguage();
   const Arrow = isRTL ? ArrowLeft : ArrowRight;
   const { createRequest } = useRequests();
+  const { showToast } = useUnits();
+  const { user } = useAuth();
   const [form, setForm] = useState<SellForm>(() => {
     try {
       const raw = localStorage.getItem(DRAFT_KEY);
-      return raw ? { ...EMPTY_SELL_FORM, ...JSON.parse(raw) } : EMPTY_SELL_FORM;
+      // The draft can't hold the files themselves, so their names are dropped too — otherwise they'd look uploaded.
+      return raw
+        ? { ...EMPTY_SELL_FORM, ...JSON.parse(raw), contractPages: [], paymentScheduleFile: '', unitPlanFile: '' }
+        : EMPTY_SELL_FORM;
     } catch {
       return EMPTY_SELL_FORM;
     }
   });
+  // The picked files themselves, uploaded once the request exists.
+  const [contractPageFiles, setContractPageFiles] = useState<File[]>([]);
+  const [scheduleFile, setScheduleFile] = useState<File | null>(null);
+  const [planFile, setPlanFile] = useState<File | null>(null);
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState('');
+
+  // Signed in: fill the owner's name and mobile from the account, without overwriting what they typed.
+  useEffect(() => {
+    if (!user) return;
+    const accountName = /\d{6,}/.test(user.fullName) ? '' : user.fullName;
+    setForm((f) => ({ ...f, ownerName: f.ownerName || accountName, ownerPhone: f.ownerPhone || user.phone }));
+  }, [user]);
   const [errors, setErrors] = useState<string[]>([]);
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [deliveryModalOpen, setDeliveryModalOpen] = useState(false);
@@ -165,7 +186,8 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
   const set = <K extends keyof SellForm>(key: K, value: SellForm[K]) => setForm((f) => ({ ...f, [key]: value }));
   const L = <T extends string>(list: { ar: T; en: string }[]) => list.map((o) => ({ value: o.ar, label: language === 'ar' ? o.ar : o.en }));
 
-  const submit = () => {
+  const submit = async () => {
+    if (sending) return;
     // لو فيه نقص في خطوة سابقة، نوديه لها بدل ما نقوله "ناقص" على شاشة مش شايفها
     for (const target of [1, 2, 3, 4] as const) {
       const e = stepErrors(target);
@@ -177,13 +199,27 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
       }
     }
     setErrors([]);
-    const req = createRequest({ ...form, developer: form.developer.trim(), compound: form.compound.trim(), ownerName: form.ownerName.trim() });
+    setSending(true);
+    setSendError('');
     try {
-      localStorage.removeItem(DRAFT_KEY);
-    } catch {
-      /* ignore */
+      const { code, failedUploads } = await createRequest(
+        { ...form, developer: form.developer.trim(), compound: form.compound.trim(), ownerName: form.ownerName.trim() },
+        { contractPages: contractPageFiles, paymentSchedule: scheduleFile, unitPlan: planFile },
+      );
+      try {
+        localStorage.removeItem(DRAFT_KEY);
+      } catch {
+        /* ignore */
+      }
+      if (failedUploads > 0) {
+        showToast(tx(`طلبك وصل، بس ${failedUploads} ملف ما اترفعش — ارفعه من "حسابي"`, `Request sent, but ${failedUploads} file(s) didn't upload — add them from "My account"`));
+      }
+      onSubmitted(code);
+    } catch (err) {
+      setSendError(errorText(err));
+    } finally {
+      setSending(false);
     }
-    onSubmitted(req.code);
   };
 
   const validMoney = form.paidAmount > 0 && form.paidAmount <= form.contractPrice;
@@ -482,7 +518,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
             <p className="rounded-xl bg-brand-soft px-4 py-3 text-[15px] leading-relaxed text-brand-ink">
               {tx(
                 'المستندات دي بتخلّي المراجعة أسرع، ومش بتظهر لأي مشتري ولا بتتنشر.',
-                "These speed up the review. They are never shown to buyers or published — you can skip now and upload later from \"Track requests\".",
+                "These speed up the review. They are never shown to buyers or published — you can skip now and upload later from \"My account\".",
               )}
             </p>
 
@@ -492,18 +528,22 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               max={4}
               value={form.contractPages}
               onChange={(v) => set('contractPages', v)}
+              files={contractPageFiles}
+              onFilesChange={setContractPageFiles}
             />
             <FilePick
               label={tx('جدول سداد الأقساط', 'Payment schedule')}
               hint={tx('الملحق بالعقد', 'The contract annex')}
               value={form.paymentScheduleFile}
               onChange={(v) => set('paymentScheduleFile', v)}
+              onFile={setScheduleFile}
             />
             <FilePick
               label={tx('صورة بلان الوحدة', 'Unit plan')}
               hint={tx('الملحق بالعقد', 'The contract annex')}
               value={form.unitPlanFile}
               onChange={(v) => set('unitPlanFile', v)}
+              onFile={setPlanFile}
             />
           </div>
           )}
@@ -616,12 +656,17 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
                 <Arrow className="w-5 h-5" />
               </button>
             ) : (
-              <button onClick={submit} className="btn-primary flex-1 min-h-14 text-base">
+              <button onClick={submit} disabled={sending} className="btn-primary flex-1 min-h-14 text-base">
                 <Send className="w-5 h-5" />
-                {tx('ابعت طلبي', 'Send my request')}
+                {sending ? tx('بنبعت طلبك...', 'Sending...') : tx('ابعت طلبي', 'Send my request')}
               </button>
             )}
           </div>
+          {sendError && (
+            <p role="alert" className="-mt-3 rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger">
+              {sendError}
+            </p>
+          )}
 
           {step === 4 && (
           <p className="-mt-3 text-center text-sm text-muted">
@@ -679,7 +724,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               <ShieldCheck className="w-5 h-5 shrink-0" />
               {tx('إيه اللي هيحصل بعد كده؟', 'What happens next?')}
             </p>
-            <p>{tx('هنكلمك خلال يوم عمل، وتقدر تكمّل باقي البيانات من "متابعة طلباتي" أو مع المستشار في التليفون.', "We'll call within one business day. Finish the details from \"Track requests\" or with your advisor on the phone.")}</p>
+            <p>{tx('هنكلمك خلال يوم عمل، وتقدر تكمّل باقي البيانات من "حسابي" أو مع المستشار في التليفون.', "We'll call within one business day. Finish the details from \"My account\" or with your advisor on the phone.")}</p>
           </div>
         </aside>
       </div>

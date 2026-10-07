@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Home, Search, Tag, Repeat, Globe, Menu, X, Info, ShieldCheck, MessageCircle, Heart, ClipboardList, Phone, Bell, MoreHorizontal, UserRound, Scale, Sparkles } from 'lucide-react';
+import { Home, Search, Tag, Repeat, Globe, Menu, X, Info, ShieldCheck, MessageCircle, Heart, ClipboardList, Phone, Bell, MoreHorizontal, UserRound, Scale, Sparkles, LogIn, LogOut } from 'lucide-react';
 import { PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useUnits } from '../context/UnitsContext';
 import { useRequests } from '../context/RequestsContext';
 import { useCompare } from '../context/CompareContext';
+import { useAuth } from '../context/AuthContext';
 import { Logo } from './Logo';
 import { whatsappLink } from '../config/brand';
 
@@ -25,6 +26,8 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
   const { savedUnitIds } = useUnits();
   const { requests } = useRequests();
   const { compareIds } = useCompare();
+  const { user, checking, openSignIn, logout } = useAuth();
+  const firstName = user?.fullName.trim().split(/\s+/)[0] ?? '';
   const [menuOpen, setMenuOpen] = useState(false);
   const [openPanel, setOpenPanel] = useState<null | 'bell' | 'more'>(null);
   const panelsRef = useRef<HTMLDivElement>(null);
@@ -84,7 +87,6 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
     buy,
     rules,
     contact,
-    { id: 'compare', label: tx('المقارنة', 'Compare'), icon: Scale },
     { id: 'market-comparisons', label: tx('مقارنات السوق', 'Market Comparisons'), icon: Sparkles },
     { id: 'saved', label: tx('المفضلة', 'Saved'), icon: Heart },
     { id: 'requests', label: tx('حسابي', 'My account'), icon: ClipboardList },
@@ -185,7 +187,6 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
                 <div className="absolute top-full mt-2 end-0 w-56 card p-2 shadow-lift z-50">
                   {[
                     { id: 'requests' as PageId, label: tx('حسابي', 'My account'), icon: ClipboardList, n: requests.length },
-                    { id: 'compare' as PageId, label: tx('المقارنة', 'Compare'), icon: Scale, n: compareIds.length },
                     { id: 'market-comparisons' as PageId, label: tx('مقارنات السوق', 'Market Comparisons'), icon: Sparkles, n: 0 },
                     { id: 'about' as PageId, label: tx('احنا مين', 'About us'), icon: Info, n: 0 },
                   ].map((m) => (
@@ -205,6 +206,19 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
                 </div>
               )}
             </div>
+
+            {/* Account: sign in as a guest, or jump to "حسابي" once signed in */}
+            {!checking &&
+              (user ? (
+                <button onClick={() => go('requests')} aria-label={tx('حسابي', 'My account')} title={user.fullName} className={iconBtn('requests')}>
+                  <span className="grid place-items-center w-8 h-8 rounded-full bg-brand text-white text-sm font-bold">{firstName.charAt(0) || <UserRound className="w-4 h-4" />}</span>
+                </button>
+              ) : (
+                <button onClick={openSignIn} className="flex items-center gap-1.5 h-10 sm:h-11 px-3 rounded-full text-sm font-semibold text-brand hover:bg-brand-soft">
+                  <LogIn className="w-4 h-4" />
+                  <span className="hidden sm:inline">{tx('دخول', 'Sign in')}</span>
+                </button>
+              ))}
 
             {/* Language toggle: hidden on mobile (<sm), accessible in mobile drawer */}
             <button onClick={toggleLanguage} className="hidden sm:flex h-11 px-3 rounded-full text-sm font-medium text-ink-soft hover:bg-surface items-center gap-1.5">
@@ -245,7 +259,41 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
                 </button>
               </div>
             </div>
-            <nav className="mt-5 grid gap-1">
+            <div className="mt-5 rounded-xl bg-paper p-3 flex items-center justify-between gap-3">
+              {user ? (
+                <>
+                  <span className="flex items-center gap-3 min-w-0">
+                    <span className="grid place-items-center w-9 h-9 rounded-full bg-brand text-white text-sm font-bold shrink-0">{firstName.charAt(0)}</span>
+                    <span className="min-w-0">
+                      <span className="block font-semibold text-ink truncate">{user.fullName}</span>
+                      <span className="block num text-xs text-muted" dir="ltr">{user.phone}</span>
+                    </span>
+                  </span>
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      logout();
+                    }}
+                    className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted hover:text-danger min-h-10 px-2"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    {tx('خروج', 'Sign out')}
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => {
+                    setMenuOpen(false);
+                    openSignIn();
+                  }}
+                  className="w-full flex items-center justify-center gap-2 min-h-11 font-semibold text-brand"
+                >
+                  <LogIn className="w-5 h-5" />
+                  {tx('سجّل دخول برقم موبايلك', 'Sign in with your mobile')}
+                </button>
+              )}
+            </div>
+            <nav className="mt-3 grid gap-1">
               {menuLinks.map((l) => (
                 <button
                   key={l.id}

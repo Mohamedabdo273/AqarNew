@@ -1,10 +1,40 @@
 import express from 'express';
+import http from 'http';
+import https from 'https';
 import path from 'path';
 import { handleAdminApiRequest } from './src/server/mockBackendState';
 
 async function startServer() {
   const app = express();
   const PORT = Number(process.env.PORT) || 3000;
+
+  // Everything under /api except the built-in admin mock goes to the real API (AqarApi, .NET).
+  // Piped raw — before express.json() — so multipart uploads and bodies pass through untouched.
+  const apiUrl = new URL(process.env.API_URL || 'http://localhost:5080');
+  app.use((req, res, next) => {
+    const url = req.originalUrl || req.url || '';
+    if (!url.startsWith('/api/') || url.startsWith('/api/admin') || url === '/api/health') return next();
+    const client = apiUrl.protocol === 'https:' ? https : http;
+    const upstream = client.request(
+      {
+        protocol: apiUrl.protocol,
+        hostname: apiUrl.hostname,
+        port: apiUrl.port,
+        method: req.method,
+        path: url,
+        headers: { ...req.headers, host: apiUrl.host },
+      },
+      (apiRes) => {
+        res.writeHead(apiRes.statusCode ?? 502, apiRes.headers);
+        apiRes.pipe(res);
+      },
+    );
+    upstream.on('error', (err) => {
+      console.error(`API proxy error for ${req.method} ${url}:`, err.message);
+      if (!res.headersSent) res.status(502).json({ message: 'السيرفر مش متاح دلوقتي، جرّب كمان شوية.', errors: [] });
+    });
+    req.pipe(upstream);
+  });
 
   // JSON parsing middleware
   app.use(express.json());

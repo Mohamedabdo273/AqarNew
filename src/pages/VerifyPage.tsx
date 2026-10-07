@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { ShieldCheck, ShieldAlert, Search, CheckCircle2, MinusCircle, MessageCircle } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, Search, CheckCircle2, MinusCircle, MessageCircle, Loader2 } from 'lucide-react';
 import { RealEstateUnit } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { whatsappLink } from '../config/brand';
 import { pick } from '../lib/unitHelpers';
+import { VerifyResult, verifyCode } from '../services/api';
 
 interface VerifyPageProps {
-  units: RealEstateUnit[];
   /** Code from the link (#verify/WHD-…), if any. */
   initialCode: string | null;
   onSelectUnit: (unit: RealEstateUnit) => void;
@@ -15,7 +15,7 @@ interface VerifyPageProps {
 const normalise = (s: string) => s.trim().toUpperCase().replace(/\s+/g, '');
 
 /** Anyone can check a unit code they were sent — the simplest guard against someone using our name on a fake listing. */
-export const VerifyPage: React.FC<VerifyPageProps> = ({ units, initialCode, onSelectUnit }) => {
+export const VerifyPage: React.FC<VerifyPageProps> = ({ initialCode, onSelectUnit }) => {
   const { language, tx, isRTL } = useLanguage();
   const [code, setCode] = useState(initialCode ?? '');
   const [checked, setChecked] = useState<string | null>(initialCode ? normalise(initialCode) : null);
@@ -27,15 +27,32 @@ export const VerifyPage: React.FC<VerifyPageProps> = ({ units, initialCode, onSe
     }
   }, [initialCode]);
 
-  const unit = checked ? units.find((u) => normalise(u.verificationCode) === checked) : undefined;
+  // Checked on the server: it also knows reserved / under-transfer units that aren't in the public list.
+  const [result, setResult] = useState<VerifyResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [failed, setFailed] = useState(false);
+  useEffect(() => {
+    if (!checked) return;
+    let live = true;
+    setLoading(true);
+    setFailed(false);
+    setResult(null);
+    verifyCode(checked)
+      .then((r) => live && setResult(r))
+      .catch(() => live && setFailed(true))
+      .finally(() => live && setLoading(false));
+    return () => {
+      live = false;
+    };
+  }, [checked]);
 
-  const checks = unit
-    ? [
-        { ok: !!unit.verifiedContract, l: tx('العقد أصلي ومراجَع', 'Contract reviewed') },
-        { ok: unit.developerAccountStatementVerified ?? !!unit.verifiedContract, l: tx('المدفوعات متطابقة مع المطور', 'Payments match the developer') },
-        { ok: unit.overpriceAmount === 0, l: tx('من غير أوفر برايس', 'No overprice') },
-      ]
-    : [];
+  const unit: RealEstateUnit | undefined = result?.found && result.unit ? result.unit : undefined;
+  const checkLabels: Record<string, string> = {
+    contract: tx('العقد أصلي ومراجَع', 'Contract reviewed'),
+    payments: tx('المدفوعات متطابقة مع المطور', 'Payments match the developer'),
+    noOverprice: tx('من غير أوفر برايس', 'No overprice'),
+  };
+  const checks = (result?.checks ?? []).map((c) => ({ ok: c.ok, l: checkLabels[c.key] ?? c.key }));
 
   return (
     <div className="page-wrap py-10 sm:py-16 max-w-2xl">
@@ -77,11 +94,27 @@ export const VerifyPage: React.FC<VerifyPageProps> = ({ units, initialCode, onSe
         </button>
       </form>
 
+      {checked && loading && (
+        <div className="mt-8 py-10 grid place-items-center text-muted" aria-busy="true">
+          <Loader2 className="w-7 h-7 animate-spin" />
+        </div>
+      )}
+
+      {checked && failed && (
+        <p role="alert" className="mt-8 rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger">
+          {tx('مش قادرين نوصل للسيرفر دلوقتي، جرّب تاني كمان شوية.', "Can't reach the server right now. Try again shortly.")}
+        </p>
+      )}
+
       {checked && unit && (
         <div className="mt-8 card overflow-hidden">
           <div className="flex items-center gap-3 bg-brand text-white px-5 py-4">
             <ShieldCheck className="w-6 h-6 shrink-0" />
-            <p className="font-bold">{tx('الوحدة دي عندنا ومتراجعة.', 'This unit is listed with us and reviewed.')}</p>
+            <p className="font-bold">
+              {result?.verified
+                ? tx('الوحدة دي عندنا ومتراجعة.', 'This unit is listed with us and reviewed.')
+                : tx('الوحدة دي عندنا، بس مراجعتها لسه ما خلصتش.', "This unit is with us, but its review isn't finished yet.")}
+            </p>
           </div>
           <div className="p-5 flex gap-4">
             <img src={unit.images[0]} alt="" className="w-28 h-24 rounded-xl object-cover shrink-0" />
@@ -112,7 +145,7 @@ export const VerifyPage: React.FC<VerifyPageProps> = ({ units, initialCode, onSe
         </div>
       )}
 
-      {checked && !unit && (
+      {checked && result && !unit && (
         <div className="mt-8 rounded-card border-2 border-danger/40 bg-danger-soft p-5">
           <p className="flex items-center gap-2 font-bold text-danger">
             <ShieldAlert className="w-6 h-6" />

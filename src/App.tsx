@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, ArrowUp, Headset } from 'lucide-react';
+import { MessageCircle, ArrowUp, Headset, Loader2, RefreshCw } from 'lucide-react';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { DEFAULT_BUDGET, Budget, CASH_RANGE, MONTHLY_RANGE } from './components/BudgetFinder';
@@ -31,6 +31,9 @@ import { useScrollReveal } from './lib/useScrollReveal';
 import { PageId, RealEstateUnit } from './types';
 import { useUnits } from './context/UnitsContext';
 import { useLanguage } from './context/LanguageContext';
+import { useAuth } from './context/AuthContext';
+import { SignInSheet } from './components/SignInSheet';
+import { fetchUnit } from './services/api';
 
 /** Pages reachable by a bare hash (#sell, #contact, …). */
 const PAGES: PageId[] = ['home', 'opportunities', 'sell', 'statement', 'compare', 'market-comparisons', 'verify', 'swap', 'contact', 'about', 'rules', 'saved', 'requests', 'privacy', 'terms', 'admin'];
@@ -49,7 +52,8 @@ const THANKS: ThanksKind[] = ['sell', 'statement', 'viewing', 'swap', 'contact',
  *   anything else                  404
  */
 export default function App() {
-  const { units } = useUnits();
+  const { units, unitsStatus, reloadUnits } = useUnits();
+  const { signInOpen } = useAuth();
   const { language, tx } = useLanguage();
   const [activePage, setActivePage] = useState<PageId>('home');
   const [requestCode, setRequestCode] = useState<string | null>(null);
@@ -149,7 +153,21 @@ export default function App() {
   // From a unit page: go back where the visitor came from, or to the listings if they landed here from a shared link.
   const backFromUnit = () => (navigatedInApp.current ? window.history.back() : handleNavigate('opportunities'));
 
-  const selectedUnit = unitId ? units.find((u) => u.id === unitId) ?? null : null;
+  // A unit that isn't in the published list (reserved, or a code instead of an id) is fetched on its own.
+  const [directUnit, setDirectUnit] = useState<{ key: string; unit: RealEstateUnit | null } | null>(null);
+  const listedUnit = unitId ? units.find((u) => u.id === unitId || u.verificationCode === unitId) ?? null : null;
+  useEffect(() => {
+    if (!unitId || listedUnit || unitsStatus !== 'ready' || directUnit?.key === unitId) return;
+    let live = true;
+    fetchUnit(unitId)
+      .then((u) => live && setDirectUnit({ key: unitId, unit: u }))
+      .catch(() => live && setDirectUnit({ key: unitId, unit: null }));
+    return () => {
+      live = false;
+    };
+  }, [unitId, listedUnit, unitsStatus, directUnit?.key]);
+  const selectedUnit = listedUnit ?? (directUnit?.key === unitId ? directUnit.unit : null);
+  const unitLoading = !!unitId && !listedUnit && (unitsStatus === 'loading' || (unitsStatus === 'ready' && directUnit?.key !== unitId));
   const thanksUnit = (thanks.kind === 'viewing' || thanks.kind === 'swap') && thanks.ref ? units.find((u) => u.id === thanks.ref) ?? null : null;
 
   if (activePage === 'admin') {
@@ -165,6 +183,17 @@ export default function App() {
       <Navbar activePage={activePage} onNavigate={handleNavigate} />
 
       <main className="flex-1">
+        {unitsStatus === 'error' && (
+          <div role="alert" className="page-wrap pt-6">
+            <div className="rounded-xl border border-danger/25 bg-danger-soft px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-sm text-ink">
+              <span>{tx('مش قادرين نوصل للسيرفر دلوقتي، فالوحدات مش ظاهرة.', "We can't reach the server right now, so units aren't showing.")}</span>
+              <button onClick={reloadUnits} className="btn-ghost min-h-10 px-4 text-sm">
+                <RefreshCw className="w-4 h-4" />
+                {tx('جرّب تاني', 'Try again')}
+              </button>
+            </div>
+          </div>
+        )}
         {activePage === 'home' && (
           <HomePage
             units={units}
@@ -195,7 +224,11 @@ export default function App() {
           />
         )}
         {activePage === 'unit' &&
-          (selectedUnit ? (
+          (unitLoading ? (
+            <div className="page-wrap py-24 grid place-items-center text-muted" aria-busy="true">
+              <Loader2 className="w-8 h-8 animate-spin" />
+            </div>
+          ) : selectedUnit ? (
             <UnitPage
               unit={selectedUnit}
               units={units}
@@ -227,7 +260,7 @@ export default function App() {
         {activePage === 'requests' && <MyRequestsPage code={requestCode} onOpenRequest={openRequest} onNavigate={handleNavigate} />}
         {activePage === 'compare' && <ComparePage units={units} onSelectUnit={openUnit} onNavigate={handleNavigate} />}
         {activePage === 'market-comparisons' && <MarketComparisonsPage units={units} onSelectUnit={openUnit} onNavigate={handleNavigate} />}
-        {activePage === 'verify' && <VerifyPage units={units} initialCode={verifyCode} onSelectUnit={openUnit} />}
+        {activePage === 'verify' && <VerifyPage initialCode={verifyCode} onSelectUnit={openUnit} />}
         {activePage === 'statement' && <StatementPage onNavigate={handleNavigate} onSent={() => go('thanks/statement')} />}
         {activePage === 'contact' && <ContactPage onNavigate={handleNavigate} onSent={() => go('thanks/contact')} />}
         {activePage === 'about' && <AboutPage onNavigate={handleNavigate} />}
@@ -238,6 +271,8 @@ export default function App() {
       </main>
 
       <Footer onNavigate={handleNavigate} />
+
+      {signInOpen && <SignInSheet />}
 
       {/* Compare tray: shows once a unit is added, until you're on the compare page. */}
       {compareIds.length > 0 && activePage !== 'compare' && (

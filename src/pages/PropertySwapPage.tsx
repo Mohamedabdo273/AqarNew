@@ -8,6 +8,7 @@ import { Field, MoneyInput, Toggle } from '../components/sell/FormBits';
 import { BRAND, whatsappLink } from '../config/brand';
 import { PROPERTY_TYPES, REGIONS, buyerFee, cashPrice, currency, money, monthlyInstallment, pick } from '../lib/unitHelpers';
 import { isResidential, isValidPhone } from '../lib/sellForm';
+import { errorText, sendSwap } from '../services/api';
 
 interface PropertySwapPageProps {
   units: RealEstateUnit[];
@@ -278,6 +279,8 @@ const SwapRequestSheet: React.FC<{
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [tried, setTried] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState('');
   const fee = buyerFee(target);
 
   useEffect(() => {
@@ -290,12 +293,28 @@ const SwapRequestSheet: React.FC<{
     };
   }, [onClose]);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTried(true);
-    if (name.trim().length < 2 || !isValidPhone(phone)) return;
-    // TODO(api): send { targetUnitId, myPaid, myArrears, myMonthly, name, phone } once the backend exists.
-    onSent();
+    if (name.trim().length < 2 || !isValidPhone(phone) || sending) return;
+    setSending(true);
+    setSendError('');
+    try {
+      await sendSwap({
+        targetUnitId: Number(target.id),
+        name: name.trim(),
+        phone: phone.replace(/\s/g, ''),
+        myPaid: myPaid || undefined,
+        myMonthly: myMonthly || undefined,
+        // The API has no field for arrears yet, so they ride along in the notes for the advisor.
+        notes: myArrears > 0 ? `متأخرات على وحدته: ${myArrears.toLocaleString('en-US')} ج.م` : undefined,
+      });
+      onSent();
+    } catch (err) {
+      setSendError(errorText(err));
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -370,10 +389,11 @@ const SwapRequestSheet: React.FC<{
           </div>
         </div>
 
-        <button type="submit" className="btn-primary w-full mt-6 min-h-13">
+        <button type="submit" disabled={sending} className="btn-primary w-full mt-6 min-h-13">
           <Repeat className="w-5 h-5" />
-          {tx('ابعت طلب التبديل', 'Send swap request')}
+          {sending ? tx('بنبعت...', 'Sending...') : tx('ابعت طلب التبديل', 'Send swap request')}
         </button>
+        {sendError && <p role="alert" className="mt-3 text-sm text-danger">{sendError}</p>}
         <p className="mt-3 text-center text-xs text-muted">{tx('الأرقام تقديرية لحد ما نراجع العقدين. مفيش أي التزام دلوقتي.', 'Figures are estimates until both contracts are reviewed. No commitment now.')}</p>
       </form>
     </div>
