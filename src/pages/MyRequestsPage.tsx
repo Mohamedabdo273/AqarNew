@@ -54,8 +54,8 @@ export const MyRequestsPage: React.FC<MyRequestsPageProps> = ({ code, onOpenRequ
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-      <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-ink">{tx('طلباتي', 'My requests')}</h1>
-      <p className="mt-2 text-muted">{tx('تابع وحدتك خطوة بخطوة', 'Follow your unit step by step')}</p>
+      <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-ink">{tx('متابعة طلباتي ووحداتي', 'Track My Requests & Units')}</h1>
+      <p className="mt-2 text-muted">{tx('تابع حالة مراجعة وعرض وحدتك للبيع خطوة بخطوة برقم الطلب', 'Track your unit review & listing status step by step with request code')}</p>
 
       <form
         className="mt-8 flex gap-3"
@@ -73,7 +73,7 @@ export const MyRequestsPage: React.FC<MyRequestsPageProps> = ({ code, onOpenRequ
             setNotFound(false);
           }}
           dir="ltr"
-          placeholder={tx('رقم الطلب — مثلاً WHD-12345', 'Request no. — e.g. WHD-12345')}
+          placeholder={tx('أدخل كود الطلب — مثلاً WHD-12345', 'Enter request code — e.g. WHD-12345')}
           className={`field flex-1 ${isRTL ? 'text-right' : 'text-left'}`}
         />
         <button className="btn-ghost h-13" aria-label={tx('دوّر', 'Find')}>
@@ -85,11 +85,11 @@ export const MyRequestsPage: React.FC<MyRequestsPageProps> = ({ code, onOpenRequ
       {requests.length === 0 ? (
         <div className="mt-8 card p-10 text-center">
           <IlloEmpty className="mx-auto w-20 h-20 text-brand" />
-          <p className="mt-4 font-bold text-lg text-ink">{tx('لسه ما بعتّش طلبات', 'No requests yet')}</p>
-          <p className="mt-1 text-muted">{tx('اعرض وحدتك في دقيقة وتابعها من هنا', 'List your unit in a minute and track it here')}</p>
+          <p className="mt-4 font-bold text-lg text-ink">{tx('لسه ما قدمتش طلب لعرض وحدتك', 'No unit requests submitted yet')}</p>
+          <p className="mt-1 text-muted max-w-md mx-auto">{tx('اعرض وحدتك في دقيقة وهتقدر تتابع كل خطوات المراجعة والمشتري من هنا', 'List your unit in a minute and track all review and buyer steps from here')}</p>
           <button onClick={() => onNavigate('sell')} className="btn-primary mt-6">
             <Tag className="w-5 h-5" />
-            {tx('اعرض وحدتك', 'List your unit')}
+            {tx('اعرض وحدتك للبيع', 'List your unit')}
           </button>
         </div>
       ) : (
@@ -181,7 +181,7 @@ const RequestDetail: React.FC<{ req: SellRequest; onBack: () => void }> = ({ req
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-12">
       <button onClick={onBack} className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted hover:text-ink">
         <Back className="w-4 h-4" />
-        {tx('كل طلباتي', 'All requests')}
+        {tx('كل طلبات وحداتي', 'All my unit requests')}
       </button>
       <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
         <div>

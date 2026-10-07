@@ -292,7 +292,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
         <aside className="lg:col-start-2 lg:row-start-1 lg:sticky lg:top-24 space-y-3">
           <div className="rounded-card bg-brand text-white p-6 shadow-lift">
             {isDeal(unit) && (
-              <div className="-mt-6 -mx-6 mb-5 rounded-t-card bg-gradient-to-r from-amber-600 via-rose-600 to-red-600 px-6 py-3.5 flex items-center justify-between text-white font-black shadow-md">
+              <div className="-mt-6 -mx-6 mb-5 rounded-t-card bg-gradient-to-r from-[#8a3311] via-[#b5562f] to-[#d0693a] px-6 py-3.5 flex items-center justify-between text-white font-black shadow-md">
                 <div className="flex items-center gap-2 text-sm sm:text-base">
                   <Flame className="w-5 h-5 shrink-0 fill-current animate-pulse" />
                   <span>
@@ -313,7 +313,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
             </p>
             {isDeal(unit) && (
               <p className="num mt-1 text-sm text-white/70 font-semibold">
-                {tx('بدل', 'instead of')} <span className="line-through decoration-rose-300 decoration-2">{money(unit.paidCashAmount, language)}</span> {tx('— اللي صاحبها دفعه', '— what the owner paid')}
+                {tx('بدل', 'instead of')} <span className="line-through decoration-[#b5562f] decoration-2">{money(unit.paidCashAmount, language)}</span> {tx('— اللي صاحبها دفعه', '— what the owner paid')}
               </p>
             )}
             {isNegotiable(unit) && (

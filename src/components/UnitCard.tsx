@@ -64,9 +64,9 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
         <div className="absolute inset-x-0 top-0 p-2.5 flex items-start justify-between gap-2 pointer-events-none">
           {/* Prominent High-Contrast Badges */}
           <div className="flex flex-col gap-1.5 items-start pointer-events-auto">
-            {/* 1. Ultra Prominent Discount Badge */}
+            {/* 1. Ultra Prominent Discount Badge - Terracotta / Brick Red (طوبي) */}
             {deal && (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-600 via-rose-600 to-red-600 text-white px-3 py-1 text-xs font-black shadow-md tracking-tight">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#8a3311] via-[#b5562f] to-[#d0693a] text-white px-3 py-1 text-xs font-black shadow-md tracking-tight">
                 <Flame className="w-3.5 h-3.5 fill-current animate-pulse" />
                 <span>{tx(`خصم ${full(discountVal)} ج.م`, `Save ${full(discountVal)} EGP`)}</span>
               </span>
@@ -97,6 +97,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
 
           {/* Quick Action Buttons (Compare & Save) */}
           <div className="flex items-center gap-1.5 pointer-events-auto">
+            {/* Clear, understandable Add to Compare Button */}
             <button
               type="button"
               onClick={(e) => {
@@ -106,15 +107,16 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
                 }
               }}
               aria-pressed={compared}
-              aria-label={compared ? tx('شيلها من المقارنة', 'Remove from comparison') : tx('قارن', 'Compare')}
-              title={compared ? tx('في المقارنة', 'In comparison') : tx('قارن', 'Compare')}
-              className={`grid place-items-center w-8 h-8 rounded-full transition-all shadow-xs ${
+              aria-label={compared ? tx('إزالة من المقارنة', 'Remove from comparison') : tx('أضف للمقارنة', 'Add to comparison')}
+              title={compared ? tx('في المقارنة', 'In comparison') : tx('أضف للمقارنة', 'Add to comparison')}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black transition-all shadow-xs ${
                 compared
-                  ? 'bg-brand text-white'
-                  : 'bg-surface/90 backdrop-blur-xs text-ink-soft hover:bg-surface hover:text-brand'
+                  ? 'bg-brand text-white ring-2 ring-brand/30'
+                  : 'bg-surface/95 backdrop-blur-xs text-ink hover:text-brand hover:bg-surface border border-line'
               }`}
             >
               <Scale className="w-3.5 h-3.5" />
+              <span>{compared ? tx('في المقارنة ✓', 'Compared ✓') : tx('+ أضف للمقارنة', '+ Add to compare')}</span>
             </button>
 
             <button
@@ -129,7 +131,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
               <Heart
                 key={String(saved)}
                 className={`w-3.5 h-3.5 transition-colors ${
-                  saved ? 'fill-danger text-danger heart-pop' : 'text-ink-soft'
+                  saved ? 'fill-[#b5562f] text-[#b5562f] heart-pop' : 'text-ink-soft'
                 }`}
               />
             </button>
@@ -201,7 +203,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
               </span>
               <div className="mt-1">
                 {deal && (
-                  <span className="text-[10px] text-danger font-bold line-through block leading-tight">
+                  <span className="text-[10px] text-[#b5562f] font-bold line-through block leading-tight">
                     {tx('كان', 'was')} {full(unit.paidCashAmount)}
                   </span>
                 )}
@@ -228,10 +230,10 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
 
           {/* Prominent High-Visibility Callout Banners */}
           <div className="mt-2 space-y-1.5">
-            {/* 1. Explicit Seller Discount Callout */}
+            {/* 1. Explicit Seller Discount Callout - Terracotta / Brick Red (طوبي) */}
             {deal && (
-              <div className="flex items-center gap-1.5 rounded-lg bg-rose-500/10 border border-rose-500/25 text-rose-700 dark:text-rose-400 px-2.5 py-1 text-xs font-black">
-                <Flame className="w-3.5 h-3.5 shrink-0 fill-current" />
+              <div className="flex items-center gap-1.5 rounded-lg bg-[#b5562f]/10 border border-[#b5562f]/25 text-[#9c431d] px-2.5 py-1 text-xs font-black">
+                <Flame className="w-3.5 h-3.5 shrink-0 fill-current text-[#b5562f]" />
                 <span>
                   {tx(
                     `خصم ${full(discountVal)} ج.م أقل من اللي دفعه المالك!`,
@@ -264,6 +266,31 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
               </span>
             </div>
           </div>
+        </div>
+
+        {/* Dedicated Clear Compare Button */}
+        <div className="mt-3 pt-2.5 border-t border-line/60">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (!toggleCompare(unit.id)) {
+                window.alert(tx(`تقدر تقارن ${COMPARE_MAX} وحدات بس في المرة.`, `You can compare up to ${COMPARE_MAX} units.`));
+              }
+            }}
+            className={`w-full py-2 px-3 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-2 border ${
+              compared
+                ? 'bg-brand text-white border-brand shadow-xs'
+                : 'bg-paper/70 hover:bg-paper border-line text-ink hover:text-brand hover:border-brand/40'
+            }`}
+          >
+            <Scale className="w-3.5 h-3.5" />
+            <span>
+              {compared
+                ? tx('الوحدة مضافة للمقارنة ✓ (اضغط للإزالة)', 'In comparison ✓ (click to remove)')
+                : tx('أضف للمقارنة مع وحدات تانية', 'Add to compare with others')}
+            </span>
+          </button>
         </div>
 
         {footer}

@@ -481,8 +481,8 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
           <div className="space-y-7">
             <p className="rounded-xl bg-brand-soft px-4 py-3 text-[15px] leading-relaxed text-brand-ink">
               {tx(
-                'المستندات دي بتخلّي المراجعة أسرع، ومش بتظهر لأي مشتري ولا بتتنشر. تقدر تعديها دلوقتي وترفعها بعدين من "طلباتي".',
-                "These speed up the review. They are never shown to buyers or published — you can skip now and upload later from \"My requests\".",
+                'المستندات دي بتخلّي المراجعة أسرع، ومش بتظهر لأي مشتري ولا بتتنشر. تقدر تعديها دلوقتي وترفعها بعدين من "متابعة طلباتي".',
+                "These speed up the review. They are never shown to buyers or published — you can skip now and upload later from \"Track requests\".",
               )}
             </p>
 
@@ -674,7 +674,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               <ShieldCheck className="w-5 h-5 shrink-0" />
               {tx('إيه اللي هيحصل بعد كده؟', 'What happens next?')}
             </p>
-            <p>{tx('هنكلمك خلال يومين، وتقدر تكمّل باقي البيانات من "طلباتي" أو مع المستشار في التليفون.', "We'll call within 2 days. Finish the details from \"My requests\" or with your advisor on the phone.")}</p>
+            <p>{tx('هنكلمك خلال يومين، وتقدر تكمّل باقي البيانات من "متابعة طلباتي" أو مع المستشار في التليفون.', "We'll call within 2 days. Finish the details from \"Track requests\" or with your advisor on the phone.")}</p>
           </div>
         </aside>
       </div>
