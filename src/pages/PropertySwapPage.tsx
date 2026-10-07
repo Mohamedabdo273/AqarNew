@@ -6,7 +6,7 @@ import { UnitCard } from '../components/UnitCard';
 import { Pagination } from '../components/Pagination';
 import { Field, MoneyInput, Toggle } from '../components/sell/FormBits';
 import { BRAND, whatsappLink } from '../config/brand';
-import { PROPERTY_TYPES, REGIONS, cashPrice, currency, money, monthlyInstallment, pick } from '../lib/unitHelpers';
+import { PROPERTY_TYPES, REGIONS, buyerFee, cashPrice, currency, money, monthlyInstallment, pick } from '../lib/unitHelpers';
 import { isResidential, isValidPhone } from '../lib/sellForm';
 
 interface PropertySwapPageProps {
@@ -26,6 +26,8 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
   const { language, tx, isRTL } = useLanguage();
   const [myPaid, setMyPaid] = useState(0);
   const [myMonthly, setMyMonthly] = useState(0);
+  const [hasArrears, setHasArrears] = useState(false);
+  const [arrearsAmount, setArrearsAmount] = useState(0);
   const [wantRegion, setWantRegion] = useState('');
   // 'residential' is a group, not a type: most people swapping out of a home want another home.
   const [wantType, setWantType] = useState('residential');
@@ -33,6 +35,12 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
   const [page, setPage] = useState(1);
   const [target, setTarget] = useState<RealEstateUnit | null>(null);
   const resultsTop = useRef<HTMLDivElement>(null);
+
+  const myArrears = hasArrears ? arrearsAmount : 0;
+  // What actually comes out of selling theirs: what they paid, less the arrears settled at transfer.
+  const myNet = Math.max(0, myPaid - myArrears);
+  // What the new unit really costs: its cash plus our fee on it.
+  const swapDiff = (u: RealEstateUnit) => cashPrice(u) + buyerFee(u) - myNet;
 
   // "Lower monthly" only means something once we know their current monthly.
   const filterLower = lowerOnly && myMonthly > 0;
@@ -47,13 +55,13 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
           filterLower
             ? monthlyInstallment(a) - monthlyInstallment(b)
             : myPaid
-              ? Math.abs(cashPrice(a) - myPaid) - Math.abs(cashPrice(b) - myPaid)
+              ? Math.abs(swapDiff(a)) - Math.abs(swapDiff(b))
               : 0,
         ),
-    [units, wantRegion, wantType, filterLower, myMonthly, myPaid],
+    [units, wantRegion, wantType, filterLower, myMonthly, myPaid, myNet],
   );
 
-  useEffect(() => setPage(1), [wantRegion, wantType, filterLower, myMonthly, myPaid]);
+  useEffect(() => setPage(1), [wantRegion, wantType, filterLower, myMonthly, myPaid, myArrears]);
 
   const totalPages = Math.max(1, Math.ceil(matches.length / PAGE_SIZE));
   const current = Math.min(page, totalPages);
@@ -61,7 +69,7 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
 
   const diffTag = (u: RealEstateUnit) => {
     if (!myPaid) return undefined;
-    const diff = cashPrice(u) - myPaid;
+    const diff = swapDiff(u);
     return {
       strong: diff <= 0,
       label:
@@ -119,6 +127,17 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
           <Field label={tx('قسطك الشهري دلوقتي كام؟', 'Your monthly instalment now')} htmlFor="sw-monthly" hint={tx('لو بتدفع كل 3 شهور، اقسم على 3', 'If you pay quarterly, divide by 3')}>
             <MoneyInput id="sw-monthly" value={myMonthly} onChange={setMyMonthly} placeholder="55,000" />
           </Field>
+          <Toggle
+            tone="danger"
+            label={tx('عليك متأخرات؟', 'Any arrears?')}
+            hint={tx('بتتسدد من فلوس وحدتك يوم التنازل', 'Settled from your unit’s money on transfer day')}
+            on={hasArrears}
+            onChange={setHasArrears}
+          >
+            <Field label={tx('حوالي كام؟', 'Roughly how much?')} htmlFor="sw-arrears">
+              <MoneyInput id="sw-arrears" value={arrearsAmount} onChange={setArrearsAmount} placeholder="80,000" />
+            </Field>
+          </Toggle>
         </div>
 
         <span className="hidden lg:grid self-center place-items-center w-12 h-12 rounded-full bg-brand-soft text-ink">
@@ -229,6 +248,8 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
         <SwapRequestSheet
           target={target}
           myPaid={myPaid}
+          myArrears={myArrears}
+          diff={myPaid ? swapDiff(target) : null}
           myMonthly={myMonthly}
           onClose={() => setTarget(null)}
           onSent={() => {
@@ -246,15 +267,18 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
 const SwapRequestSheet: React.FC<{
   target: RealEstateUnit;
   myPaid: number;
+  myArrears: number;
+  /** New unit's cash + our fee, minus what theirs nets. null until they enter what they paid. */
+  diff: number | null;
   myMonthly: number;
   onClose: () => void;
   onSent: () => void;
-}> = ({ target, myPaid, myMonthly, onClose, onSent }) => {
+}> = ({ target, myPaid, myArrears, diff, myMonthly, onClose, onSent }) => {
   const { language, tx, isRTL } = useLanguage();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [tried, setTried] = useState(false);
-  const diff = myPaid ? cashPrice(target) - myPaid : null;
+  const fee = buyerFee(target);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
@@ -270,7 +294,7 @@ const SwapRequestSheet: React.FC<{
     e.preventDefault();
     setTried(true);
     if (name.trim().length < 2 || !isValidPhone(phone)) return;
-    // TODO(api): send { targetUnitId, myPaid, myMonthly, name, phone } once the backend exists.
+    // TODO(api): send { targetUnitId, myPaid, myArrears, myMonthly, name, phone } once the backend exists.
     onSent();
   };
 
@@ -293,12 +317,23 @@ const SwapRequestSheet: React.FC<{
             <dd className="font-semibold text-ink text-end truncate">{pick(language, target.compound, target.compoundEn)}</dd>
           </div>
           {diff !== null && (
-            <div className="flex justify-between gap-3">
-              <dt className="text-muted">{diff > 0 ? tx('هتدفع فرق', "You'll pay") : tx('هتاخد فرق', "You'll get")}</dt>
-              <dd className="num font-semibold text-ink">
-                {money(Math.abs(diff), language)} {currency(language)}
-              </dd>
-            </div>
+            <>
+              <div className="flex justify-between gap-3">
+                <dt className="text-muted">
+                  {diff > 0 ? tx('هتدفع فرق', "You'll pay") : diff < 0 ? tx('هتاخد فرق', "You'll get") : tx('الفرق', 'Difference')}
+                </dt>
+                <dd className="num font-semibold text-ink">
+                  {diff === 0 ? tx('من غير فرق', 'Even swap') : `${money(Math.abs(diff), language)} ${currency(language)}`}
+                </dd>
+              </div>
+              <p className="text-xs text-muted leading-relaxed">
+                {tx(
+                  `محسوب بعد عمولة الوحدة الجديدة ${money(fee, language)} (${BRAND.buyerFeePercent}% من سعر عقدها)`,
+                  `Includes the new unit's fee of ${money(fee, language)} (${BRAND.buyerFeePercent}% of its contract)`,
+                )}
+                {myArrears > 0 && tx(` وبعد متأخراتك ${money(myArrears, language)}`, ` and your ${money(myArrears, language)} arrears`)}
+              </p>
+            </>
           )}
           <div className="flex justify-between gap-3">
             <dt className="text-muted">{tx('قسطك الجديد تقريباً', 'New monthly, roughly')}</dt>

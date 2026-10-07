@@ -40,7 +40,7 @@ import { IlloForm, IlloKeys, IlloPeople, IlloReview } from '../components/Illust
 import { useAnimatedNumber } from '../lib/useAnimatedNumber';
 import { BRAND, whatsappLink } from '../config/brand';
 import { Budget, BudgetFinder, fitsBudget } from '../components/BudgetFinder';
-import { PROPERTY_TYPES, PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, categoryOfType, REGIONS, SUB_AREAS, subAreasFor, cancellationLoss, currency, isDeal, money, sellerDiscount } from '../lib/unitHelpers';
+import { PROPERTY_TYPES, PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, categoryOfType, REGIONS, SUB_AREAS, subAreasFor, CANCELLATION_PENALTY_MIN_RATE, cancellationLoss, currency, isDeal, money, sellerDiscount } from '../lib/unitHelpers';
 
 interface HomePageProps {
   units: RealEstateUnit[];
@@ -827,10 +827,10 @@ const AREA_PHOTOS: Record<string, string> = {
 
 const RegionsRow: React.FC<{ units: RealEstateUnit[]; onPick: (region: string) => void }> = ({ units, onPick }) => {
   const { tx } = useLanguage();
-  // Every area, busiest first, each with its own area photo.
+  // Every area in the fixed REGIONS order, each with its own area photo.
   const areas = useMemo(
     () =>
-      REGIONS.map((r) => ({ ...r, count: units.filter((u) => u.region === r.ar).length, photo: AREA_PHOTOS[r.ar] })).sort((a, b) => b.count - a.count),
+      REGIONS.map((r) => ({ ...r, count: units.filter((u) => u.region === r.ar).length, photo: AREA_PHOTOS[r.ar] })),
     [units],
   );
   return (
@@ -862,19 +862,24 @@ const HeroCalculator: React.FC = () => {
   const [contract, setContract] = useState(6_000_000);
   const [paid, setPaid] = useState(1_500_000);
   const safePaid = Math.min(paid, contract);
+  // The developer deducts 10–15% of the contract, so the loss is a range.
+  const lossMin = cancellationLoss(contract, safePaid, CANCELLATION_PENALTY_MIN_RATE);
   const loss = cancellationLoss(contract, safePaid);
-  const cancelBack = safePaid - loss;
-  const lostPct = safePaid ? Math.round((loss / safePaid) * 100) : 0;
+  const cancelBackMin = safePaid - loss;
+  const cancelBack = safePaid - lossMin;
+  const pctOf = (n: number) => (safePaid ? Math.round((n / safePaid) * 100) : 0);
+  const shownCancelMin = useAnimatedNumber(cancelBackMin);
   const shownCancel = useAnimatedNumber(cancelBack);
   const shownPaid = useAnimatedNumber(safePaid);
+  const shownLossMin = useAnimatedNumber(lossMin);
   const shownLoss = useAnimatedNumber(loss);
 
   // Native share sheet on phones (WhatsApp is usually first); WhatsApp link elsewhere.
   const share = async () => {
     const url = `${window.location.origin}${window.location.pathname}`;
     const text = tx(
-      `وحدتي بـ ${money(contract, language)} ودفعت ${money(safePaid, language)}.\nلو لغيت مع المطور: ترجعلي ${money(cancelBack, language)} على أقساط — يعني هخسر ${money(loss, language)}.\nلو بعتها عن طريق وحدتي: هقبض ${money(safePaid, language)} كاش.\nإيه رأيك؟`,
-      `My unit is ${money(contract, language)} and I've paid ${money(safePaid, language)}.\nCancelling returns ${money(cancelBack, language)} over years — I'd lose ${money(loss, language)}.\nSelling through Forsa: ${money(safePaid, language)} cash.\nWhat do you think?`,
+      `وحدتي بـ ${money(contract, language)} ودفعت ${money(safePaid, language)}.\nلو لغيت مع المطور: ترجعلي من ${money(cancelBackMin, language)} لـ ${money(cancelBack, language)} على أقساط — يعني هخسر من ${money(lossMin, language)} لـ ${money(loss, language)}.\nلو بعتها عن طريق وحدتي: هقبض ${money(safePaid, language)} كاش.\nإيه رأيك؟`,
+      `My unit is ${money(contract, language)} and I've paid ${money(safePaid, language)}.\nCancelling returns ${money(cancelBackMin, language)}–${money(cancelBack, language)} over years — I'd lose ${money(lossMin, language)}–${money(loss, language)}.\nSelling through Forsa: ${money(safePaid, language)} cash.\nWhat do you think?`,
     );
     if (navigator.share) {
       try {
@@ -900,7 +905,9 @@ const HeroCalculator: React.FC = () => {
             <TrendingDown className="w-4 h-4" />
             {tx('لو لغيت', 'If you cancel')}
           </p>
-          <p className="num font-display mt-1.5 text-xl sm:text-2xl font-bold text-muted line-through decoration-2">{money(shownCancel, language)}</p>
+          <p className="num font-display mt-1.5 text-lg sm:text-xl font-bold text-muted line-through decoration-2">
+            {money(shownCancelMin, language)} – {money(shownCancel, language)}
+          </p>
           <p className="mt-1 text-xs text-muted">{tx('على أقساط لسنين', 'over years')}</p>
         </div>
         <div className="rounded-xl bg-brand text-white p-3.5">
@@ -912,12 +919,15 @@ const HeroCalculator: React.FC = () => {
       {/* الرقم الكبير أول حاجة، وتحته من فين جه: الخصم نسبته من سعر العقد مش من اللي دفعته. */}
       <div className="mt-3 rounded-xl bg-danger-soft px-4 py-3.5 text-danger">
         <p className="text-xl sm:text-2xl font-extrabold leading-snug">
-          {tx(`الإلغاء بيخسّرك ${money(shownLoss, language)}`, `Cancelling costs you ${money(loss, language)}`)}
+          {tx(
+            `الإلغاء بيخسّرك من ${money(shownLossMin, language)} لـ ${money(shownLoss, language)}`,
+            `Cancelling costs you ${money(shownLossMin, language)}–${money(shownLoss, language)}`,
+          )}
         </p>
         <p className="mt-1.5 text-sm sm:text-base font-semibold leading-relaxed text-danger/90">
           {tx(
-            `المطور بيخصم 10–15% من سعر العقد كله — يعني ${lostPct}% من اللي دفعته`,
-            `The developer deducts 10–15% of the whole contract — that's ${lostPct}% of what you paid`,
+            `المطور بيخصم 10–15% من سعر العقد كله — يعني من ${pctOf(lossMin)}% لـ ${pctOf(loss)}% من اللي دفعته`,
+            `The developer deducts 10–15% of the whole contract — that's ${pctOf(lossMin)}–${pctOf(loss)}% of what you paid`,
           )}
         </p>
       </div>

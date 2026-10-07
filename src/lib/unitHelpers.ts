@@ -62,19 +62,21 @@ export const deliveryLabel = (unit: RealEstateUnit, lang: Language): string => {
 
 /** Developers typically deduct 10–15% of the TOTAL contract price on cancellation, refunded over up to ~3 years. */
 export const CANCELLATION_PENALTY_RATE = 0.15;
+/** Low end of the same range — for showing the loss as a 10–15% range. */
+export const CANCELLATION_PENALTY_MIN_RATE = 0.1;
 
 /** What cancelling costs: the penalty on the full contract price, capped at what was actually paid. */
-export const cancellationLoss = (contractPrice: number, paid: number) =>
-  Math.min(paid, Math.round(contractPrice * CANCELLATION_PENALTY_RATE));
+export const cancellationLoss = (contractPrice: number, paid: number, rate = CANCELLATION_PENALTY_RATE) =>
+  Math.min(paid, Math.round(contractPrice * rate));
 
 export const REGIONS: { ar: RealEstateUnit['region']; en: string }[] = [
   { ar: 'القاهرة الكبرى', en: 'Greater Cairo' },
+  { ar: 'الساحل الشمالي', en: 'North Coast' },
+  { ar: 'العين السخنة', en: 'Ain Sokhna' },
   { ar: 'إسكندرية', en: 'Alexandria' },
   { ar: 'دلتا', en: 'Delta' },
   { ar: 'الصعيد', en: 'Upper Egypt' },
   { ar: 'مدن القناة', en: 'Canal cities' },
-  { ar: 'الساحل الشمالي', en: 'North Coast' },
-  { ar: 'العين السخنة', en: 'Ain Sokhna' },
 ];
 
 /** المناطق التفصيلية تحت كل إقليم. عدّل القوايم دي وبس — الفلاتر والفورم بيقروا منها. */
@@ -170,6 +172,7 @@ export const TYPES_BY_CATEGORY: Record<RealEstateUnit['propertyCategory'], { ar:
     { ar: 'توين هاوس', en: 'Twin house' },
     { ar: 'فيلا', en: 'Villa' },
     { ar: 'بنتهاوس', en: 'Penthouse' },
+    { ar: 'أخرى', en: 'Other' },
   ],
   'تجاري': [
     { ar: 'محل', en: 'Retail shop' },

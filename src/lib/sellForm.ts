@@ -1,3 +1,4 @@
+import { categoryOfType } from './unitHelpers';
 import { DeliveryStatus, FinishingType, InstallmentFrequency, PropertyCategory, PropertyType, RealEstateUnit } from '../types';
 
 export type View = 'بحري صريح' | 'بحري شرقي' | 'قبلي' | 'شرقي' | 'غربي';
@@ -143,7 +144,8 @@ export const EMPTY_SELL_FORM: SellForm = {
 
 export const isValidPhone = (phone: string) => /^01\d{9}$/.test(phone.replace(/\s/g, ''));
 
-export const isResidential = (type: PropertyType | '') => !['محل', 'مكتب'].includes(type);
+/** سكني = أي نوع تحت نشاط "سكني". لسه ماختارش نوع → بنعامله سكني (أغلب الوحدات). */
+export const isResidential = (type: PropertyType | '') => !type || categoryOfType(type) === 'سكني';
 
 /** What the seller actually walks away with after deducted dues and any discount they offered. */
 export const netToSeller = (f: SellForm) => {

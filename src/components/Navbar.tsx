@@ -75,7 +75,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
     { ...sell, label: tx('بيع', 'Sell') },
     { ...swap, label: tx('بدّل', 'Swap') },
     buy,
-    { id: 'requests', label: tx('متابعة طلباتي', 'Track Requests'), icon: ClipboardList, badge: requests.length },
+    { id: 'requests', label: tx('حسابي', 'Account'), icon: ClipboardList, badge: requests.length },
   ];
   const menuLinks: Link[] = [
     { id: 'home', label: tx('الرئيسية', 'Home'), icon: Home },
@@ -87,7 +87,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
     { id: 'compare', label: tx('المقارنة', 'Compare'), icon: Scale },
     { id: 'market-comparisons', label: tx('مقارنات السوق', 'Market Comparisons'), icon: Sparkles },
     { id: 'saved', label: tx('المفضلة', 'Saved'), icon: Heart },
-    { id: 'requests', label: tx('متابعة طلباتي', 'Track my requests'), icon: ClipboardList },
+    { id: 'requests', label: tx('حسابي', 'My account'), icon: ClipboardList },
     { id: 'about', label: tx('احنا مين', 'About us'), icon: Info },
   ];
 
@@ -184,7 +184,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
               {openPanel === 'more' && (
                 <div className="absolute top-full mt-2 end-0 w-56 card p-2 shadow-lift z-50">
                   {[
-                    { id: 'requests' as PageId, label: tx('متابعة طلباتي', 'Track my requests'), icon: ClipboardList, n: requests.length },
+                    { id: 'requests' as PageId, label: tx('حسابي', 'My account'), icon: ClipboardList, n: requests.length },
                     { id: 'compare' as PageId, label: tx('المقارنة', 'Compare'), icon: Scale, n: compareIds.length },
                     { id: 'market-comparisons' as PageId, label: tx('مقارنات السوق', 'Market Comparisons'), icon: Sparkles, n: 0 },
                     { id: 'about' as PageId, label: tx('احنا مين', 'About us'), icon: Info, n: 0 },

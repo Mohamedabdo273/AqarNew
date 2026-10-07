@@ -3,7 +3,7 @@ import { AlertTriangle, ShieldCheck, TrendingDown, Clock, ScrollText, Send, Chec
 import { PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useRequests } from '../context/RequestsContext';
-import { PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, REGIONS, SUB_AREAS, cancellationLoss, currency, money } from '../lib/unitHelpers';
+import { PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, REGIONS, SUB_AREAS, CANCELLATION_PENALTY_MIN_RATE, cancellationLoss, currency, money } from '../lib/unitHelpers';
 import { DeliveryStatus } from '../types';
 import { EMPTY_SELL_FORM, SellForm, isValidPhone, netToSeller } from '../lib/sellForm';
 import { ChipSelect, CheckBox, Field, FilePick, FilePickMany, MoneyInput, Toggle } from '../components/sell/FormBits';
@@ -113,10 +113,10 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
     if (target === 1) {
       if (!form.region) e.push(tx('المنطقة', 'Area'));
       if (form.region && !form.subArea) e.push(tx('المنطقة بالتحديد', 'Which part'));
-      if (!form.propertyCategory) e.push(tx('التصنيف', 'Category'));
-      if (form.propertyCategory && !form.propertyType) e.push(tx('الصنف (نوع الوحدة)', 'Type'));
       if (!form.developer.trim()) e.push(tx('المطور', 'Developer'));
       if (!form.compound.trim()) e.push(tx('الكمبوند', 'Compound'));
+      if (!form.propertyCategory) e.push(tx('النشاط', 'Activity'));
+      if (form.propertyCategory && !form.propertyType) e.push(tx('نوع الوحدة', 'Unit type'));
       if (form.alreadyDelivered === null) e.push(tx('موقف الاستلام (تم الاستلام بالفعل؟)', 'Delivery status (Already received?)'));
       if (form.alreadyDelivered === false && !form.deliveryDate && !form.deliveryStatus) {
         e.push(tx('تحديد تاريخ الاستلام المتوقع', 'Select expected delivery date'));
@@ -228,7 +228,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
       {/* الثلاثة دول مكاسب مش تفاصيل — كل واحد في كارت لوحده عشان يتقروا بنظرة. */}
       <ul className="mt-6 grid sm:grid-cols-3 gap-3">
         {[
-          { icon: Coins, t: tx('باللي دفعته', 'What you paid'), d: tx('تبيع بسعرك، أو تبدّلها بوحدة تانية', 'Sell at your price, or swap it') },
+          { icon: Coins, t: tx('الى دفعته', 'What you paid'), d: tx('تبيع بسعرك، أو تبدّلها بوحدة تانية', 'Sell at your price, or swap it') },
           { icon: TrendingDown, t: tx('تتباع أسرع', 'Sells faster'), d: tx('تقدر تعمل خصم أو تقبل التفاوض', 'Add a discount or accept offers') },
           { icon: EyeOff, t: tx('في سرية', 'Private'), d: tx('اسمك ورقمك مش بيتنشروا', 'Your name and number stay private') },
         ].map((b) => (
@@ -324,8 +324,18 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
             </Field>
           )}
 
-          {/* 2. الصنف والتصنيف */}
-          <Field label={tx('التصنيف', 'Category')} required>
+          {/* 2. المطور والكمبوند */}
+          <div className="grid sm:grid-cols-2 gap-4">
+            <Field label={tx('المطور', 'Developer')} required htmlFor="dev">
+              <input id="dev" value={form.developer} onChange={(e) => set('developer', e.target.value)} placeholder={tx('مثلاً: بالم هيلز', 'e.g. Palm Hills')} className="field" />
+            </Field>
+            <Field label={tx('الكمبوند', 'Compound')} required htmlFor="cmp">
+              <input id="cmp" value={form.compound} onChange={(e) => set('compound', e.target.value)} placeholder={tx('مثلاً: بالم هيلز نيو كايرو', 'e.g. Palm Hills New Cairo')} className="field" />
+            </Field>
+          </div>
+
+          {/* 3. النشاط ونوع الوحدة */}
+          <Field label={tx('النشاط', 'Activity')} required>
             <ChipSelect
               options={L(PROPERTY_CATEGORIES)}
               value={form.propertyCategory}
@@ -336,7 +346,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
             />
           </Field>
           {form.propertyCategory && (
-            <Field label={tx('الصنف (نوع الوحدة)', 'Property Type')} required>
+            <Field label={tx('نوع الوحدة', 'Unit type')} required>
               <ChipSelect
                 options={(TYPES_BY_CATEGORY[form.propertyCategory] ?? []).map((o) => ({ value: o.ar, label: language === 'ar' ? o.ar : o.en }))}
                 value={form.propertyType}
@@ -344,16 +354,6 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               />
             </Field>
           )}
-
-          {/* 3. المطور والكمبوند */}
-          <div className="grid sm:grid-cols-2 gap-4">
-            <Field label={tx('المطور', 'Developer')} required htmlFor="dev">
-              <input id="dev" value={form.developer} onChange={(e) => set('developer', e.target.value)} placeholder={tx('مثلاً: بالم هيلز', 'e.g. Palm Hills')} className="field" />
-            </Field>
-            <Field label={tx('الكمبوند', 'Compound')} required htmlFor="cmp">
-              <input id="cmp" value={form.compound} onChange={(e) => set('compound', e.target.value)} placeholder={tx('مثلاً: بالم هيلز نيو كايرو', 'e.g. Palm Hills New Cairo')} className="field" />
-            </Field>
-          </div>
 
           {/* 4. تم الاستلام بالفعل (نعم / لا) */}
           <div className="rounded-xl border border-line bg-surface p-5 space-y-4">
@@ -462,7 +462,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
             on={form.hasLatePenalties}
             onChange={(v) => set('hasLatePenalties', v)}
           >
-            <Field label={tx('حوالي كام؟ (لو تعرف)', 'Roughly how much? (if you know)')} htmlFor="fines">
+            <Field label={tx('حوالي كام؟', 'Roughly how much? (if you know)')} htmlFor="fines">
               <MoneyInput id="fines" value={form.latePenaltiesAmount} onChange={(n) => set('latePenaltiesAmount', n)} placeholder="80,000" />
             </Field>
           </Toggle>
@@ -481,7 +481,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
           <div className="space-y-7">
             <p className="rounded-xl bg-brand-soft px-4 py-3 text-[15px] leading-relaxed text-brand-ink">
               {tx(
-                'المستندات دي بتخلّي المراجعة أسرع، ومش بتظهر لأي مشتري ولا بتتنشر. تقدر تعديها دلوقتي وترفعها بعدين من "متابعة طلباتي".',
+                'المستندات دي بتخلّي المراجعة أسرع، ومش بتظهر لأي مشتري ولا بتتنشر.',
                 "These speed up the review. They are never shown to buyers or published — you can skip now and upload later from \"Track requests\".",
               )}
             </p>
@@ -660,8 +660,13 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
                 <div className="mt-5 rounded-xl bg-danger-soft p-4 flex items-center gap-3">
                   <TrendingDown className="w-5 h-5 text-danger shrink-0" />
                   <p className="text-sm text-ink-soft">
-                    {tx('لو لغيت مع المطور ممكن تخسر', 'Cancelling could cost you')}{' '}
-                    <span className="num font-bold text-danger">{money(cancellationLoss(form.contractPrice, form.paidAmount), language)}</span>
+                    {tx('لو لغيت مع المطور ممكن تخسر من', 'Cancelling could cost you')}{' '}
+                    <span className="num font-bold text-danger">
+                      {money(cancellationLoss(form.contractPrice, form.paidAmount, CANCELLATION_PENALTY_MIN_RATE), language)}
+                      {tx(' لـ ', ' – ')}
+                      {money(cancellationLoss(form.contractPrice, form.paidAmount), language)}
+                    </span>
+                    <span className="block text-xs text-muted mt-0.5">{tx('(10% – 15% من سعر الوحدة)', '(10–15% of the unit price)')}</span>
                   </p>
                 </div>
               </>
@@ -674,7 +679,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               <ShieldCheck className="w-5 h-5 shrink-0" />
               {tx('إيه اللي هيحصل بعد كده؟', 'What happens next?')}
             </p>
-            <p>{tx('هنكلمك خلال يومين، وتقدر تكمّل باقي البيانات من "متابعة طلباتي" أو مع المستشار في التليفون.', "We'll call within 2 days. Finish the details from \"Track requests\" or with your advisor on the phone.")}</p>
+            <p>{tx('هنكلمك خلال يوم عمل، وتقدر تكمّل باقي البيانات من "متابعة طلباتي" أو مع المستشار في التليفون.', "We'll call within one business day. Finish the details from \"Track requests\" or with your advisor on the phone.")}</p>
           </div>
         </aside>
       </div>

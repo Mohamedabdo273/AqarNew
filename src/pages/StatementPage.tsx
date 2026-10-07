@@ -19,7 +19,7 @@ import {
 import { PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { whatsappLink } from '../config/brand';
-import { cancellationLoss, currency, money } from '../lib/unitHelpers';
+import { CANCELLATION_PENALTY_MIN_RATE, cancellationLoss, currency, money } from '../lib/unitHelpers';
 import { isValidPhone } from '../lib/sellForm';
 import { Field, FilePick, MoneyInput, Toggle } from '../components/sell/FormBits';
 
@@ -50,7 +50,9 @@ export const StatementPage: React.FC<StatementPageProps> = ({ onNavigate, onSent
 
   const validMoney = contract > 0 && paid > 0 && paid <= contract;
   const fines = late ? lateAmount : 0;
-  const cancelBack = validMoney ? paid - cancellationLoss(contract, paid) : 0;
+  // The developer deducts 10–15% of the contract, so what comes back is a range.
+  const cancelBackMin = validMoney ? paid - cancellationLoss(contract, paid) : 0;
+  const cancelBack = validMoney ? paid - cancellationLoss(contract, paid, CANCELLATION_PENALTY_MIN_RATE) : 0;
   const sellBack = validMoney ? Math.max(0, paid - fines) : 0;
 
   const submit = (e: React.FormEvent) => {
@@ -373,11 +375,11 @@ export const StatementPage: React.FC<StatementPageProps> = ({ onNavigate, onSent
                     </span>
                     <span className="text-[10px] text-danger font-semibold">{tx('خصم وخسارة', 'Loss')}</span>
                   </div>
-                  <dd className="num font-display mt-1 text-2xl font-bold text-muted line-through decoration-danger decoration-2">
-                    {money(cancelBack, language)}
+                  <dd className="num font-display mt-1 text-xl font-bold text-muted line-through decoration-danger decoration-2">
+                    {money(cancelBackMin, language)} – {money(cancelBack, language)}
                   </dd>
                   <p className="text-[11px] text-muted mt-1 leading-snug">
-                    {tx('المطور بيخصم نسبة وغالباً الاسترداد بيقعد لسنين', 'Deductions apply, refund often delayed')}
+                    {tx('المطور بيخصم من 10% لـ 15% من سعر الوحدة، وغالباً الاسترداد بيقعد لسنين', 'The developer deducts 10–15% of the unit price, and refunds often take years')}
                   </p>
                 </div>
 

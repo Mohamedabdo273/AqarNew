@@ -344,7 +344,7 @@ export const UnitsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     };
 
     setInquiries((prev) => [newInquiry, ...prev]);
-    showToast('تمام! هنكلمك خلال يومين');
+    showToast('تمام! هنكلمك خلال يوم عمل');
   };
 
   return (
