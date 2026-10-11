@@ -40,7 +40,7 @@ import { IlloForm, IlloKeys, IlloPeople, IlloReview } from '../components/Illust
 import { useAnimatedNumber } from '../lib/useAnimatedNumber';
 import { BRAND, whatsappLink } from '../config/brand';
 import { Budget, BudgetFinder, fitsBudget } from '../components/BudgetFinder';
-import { PROPERTY_TYPES, PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, categoryOfType, REGIONS, SUB_AREAS, subAreasFor, CANCELLATION_PENALTY_MIN_RATE, cancellationLoss, currency, isDeal, money, sellerDiscount } from '../lib/unitHelpers';
+import { PROPERTY_TYPES, PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, categoryOfType, REGIONS, SUB_AREAS, subAreasFor, CANCELLATION_PENALTY_MIN_RATE, cancellationLoss, cashPrice, currency, isDeal, money, sellerDiscount } from '../lib/unitHelpers';
 
 interface HomePageProps {
   units: RealEstateUnit[];
@@ -430,6 +430,11 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </section>
 
+      {/* ───────── 1b''. How it works — right after the promises, before anything to browse ───────── */}
+      <div className="mt-10 sm:mt-12">
+        <HowItWorks />
+      </div>
+
       {/* ───────── 1c. Areas, as photos ───────── */}
       <RegionsRow units={units} onPick={(r) => onSearch({ filters: { regions: [r] } })} />
 
@@ -569,9 +574,6 @@ export const HomePage: React.FC<HomePageProps> = ({
 
       {/* ───────── 6. Money safety ───────── */}
       <RulesPreview onOpenRules={onOpenRules} />
-
-      {/* ───────── 7. Steps ───────── */}
-      <HowItWorks />
 
       {/* ───────── 8. FAQ ───────── */}
       <Faq />
@@ -825,30 +827,74 @@ const AREA_PHOTOS: Record<string, string> = {
   'العين السخنة': areaPhoto('1519046904884-53103b34b206'), // sea under the mountains
 };
 
+/*
+ * Regions as a "where are the deals" overview — the search bar already filters by region, so this row adds what the
+ * bar can't: how many units, the lowest cash to get in, and the biggest discount. A click opens that region's listings
+ * (an empty one opens the "alert me" form). All regions stay in one row, in the fixed REGIONS order.
+ */
 const RegionsRow: React.FC<{ units: RealEstateUnit[]; onPick: (region: string) => void }> = ({ units, onPick }) => {
-  const { tx } = useLanguage();
-  // Every area in the fixed REGIONS order, each with its own area photo.
+  const { language, tx } = useLanguage();
   const areas = useMemo(
     () =>
-      REGIONS.map((r) => ({ ...r, count: units.filter((u) => u.region === r.ar).length, photo: AREA_PHOTOS[r.ar] })),
+      REGIONS.map((r, i) => {
+        const inRegion = units.filter((u) => u.region === r.ar);
+        return {
+          ...r,
+          tint: AREA_TINTS[i % AREA_TINTS.length],
+          photo: AREA_PHOTOS[r.ar],
+          count: inRegion.length,
+          minCash: inRegion.length ? Math.min(...inRegion.map(cashPrice)) : 0,
+          maxDiscount: inRegion.reduce((m, u) => Math.max(m, sellerDiscount(u)), 0),
+        };
+      }),
     [units],
   );
+  const name = (r: (typeof areas)[number]) => tx(AREA_SHORT[r.ar]?.[0] ?? r.ar, AREA_SHORT[r.ar]?.[1] ?? r.en);
+  const unitsLabel = (n: number) =>
+    tx(n === 1 ? 'وحدة واحدة' : n === 2 ? 'وحدتين' : `${n} ${n > 10 ? 'وحدة' : 'وحدات'}`, `${n} ${n === 1 ? 'unit' : 'units'}`);
+
   return (
     <section className="page-wrap pt-10 sm:pt-12">
-      <h2 className="text-2xl sm:text-[2rem] font-bold text-brand">{tx('المناطق', 'Areas')}</h2>
-      <div className="mt-5 -mx-4 px-4 sm:mx-0 sm:px-0 flex lg:justify-between gap-5 sm:gap-7 overflow-x-auto no-scrollbar pb-1">
-        {areas.map((r, i) => (
-          <button key={r.ar} onClick={() => onPick(r.ar)} className="group flex flex-col items-center gap-1.5 shrink-0">
-            <span
-              className="block w-20 h-20 sm:w-28 sm:h-28 rounded-full overflow-hidden ring-2 ring-transparent ring-offset-2 ring-offset-paper group-hover:ring-brand transition"
-              style={{ backgroundColor: AREA_TINTS[i % AREA_TINTS.length] }}
-            >
-              {r.photo && <img src={r.photo} alt="" loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />}
+      <h2 className="text-2xl sm:text-[2rem] font-bold text-brand">{tx('فين الفرص دلوقتي؟', 'Where the deals are')}</h2>
+      <p className="mt-1 text-muted">{tx('دوس على المنطقة وشوف وحداتها', 'Tap a region to see its units')}</p>
+
+      <div className="mt-6 -mx-4 px-4 sm:mx-0 sm:px-0 flex lg:justify-between gap-5 sm:gap-7 overflow-x-auto no-scrollbar pb-1">
+        {areas.map((r) => (
+          <button
+            key={r.ar}
+            onClick={() => onPick(r.ar)}
+            title={r.count ? undefined : tx('سيب رقمك ونبلّغك أول ما تنزل وحدة هنا', "Leave your number and we'll tell you when one is listed")}
+            className="group flex flex-col items-center shrink-0 text-center"
+          >
+            <span className="relative">
+              <span
+                className={`block w-20 h-20 sm:w-28 sm:h-28 rounded-full overflow-hidden ring-2 ring-transparent ring-offset-2 ring-offset-paper group-hover:ring-brand transition ${r.count ? '' : 'opacity-70 group-hover:opacity-100'}`}
+                style={{ backgroundColor: r.tint }}
+              >
+                {r.photo && <img src={r.photo} alt="" loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />}
+              </span>
+              {r.count > 0 && (
+                <span className="absolute -bottom-1 start-1/2 -translate-x-1/2 rtl:translate-x-1/2 whitespace-nowrap rounded-full bg-brand px-2.5 py-0.5 text-xs font-bold text-white shadow-xs">
+                  {unitsLabel(r.count)}
+                </span>
+              )}
             </span>
-            <span className="mt-0.5 text-sm font-semibold text-ink-soft group-hover:text-brand">{tx(AREA_SHORT[r.ar]?.[0] ?? r.ar, AREA_SHORT[r.ar]?.[1] ?? r.en)}</span>
-            <span className="text-xs text-muted">
-              {r.count > 0 ? tx(r.count === 1 ? 'وحدة واحدة' : r.count === 2 ? 'وحدتين' : `${r.count} ${r.count > 10 ? 'وحدة' : 'وحدات'}`, `${r.count} ${r.count === 1 ? 'unit' : 'units'}`) : tx('قريباً', 'Soon')}
-            </span>
+            <span className="mt-3 text-sm sm:text-base font-bold text-ink group-hover:text-brand">{name(r)}</span>
+            {r.count > 0 ? (
+              <>
+                <span className="mt-0.5 text-xs sm:text-sm text-muted">
+                  {tx('كاش من', 'Cash from')} <span className="num font-bold text-brand">{money(r.minCash, language)}</span>
+                </span>
+                {r.maxDiscount > 0 && (
+                  <span className="text-xs text-muted">
+                    {tx('خصم لحد', 'Up to')} <span className="num font-bold text-accent">{money(r.maxDiscount, language)}</span>
+                    {language === 'en' && ' off'}
+                  </span>
+                )}
+              </>
+            ) : (
+              <span className="mt-0.5 text-xs sm:text-sm text-muted">{tx('قريباً', 'Soon')}</span>
+            )}
           </button>
         ))}
       </div>
@@ -1208,7 +1254,7 @@ const SellerPromises: React.FC<{ onStatement: () => void }> = ({ onStatement }) 
 
 const HowItWorks: React.FC = () => {
   const { tx } = useLanguage();
-  const [tab, setTab] = useState<'sell' | 'buy'>('sell');
+  const [tab, setTab] = useState<'sell' | 'buy' | 'swap'>('sell');
 
   const steps =
     tab === 'sell'
@@ -1218,11 +1264,18 @@ const HowItWorks: React.FC = () => {
           { illo: IlloPeople, icon: Users, t: tx('نوصلك بمشتري جاد', 'We find a serious buyer'), d: tx('واسمك ورقمك مش بيظهروا', 'Your name and number stay hidden') },
           { illo: IlloKeys, icon: Handshake, t: tx('تتنازل وتقبض', 'Transfer & get paid'), d: tx('في مقر المطور بشيك مصرفي', 'At the developer, by bank cheque') },
         ]
-      : [
+      : tab === 'buy'
+      ? [
           { illo: IlloForm, icon: Wallet, t: tx('حدد ميزانيتك', 'Set your budget'), d: tx('الكاش اللي معاك والقسط اللي يريحك', 'Your cash and a comfortable monthly') },
           { illo: IlloPeople, icon: UserCheck, t: tx('عاين ببلاش', 'Free viewing'), d: tx('بنرتبها معاك', 'We arrange it') },
           { illo: IlloReview, icon: ShieldCheck, t: tx('اطمن على الورق', 'Check the papers'), d: tx('العقد والمديونية متراجعين', 'Contract & dues verified') },
           { illo: IlloKeys, icon: Handshake, t: tx('استلم باسمك', 'Take it over'), d: tx('تنازل رسمي وتكمّل الأقساط', 'Official transfer, continue the plan') },
+        ]
+      : [
+          { illo: IlloForm, icon: FileCheck2, t: tx('قولنا وحدتك وعاوز إيه', 'Tell us your unit and what you want'), d: tx('اللي دفعته وقسطك، والمنطقة والنوع', 'What you paid, your monthly, area and type') },
+          { illo: IlloPeople, icon: ArrowLeftRight, t: tx('اختار الوحدة الجديدة', 'Pick the new unit'), d: tx('قسطها يريحك، وبتشوف الفرق قبل ما تقرر', 'A monthly you can manage — see the difference first') },
+          { illo: IlloReview, icon: ShieldCheck, t: tx('نراجع العقدين', 'We check both contracts'), d: tx('ونلاقي مشتري لوحدتك بسعر اللي دفعته', 'And find a buyer for yours at what you paid') },
+          { illo: IlloKeys, icon: Handshake, t: tx('تنازلين مع بعض', 'Two transfers, together'), d: tx('تدفع أو تاخد الفرق بس', 'You just settle the difference') },
         ];
 
   return (
@@ -1231,13 +1284,13 @@ const HowItWorks: React.FC = () => {
         <SectionTitle center kicker={tx('إزاي بنشتغل', 'How it works')} title={tx('4 خطوات وبس', 'Four steps, that’s it')} />
         <div className="mt-6 flex justify-center">
           <div className="inline-flex p-1 rounded-full bg-paper border border-line">
-            {(['sell', 'buy'] as const).map((k) => (
+            {(['sell', 'buy', 'swap'] as const).map((k) => (
               <button
                 key={k}
                 onClick={() => setTab(k)}
                 className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-colors ${tab === k ? 'bg-brand text-white' : 'text-ink-soft hover:text-brand'}`}
               >
-                {k === 'sell' ? tx('للبايع', 'Sellers') : tx('للمشتري', 'Buyers')}
+                {k === 'sell' ? tx('للبايع', 'Sellers') : k === 'buy' ? tx('للمشتري', 'Buyers') : tx('للبدل', 'Swap')}
               </button>
             ))}
           </div>

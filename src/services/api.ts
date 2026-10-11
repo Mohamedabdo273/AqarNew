@@ -298,6 +298,20 @@ export const requestOtp = (phone: string) => request<{ success: boolean }>('/aut
 
 export const verifyOtp = (phone: string, code: string) => request<AuthResponse>('/auth/otp/verify', json('POST', { phone, code }));
 
+/** Sign-up, step 1: checks the details (409 if the phone already has a password) and sends the code. */
+export const startRegistration = (body: { fullName: string; phone: string; password: string }) =>
+  request<{ success: boolean }>('/auth/register/start', json('POST', body));
+
+/** Sign-up, step 2: same details plus the code. */
+export const register = (body: { fullName: string; phone: string; password: string; code: string }) =>
+  request<AuthResponse>('/auth/register', json('POST', body));
+
+export const login = (phone: string, password: string) => request<AuthResponse>('/auth/login', json('POST', { phone, password }));
+
+/** "Forgot password": after requestOtp, the code sets a new password and signs in. */
+export const resetPassword = (body: { phone: string; code: string; newPassword: string }) =>
+  request<AuthResponse>('/auth/password/reset', json('POST', body));
+
 export const fetchMe = () => request<AccountUser>('/auth/me');
 
 export const updateMe = (body: { fullName: string; email?: string | null }) => request<AccountUser>('/auth/me', json('PUT', body));

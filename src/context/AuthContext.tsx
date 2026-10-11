@@ -2,14 +2,17 @@ import React, { createContext, useCallback, useContext, useEffect, useState, Rea
 import {
   AccountUser,
   ApiError,
+  AuthResponse,
   fetchMe,
   getSession,
+  login as loginRequest,
   logoutSession,
   onSessionChange,
+  register,
   requestOtp,
+  resetPassword as resetPasswordRequest,
   setSession,
-  updateMe,
-  verifyOtp,
+  startRegistration,
 } from '../services/api';
 
 interface AuthContextType {
@@ -17,11 +20,16 @@ interface AuthContextType {
   isAuthenticated: boolean;
   /** True while a saved session is being checked on load. */
   checking: boolean;
-  /** Sends a WhatsApp code to the phone. Throws ApiError (e.g. too many requests). */
-  sendCode: (phone: string) => Promise<void>;
-  /** Signs in with the code. Returns whether the account still needs a name. */
-  confirmCode: (phone: string, code: string) => Promise<{ needsName: boolean }>;
-  saveName: (fullName: string) => Promise<void>;
+  /** Phone + password. Throws ApiError (401 for a wrong phone or password). */
+  login: (phone: string, password: string) => Promise<void>;
+  /** Sign-up step 1: checks the details and sends a code to the phone. 409 if the phone already has an account. */
+  startSignUp: (fullName: string, phone: string, password: string) => Promise<void>;
+  /** Sign-up step 2: the code from the phone creates the account and signs in. */
+  finishSignUp: (fullName: string, phone: string, password: string, code: string) => Promise<void>;
+  /** "Forgot password", step 1: sends a code to the phone. */
+  sendResetCode: (phone: string) => Promise<void>;
+  /** "Forgot password", step 2: the code sets the new password and signs in. */
+  resetPassword: (phone: string, code: string, newPassword: string) => Promise<void>;
   logout: () => Promise<void>;
   /** Opens the sign-in sheet from anywhere (navbar, saving a favorite, …). */
   openSignIn: () => void;
@@ -30,9 +38,6 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-/** A first-time account is created with the phone as its name until the visitor gives one. */
-const hasNoName = (u: AccountUser) => !u.fullName.trim() || u.fullName.replace(/\D/g, '') === u.phone.replace(/\D/g, '');
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AccountUser | null>(null);
@@ -60,20 +65,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // A session that dies mid-use (refresh rejected) signs the visitor out here too.
   useEffect(() => onSessionChange((s) => !s && setUser(null)), []);
 
-  const sendCode = async (phone: string) => {
+  const signIn = (auth: AuthResponse) => {
+    setSession({ accessToken: auth.accessToken, refreshToken: auth.refreshToken, expiresAt: auth.expiresAt });
+    setUser(auth.user);
+  };
+
+  const login = async (phone: string, password: string) => signIn(await loginRequest(phone, password));
+
+  const startSignUp = async (fullName: string, phone: string, password: string) => {
+    await startRegistration({ fullName, phone, password });
+  };
+
+  const finishSignUp = async (fullName: string, phone: string, password: string, code: string) =>
+    signIn(await register({ fullName, phone, password, code }));
+
+  const sendResetCode = async (phone: string) => {
     await requestOtp(phone);
   };
 
-  const confirmCode = async (phone: string, code: string) => {
-    const auth = await verifyOtp(phone, code);
-    setSession({ accessToken: auth.accessToken, refreshToken: auth.refreshToken, expiresAt: auth.expiresAt });
-    setUser(auth.user);
-    return { needsName: hasNoName(auth.user) };
-  };
-
-  const saveName = async (fullName: string) => {
-    setUser(await updateMe({ fullName, email: user?.email ?? null }));
-  };
+  const resetPassword = async (phone: string, code: string, newPassword: string) =>
+    signIn(await resetPasswordRequest({ phone, code, newPassword }));
 
   const logout = async () => {
     const s = getSession();
@@ -87,7 +98,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated: !!user, checking, sendCode, confirmCode, saveName, logout, openSignIn, closeSignIn, signInOpen }}
+      value={{ user, isAuthenticated: !!user, checking, login, startSignUp, finishSignUp, sendResetCode, resetPassword, logout, openSignIn, closeSignIn, signInOpen }}
     >
       {children}
     </AuthContext.Provider>

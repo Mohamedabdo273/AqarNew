@@ -7,62 +7,28 @@ interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-/** Standalone square icon mark for tight places (favicon, admin login, etc.) */
-export const LogoMark: React.FC<{ size?: number; className?: string; light?: boolean }> = ({
-  size = 38,
-  className,
-  light,
-}) => {
-  const accent = '#b5562f';
-  const bg = light ? 'rgba(255,255,255,0.15)' : '#1e3a5f';
-  const fg = '#ffffff';
+/** The mark on its own: a terracotta circle with a white "ف". Works as the app/tab icon too. */
+export const LogoMark: React.FC<{ size?: number; className?: string; light?: boolean }> = ({ size = 38, className }) => (
+  <svg width={size} height={size} viewBox="0 0 44 44" className={className} aria-hidden="true">
+    <circle cx="22" cy="22" r="22" fill="#b5562f" />
+    <text x="22" y="29.5" textAnchor="middle" fontFamily="'El Messiri', serif" fontWeight={700} fontSize="25" fill="#ffffff">
+      ف
+    </text>
+  </svg>
+);
 
-  return (
-    <svg width={size} height={size} viewBox="0 0 44 44" className={className} fill="none" aria-hidden="true">
-      <rect width="44" height="44" rx="12" fill={bg} />
-      {/* Architectural Doorway / Portal */}
-      <path
-        d="M13 33V17C13 13.6863 15.6863 11 19 11H25C28.3137 11 31 13.6863 31 17V33"
-        stroke={fg}
-        strokeWidth="3.5"
-        strokeLinecap="round"
-      />
-      {/* Inner Key / Exit Arrow Step */}
-      <path d="M22 17V26" stroke={accent} strokeWidth="3.5" strokeLinecap="round" />
-      <circle cx="22" cy="29" r="2.5" fill={accent} />
-      <rect x="10" y="32" width="24" height="3" rx="1.5" fill={fg} />
-    </svg>
-  );
+const SIZES = {
+  sm: { mark: 'w-9 h-9', en: 'text-[24px]', ar: 'text-[12px]' },
+  md: { mark: 'w-11 h-11 sm:w-[52px] sm:h-[52px]', en: 'text-[28px] sm:text-[34px]', ar: 'text-[13px] sm:text-[15px]' },
+  lg: { mark: 'w-16 h-16', en: 'text-[46px]', ar: 'text-[20px]' },
 };
 
 /**
- * Platform Logo:
- * English (FORSA) on top and larger, with Arabic (فرصة) underneath.
+ * Circle mark + "forsa" as the big word, with "فرصة" small underneath.
+ * `light` is for dark backgrounds (footer): white words, the circle keeps its terracotta.
  */
-export const Logo: React.FC<LogoProps> = ({
-  onClick,
-  light = false,
-  className = '',
-  size = 'md',
-}) => {
-  const primaryColor = light ? 'text-white' : 'text-brand';
-  const accentColor = light ? 'text-white/80' : 'text-accent';
-
-  const isLg = size === 'lg';
-  const isSm = size === 'sm';
-
-  const engSize = isLg
-    ? 'text-3xl sm:text-4xl'
-    : isSm
-    ? 'text-lg sm:text-xl'
-    : 'text-2xl sm:text-[26px]';
-
-  const arSize = isLg
-    ? 'text-sm sm:text-base'
-    : isSm
-    ? 'text-[10px]'
-    : 'text-xs sm:text-[13px]';
-
+export const Logo: React.FC<LogoProps> = ({ onClick, light = false, className = '', size = 'md' }) => {
+  const s = SIZES[size];
   return (
     <div
       onClick={onClick}
@@ -72,19 +38,22 @@ export const Logo: React.FC<LogoProps> = ({
       className={`inline-flex items-center gap-2.5 sm:gap-3 shrink-0 cursor-pointer select-none group focus:outline-hidden ${className}`}
       aria-label="FORSA - فرصة"
     >
-      <LogoMark
-        size={isLg ? 48 : isSm ? 32 : 40}
-        light={light}
-        className="group-hover:scale-105 transition-transform duration-200"
-      />
-      <div className="flex flex-col text-start leading-none">
-        <span className={`font-display font-black tracking-tight ${engSize} ${primaryColor} group-hover:text-brand-light transition-colors`}>
-          FORSA
+      <LogoMark className={`${s.mark} shrink-0 transition-transform duration-200 group-hover:scale-105`} />
+      <span className="flex flex-col items-start leading-none">
+        <span
+          dir="ltr"
+          className={`${s.en} font-extrabold tracking-[-0.03em] leading-[0.95] ${light ? 'text-white' : 'text-brand'}`}
+          style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+        >
+          forsa
         </span>
-        <span className={`mt-0.5 font-bold font-display ${arSize} ${accentColor} tracking-widest`}>
-          فـُـرصــة
+        <span
+          className={`${s.ar} mt-0.5 leading-none ${light ? 'text-white/70' : 'text-accent'}`}
+          style={{ fontFamily: "'El Messiri', serif", fontWeight: 700 }}
+        >
+          فرصة
         </span>
-      </div>
+      </span>
     </div>
   );
 };
