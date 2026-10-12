@@ -282,7 +282,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               {tx('تنازل رسمي في مقر المطور · من غير عمولة عليك', 'Official transfer at the developer · no fee for you')}
             </p>
             <h1 style={{ animationDelay: '80ms' }} className="hero-in mt-4 text-[2.4rem] sm:text-5xl lg:text-6xl font-extrabold leading-[1.22] text-white [text-shadow:0_2px_16px_rgb(0_0_0/0.55)]">
-              {tx('اللي بيبيع بياخد فلوسه، واللي بيشتري بياخد ', 'Sellers get their money back, buyers get ')}
+              {tx('اللي بيبيع بياخد كل اللي دفعه، واللي بيشتري بياخد ', 'Sellers get back everything they paid, buyers get ')}
               <br className="sm:hidden" />
               <span className="text-accent-light">
                 <span className="relative inline-block">
