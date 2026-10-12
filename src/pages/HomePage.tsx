@@ -282,11 +282,12 @@ export const HomePage: React.FC<HomePageProps> = ({
               {tx('تنازل رسمي في مقر المطور · من غير عمولة عليك', 'Official transfer at the developer · no fee for you')}
             </p>
             <h1 style={{ animationDelay: '80ms' }} className="hero-in mt-4 text-[2.4rem] sm:text-5xl lg:text-6xl font-extrabold leading-[1.22] text-white [text-shadow:0_2px_16px_rgb(0_0_0/0.55)]">
-              {tx('اللي بيبيع بياخد كل اللي دفعه، واللي بيشتري بياخد ', 'Sellers get back everything they paid, buyers get ')}
-              <br className="sm:hidden" />
+              {/* نص الجملة للبايع والنص التاني للمشتري — كل واحد بلونه عشان كل طرف يلاقي سطره بنظرة */}
+              <span className="text-white">{tx('البايع ياخد كل اللي دفعه،', 'Sellers get back everything they paid,')}</span>
+              <br className="sm:hidden" />{' '}
               <span className="text-accent-light">
                 <span className="relative inline-block">
-                  {tx('سعر يوم التعاقد.', 'the original contract price.')}
+                  {tx('والمشتري ياخد سعر يوم التعاقد.', 'buyers get the original contract price.')}
                   <svg aria-hidden="true" viewBox="0 0 200 20" preserveAspectRatio="none" className="underline-draw absolute -bottom-2 inset-x-0 w-full h-3 sm:h-4">
                     <path d="M4 14C40 6 90 4 130 7s56 6 66 4" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" />
                   </svg>
@@ -301,6 +302,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                   'بيع وحدتك من غير أوفر واسترجع فلوسك كاش، بدل ما تخاطر بخسارة توصل لـ 10–15% من سعر الوحدة كلها في الإلغاء حسب عقدك. ',
                   'sell your unit with no overprice and get your money back in cash, instead of risking a loss of 10–15% of the whole contract price on cancellation, depending on your contract. ',
                 )}
+                <br/>
                 {tx('ولو بتدوّر على وحدة: ', 'And if you are looking for a unit: ')}
                 {tx(
                   'اشتري بسعر يوم التعاقد — أرخص من سعر السوق — وكمّل نفس الأقساط. كل الأرقام متحققة من العقد والإيصالات، وإحنا معاك في إجراءات التنازل خطوة بخطوة لحد ما تقبض.',
