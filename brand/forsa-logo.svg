@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 140" width="1040" height="280">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;800&amp;display=swap');
+    .w { font-family: 'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif; }
+  </style>
+  <!-- Mark: house outline with a handshake inside (orange) -->
+  <g transform="translate(10 18)" fill="none" stroke="#f26a0a" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 44L54 7l48 37" stroke-width="10"/>
+    <path d="M17 37v53h74V37" stroke-width="10"/>
+    <g transform="translate(31 34) scale(1.9)" stroke-width="2.4">
+      <path d="M11 17l2 2a1 1 0 1 0 3-3"/>
+      <path d="M14 14l2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4"/>
+      <path d="M21 3l1 11h-2"/>
+      <path d="M3 3L2 14l6.5 6.5a1 1 0 1 0 3-3"/>
+      <path d="M3 4h8"/>
+    </g>
+  </g>
+  <!-- Wordmark: FORSA navy, tagline orange -->
+  <text class="w" x="132" y="86" font-weight="800" font-size="76" fill="#1e3a5f" letter-spacing="1">FORSA</text>
+  <text class="w" x="135" y="116" font-weight="600" font-size="16" fill="#f26a0a" letter-spacing="3.4">REAL ESTATE SOLUTIONS</text>
+</svg>

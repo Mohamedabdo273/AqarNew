@@ -1,4 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44">
-  <circle cx="22" cy="22" r="22" fill="#b5562f"/>
-  <text x="22" y="30" text-anchor="middle" font-size="26" font-weight="700" fill="#ffffff" font-family="'El Messiri', 'Segoe UI', 'Arabic Typesetting', sans-serif">ف</text>
+  <rect width="44" height="44" rx="10" fill="#f26a0a"/>
+  <g fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M7 21L22 9.5 37 21" stroke-width="4"/>
+    <path d="M11 18.5v17h22v-17" stroke-width="4"/>
+    <path d="M16.5 27.5l3 3 3-3 3 3 2-2" stroke-width="2.6"/>
+  </g>
 </svg>

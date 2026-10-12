@@ -28,7 +28,6 @@ import {
   MessageCircle,
   Share2,
   Check,
-  X,
   Search,
   KeyRound,
 } from 'lucide-react';
@@ -122,7 +121,7 @@ const Slider: React.FC<{ label: string; value: number; min: number; max: number;
   );
 };
 
-/* قايمة فلتر واحدة. بتتخفي لو مفيش غير خيار واحد — فلتر بخيار واحد مالوش لازمة. */
+/* قايمة فلتر واحدة. الخيارات اللي مفيهاش وحدات بتفضل ظاهرة بس مقفولة ومكتوب جنبها not available. */
 const FilterSelect: React.FC<{
   label: string;
   allLabel: string;
@@ -131,7 +130,7 @@ const FilterSelect: React.FC<{
   onPick: (v: string) => void;
   options: { value: string; label: string; count: number }[];
 }> = ({ label, allLabel, allCount, value, onPick, options }) => {
-  if (options.length < 2) return null;
+  if (options.length === 0) return null;
   return (
     <label className="block">
       <span className="block mb-1.5 text-sm font-semibold text-muted">{label}</span>
@@ -140,8 +139,8 @@ const FilterSelect: React.FC<{
           {allLabel} ({allCount})
         </option>
         {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label} ({o.count})
+          <option key={o.value} value={o.value} disabled={o.count === 0}>
+            {o.count > 0 ? `${o.label} (${o.count})` : `${o.label} — not available`}
           </option>
         ))}
       </select>
@@ -209,7 +208,8 @@ export const HomePage: React.FC<HomePageProps> = ({
   const [cardCategory, setCardCategory] = useState('');
   const [cardType, setCardType] = useState('');
 
-  /** بيعدّ وحدات كل خيار، ويرجّع اللي فيها وحدات بس — بالترتيب الرسمي للقايمة. */
+  /** بيعدّ وحدات كل خيار ويرجّع القايمة كاملة بالترتيب الرسمي — حتى الخيارات اللي عدادها صفر،
+      عشان الزباين تشوف إيه اللي إحنا بنغطيه حتى لو مفيش وحدة متاحة دلوقتي. */
   type Opt = { ar: string; en: string };
   const tally = (list: RealEstateUnit[], key: (u: RealEstateUnit) => string | undefined, order: readonly Opt[]) => {
     const counts = new Map<string, number>();
@@ -217,7 +217,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       const k = key(u);
       if (k) counts.set(k, (counts.get(k) ?? 0) + 1);
     });
-    return order.filter((o) => counts.has(o.ar)).map((o) => ({ o, count: counts.get(o.ar) as number }));
+    return order.map((o) => ({ o, count: counts.get(o.ar) ?? 0 }));
   };
 
   const regionsShown = useMemo(() => tally(featured, (u) => u.region, REGIONS), [featured]);
@@ -282,57 +282,72 @@ export const HomePage: React.FC<HomePageProps> = ({
               {tx('تنازل رسمي في مقر المطور · من غير عمولة عليك', 'Official transfer at the developer · no fee for you')}
             </p>
             <h1 style={{ animationDelay: '80ms' }} className="hero-in mt-4 text-[2.4rem] sm:text-5xl lg:text-6xl font-extrabold leading-[1.22] text-white [text-shadow:0_2px_16px_rgb(0_0_0/0.55)]">
-              {tx('اتأخرت في الأقساط؟', 'Behind on installments?')}{' '}
+              {tx('اللي بيبيع بياخد فلوسه، واللي بيشتري بياخد ', 'Sellers get their money back, buyers get ')}
               <br className="sm:hidden" />
               <span className="text-accent-light">
-                {tx('استرد اللي دفعته ', 'Get back all ')}
                 <span className="relative inline-block">
-                  {tx('كامل.', 'you paid.')}
+                  {tx('سعر يوم التعاقد.', 'the original contract price.')}
                   <svg aria-hidden="true" viewBox="0 0 200 20" preserveAspectRatio="none" className="underline-draw absolute -bottom-2 inset-x-0 w-full h-3 sm:h-4">
                     <path d="M4 14C40 6 90 4 130 7s56 6 66 4" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" />
                   </svg>
                 </span>
               </span>
             </h1>
+            {/* الشرح: سطر لكل طرف — مش فقرة واحدة تضم الاتنين، عشان كل واحد يلاقي سطره بسرعة. */}
+            <div style={{ animationDelay: '140ms' }} className="hero-in mt-5 max-w-3xl [text-shadow:0_2px_12px_rgb(0_0_0/0.6)]">
+              <p className="text-lg sm:text-xl text-white leading-relaxed">
+                {tx('لو مش قادر تكمّل أقساطك: ', "If you can't keep up with the instalments: ")}
+                {tx(
+                  'بيع وحدتك من غير أوفر واسترجع فلوسك كاش، بدل ما تخاطر بخسارة توصل لـ 10–15% من سعر الوحدة كلها في الإلغاء حسب عقدك. ',
+                  'sell your unit with no overprice and get your money back in cash, instead of risking a loss of 10–15% of the whole contract price on cancellation, depending on your contract. ',
+                )}
+                {tx('ولو بتدوّر على وحدة: ', 'And if you are looking for a unit: ')}
+                {tx(
+                  'اشتري بسعر يوم التعاقد — أرخص من سعر السوق — وكمّل نفس الأقساط. كل الأرقام متحققة من العقد والإيصالات، وإحنا معاك في إجراءات التنازل خطوة بخطوة لحد ما تقبض.',
+                  'buy at the original contract price — below market — and continue the same instalments. Every number is checked against the contract and receipts, and we walk you through the transfer, step by step, until you are paid.',
+                )}
+              </p>
+            </div>
+
             {/* The 3 key promises transformed into sleek micro-cards spanning full width */}
-            <div style={{ animationDelay: '160ms' }} className="hero-in mt-6 sm:mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 w-full">
-              <div className="flex items-center gap-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-md p-3 sm:p-3.5 transition shadow-sm">
-                <div className="w-10 h-10 rounded-xl bg-accent-light/20 border border-accent-light/30 flex items-center justify-center shrink-0 text-accent-light">
-                  <ShieldCheck className="w-5 h-5" />
+            <div style={{ animationDelay: '220ms' }} className="hero-in mt-6 sm:mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 w-full">
+              <div className="flex items-center gap-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-md p-4 sm:p-5 transition shadow-sm">
+                <div className="w-14 h-14 rounded-xl bg-accent-light/20 border border-accent-light/30 flex items-center justify-center shrink-0 text-accent-light">
+                  <ShieldCheck className="w-7 h-7" />
                 </div>
                 <div>
-                  <span className="block text-sm sm:text-base font-extrabold text-white leading-tight">
+                  <span className="block text-lg sm:text-xl font-extrabold text-white leading-tight">
                     {tx('ما تلغيش وتخسر', "Don't cancel & lose")}
                   </span>
-                  <span className="block text-xs sm:text-[13px] text-white/85 font-medium leading-snug mt-0.5">
-                    {tx('بنبيع وحدتك بسعر اللي دفعته', 'Sold for what you paid')}
+                  <span className="block text-[15px] sm:text-[17px] text-white/90 font-medium leading-snug mt-1">
+                    {tx('بنبيع وحدتك بالسعر اللي دفعته', 'Sold for what you paid')}
                   </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-md p-3 sm:p-3.5 transition shadow-sm">
-                <div className="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-400/30 flex items-center justify-center shrink-0 text-amber-300">
-                  <Receipt className="w-5 h-5" />
+              <div className="flex items-center gap-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-md p-4 sm:p-5 transition shadow-sm">
+                <div className="w-14 h-14 rounded-xl bg-accent-light/20 border border-accent-light/30 flex items-center justify-center shrink-0 text-accent-light">
+                  <Receipt className="w-7 h-7" />
                 </div>
                 <div>
-                  <span className="block text-sm sm:text-base font-extrabold text-white leading-tight">
+                  <span className="block text-lg sm:text-xl font-extrabold text-white leading-tight">
                     {tx('عليك متأخرات؟', 'Have arrears?')}
                   </span>
-                  <span className="block text-xs sm:text-[13px] text-white/85 font-medium leading-snug mt-0.5">
+                  <span className="block text-[15px] sm:text-[17px] text-white/90 font-medium leading-snug mt-1">
                     {tx('بتتخصم عادي يوم التنازل', 'Deducted on transfer day')}
                   </span>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-md p-3 sm:p-3.5 transition shadow-sm">
-                <div className="w-10 h-10 rounded-xl bg-emerald-400/20 border border-emerald-400/30 flex items-center justify-center shrink-0 text-emerald-300">
-                  <EyeOff className="w-5 h-5" />
+              <div className="flex items-center gap-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-md p-4 sm:p-5 transition shadow-sm">
+                <div className="w-14 h-14 rounded-xl bg-accent-light/20 border border-accent-light/30 flex items-center justify-center shrink-0 text-accent-light">
+                  <EyeOff className="w-7 h-7" />
                 </div>
                 <div>
-                  <span className="block text-sm sm:text-base font-extrabold text-white leading-tight">
+                  <span className="block text-lg sm:text-xl font-extrabold text-white leading-tight">
                     {tx('سرية وأمان', '100% Confidential')}
                   </span>
-                  <span className="block text-xs sm:text-[13px] text-white/85 font-medium leading-snug mt-0.5">
+                  <span className="block text-[15px] sm:text-[17px] text-white/90 font-medium leading-snug mt-1">
                     {tx('محدش هيعرف إنك بتبيع', 'No one knows you sell')}
                   </span>
                 </div>
@@ -355,7 +370,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 icon: Receipt,
                 t: tx('عليك متأخرات؟', 'Behind on dues?'),
                 d: tx('بتتخصم تلقائياً يوم التنازل', 'Deducted directly on transfer day'),
-                color: 'text-amber-600 bg-amber-500/10',
+                color: 'text-accent bg-accent-soft',
               },
               {
                 icon: EyeOff,
@@ -395,7 +410,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               <button
                 type="button"
                 onClick={() => onNavigate('sell')}
-                className="btn-primary min-h-11 px-5 text-sm font-bold shadow-xs"
+                className="btn-accent min-h-11 px-5 text-sm font-bold shadow-xs"
               >
                 <Tag className="w-4 h-4" />
                 <span>{tx('اعرض وحدتك', 'List your unit')}</span>
@@ -450,7 +465,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             <p className="text-sm text-ink-soft">
               {matching.length > 0 ? (
                 <>
-                  <span className="num font-display text-2xl font-bold text-ink">{matching.length}</span> {tx('وحدة على قد ميزانيتك', 'units fit your budget')}
+                  <span className="num font-display text-2xl font-bold text-ink">{matching.length}</span> {tx('عرض متتفوتش', "offers you shouldn't miss")}
                 </>
               ) : (
                 tx('زوّد الميزانية شوية', 'Try a higher budget')
@@ -476,7 +491,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 'Developers deduct 10–15% of the whole contract on cancellation and refund the rest in instalments. Try your numbers.',
               )}
             />
-            <button onClick={() => onNavigate('sell')} className="btn-primary rounded-full mt-6">
+            <button onClick={() => onNavigate('sell')} className="btn-accent rounded-full mt-6">
               <Tag className="w-5 h-5" />
               {tx('اعرض وحدتك', 'List your unit')}
             </button>
@@ -490,7 +505,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className="page-wrap py-14 sm:py-20">
           <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
             <SectionTitle
-              title={matching.length > 0 ? tx('على قد ميزانيتك', 'Within your budget') : tx('وحدات بسعر زمان', 'Units at old prices')}
+              title={matching.length > 0 ? tx('عروض متتفوتش', "Offers you shouldn't miss") : tx('وحدات بسعر زمان', 'Units at old prices')}
               sub={tx('موثّقة ومراجَعة قبل النشر — واللي عليها خصم من صاحبها الأول', 'Verified before listing — owner discounts first')}
             />
             <div className="flex flex-wrap items-center gap-3">
@@ -530,8 +545,8 @@ export const HomePage: React.FC<HomePageProps> = ({
               options={subAreasShown.map((x) => ({ value: x.o.ar, label: language === 'ar' ? x.o.ar : x.o.en, count: x.count }))}
             />
             <FilterSelect
-              label={tx('التصنيف', 'Category')}
-              allLabel={tx('كل التصنيفات', 'All categories')}
+              label={tx('الأنشطة', 'Activity')}
+              allLabel={tx('كل الأنشطة', 'All activities')}
               allCount={afterSubArea.length}
               value={cardCategory}
               onPick={(v) => {
@@ -542,7 +557,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             />
             <FilterSelect
               label={tx('النوع', 'Type')}
-              allLabel={tx('كل الأنواع', 'All types')}
+              allLabel={tx('كل أنواع الوحدات', 'All unit types')}
               allCount={afterCategory.length}
               value={cardType}
               onPick={setCardType}
@@ -720,10 +735,10 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
                     setCategory(e.target.value);
                     setType(''); // التصنيف اتغير، فالنوع القديم مابقاش تحته
                   }}
-                  aria-label={tx('التصنيف', 'Category')}
+                  aria-label={tx('الأنشطة', 'Activity')}
                   className="field h-14"
                 >
-                  <option value="">{tx('كل التصنيفات', 'All categories')}</option>
+                  <option value="">{tx('كل الأنشطة', 'All activities')}</option>
                   {PROPERTY_CATEGORIES.map((c) => (
                     <option key={c.ar} value={c.ar}>
                       {language === 'ar' ? c.ar : c.en}
@@ -756,7 +771,12 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
               <div className="flex flex-wrap items-center gap-2 pt-1">
                 <span className="text-sm text-muted">{tx('بحث سريع:', 'Quick:')}</span>
                 {quick.map((q) => (
-                  <button key={q.label} type="button" onClick={() => onSearch(q.s)} className="chip-off">
+                  <button
+                    key={q.label}
+                    type="button"
+                    onClick={() => onSearch(q.s)}
+                    className="chip font-semibold bg-brand-soft border-brand/35 text-brand-ink hover:border-brand hover:bg-brand/15"
+                  >
                     <q.icon className="w-4 h-4 text-brand" />
                     {q.label}
                   </button>
@@ -1076,11 +1096,12 @@ const ThreeWays: React.FC<{ onSell: () => void }> = ({ onSell }) => {
                         <Check className="w-3.5 h-3.5" strokeWidth={3.5} />
                       </div>
                     ) : pt.bad ? (
-                      <div className="w-5 h-5 rounded-full bg-danger/10 text-danger flex items-center justify-center shrink-0 mt-1">
-                        <X className="w-3.5 h-3.5" strokeWidth={2.5} />
+                      /* حلقة فاتحة جوّاها دايرة مصمتة — من غير علامة، اللون لوحده بيقول إنها نقطة ضعف */
+                      <div className="w-7 h-7 rounded-full bg-danger/10 flex items-center justify-center shrink-0 mt-0.5">
+                        <span className="block w-3.5 h-3.5 rounded-full bg-danger" />
                       </div>
                     ) : (
-                      <span className="w-5 shrink-0" />
+                      <span className="w-7 shrink-0" />
                     )}
                     <span className="min-w-0">
                       <span className={`block ${w.ours ? 'text-xs sm:text-sm font-bold text-brand-ink' : 'text-xs text-muted'}`}>
@@ -1098,16 +1119,12 @@ const ThreeWays: React.FC<{ onSell: () => void }> = ({ onSell }) => {
         </div>
 
         <div className="mt-12 text-center flex flex-col items-center">
-          <button onClick={onSell} className="btn-primary min-h-13 px-8 text-base font-bold shadow-lg hover:shadow-xl transition">
+          <button onClick={onSell} className="btn-accent min-h-13 px-8 text-base font-bold shadow-lg hover:shadow-xl transition">
             <Tag className="w-5 h-5" />
             <span>{tx('اعرض وحدتك الآن', 'List your unit now')}</span>
           </button>
 
-          <div className="mt-6 inline-flex items-center justify-center gap-2 rounded-2xl bg-paper/90 border border-line px-5 py-3 shadow-xs max-w-2xl">
-            <span className="text-sm sm:text-base font-bold text-ink leading-relaxed">
-              ⚠️ {tx('نسب الإلغاء والعمولات بتختلف من مطور ومن سمسار للتاني.', 'Cancellation rates and commissions vary from one developer and broker to another.')}
-            </span>
-          </div>
+          
         </div>
       </div>
     </section>
@@ -1324,7 +1341,7 @@ const RulesPreview: React.FC<{ onOpenRules: (tab: 'seller' | 'buyer') => void }>
     { icon: Ban, t: tx('صفر أوفر برايس', 'Zero overprice'), d: tx('السعر هو اللي البايع دفعه، مش جنيه زيادة', 'The price is what the seller paid') },
     { icon: FileText, t: tx('المديونية مكتوبة', 'Dues in writing'), d: tx('أي متأخرات بتظهر في الإعلان', 'Any overdues shown on the listing') },
     { icon: UserCheck, t: tx('ملّاك بس', 'Owners only'), d: tx('بنتعامل مع صاحب الوحدة، مش سماسرة', 'We deal with owners, not brokers') },
-    { icon: Percent, t: tx(`المشتري ${BRAND.buyerFeePercent}% بس`, `Buyers pay ${BRAND.buyerFeePercent}% only`), d: tx('وبعد توقيع التنازل. البايع صفر.', 'After signing. Sellers pay nothing.') },
+    { icon: Percent, t: tx(`المشتري ${BRAND.buyerFeePercent}% عموله بس`, `Buyers pay ${BRAND.buyerFeePercent}% only`), d: tx('وبعد توقيع التنازل. البايع صفر.', 'After signing. Sellers pay nothing.') },
   ];
   return (
     <section className="page-wrap py-14 sm:py-20">

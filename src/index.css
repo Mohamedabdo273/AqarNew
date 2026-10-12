@@ -30,10 +30,13 @@
   --color-sand: #e6dccb;
   --color-sand-soft: #efe9dd;
 
-  /* The single accent: terracotta. At most one or two touches per screen. */
-  --color-accent: #b5562f; /* white text 4.6:1 */
-  --color-accent-soft: #f6e9e2;
-  --color-accent-light: #f0a27f; /* for accent text on the dark sections */
+  /* The single accent: the logo's orange. At most one or two touches per screen.
+     The logo orange itself (#f26a0a) is only 3:1 with white, so text and white-on-orange use a deeper shade of it. */
+  --color-accent: #cc4e08; /* text, and fills under white text — 4.5:1 with white */
+  --color-accent-bright: #f26a0a; /* the logo orange: icons, shapes, decoration — not body text */
+  --color-accent-ink: #9a3a06; /* orange text on accent-soft / light orange tints */
+  --color-accent-soft: #fdeee3;
+  --color-accent-light: #ff8a3d; /* accent text on the dark navy sections — close to the logo orange, still readable on navy */
 
   --color-danger: #b42318;
   --color-danger-soft: #fdecea;
@@ -88,6 +91,10 @@
 }
 @utility btn-primary {
   @apply btn bg-brand text-white hover:bg-brand-hover;
+}
+/* The seller's main action ("اعرض وحدتك") — the logo's orange, used once per section at most. */
+@utility btn-accent {
+  @apply btn bg-accent text-white hover:bg-accent-ink;
 }
 @utility btn-ghost {
   @apply btn bg-surface text-ink border border-line-strong hover:border-ink-soft;
