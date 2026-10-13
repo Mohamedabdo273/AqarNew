@@ -21,7 +21,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onSignedIn, onBackToSite
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !password) {
-      setError(tx('اكتب الإيميل والباسورد', 'Enter your email and password'));
+      setError(tx('اكتب الإيميل وكلمة السر', 'Enter your email and password'));
       return;
     }
     setBusy(true);
@@ -29,7 +29,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onSignedIn, onBackToSite
     const result = await adminSignIn(email.trim(), password);
     setBusy(false);
     if (result === 'ok') onSignedIn();
-    else if (result === 'invalid') setError(tx('الإيميل أو الباسورد غلط', 'Wrong email or password'));
+    else if (result === 'invalid') setError(tx('الإيميل أو كلمة السر غلط', 'Wrong email or password'));
     else setError(tx('الدخول مش متاح دلوقتي. جرّب تاني بعد شوية.', "Sign-in isn't available right now. Try again shortly."));
   };
 
@@ -60,7 +60,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onSignedIn, onBackToSite
           </div>
           <div>
             <label htmlFor="a-pass" className="label">
-              {tx('الباسورد', 'Password')}
+              {tx('كلمة السر', 'Password')}
             </label>
             <div className="relative">
               <input
@@ -75,7 +75,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({ onSignedIn, onBackToSite
               <button
                 type="button"
                 onClick={() => setShow((s) => !s)}
-                aria-label={show ? tx('إخفاء الباسورد', 'Hide password') : tx('إظهار الباسورد', 'Show password')}
+                aria-label={show ? tx('إخفاء كلمة السر', 'Hide password') : tx('إظهار كلمة السر', 'Show password')}
                 className="absolute inset-y-0 end-0 grid place-items-center w-12 text-muted hover:text-ink"
               >
                 {show ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}

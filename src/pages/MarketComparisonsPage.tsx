@@ -83,7 +83,7 @@ export const MarketComparisonsPage: React.FC<MarketComparisonsPageProps> = ({
       subtitleEn: 'Side-by-side comparison of prime apartments in New Cairo and surrounding compounds',
       tag: tx('القاهرة الجديدة', 'New Cairo'),
       filter: (all) => {
-        const matching = all.filter((u) => u.region === 'القاهرة الكبرى' || u.location.includes('التجمع') || u.location.includes('القاهرة الجديدة'));
+        const matching = all.filter((u) => u.region === 'قاهرة' || u.region === 'جيزة' || u.location.includes('التجمع') || u.location.includes('القاهرة الجديدة'));
         return matching.slice(0, COMPARE_MAX);
       },
     },
@@ -102,7 +102,7 @@ export const MarketComparisonsPage: React.FC<MarketComparisonsPageProps> = ({
             u.location.includes('أكتوبر') ||
             u.compound.includes('زايد') ||
             u.compound.includes('أكتوبر') ||
-            u.region === 'القاهرة الكبرى'
+            u.region === 'قاهرة' || u.region === 'جيزة'
         );
         return matching.slice(0, COMPARE_MAX);
       },

@@ -30,6 +30,7 @@ import {
   Check,
   Search,
   KeyRound,
+  MapPin,
 } from 'lucide-react';
 import { Filters, SortKey } from '../lib/unitFilters';
 import { PageId, RealEstateUnit } from '../types';
@@ -39,7 +40,7 @@ import { IlloForm, IlloKeys, IlloPeople, IlloReview } from '../components/Illust
 import { useAnimatedNumber } from '../lib/useAnimatedNumber';
 import { BRAND, whatsappLink } from '../config/brand';
 import { Budget, BudgetFinder, fitsBudget } from '../components/BudgetFinder';
-import { PROPERTY_TYPES, PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, categoryOfType, REGIONS, SUB_AREAS, subAreasFor, CANCELLATION_PENALTY_MIN_RATE, cancellationLoss, cashPrice, currency, isDeal, money, sellerDiscount } from '../lib/unitHelpers';
+import { PROPERTY_TYPES, PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, categoryOf, REGIONS, SUB_AREAS, subAreasFor, CANCELLATION_PENALTY_MIN_RATE, cancellationLoss, cashPrice, currency, isDeal, money, sellerDiscount } from '../lib/unitHelpers';
 
 interface HomePageProps {
   units: RealEstateUnit[];
@@ -238,12 +239,12 @@ export const HomePage: React.FC<HomePageProps> = ({
     [afterRegion, cardSubArea],
   );
   const categoriesShown = useMemo(
-    () => tally(afterSubArea, (u) => categoryOfType(u.propertyType), PROPERTY_CATEGORIES),
+    () => tally(afterSubArea, (u) => categoryOf(u), PROPERTY_CATEGORIES),
     [afterSubArea],
   );
 
   const afterCategory = useMemo(
-    () => (cardCategory ? afterSubArea.filter((u) => categoryOfType(u.propertyType) === cardCategory) : afterSubArea),
+    () => (cardCategory ? afterSubArea.filter((u) => categoryOf(u) === cardCategory) : afterSubArea),
     [afterSubArea, cardCategory],
   );
   const typesShown = useMemo(
@@ -294,19 +295,25 @@ export const HomePage: React.FC<HomePageProps> = ({
                 </span>
               </span>
             </h1>
-            {/* الشرح: سطر لكل طرف — مش فقرة واحدة تضم الاتنين، عشان كل واحد يلاقي سطره بسرعة. */}
-            <div style={{ animationDelay: '140ms' }} className="hero-in mt-5 max-w-3xl [text-shadow:0_2px_12px_rgb(0_0_0/0.6)]">
-              <p className="text-lg sm:text-xl text-white leading-relaxed">
-                {tx('لو مش قادر تكمّل أقساطك: ', "If you can't keep up with the instalments: ")}
+            {/* الشرح: فقرة لكل طرف، كل واحدة بمقدمة بارزة بلونها.
+                كانت فقرة واحدة بـ <br/> في نُصّها، فالكلام كان بيبقى كتلة واحدة. */}
+            <div style={{ animationDelay: '140ms' }} className="hero-in mt-6 max-w-3xl space-y-4 [text-shadow:0_2px_12px_rgb(0_0_0/0.6)]">
+              <p className="text-lg sm:text-xl text-white/95 leading-[1.85]">
+                <span className="font-bold text-accent-light">
+                  {tx('لو مش قادر تكمّل أقساطك:', "Can't keep up with the instalments?")}{' '}
+                </span>
                 {tx(
-                  'بيع وحدتك من غير أوفر واسترجع فلوسك كاش، بدل ما تخاطر بخسارة توصل لـ 10–15% من سعر الوحدة كلها في الإلغاء حسب عقدك. ',
-                  'sell your unit with no overprice and get your money back in cash, instead of risking a loss of 10–15% of the whole contract price on cancellation, depending on your contract. ',
+                  'بيع وحدتك من غير أوفر واسترجع فلوسك كاش، بدل ما تخاطر بخسارة توصل لـ 10–15% من سعر الوحدة كلها في الإلغاء حسب عقدك.',
+                  'Sell your unit with no overprice and get your money back in cash, instead of risking a loss of 10–15% of the whole contract price on cancellation, depending on your contract.',
                 )}
-                <br/>
-                {tx('ولو بتدوّر على وحدة: ', 'And if you are looking for a unit: ')}
+              </p>
+              <p className="text-lg sm:text-xl text-white/95 leading-[1.85]">
+                <span className="font-bold text-accent-light">
+                  {tx('ولو بتدوّر على وحدة:', 'Looking for a unit?')}{' '}
+                </span>
                 {tx(
                   'اشتري بسعر يوم التعاقد — أرخص من سعر السوق — وكمّل نفس الأقساط. كل الأرقام متحققة من العقد والإيصالات، وإحنا معاك في إجراءات التنازل خطوة بخطوة لحد ما تقبض.',
-                  'buy at the original contract price — below market — and continue the same instalments. Every number is checked against the contract and receipts, and we walk you through the transfer, step by step, until you are paid.',
+                  'Buy at the original contract price — below market — and continue the same instalments. Every number is checked against the contract and receipts, and we walk you through the transfer, step by step, until you are paid.',
                 )}
               </p>
             </div>
@@ -633,7 +640,6 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
   const [mode, setMode] = useState<'buy' | 'sell' | 'swap'>('buy');
   const [query, setQuery] = useState('');
   const [region, setRegion] = useState('');
-  const [subArea, setSubArea] = useState('');
   const [category, setCategory] = useState('');
   const [type, setType] = useState('');
   const [monthly, setMonthly] = useState('');
@@ -644,7 +650,6 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
     const filters: Partial<Filters> = {};
     if (query.trim()) filters.query = query.trim();
     if (region) filters.regions = [region];
-    if (subArea) filters.subAreas = [subArea];
     if (category) filters.categories = [category];
     if (type) filters.types = [type];
     onSearch({ filters, monthly: m > 0 ? m : undefined });
@@ -698,12 +703,11 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
                   className="field h-14 ps-12 text-base"
                 />
               </label>
-              <div className={`grid grid-cols-2 gap-3 ${region ? 'lg:grid-cols-[1fr_1fr_1fr_1fr_10rem]' : 'lg:grid-cols-[1fr_1fr_1fr_12rem]'}`}>
+              <div className={`grid grid-cols-2 gap-3 ${category ? 'lg:grid-cols-[1fr_1fr_1fr_1fr_10rem]' : 'lg:grid-cols-[1fr_1fr_1fr_12rem]'}`}>
                 <select
                   value={region}
                   onChange={(e) => {
                     setRegion(e.target.value);
-                    setSubArea(''); // الإقليم اتغير، فاللي كان متختار جواه مابقاش صالح
                   }}
                   aria-label={tx('المنطقة', 'Area')}
                   className="field h-14"
@@ -715,21 +719,6 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
                     </option>
                   ))}
                 </select>
-                {region && (
-                  <select
-                    value={subArea}
-                    onChange={(e) => setSubArea(e.target.value)}
-                    aria-label={tx('المنطقة بالتحديد', 'Which part')}
-                    className="field h-14"
-                  >
-                    <option value="">{tx('كل مناطق ', 'All of ') + (language === 'ar' ? region : region)}</option>
-                    {(SUB_AREAS[region as keyof typeof SUB_AREAS] ?? []).map((a) => (
-                      <option key={a.ar} value={a.ar}>
-                        {language === 'ar' ? a.ar : a.en}
-                      </option>
-                    ))}
-                  </select>
-                )}
                 {/* التصنيف الأول، وقايمة الأنواع بتتفتح بعده — زي المنطقة بالظبط */}
                 <select
                   value={category}
@@ -777,9 +766,9 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
                     key={q.label}
                     type="button"
                     onClick={() => onSearch(q.s)}
-                    className="chip font-semibold bg-brand-soft border-brand/35 text-brand-ink hover:border-brand hover:bg-brand/15"
+                    className="chip font-semibold bg-accent-soft border-accent/35 text-accent-ink hover:border-accent hover:bg-accent/15"
                   >
-                    <q.icon className="w-4 h-4 text-brand" />
+                    <q.icon className="w-4 h-4 text-accent" />
                     {q.label}
                   </button>
                 ))}
@@ -828,7 +817,8 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
 /* Soft tones behind each area photo (and in place of it, until an area has one). */
 const AREA_TINTS = ['#e6dccb', '#dcd2c4', '#d9cfbd', '#e2d6c6', '#d4c8b4', '#e8dfd0'];
 const AREA_SHORT: Record<string, [string, string]> = {
-  'القاهرة الكبرى': ['القاهرة الكبرى', 'Greater Cairo'],
+  'قاهرة': ['قاهرة', 'Cairo'],
+  'جيزة': ['جيزة', 'Giza'],
   'إسكندرية': ['إسكندرية', 'Alexandria'],
   'دلتا': ['دلتا', 'Delta'],
   'الصعيد': ['الصعيد', 'Upper Egypt'],
@@ -840,16 +830,15 @@ const AREA_SHORT: Record<string, [string, string]> = {
 /* One photo per area that says "this place" at a glance (not a unit's interior). Stock photos — swap for real ones of each area. */
 const areaPhoto = (id: string) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=320&h=320&q=70`;
 const AREA_PHOTOS: Record<string, string> = {
-  'القاهرة الكبرى': areaPhoto('1572252009286-268acec5ca0a'), // Cairo cityscape
-  'إسكندرية': areaPhoto('1552465011-b4e21bf6e79a'), // seafront city
-  'دلتا': areaPhoto('1500382017468-9049fed747ef'), // green farmland
-  'الصعيد': areaPhoto('1568322445389-f64ac2515020'), // Nile and desert
-  'مدن القناة': areaPhoto('1519046904884-53103b34b206'), // sea under the mountains
-  'الساحل الشمالي': areaPhoto('1507525428034-b723cf961d3e'), // white sand and sea
-  'العين السخنة': areaPhoto('1519046904884-53103b34b206'), // sea under the mountains
-};
-
-/*
+  'قاهرة': areaPhoto('1572252009286-268acec5ca0a'), // القاهرة القديمة بمآذنها
+  'جيزة': areaPhoto('1600520611035-84157ad4084d'), // أهرامات الجيزة
+  'إسكندرية': areaPhoto('1633624646814-3a61ed3e2847'), // قلعة قايتباي
+  'دلتا': areaPhoto('1500382017468-9049fed747ef'), // أرض زراعية
+  'الصعيد': areaPhoto('1738829235767-83963c09647c'), // بالونات الأقصر فوق الصحرا
+  'مدن القناة': areaPhoto('1587634552378-199c247a85c5'), // كوبري على القناة
+  'الساحل الشمالي': areaPhoto('1507525428034-b723cf961d3e'), // رمل أبيض وبحر
+  'العين السخنة': areaPhoto('1519046904884-53103b34b206'), // نخل وشاطئ
+};/*
  * Regions as a "where are the deals" overview — the search bar already filters by region, so this row adds what the
  * bar can't: how many units, the lowest cash to get in, and the biggest discount. A click opens that region's listings
  * (an empty one opens the "alert me" form). All regions stay in one row, in the fixed REGIONS order.
@@ -893,7 +882,13 @@ const RegionsRow: React.FC<{ units: RealEstateUnit[]; onPick: (region: string) =
                 className={`block w-20 h-20 sm:w-28 sm:h-28 rounded-full overflow-hidden ring-2 ring-transparent ring-offset-2 ring-offset-paper group-hover:ring-brand transition ${r.count ? '' : 'opacity-70 group-hover:opacity-100'}`}
                 style={{ backgroundColor: r.tint }}
               >
-                {r.photo && <img src={r.photo} alt="" loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />}
+                {r.photo ? (
+                  <img src={r.photo} alt="" loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                ) : (
+                  <span className="grid h-full w-full place-items-center text-ink/25">
+                    <MapPin className="h-7 w-7 sm:h-9 sm:w-9" strokeWidth={1.5} />
+                  </span>
+                )}
               </span>
               {r.count > 0 && (
                 <span className="absolute -bottom-1 start-1/2 -translate-x-1/2 rtl:translate-x-1/2 whitespace-nowrap rounded-full bg-brand px-2.5 py-0.5 text-xs font-bold text-white shadow-xs">

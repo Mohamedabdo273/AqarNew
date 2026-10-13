@@ -140,18 +140,51 @@ interface Paged<T> {
 /** The API sends the unit in the front end's own shape; ids come back as strings. */
 type UnitDto = RealEstateUnit & { publicCode?: string };
 
+/* الباك اند لسه بيرجّع إقليم واحد اسمه "القاهرة الكبرى"، واحنا قسمناه قاهرة وجيزة.
+   بنقسمه هنا وقت الاستقبال حسب المنطقة التفصيلية، فالفلاتر تشتغل من غير ما نستنى الداتابيز.
+   يتشال لما الباك اند يتعدّل. */
+const LEGACY_GREATER_CAIRO = 'القاهرة الكبرى';
+const GIZA_SUB_AREAS = new Set([
+  'الشيخ زايد',
+  'الشيخ زايد الجديدة',
+  '6 أكتوبر وحدائق أكتوبر',
+  'المهندسين والدقي',
+  'المهندسين والدقي والزمالك',
+  'الهرم وفيصل',
+]);
+/** المنطقة التفصيلية القديمة اللي اتغير اسمها مع التقسيم. */
+const RENAMED_SUB_AREAS: Record<string, string> = {
+  'المهندسين والدقي والزمالك': 'المهندسين والدقي',
+};
+
+/** أنواع اتغير اسمها عندنا والباك اند لسه بيرجّع القديم. */
+const RENAMED_TYPES: Record<string, RealEstateUnit['propertyType']> = {
+  'محل': 'محل/مقر',
+  'مساحة في مول': 'محل/مقر',
+};
+
+function splitGreaterCairo(unit: UnitDto): UnitDto {
+  const subArea = (unit.subArea && RENAMED_SUB_AREAS[unit.subArea]) || unit.subArea;
+  const propertyType = RENAMED_TYPES[unit.propertyType] ?? unit.propertyType;
+  if (propertyType !== unit.propertyType) unit = { ...unit, propertyType };
+  if ((unit.region as string) !== LEGACY_GREATER_CAIRO) return subArea === unit.subArea ? unit : { ...unit, subArea };
+  const isGiza = !!unit.subArea && GIZA_SUB_AREAS.has(unit.subArea);
+  return { ...unit, subArea, region: isGiza ? 'جيزة' : 'قاهرة' };
+}
+
 /** Every published unit, all pages. The listing filters and sorts on the client. */
 export async function fetchAllUnits(): Promise<RealEstateUnit[]> {
   const all: RealEstateUnit[] = [];
   for (let page = 1; ; page++) {
     const res = await request<Paged<UnitDto>>(`/units?page=${page}&pageSize=100&sort=newest`);
-    all.push(...res.items);
+    all.push(...res.items.map(splitGreaterCairo));
     if (!res.hasNext) return all;
   }
 }
 
 /** One unit by id or code — also counts a view. */
-export const fetchUnit = (idOrCode: string) => request<UnitDto>(`/units/${encodeURIComponent(idOrCode)}`);
+export const fetchUnit = async (idOrCode: string) =>
+  splitGreaterCairo(await request<UnitDto>(`/units/${encodeURIComponent(idOrCode)}`));
 
 export interface VerifyResult {
   found: boolean;

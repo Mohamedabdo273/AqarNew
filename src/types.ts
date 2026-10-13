@@ -40,8 +40,8 @@ export interface User {
   joinedDate: string;
 }
 
-export type PropertyType = 
-  // سكني
+export type PropertyType =
+  // سكني (والفندقي بنفس الأنواع)
   | 'شقة'
   | 'استوديو'
   | 'شاليه'
@@ -52,24 +52,21 @@ export type PropertyType =
   | 'بنتهاوس'
   | 'أخرى'
   // تجاري
-  | 'محل'
-  | 'مساحة في مول'
+  | 'محل/مقر'
   | 'مخزن'
+  | 'مطعم/كافيه'
   // إداري
   | 'مكتب'
   | 'دور إداري'
   | 'مقر شركة'
-  // فندقي
-  | 'غرفة فندقية'
-  | 'جناح فندقي'
-  | 'شاليه فندقي'
   // طبي
   | 'عيادة'
   | 'صيدلية'
-  | 'معمل تحاليل'
-  | 'مركز أشعة';
+  // ترفيهي
+  | 'سينما'
+  | 'ملاهي';
 
-export type PropertyCategory = 'سكني' | 'تجاري' | 'إداري' | 'فندقي' | 'طبي';
+export type PropertyCategory = 'سكني' | 'تجاري' | 'إداري' | 'فندقي' | 'طبي' | 'ترفيهي';
 
 export type InstallmentFrequency = 'شهري' | 'ربع سنوي' | 'نصف سنوي' | 'سنوي';
 
@@ -108,7 +105,7 @@ export interface RealEstateUnit {
   compoundEn?: string;
   location: string;
   locationEn?: string;
-  region: 'القاهرة الكبرى' | 'إسكندرية' | 'دلتا' | 'الصعيد' | 'مدن القناة' | 'الساحل الشمالي' | 'العين السخنة';
+  region: 'قاهرة' | 'جيزة' | 'إسكندرية' | 'دلتا' | 'الصعيد' | 'مدن القناة' | 'الساحل الشمالي' | 'العين السخنة';
   /** المنطقة التفصيلية جوه الإقليم — من SUB_AREAS */
   subArea?: string;
   regionEn?: string;

@@ -70,7 +70,8 @@ export const cancellationLoss = (contractPrice: number, paid: number, rate = CAN
   Math.min(paid, Math.round(contractPrice * rate));
 
 export const REGIONS: { ar: RealEstateUnit['region']; en: string }[] = [
-  { ar: 'القاهرة الكبرى', en: 'Greater Cairo' },
+  { ar: 'قاهرة', en: 'Cairo' },
+  { ar: 'جيزة', en: 'Giza' },
   { ar: 'الساحل الشمالي', en: 'North Coast' },
   { ar: 'العين السخنة', en: 'Ain Sokhna' },
   { ar: 'إسكندرية', en: 'Alexandria' },
@@ -81,19 +82,22 @@ export const REGIONS: { ar: RealEstateUnit['region']; en: string }[] = [
 
 /** المناطق التفصيلية تحت كل إقليم. عدّل القوايم دي وبس — الفلاتر والفورم بيقروا منها. */
 export const SUB_AREAS: Record<RealEstateUnit['region'], { ar: string; en: string }[]> = {
-  'القاهرة الكبرى': [
+  'قاهرة': [
     { ar: 'التجمع والقاهرة الجديدة', en: 'New Cairo & Fifth Settlement' },
     { ar: 'العاصمة الإدارية', en: 'New Capital' },
     { ar: 'مدينة نصر ومصر الجديدة', en: 'Nasr City & Heliopolis' },
     { ar: 'المعادي وحلوان', en: 'Maadi & Helwan' },
     { ar: 'مدينتي والشروق والعبور', en: 'Madinaty, Shorouk & Obour' },
     { ar: 'المستقبل سيتي', en: 'Mostakbal City' },
-    { ar: 'الشيخ زايد', en: 'Sheikh Zayed' },
-    { ar: '6 أكتوبر وحدائق أكتوبر', en: '6th of October & October Gardens' },
-    { ar: 'الشيخ زايد الجديدة', en: 'New Zayed' },
-    { ar: 'المهندسين والدقي والزمالك', en: 'Mohandessin, Dokki & Zamalek' },
-    { ar: 'الهرم وفيصل', en: 'Haram & Faisal' },
+    { ar: 'وسط البلد والزمالك', en: 'Downtown & Zamalek' },
     { ar: 'شبرا والقليوبية', en: 'Shubra & Qalyubia' },
+  ],
+  'جيزة': [
+    { ar: 'الشيخ زايد', en: 'Sheikh Zayed' },
+    { ar: 'الشيخ زايد الجديدة', en: 'New Zayed' },
+    { ar: '6 أكتوبر وحدائق أكتوبر', en: '6th of October & October Gardens' },
+    { ar: 'المهندسين والدقي', en: 'Mohandessin & Dokki' },
+    { ar: 'الهرم وفيصل', en: 'Haram & Faisal' },
   ],
   'إسكندرية': [
     { ar: 'سموحة وسيدي جابر', en: 'Smouha & Sidi Gaber' },
@@ -159,61 +163,77 @@ export const PROPERTY_CATEGORIES: { ar: RealEstateUnit['propertyCategory']; en: 
   { ar: 'إداري', en: 'Administrative' },
   { ar: 'فندقي', en: 'Hotel' },
   { ar: 'طبي', en: 'Medical' },
+  { ar: 'ترفيهي', en: 'Entertainment' },
+];
+
+/** الفندقي بنفس أنواع السكني — نفس القايمة مش نسخة منها، عشان تعديل واحد يمشي على الاتنين. */
+const LIVING_TYPES: { ar: RealEstateUnit['propertyType']; en: string }[] = [
+  { ar: 'شقة', en: 'Apartment' },
+  { ar: 'استوديو', en: 'Studio' },
+  { ar: 'شاليه', en: 'Chalet' },
+  { ar: 'دوبلكس', en: 'Duplex' },
+  { ar: 'تاون هاوس', en: 'Townhouse' },
+  { ar: 'توين هاوس', en: 'Twin house' },
+  { ar: 'فيلا', en: 'Villa' },
+  { ar: 'بنتهاوس', en: 'Penthouse' },
+  { ar: 'أخرى', en: 'Other' },
 ];
 
 /** الأنواع تحت كل تصنيف. عدّل هنا وبس — الفلاتر والفورم بيقروا منها. */
 export const TYPES_BY_CATEGORY: Record<RealEstateUnit['propertyCategory'], { ar: RealEstateUnit['propertyType']; en: string }[]> = {
-  'سكني': [
-    { ar: 'شقة', en: 'Apartment' },
-    { ar: 'استوديو', en: 'Studio' },
-    { ar: 'شاليه', en: 'Chalet' },
-    { ar: 'دوبلكس', en: 'Duplex' },
-    { ar: 'تاون هاوس', en: 'Townhouse' },
-    { ar: 'توين هاوس', en: 'Twin house' },
-    { ar: 'فيلا', en: 'Villa' },
-    { ar: 'بنتهاوس', en: 'Penthouse' },
-    { ar: 'أخرى', en: 'Other' },
-  ],
+  'سكني': LIVING_TYPES,
   'تجاري': [
-    { ar: 'محل', en: 'Retail shop' },
-    { ar: 'مساحة في مول', en: 'Mall space' },
+    { ar: 'محل/مقر', en: 'Shop / premises' },
     { ar: 'مخزن', en: 'Warehouse' },
+    { ar: 'مطعم/كافيه', en: 'Restaurant / cafe' },
   ],
   'إداري': [
     { ar: 'مكتب', en: 'Office' },
     { ar: 'دور إداري', en: 'Office floor' },
     { ar: 'مقر شركة', en: 'Company HQ' },
   ],
-  'فندقي': [
-    { ar: 'غرفة فندقية', en: 'Hotel room' },
-    { ar: 'جناح فندقي', en: 'Hotel suite' },
-    { ar: 'شاليه فندقي', en: 'Serviced chalet' },
-  ],
+  'فندقي': LIVING_TYPES,
   'طبي': [
     { ar: 'عيادة', en: 'Clinic' },
     { ar: 'صيدلية', en: 'Pharmacy' },
-    { ar: 'معمل تحاليل', en: 'Lab' },
-    { ar: 'مركز أشعة', en: 'Imaging centre' },
+  ],
+  'ترفيهي': [
+    { ar: 'سينما', en: 'Cinema' },
+    { ar: 'ملاهي', en: 'Amusement park' },
   ],
 };
 
 /** كل الأنواع في قايمة واحدة — للفلاتر اللي مش محتاجة التصنيف. */
-export const PROPERTY_TYPES: { ar: RealEstateUnit['propertyType']; en: string }[] =
-  PROPERTY_CATEGORIES.flatMap((c) => TYPES_BY_CATEGORY[c.ar]);
+export const PROPERTY_TYPES: { ar: RealEstateUnit['propertyType']; en: string }[] = dedupe(
+  PROPERTY_CATEGORIES.flatMap((c) => TYPES_BY_CATEGORY[c.ar]),
+);
 
 /** الأنواع تحت التصنيفات المختارة — من غير اختيار بتجيب الكل. */
 export const typesFor = (categories: string[]) => {
   const keys = categories.length ? categories : PROPERTY_CATEGORIES.map((c) => c.ar);
-  return keys.flatMap((c) => TYPES_BY_CATEGORY[c as RealEstateUnit['propertyCategory']] ?? []);
+  return dedupe(keys.flatMap((c) => TYPES_BY_CATEGORY[c as RealEstateUnit['propertyCategory']] ?? []));
 };
 
-/** تصنيف أي نوع — بنشتقه بدل ما نخزنه مرتين في كل وحدة. */
+/** نفس النوع ممكن يتكرر تحت أكتر من تصنيف (شقة سكني وفندقي)، فبنشيل التكرار من القوايم المجمّعة. */
+function dedupe(list: { ar: RealEstateUnit['propertyType']; en: string }[]) {
+  const seen = new Set<string>();
+  return list.filter((t) => !seen.has(t.ar) && seen.add(t.ar));
+}
+
+/**
+ * تصنيف أي نوع. دي تخمين من النوع بس — والسكني والفندقي بنفس الأنواع،
+ * فأي نوع سكن هيرجّع "سكني". للوحدات استخدم categoryOf اللي بتقرا التصنيف المخزّن الأول.
+ */
 export const categoryOfType = (type: string): RealEstateUnit['propertyCategory'] | '' => {
   for (const c of PROPERTY_CATEGORIES) {
     if (TYPES_BY_CATEGORY[c.ar].some((t) => t.ar === type)) return c.ar;
   }
   return '';
 };
+
+/** تصنيف وحدة: المخزّن الأول (بيفرّق بين السكني والفندقي)، وإلا بنشتقه من النوع. */
+export const categoryOf = (unit: Pick<RealEstateUnit, 'propertyType' | 'propertyCategory'>) =>
+  unit.propertyCategory || categoryOfType(unit.propertyType);
 
 export const DELIVERY_OPTIONS: { ar: RealEstateUnit['deliveryStatus']; en: string; short: string }[] = [
   { ar: 'استلام فوري', en: 'Ready', short: 'فوري' },

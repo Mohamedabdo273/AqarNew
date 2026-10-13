@@ -95,7 +95,7 @@ export const SignInSheet: React.FC = () => {
 
     if (mode === 'login') {
       if (!phoneOk) return fail(tx('اكتب رقم موبايل مصري صحيح، 11 رقم', 'Enter a valid 11-digit Egyptian mobile'));
-      if (!password) return fail(tx('اكتب الباسورد', 'Enter your password'));
+      if (!password) return fail(tx('اكتب كلمة السر', 'Enter your password'));
       return run(async () => {
         await login(cleanPhone, password);
         done(tx('أهلاً بيك 👋', 'Welcome back 👋'));
@@ -104,8 +104,8 @@ export const SignInSheet: React.FC = () => {
     if (mode === 'register' || mode === 'forgot-code') {
       if (mode === 'register' && name.trim().length < 2) return fail(tx('اكتب اسمك', 'Enter your name'));
       if (mode === 'register' && !phoneOk) return fail(tx('اكتب رقم موبايل مصري صحيح، 11 رقم', 'Enter a valid 11-digit Egyptian mobile'));
-      if (!pwOk) return fail(tx(`الباسورد لازم يكون ${MIN_PASSWORD} حروف على الأقل`, `Password must be at least ${MIN_PASSWORD} characters`));
-      if (password !== confirm) return fail(tx('الباسورد وتأكيده مش زي بعض', "Passwords don't match"));
+      if (!pwOk) return fail(tx(`كلمة السر لازم تكون ${MIN_PASSWORD} حروف على الأقل`, `Password must be at least ${MIN_PASSWORD} characters`));
+      if (password !== confirm) return fail(tx('كلمة السر وتأكيدها مش زي بعض', "Passwords don't match"));
     }
     if (mode === 'register') return sendCode(() => startSignUp(name.trim(), cleanPhone, password), 'register-code');
     if (mode === 'forgot') {
@@ -120,7 +120,7 @@ export const SignInSheet: React.FC = () => {
       });
     return run(async () => {
       await resetPassword(cleanPhone, code.trim(), password);
-      done(tx('اتغيّر الباسورد ودخلت', 'Password changed — you’re in'));
+      done(tx('اتغيّرت كلمة السر ودخلت', 'Password changed — you’re in'));
     });
   };
 
@@ -128,8 +128,8 @@ export const SignInSheet: React.FC = () => {
     login: tx('تسجيل الدخول', 'Log in'),
     register: tx('حساب جديد', 'Create account'),
     'register-code': tx('أكّد رقمك', 'Confirm your number'),
-    forgot: tx('نسيت الباسورد', 'Forgot password'),
-    'forgot-code': tx('باسورد جديد', 'New password'),
+    forgot: tx('نسيت كلمة السر', 'Forgot password'),
+    'forgot-code': tx('كلمة سر جديدة', 'New password'),
   };
   const buttons: Record<Mode, string> = {
     login: tx('دخول', 'Log in'),
@@ -160,7 +160,7 @@ export const SignInSheet: React.FC = () => {
         <button
           type="button"
           onClick={() => setShowPw((v) => !v)}
-          aria-label={showPw ? tx('اخفي الباسورد', 'Hide password') : tx('اظهر الباسورد', 'Show password')}
+          aria-label={showPw ? tx('اخفي كلمة السر', 'Hide password') : tx('اظهر كلمة السر', 'Show password')}
           className={`absolute top-1/2 -translate-y-1/2 ${isRTL ? 'left-3' : 'right-3'} text-muted hover:text-ink`}
         >
           {showPw ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -221,9 +221,9 @@ export const SignInSheet: React.FC = () => {
           {mode === 'login' && (
             <>
               {phoneInput}
-              {pwInput('signin-pw', password, setPassword, tx('الباسورد', 'Password'), 'current-password')}
+              {pwInput('signin-pw', password, setPassword, tx('كلمة السر', 'Password'), 'current-password')}
               <button type="button" onClick={() => go('forgot')} className="text-sm font-semibold text-brand hover:underline">
-                {tx('نسيت الباسورد؟', 'Forgot password?')}
+                {tx('نسيت كلمة السر؟', 'Forgot password?')}
               </button>
             </>
           )}
@@ -237,15 +237,15 @@ export const SignInSheet: React.FC = () => {
                 <input id="signin-name" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" className="field" />
               </div>
               {phoneInput}
-              {pwInput('signin-pw', password, setPassword, tx('الباسورد', 'Password'), 'new-password')}
-              {pwInput('signin-pw2', confirm, setConfirm, tx('تأكيد الباسورد', 'Confirm password'), 'new-password')}
+              {pwInput('signin-pw', password, setPassword, tx('كلمة السر', 'Password'), 'new-password')}
+              {pwInput('signin-pw2', confirm, setConfirm, tx('تأكيد كلمة السر', 'Confirm password'), 'new-password')}
               <p className="text-xs text-muted">{tx(`${MIN_PASSWORD} حروف على الأقل. هنبعتلك كود مرة واحدة نتأكد بيه من رقمك.`, `At least ${MIN_PASSWORD} characters. We'll send one code to confirm your number.`)}</p>
             </>
           )}
 
           {mode === 'forgot' && (
             <>
-              <p className="text-sm text-muted">{tx('اكتب رقمك وهنبعتلك كود تعمل بيه باسورد جديد.', "Enter your number and we'll send a code to set a new password.")}</p>
+              <p className="text-sm text-muted">{tx('اكتب رقمك وهنبعتلك كود تعمل بيه كلمة سر جديدة.', "Enter your number and we'll send a code to set a new password.")}</p>
               {phoneInput}
             </>
           )}
@@ -279,8 +279,8 @@ export const SignInSheet: React.FC = () => {
               </div>
               {mode === 'forgot-code' && (
                 <>
-                  {pwInput('signin-pw', password, setPassword, tx('الباسورد الجديد', 'New password'), 'new-password')}
-                  {pwInput('signin-pw2', confirm, setConfirm, tx('تأكيد الباسورد', 'Confirm password'), 'new-password')}
+                  {pwInput('signin-pw', password, setPassword, tx('كلمة السر الجديدة', 'New password'), 'new-password')}
+                  {pwInput('signin-pw2', confirm, setConfirm, tx('تأكيد كلمة السر', 'Confirm password'), 'new-password')}
                 </>
               )}
               <button

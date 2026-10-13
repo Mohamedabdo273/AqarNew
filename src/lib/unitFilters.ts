@@ -1,6 +1,6 @@
 import { RealEstateUnit } from '../types';
 import { Budget, fitsBudget } from '../components/BudgetFinder';
-import { cashPrice, categoryOfType, isDeal, isNegotiable, monthlyInstallment, savingsPercent, sellerDiscount } from './unitHelpers';
+import { cashPrice, categoryOf, isDeal, isNegotiable, monthlyInstallment, savingsPercent, sellerDiscount } from './unitHelpers';
 
 export interface Filters {
   query: string;
@@ -75,7 +75,7 @@ export const applyFilters = (
     if (budget && !fitsBudget(u, budget)) return false;
     if (f.regions.length && !f.regions.includes(u.region)) return false;
     if (f.subAreas.length && !f.subAreas.includes(u.subArea ?? '')) return false;
-    if (f.categories.length && !f.categories.includes(categoryOfType(u.propertyType))) return false;
+    if (f.categories.length && !f.categories.includes(categoryOf(u))) return false;
     if (f.types.length && !f.types.includes(u.propertyType)) return false;
     if (f.developers.length && !f.developers.includes(u.developer)) return false;
     if (f.bedrooms !== null && (f.bedrooms >= 5 ? u.bedrooms < 5 : u.bedrooms !== f.bedrooms)) return false;

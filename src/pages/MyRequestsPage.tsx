@@ -118,7 +118,7 @@ export const MyRequestsPage: React.FC<MyRequestsPageProps> = ({ code, onOpenRequ
           <div className="mt-6 card p-5 flex flex-wrap items-center justify-between gap-4">
             <div className="max-w-md">
               <p className="font-bold text-ink">{tx('ادخل برقم موبايلك', 'Sign in with your mobile')}</p>
-              <p className="mt-1 text-sm text-muted">{tx('وتشوف طلباتك ومفضلتك من أي جهاز — من غير باسورد.', 'See your requests and saved units on any device — no password.')}</p>
+              <p className="mt-1 text-sm text-muted">{tx('وتشوف طلباتك ومفضلتك من أي جهاز — من غير كلمة سر.', 'See your requests and saved units on any device — no password.')}</p>
             </div>
             <button onClick={openSignIn} className="btn-primary min-h-11 px-5 text-sm">
               <LogIn className="w-4 h-4" />
