@@ -543,7 +543,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               options={regionsShown.map((x) => ({ value: x.o.ar, label: language === 'ar' ? x.o.ar : x.o.en, count: x.count }))}
             />
             <FilterSelect
-              label={tx('بالتحديد', 'Which part')}
+              label={tx('الموقع', 'Location')}
               allLabel={tx('كلها', 'All')}
               allCount={afterRegion.length}
               value={cardSubArea}
@@ -640,6 +640,7 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
   const [mode, setMode] = useState<'buy' | 'sell' | 'swap'>('buy');
   const [query, setQuery] = useState('');
   const [region, setRegion] = useState('');
+  const [subArea, setSubArea] = useState('');
   const [category, setCategory] = useState('');
   const [type, setType] = useState('');
   const [monthly, setMonthly] = useState('');
@@ -650,6 +651,7 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
     const filters: Partial<Filters> = {};
     if (query.trim()) filters.query = query.trim();
     if (region) filters.regions = [region];
+    if (subArea) filters.subAreas = [subArea];
     if (category) filters.categories = [category];
     if (type) filters.types = [type];
     onSearch({ filters, monthly: m > 0 ? m : undefined });
@@ -703,11 +705,21 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
                   className="field h-14 ps-12 text-base"
                 />
               </label>
-              <div className={`grid grid-cols-2 gap-3 ${category ? 'lg:grid-cols-[1fr_1fr_1fr_1fr_10rem]' : 'lg:grid-cols-[1fr_1fr_1fr_12rem]'}`}>
+              {/* Area and unit type each open a second list once chosen, so the row has 4, 5 or 6 cells. */}
+              <div
+                className={`grid grid-cols-2 gap-3 ${
+                  region && category
+                    ? 'lg:grid-cols-[1fr_1fr_1fr_1fr_1fr_9rem]'
+                    : region || category
+                      ? 'lg:grid-cols-[1fr_1fr_1fr_1fr_10rem]'
+                      : 'lg:grid-cols-[1fr_1fr_1fr_12rem]'
+                }`}
+              >
                 <select
                   value={region}
                   onChange={(e) => {
                     setRegion(e.target.value);
+                    setSubArea(''); // الإقليم اتغير، فاللي كان متختار جواه مابقاش صالح
                   }}
                   aria-label={tx('المنطقة', 'Area')}
                   className="field h-14"
@@ -719,6 +731,21 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
                     </option>
                   ))}
                 </select>
+                {region && (
+                  <select
+                    value={subArea}
+                    onChange={(e) => setSubArea(e.target.value)}
+                    aria-label={tx('الموقع', 'Location')}
+                    className="field h-14"
+                  >
+                    <option value="">{tx('كل مناطق ', 'All of ') + (language === 'ar' ? region : REGIONS.find((r) => r.ar === region)?.en ?? region)}</option>
+                    {(SUB_AREAS[region as keyof typeof SUB_AREAS] ?? []).map((a) => (
+                      <option key={a.ar} value={a.ar}>
+                        {language === 'ar' ? a.ar : a.en}
+                      </option>
+                    ))}
+                  </select>
+                )}
                 {/* التصنيف الأول، وقايمة الأنواع بتتفتح بعده — زي المنطقة بالظبط */}
                 <select
                   value={category}
@@ -766,9 +793,9 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
                     key={q.label}
                     type="button"
                     onClick={() => onSearch(q.s)}
-                    className="chip font-semibold bg-accent-soft border-accent/35 text-accent-ink hover:border-accent hover:bg-accent/15"
+                    className="chip font-semibold bg-accent border-accent text-white hover:bg-accent-ink hover:border-accent-ink"
                   >
-                    <q.icon className="w-4 h-4 text-accent" />
+                    <q.icon className="w-4 h-4 text-white" />
                     {q.label}
                   </button>
                 ))}

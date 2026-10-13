@@ -134,7 +134,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
     const e: string[] = [];
     if (target === 1) {
       if (!form.region) e.push(tx('المنطقة', 'Area'));
-      if (form.region && !form.subArea) e.push(tx('المنطقة بالتحديد', 'Which part'));
+      if (form.region && !form.subArea) e.push(tx('الموقع', 'Location'));
       if (!form.developer.trim()) e.push(tx('المطور', 'Developer'));
       if (!form.compound.trim()) e.push(tx('الكمبوند', 'Compound'));
       if (!form.propertyCategory) e.push(tx('النشاط', 'Activity'));
@@ -352,7 +352,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
             />
           </Field>
           {form.region && (
-            <Field label={tx('المنطقة بالتحديد', 'Which part')} required>
+            <Field label={tx('الموقع', 'Location')} required>
               <ChipSelect
                 options={(SUB_AREAS[form.region] ?? []).map((o) => ({ value: o.ar, label: language === 'ar' ? o.ar : o.en }))}
                 value={form.subArea}

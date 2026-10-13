@@ -167,7 +167,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
 
       {/* من غير إقليم مختار دي بتبقى 46 خيار مخلوطين — مالهاش لازمة قبل الاختيار */}
       {f.regions.length > 0 && (
-        <Section title={tx('المنطقة بالتحديد', 'Which part')} active={f.subAreas.length} defaultOpen>
+        <Section title={tx('الموقع', 'Location')} active={f.subAreas.length} defaultOpen>
           <Chips
             options={subAreasFor(f.regions).map((o) => ({ value: o.ar, label: tx(o.ar, o.en) }))}
             selected={f.subAreas}
