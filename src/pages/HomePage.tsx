@@ -77,8 +77,8 @@ const SectionTitle: React.FC<{ title: string; sub?: string; center?: boolean; li
   <div className={center ? 'text-center max-w-2xl mx-auto' : 'max-w-2xl'}>
     {kicker && (
       <p
-        className={`inline-flex items-center rounded-full px-3 py-1 text-xs sm:text-sm font-semibold mb-3 ${
-          light ? 'bg-white/10 text-accent-light' : 'bg-sand text-brand'
+        className={`inline-flex items-center rounded-full px-4 py-1.5 text-sm sm:text-base font-bold mb-3 ${
+          light ? 'bg-white/10 text-accent-light' : 'bg-accent-soft text-accent-ink'
         }`}
       >
         {kicker}
@@ -1141,15 +1141,15 @@ const SwapFeature: React.FC<{ onSwap: () => void }> = ({ onSwap }) => {
           kicker={tx('حصري على فرصة', 'Only on Forsa')}
           title={tx('عايز تغيّر وحدتك؟ بدّلها.', 'Want a different unit? Swap it.')}
           sub={tx(
-            'مش لازم تبيع الأول وتدوّر لوحدك. إحنا بنبيع وحدتك وبنشتريلك التانية مع بعض، وإنت تدفع أو تاخد الفرق بس.',
-            "No need to sell first and search on your own. We sell your unit and buy the new one for you together — you just settle the difference.",
+            'لاقي حد عايز يبدل معاك: انت تاخد وحدته وهو ياخد وحدتك، وكل واحد يكمّل أقساط اللي خده. اللي بيتدفع هو الفرق في المدفوع بس.',
+            'Find an owner who wants to swap with you: you take their unit, they take yours, and each of you carries on the other\'s plan. Only the difference in what was paid changes hands.',
           )}
         />
         <ul className="mt-6 space-y-3 text-ink-soft">
           {[
             tx('وحدة قسطها أقل لو القسط تقل عليك — أو أكبر، أو في منطقة تانية', 'A lower monthly if yours is too heavy — or bigger, or elsewhere'),
             tx('الفرق بيتحسب على المدفوع، مش على سعر النهارده', "The difference is on what's paid, not today's price"),
-            tx('أي وحدة على الموقع ينفع تبدّل بيها — صاحبها مش لازم يعوز وحدتك', "Any listed unit works — its owner doesn't need to want yours"),
+            tx('بنوريك بس الوحدات اللي أصحابها عايزين يبدلوا، وبناخد موافقتهم على وحدتك', 'Only units whose owners want to swap — and we get their OK on yours'),
           ].map((p) => (
             <li key={p} className="flex items-start gap-3">
               <ShieldCheck className="w-5 h-5 text-ink shrink-0 mt-0.5" />
@@ -1173,7 +1173,7 @@ const SwapFeature: React.FC<{ onSwap: () => void }> = ({ onSwap }) => {
             <ArrowLeftRight className="w-5 h-5" />
           </span>
           <div className="rounded-xl bg-paper border border-line p-3 sm:p-5">
-            <p className="text-xs sm:text-sm text-muted">{tx('الوحدة الجديدة — مدفوع فيها', 'New unit — paid')}</p>
+            <p className="text-xs sm:text-sm text-muted">{tx('وحدة اللي هيبدل معاك — مدفوع فيها', "The other owner's unit — paid")}</p>
             <p className="num font-display mt-2 text-lg sm:text-3xl font-bold text-ink whitespace-nowrap">{money(theirs, language)}</p>
           </div>
         </div>
@@ -1183,7 +1183,7 @@ const SwapFeature: React.FC<{ onSwap: () => void }> = ({ onSwap }) => {
             {money(theirs - mine, language)} <span className="text-sm font-medium text-white/60">{currency(language)}</span>
           </span>
         </div>
-        <p className="mt-3 text-xs text-muted">{tx('مثال توضيحي. الفرق الفعلي بيتحدد بعد مراجعة العقدين.', 'Illustrative. The actual difference is set after both contracts are reviewed.')}</p>
+        <p className="mt-3 text-xs text-muted">{tx('مثال توضيحي. وحدته مدفوع فيها أكتر، فانت اللي بتدفعله الفرق — ولو العكس هو اللي بيدفعلك. الفرق الفعلي بيتحدد بعد مراجعة العقدين.', 'Illustrative. Theirs has more paid in, so you pay them the difference — the other way round, they pay you. The actual figure is set after both contracts are reviewed.')}</p>
       </div>
       </div>
     </section>
@@ -1287,9 +1287,9 @@ const HowItWorks: React.FC = () => {
         ]
       : [
           { illo: IlloForm, icon: FileCheck2, t: tx('قولنا وحدتك وعاوز إيه', 'Tell us your unit and what you want'), d: tx('اللي دفعته وقسطك، والمنطقة والنوع', 'What you paid, your monthly, area and type') },
-          { illo: IlloPeople, icon: ArrowLeftRight, t: tx('اختار الوحدة الجديدة', 'Pick the new unit'), d: tx('قسطها يريحك، وبتشوف الفرق قبل ما تقرر', 'A monthly you can manage — see the difference first') },
-          { illo: IlloReview, icon: ShieldCheck, t: tx('نراجع العقدين', 'We check both contracts'), d: tx('ونلاقي مشتري لوحدتك بسعر اللي دفعته', 'And find a buyer for yours at what you paid') },
-          { illo: IlloKeys, icon: Handshake, t: tx('تنازلين مع بعض', 'Two transfers, together'), d: tx('تدفع أو تاخد الفرق بس', 'You just settle the difference') },
+          { illo: IlloPeople, icon: ArrowLeftRight, t: tx('اختار وحدة صاحبها عايز يبدل', 'Pick a unit whose owner wants to swap'), d: tx('وشوف الفرق والقسط الجديد قبل ما تقرر', 'See the difference and the new monthly first') },
+          { illo: IlloReview, icon: ShieldCheck, t: tx('ناخد موافقة الطرف التاني', "We get the other owner's OK"), d: tx('ونراجع العقدين الاتنين', 'And check both contracts') },
+          { illo: IlloKeys, icon: Handshake, t: tx('تبدلوا في نفس اليوم', 'Swap on the same day'), d: tx('كل واحد يكمّل أقساط اللي خده، والفرق بيتسوّى بينكم', "Each carries on the other's plan; you settle the difference") },
         ];
 
   return (

@@ -20,8 +20,9 @@ interface PropertySwapPageProps {
 const PAGE_SIZE = 12;
 
 /**
- * Swap = we sell the owner's unit and buy the new one for them, arranged together.
- * So any listed unit can be a target — the other owner doesn't need to want this one.
+ * Swap = two owners exchange units: each takes the other's unit and carries on its plan; only the difference in what
+ * was paid changes hands. So only units whose owner said "open to swap" are shown — and an advisor gets that owner's
+ * OK on this visitor's unit before anything moves.
  */
 export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSelectUnit, onRequested }) => {
   const { language, tx, isRTL } = useLanguage();
@@ -49,6 +50,7 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
   const matches = useMemo(
     () =>
       units
+        .filter((u) => u.eligibleForSwap === true)
         .filter((u) => !wantRegion || u.region === wantRegion)
         .filter((u) => !wantType || (wantType === 'residential' ? isResidential(u.propertyType) : u.propertyType === wantType))
         .filter((u) => !filterLower || monthlyInstallment(u) < myMonthly)
@@ -92,8 +94,8 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
         <h1 className="mt-4 text-3xl sm:text-4xl font-bold text-ink">{tx('بدّل وحدتك بوحدة قسطها يريحك', 'Swap for a unit whose instalment you can manage')}</h1>
         <p className="mt-3 text-ink-soft leading-relaxed">
           {tx(
-            'مش لازم تبيع الأول وتدوّر لوحدك. إحنا بنبيع وحدتك وبنشتريلك الوحدة التانية مع بعض، وإنت تدفع أو تاخد الفرق بس.',
-            "No need to sell first and search on your own. We sell your unit and buy the new one for you together — you just settle the difference.",
+            'لاقي حد عايز يبدل معاك: انت تاخد وحدته وهو ياخد وحدتك، وكل واحد يكمّل أقساط اللي خده. بنوريك بس الوحدات اللي أصحابها عايزين يبدلوا، واللي بيتدفع هو الفرق بس.',
+            "Find an owner who wants to swap with you: you take their unit, they take yours, and each carries on the other's plan. Only units whose owners want to swap are shown, and only the difference changes hands.",
           )}
         </p>
       </div>
@@ -102,11 +104,11 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
       <ol className="mt-8 grid sm:grid-cols-3 gap-3">
         {[
           { icon: ClipboardList, t: tx('قولنا وحدتك وعاوز إيه', 'Tell us your unit and what you want'), d: tx('اللي دفعته وقسطك، والمنطقة والنوع', 'What you paid, your monthly, area and type') },
-          { icon: Search, t: tx('نراجع العقدين', 'We check both contracts'), d: tx('ونلاقي مشتري لوحدتك بسعر اللي دفعته', 'And find a buyer for yours at what you paid') },
+          { icon: Search, t: tx('ناخد موافقة الطرف التاني', "We get the other owner's OK"), d: tx('بنعرض عليه وحدتك، ونراجع العقدين', 'We show them your unit and check both contracts') },
           {
             icon: Handshake,
-            t: tx('تنازلين مترتبين مع بعض', 'Two transfers, arranged together'),
-            d: tx(`تدفع أو تاخد الفرق. وحدتك من غير عمولة، والجديدة ${BRAND.buyerFeePercent}% بعد التوقيع`, `Settle the difference. No fee on yours; ${BRAND.buyerFeePercent}% on the new one after signing`),
+            t: tx('تبدلوا في نفس اليوم', 'Swap on the same day'),
+            d: tx(`كل واحد يكمّل أقساط اللي خده، والفرق بيتسوّى بينكم. العمولة ${BRAND.buyerFeePercent}% على الوحدة اللي بتاخدها بعد التوقيع`, `Each carries on the other's plan; you settle the difference. ${BRAND.buyerFeePercent}% on the unit you take, after signing`),
           },
         ].map((s, i) => (
           <li key={s.t} className="card p-4 flex items-start gap-3">
@@ -181,7 +183,7 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
 
       <div ref={resultsTop} className="mt-10 scroll-mt-24">
         <p className="text-ink-soft">
-          <span className="num font-bold text-ink">{matches.length}</span> {tx('وحدة ممكن تبدّل بيها', 'units you could swap into')}
+          <span className="num font-bold text-ink">{matches.length}</span> {tx('وحدة أصحابها عايزين يبدلوا', 'units whose owners want to swap')}
           {filterLower && <span className="text-muted"> · {tx('قسطها أقل من قسطك', 'lower monthly than yours')}</span>}
         </p>
       </div>
@@ -199,6 +201,16 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
                   tag={diffTag(u)}
                   footer={
                     <div className="mt-4 pt-4 border-t border-line space-y-3">
+                      {/* What this owner is after — the visitor can tell at a glance whether their unit fits. */}
+                      {(u.swapTargetType || u.swapTargetTypeEn) && (
+                        <p className="flex items-start gap-1.5 rounded-lg bg-brand-soft px-3 py-2 text-sm text-brand-ink">
+                          <Repeat className="w-4 h-4 mt-0.5 shrink-0" />
+                          <span>
+                            <span className="font-semibold">{tx('صاحبها عايز بدالها: ', 'Owner wants: ')}</span>
+                            {pick(language, u.swapTargetType ?? '', u.swapTargetTypeEn)}
+                          </span>
+                        </p>
+                      )}
                       {myMonthly > 0 && (
                         <p className={`num flex items-center gap-1.5 text-sm font-semibold ${change < 0 ? 'text-ink' : 'text-danger'}`}>
                           {change < 0 ? <ArrowDown className="w-4 h-4" /> : <ArrowUp className="w-4 h-4" />}
