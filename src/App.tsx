@@ -23,6 +23,7 @@ import { StatementPage } from './pages/StatementPage';
 import { ComparePage } from './pages/ComparePage';
 import { MarketComparisonsPage } from './pages/MarketComparisonsPage';
 import { VerifyPage } from './pages/VerifyPage';
+import { MobileDesignPage } from './pages/MobileDesignPage';
 import { useCompare } from './context/CompareContext';
 import { Scale } from 'lucide-react';
 import { BRAND, whatsappLink } from './config/brand';
@@ -36,7 +37,7 @@ import { SignInSheet } from './components/SignInSheet';
 import { fetchUnit } from './services/api';
 
 /** Pages reachable by a bare hash (#sell, #contact, …). */
-const PAGES: PageId[] = ['home', 'opportunities', 'sell', 'statement', 'compare', 'market-comparisons', 'verify', 'swap', 'contact', 'about', 'rules', 'saved', 'requests', 'privacy', 'terms', 'admin'];
+const PAGES: PageId[] = ['home', 'opportunities', 'sell', 'statement', 'compare', 'market-comparisons', 'verify', 'swap', 'contact', 'about', 'rules', 'saved', 'requests', 'privacy', 'terms', 'admin', 'mobile-design'];
 const THANKS: ThanksKind[] = ['sell', 'statement', 'viewing', 'swap', 'contact', 'alert'];
 
 /*
@@ -113,6 +114,7 @@ export default function App() {
         return setActivePage('thanks');
       }
       if (head === 'requests') return setActivePage('requests');
+      if (hash === 'figma' || hash === 'mobile-design' || hash === 'mobile') return setActivePage('mobile-design');
       if (hash === '') return setActivePage('home');
       if (hash === 'listings') return setActivePage('opportunities');
       setActivePage(PAGES.includes(hash as PageId) ? (hash as PageId) : 'notfound');
@@ -176,6 +178,10 @@ export default function App() {
     ) : (
       <AdminLogin onSignedIn={() => setAdminIn(true)} onBackToSite={() => handleNavigate('home')} />
     );
+  }
+
+  if (activePage === 'mobile-design') {
+    return <MobileDesignPage onNavigate={handleNavigate} />;
   }
 
   return (

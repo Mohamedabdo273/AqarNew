@@ -93,7 +93,8 @@ export type PageId =
   | 'unit'
   | 'thanks'
   | 'notfound'
-  | 'admin';
+  | 'admin'
+  | 'mobile-design';
 
 export interface RealEstateUnit {
   id: string;

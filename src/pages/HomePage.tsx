@@ -1406,6 +1406,7 @@ const RulesPreview: React.FC<{ onOpenRules: (tab: 'seller' | 'buyer') => void }>
   );
 };
 
+
 const Faq: React.FC = () => {
   const { tx } = useLanguage();
   const [open, setOpen] = useState<number | null>(0);

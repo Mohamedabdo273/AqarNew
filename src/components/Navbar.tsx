@@ -220,6 +220,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
                 </button>
               ))}
 
+
             {/* Language toggle: hidden on mobile (<sm), accessible in mobile drawer */}
             <button onClick={toggleLanguage} className="hidden sm:flex h-11 px-3 rounded-full text-sm font-medium text-ink-soft hover:bg-surface items-center gap-1.5">
               <Globe className="w-4 h-4" />
