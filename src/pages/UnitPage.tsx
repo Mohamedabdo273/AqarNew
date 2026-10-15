@@ -21,14 +21,12 @@ import {
   Images,
   Flame,
   ArrowDown,
-  Scale,
 } from 'lucide-react';
 import { PageId, RealEstateUnit } from '../types';
 import { BRAND, whatsappLink } from '../config/brand';
 import { useLanguage } from '../context/LanguageContext';
 import { useUnits } from '../context/UnitsContext';
 import { errorText } from '../services/api';
-import { useCompare, COMPARE_MAX } from '../context/CompareContext';
 import { UnitCard } from '../components/UnitCard';
 import { SourceTag } from '../components/SourceTag';
 import { AqarExitComparison } from '../components/AqarExitComparison';
@@ -72,7 +70,6 @@ export const similarUnits = (unit: RealEstateUnit, units: RealEstateUnit[], n = 
 export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelectUnit, onOpenBuyerRules, onNavigate, onBooked }) => {
   const { language, tx, isRTL } = useLanguage();
   const { isUnitSaved, toggleSaveUnit, submitInquiry } = useUnits();
-  const { isCompared, toggleCompare } = useCompare();
   const [imgIdx, setImgIdx] = useState(0);
   const [booking, setBooking] = useState(false);
   const [name, setName] = useState('');
@@ -269,20 +266,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
           </p>
         </div>
         <div className="relative flex items-center flex-wrap gap-2">
-          <button
-            onClick={() => {
-              if (!toggleCompare(unit.id)) {
-                window.alert(tx(`تقدر تقارن ${COMPARE_MAX} وحدات بس في المرة.`, `You can compare up to ${COMPARE_MAX} units.`));
-              }
-            }}
-            aria-pressed={isCompared(unit.id)}
-            className={`btn min-h-11 px-4 text-sm transition-colors ${
-              isCompared(unit.id) ? 'bg-brand text-white border-brand' : 'btn-ghost'
-            }`}
-          >
-            <Scale className="w-4 h-4" />
-            {isCompared(unit.id) ? tx('في المقارنة', 'In Compare') : tx('قارن', 'Compare')}
-          </button>
+
           <button onClick={share} className="btn-ghost min-h-11 px-4 text-sm">
             <Share2 className="w-4 h-4" />
             {tx('شارك', 'Share')}
