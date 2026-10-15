@@ -345,7 +345,17 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
                 </a>
               </div>
             ) : (
-              <form onSubmit={book} className="mt-6 grid gap-2">
+              <form onSubmit={book} className="mt-6 grid gap-2.5">
+                <div className="flex items-center justify-between text-xs text-white/80 mb-0.5">
+                  <span className="font-semibold">{tx('بيانات حجز المعاينة المجانية', 'Free viewing details')}</span>
+                  <button
+                    type="button"
+                    onClick={() => setBooking(false)}
+                    className="underline text-white/70 hover:text-white text-xs"
+                  >
+                    {tx('إلغاء', 'Cancel')}
+                  </button>
+                </div>
                 <label className="sr-only" htmlFor="bk-name">
                   {tx('اسمك', 'Your name')}
                 </label>
@@ -353,8 +363,8 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
                   id="bk-name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder={tx('اسمك', 'Your name')}
-                  className="field bg-white/10 border-white/15 text-white placeholder:text-white/50 focus:border-white"
+                  placeholder={tx('اسمك بالكامل', 'Your full name')}
+                  className="w-full rounded-xl border border-white/30 bg-white px-4 h-13 text-[15px] font-semibold text-ink placeholder:text-muted/70 hover:border-white focus:outline-none focus:ring-4 focus:ring-accent/30 focus:border-accent focus:bg-white focus:text-ink transition shadow-xs"
                   autoFocus
                 />
                 <label className="sr-only" htmlFor="bk-phone">
@@ -364,12 +374,21 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
                   id="bk-phone"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder={tx('رقم الموبايل', 'Mobile number')}
+                  placeholder={tx('رقم الموبايل (مثال: 01012345678)', 'Mobile (e.g. 01012345678)')}
                   inputMode="tel"
                   dir="ltr"
-                  className={`field bg-white/10 border-white/15 text-white placeholder:text-white/50 focus:border-white ${language === 'ar' ? 'text-right' : 'text-left'}`}
+                  className={`w-full rounded-xl border border-white/30 bg-white px-4 h-13 text-[15px] font-semibold text-ink placeholder:text-muted/70 hover:border-white focus:outline-none focus:ring-4 focus:ring-accent/30 focus:border-accent focus:bg-white focus:text-ink transition shadow-xs ${language === 'ar' ? 'text-right' : 'text-left'}`}
                 />
-                <button type="submit" disabled={!name.trim() || !phoneValid || sending} className="btn bg-white text-ink hover:bg-brand-soft min-h-13 w-full">
+                {phone.length > 0 && !phoneValid && (
+                  <p className="text-xs text-amber-200">
+                    {tx('رقم الموبايل لازم يبدأ بـ 01 ويتكون من 11 رقم', 'Phone must start with 01 and be 11 digits')}
+                  </p>
+                )}
+                <button
+                  type="submit"
+                  disabled={!name.trim() || !phoneValid || sending}
+                  className="btn bg-accent text-white hover:bg-accent-hover active:scale-[0.98] min-h-13 w-full font-bold shadow-md disabled:bg-white/20 disabled:text-white/40 disabled:cursor-not-allowed"
+                >
                   {sending ? tx('بنبعت...', 'Sending...') : tx('أكّد المعاينة', 'Confirm viewing')}
                 </button>
                 {sendError && <p role="alert" className="text-sm text-white bg-danger/80 rounded-lg px-3 py-2">{sendError}</p>}
