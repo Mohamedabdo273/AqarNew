@@ -457,10 +457,11 @@ const RequestDetail: React.FC<{ req: SellRequest; onBack: () => void }> = ({ req
               <dt className="text-muted">{tx('عمولتنا عليك', 'Our fee to you')}</dt>
               <dd className="font-semibold text-ink">{tx('صفر', 'Zero')}</dd>
             </div>
-            {(f.negotiable || f.eligibleForSwap) && (
+            {(f.negotiable || f.eligibleForSwap || f.privateListing) && (
               <div className="pt-2.5 border-t border-line flex flex-wrap gap-1.5">
                 {f.negotiable && <span className="rounded-full bg-brand-soft px-2.5 py-0.5 text-xs font-semibold text-ink">{tx('قابل للتفاوض', 'Negotiable')}</span>}
                 {f.eligibleForSwap && <span className="rounded-full bg-brand-soft px-2.5 py-0.5 text-xs font-semibold text-ink">{tx('يقبل التبديل', 'Open to swap')}</span>}
+                {f.privateListing && <span className="rounded-full bg-brand-soft px-2.5 py-0.5 text-xs font-semibold text-ink">{tx('عرض خاص', 'Private listing')}</span>}
               </div>
             )}
           </dl>

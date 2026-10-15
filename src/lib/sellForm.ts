@@ -65,6 +65,8 @@ export interface SellForm {
   discountAmount: number;
   /** Open to offers below the asking cash. */
   negotiable: boolean;
+  /** "العرض الخاص": not shown on the site — offered only to vetted buyers. */
+  privateListing: boolean;
   acceptsCashInstallments: boolean;
   cashInstallmentNotes: string;
   eligibleForSwap: boolean;
@@ -129,6 +131,7 @@ export const EMPTY_SELL_FORM: SellForm = {
   taxBearer: 'حسب القانون',
   willingToDiscount: false,
   negotiable: false,
+  privateListing: false,
   discountAmount: 0,
   acceptsCashInstallments: false,
   cashInstallmentNotes: '',

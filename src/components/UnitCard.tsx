@@ -2,6 +2,7 @@ import React from 'react';
 import { Heart, BadgeCheck, ArrowDown } from 'lucide-react';
 import { RealEstateUnit } from '../types';
 import { useLanguage } from '../context/LanguageContext';
+import { SourceTag } from './SourceTag';
 import { useUnits } from '../context/UnitsContext';
 import { BRAND } from '../config/brand';
 import {
@@ -131,7 +132,10 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
 
         {/* The one number that matters */}
         <div className="mt-3">
-          <span className="block text-xs text-muted">{tx('المطلوب كاش دلوقتي', 'Cash needed now')}</span>
+          <span className="flex items-center gap-1.5 text-xs text-muted">
+            {tx('المطلوب كاش دلوقتي', 'Cash needed now')}
+            <SourceTag verified={!!(unit.developerAccountStatementVerified ?? unit.verifiedContract)} />
+          </span>
           {/* Reserved whether or not there's an old price, so the big number sits at the same height on every card. */}
           <span className="num block h-4 text-[11px] text-muted line-through leading-4 mt-0.5">
             {deal ? `${full(unit.paidCashAmount)} ${cur}` : ''}
@@ -160,8 +164,9 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
             bottom, so these line up across the row no matter how many flag lines the price has. */}
         <div className="mt-auto" aria-hidden />
         <div className="mt-3 rounded-xl bg-accent-soft px-2.5 py-2">
-          <span className="block text-[11px] text-accent-ink/80">
+          <span className="flex items-center gap-1.5 text-[11px] text-accent-ink/80">
             {tx('مكسبك عن سعر السوق', 'Your gain vs market')}
+            <SourceTag verified={false} />
           </span>
           <span className="num block font-black text-base @xs:text-lg text-accent-ink leading-tight mt-0.5">
             +{full(savings)} <span className="text-xs font-bold">{cur}</span>

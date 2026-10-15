@@ -601,10 +601,16 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               on={form.negotiable}
               onChange={(v) => set('negotiable', v)}
             />
+            <Toggle
+              label={tx('عرض خاص — ما تظهرش في الموقع', "Private listing — not shown on the site")}
+              hint={tx('بنعرضها بس على مشترين متحقق منهم ومناسبين ليها', 'We offer it only to vetted buyers who match it')}
+              on={form.privateListing}
+              onChange={(v) => set('privateListing', v)}
+            />
             {/* خيار جوه الفورم مش لينك بيخرّجه منه — البايع يقول إنه يقبل التبديل ويكمّل. */}
             <Toggle
               label={tx('أقبل أبدّلها بوحدة تانية', 'Open to swapping it')}
-              hint={tx('من غير ما تبيع الأول — تدفع أو تاخد الفرق بس', 'No selling first — just settle the difference')}
+              hint={tx('تتبادل مع مالك تاني عايز وحدتك — واللي وحدته أغلى ياخد الفرق', 'Trade with another owner who wants yours — the pricier side gets the difference')}
               on={form.eligibleForSwap}
               onChange={(v) => set('eligibleForSwap', v)}
             >
@@ -643,7 +649,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               </button>
             </div>
             <CheckBox checked={form.ackOwner} onChange={(v) => set('ackOwner', v)}>
-              <b>{tx('أنا المالك', "I'm the owner")}</b> — {tx('العقد باسمي أو معايا توكيل رسمي. مش بنقبل سماسرة.', 'the contract is in my name or I hold a formal POA. No brokers.')}
+              <b>{tx('أنا المالك ومش سمسار ولا وسيط', "I'm the owner, not a broker or middleman")}</b> — {tx('العقد باسمي أو معايا توكيل رسمي. لو اتضح إني وسيط، الوحدة بتتشال نهائياً.', "the contract is in my name or I hold a formal POA. If I turn out to be a middleman, the unit is removed for good.")}
             </CheckBox>
             <CheckBox checked={form.ackNoOverprice} onChange={(v) => set('ackNoOverprice', v)}>
               <b>{tx('مفيش أوفر برايس', 'No overprice')}</b> — {tx('هاخد اللي دفعته بس، ومش هاخد عربون برّه', "I'll take only what I paid, and no side deposits")}

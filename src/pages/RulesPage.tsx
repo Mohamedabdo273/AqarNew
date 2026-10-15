@@ -20,6 +20,9 @@ import {
   HandCoins,
   KeyRound,
   FileCheck2,
+  EyeOff,
+  MessageSquareHeart,
+  BadgeCheck,
 } from 'lucide-react';
 import { PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
@@ -47,21 +50,24 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
     { icon: Ban, t: tx('صفر أوفر برايس', 'Zero overprice'), d: tx('السعر هو اللي البايع دفعه. مش جنيه زيادة.', 'The price is what the seller paid. Not a pound more.') },
     { icon: HandCoins, t: tx('مفيش فلوس قبل التنازل', 'No money before transfer'), d: tx('كل الفلوس بتتدفع في مقر المطور يوم التنازل.', 'All money changes hands at the developer on transfer day.') },
     { icon: FileCheck2, t: tx('كل حاجة مكتوبة', 'Everything in writing'), d: tx('المديونية والرسوم مكتوبة في الإعلان قبل ما تقرر.', 'Dues and fees are listed before you decide.') },
+    { icon: BadgeCheck, t: tx('كل رقم معروف مصدره', 'Every number shows its source'), d: tx('اللي اتأكدنا منه بالمستندات مكتوب عليه "متأكد"، والتقديري مكتوب عليه "تقديري".', 'Figures checked against documents say "verified"; estimates say "estimate".') },
   ];
 
   const seller: Rule[] = [
-    { icon: UserCheck, t: tx('لازم تكون المالك', 'You must be the owner'), d: tx('العقد باسمك، أو معاك توكيل رسمي.', 'The contract is in your name, or you hold a formal power of attorney.') },
+    { icon: UserCheck, t: tx('الملّاك بس — مفيش سماسرة', 'Owners only — no brokers'), d: tx('العقد باسمك، أو معاك توكيل رسمي بنراجعه. ممنوع السماسرة والوسطاء يعرضوا وحدات، وأي وحدة يبان إنها من وسيط بتتشال نهائياً.', 'The contract is in your name, or you hold a formal power of attorney we review. Brokers and middlemen may not list; any unit found to come from one is removed for good.') },
     { icon: Tag, t: tx('السعر = اللي دفعته', 'Price = what you paid'), d: tx('تقدر تعمل خصم، بس ما تقدرش تزوّد.', 'You can offer a discount, never add on top.') },
     { icon: Wallet, t: tx('صفر عمولة عليك', 'Zero fee for you'), d: tx('مش هتدفع لينا ولا جنيه.', "You don't pay us anything.") },
     { icon: AlertTriangle, t: tx('قول على المديونية', 'Declare all dues'), d: tx('أي أقساط متأخرة أو غرامات لازم تتكتب. لو اتخبّت، الإعلان بيتشال.', 'Any overdue installments or fines must be listed. Hidden dues get the listing removed.') },
     { icon: FileSearch, t: tx('مراجعة قبل النشر', 'Reviewed before listing'), d: tx('بنراجع العقد وكشف الحساب مع المطور خلال 24 ساعة.', 'We check the contract and statement with the developer within 24h.') },
     { icon: Building2, t: tx('تقبض في مقر المطور', 'Paid at the developer'), d: tx('بشيك مصرفي، وشيكاتك القديمة بترجعلك في نفس اليوم.', 'By bank cheque, and your old cheques are returned the same day.') },
+    { icon: EyeOff, t: tx('تقدر تختار العرض الخاص', 'Private listing if you want'), d: tx('وحدتك ما تظهرش في الموقع خالص، وبنعرضها بس على مشترين متحقق منهم ومناسبين ليها.', "Your unit isn't shown on the site at all — only to vetted buyers who match it.") },
+    { icon: MessageSquareHeart, t: tx('نصيحة بصراحة', 'Honest advice'), d: tx('بنعرض عليك كل الاختيارات، ولو الأحسن ليك إنك تكمّل تعاقدك هنقولك.', "We lay out every option — and if you're better off keeping your contract, we'll say so.") },
     { icon: Undo2, t: tx('تقدر تنسحب', 'You can withdraw'), d: tx('قبل التوقيع تشيل إعلانك في أي وقت ومن غير تكلفة.', 'Remove your listing any time before signing, free.') },
   ];
 
   const buyer: Rule[] = [
     { icon: Banknote, t: tx('تدفع اللي البايع دفعه بس', 'Pay only what the seller paid'), d: tx('والباقي أقساط للمطور بنفس نظامها القديم.', 'The rest continues as installments to the developer.') },
-    { icon: Percent, t: tx(`عمولتنا ${fee}% بس`, `Our fee is only ${fee}%`), d: tx('من سعر العقد، وبتتدفع بعد توقيع التنازل، مش قبله.', 'Of the contract price, paid after the transfer is signed, never before.') },
+    { icon: Percent, t: tx(`عمولتنا ${fee}% بس`, `Our fee is only ${fee}%`), d: tx('من سعر العقد، وبتتدفع بس لو التنازل تم. لو ما تمش لأي سبب، مفيش عمولة على حد.', "Of the contract price, and only if the transfer completes. If it doesn't, for any reason, nobody pays a fee.") },
     { icon: Receipt, t: tx('رسوم التنازل واضحة', 'Transfer fee is clear'), d: tx('كل إعلان مكتوب فيه مين بيدفع رسوم المطور ونسبتها.', 'Every listing states who pays the developer fee and how much.') },
     { icon: Eye, t: tx('المعاينة ببلاش', 'Free viewing'), d: tx('احجزها من صفحة الوحدة وفريقنا يرتبها.', 'Book from the unit page and we arrange it.') },
     { icon: AlertTriangle, t: tx('المتأخرات مش عليك', "Overdues aren't on you"), d: tx('بتتسدد للمطور يوم التنازل وتتخصم من البايع.', "They're settled on transfer day and deducted from the seller.") },
@@ -103,7 +109,7 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
       </p>
 
       {/* Golden rules — apply to everyone */}
-      <div className="mt-8 grid sm:grid-cols-3 gap-4">
+      <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {golden.map((g) => (
           <div key={g.t} className="rounded-card bg-brand-ink text-white p-6">
             <g.icon className="w-7 h-7 text-accent-light" />

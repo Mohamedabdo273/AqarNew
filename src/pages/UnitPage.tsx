@@ -30,6 +30,7 @@ import { useUnits } from '../context/UnitsContext';
 import { errorText } from '../services/api';
 import { useCompare, COMPARE_MAX } from '../context/CompareContext';
 import { UnitCard } from '../components/UnitCard';
+import { SourceTag } from '../components/SourceTag';
 import { AqarExitComparison } from '../components/AqarExitComparison';
 import {
   cashPrice,
@@ -318,7 +319,10 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
                 </span>
               </div>
             )}
-            <p className="text-sm text-white/70 font-medium">{tx('تدفع كاش دلوقتي', 'Cash now')}</p>
+            <p className="flex items-center gap-2 text-sm text-white/70 font-medium">
+              {tx('تدفع كاش دلوقتي', 'Cash now')}
+              <SourceTag light verified={!!(unit.developerAccountStatementVerified ?? unit.verifiedContract)} />
+            </p>
             <p className="num font-display mt-1 text-4xl font-extrabold">
               {money(cashPrice(unit), language)} <span className="text-base font-medium text-white/70">{currency(language)}</span>
             </p>
@@ -339,7 +343,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
               </div>
             )}
             <div className="mt-4 pt-4 border-t border-white/10 flex items-baseline justify-between gap-3">
-              <span className="text-white/60">{tx('وقسط شهري تقريباً', 'Monthly, roughly')}</span>
+              <span className="flex items-center gap-2 text-white/60">{tx('وقسط شهري تقريباً', 'Monthly, roughly')} <SourceTag light verified={false} /></span>
               <span className="num font-display text-xl font-bold">
                 {money(monthlyInstallment(unit), language)} <span className="text-xs font-medium text-white/60">{currency(language)}</span>
               </span>
