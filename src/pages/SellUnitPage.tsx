@@ -244,7 +244,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
   };
 
   return (
-    <div id="sell-top" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-12 scroll-mt-20">
+    <div id="sell-top" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-12 scroll-mt-32">
       {/* العنوان الأول، وتحته سطر الطمأنة — مش العكس. اللي داخل الصفحة دي عايز يعرف بيعمل إيه قبل أي كلام. */}
       <header className="max-w-3xl">
         <span className="inline-flex items-center gap-2 rounded-full bg-accent-soft px-3.5 py-1.5 text-sm font-bold text-accent">

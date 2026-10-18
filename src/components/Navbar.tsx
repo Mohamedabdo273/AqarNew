@@ -104,7 +104,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
   return (
     <>
       <header className="sticky top-0 z-40 bg-paper/85 backdrop-blur-md border-b border-line">
-        <div className="page-wrap h-16 sm:h-20 flex items-center justify-between gap-3 sm:gap-5">
+        <div className="page-wrap h-24 sm:h-28 flex items-center justify-between gap-3 sm:gap-5">
           <Logo onClick={() => go('home')} />
 
           <nav className="hidden lg:flex items-center gap-1">

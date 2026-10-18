@@ -8,9 +8,10 @@ interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-/* اللوجو كامل زي ما هو: أبيض على خلفيته البرتقالي، بسطر REAL ESTATE SOLUTIONS.
-   الفراغ البرتقالي حوالين الكلام أقل ما يمكن عشان الكلام ياخد أكبر نصيب من البادچ. */
-const LOGO_SRC = '/brand/forsa-logo-bg.png';
+/* لوجو DEAL: الحروف مباني، حرف برتقاني وحرف كحلي، وتحتها REAL ESTATE.
+   على الخلفيات الغامقة (الفوتر) الكحلي بيبقى أبيض. */
+const LOGO_SRC = '/brand/deal-logo.svg?v=4';
+const LOGO_SRC_LIGHT = '/brand/deal-logo-white.svg?v=4';
 const MARK_SRC = '/brand/forsa-mark.png';
 const MARK_SRC_LIGHT = '/brand/forsa-mark-white.png';
 
@@ -32,25 +33,25 @@ export const LogoMark: React.FC<{ size?: number; className?: string; light?: boo
 );
 
 /** عرض اللوجو — الارتفاع بيتحسب لوحده من نسبة الصورة. */
-const SIZES = { sm: 'w-36', md: 'w-48 sm:w-60', lg: 'w-72' };
+const SIZES = { sm: 'h-24', md: 'h-20 sm:h-24', lg: 'h-28' };
 
-/** اللوجو الكامل: العلامة + FORSA + REAL ESTATE SOLUTIONS، على خلفيته البرتقالي. */
-export const Logo: React.FC<LogoProps> = ({ onClick, className = '', size = 'md' }) => (
+/** اللوجو الكامل: DEAL + REAL ESTATE. */
+export const Logo: React.FC<LogoProps> = ({ onClick, className = '', size = 'md', light = false }) => (
   <div
     onClick={onClick}
     role={onClick ? 'button' : undefined}
     tabIndex={onClick ? 0 : undefined}
     onKeyDown={(e) => onClick && (e.key === 'Enter' || e.key === ' ') && onClick()}
     className={`inline-flex items-center shrink-0 cursor-pointer select-none group focus:outline-hidden ${className}`}
-    aria-label="FORSA - Real Estate Solutions"
+    aria-label="DEAL - Real Estate Solutions"
     dir="ltr"
   >
     <img
-      src={LOGO_SRC}
-      alt="FORSA — Real Estate Solutions"
-      width={1062}
-      height={306}
-      className={`${SIZES[size]} h-auto shrink-0 rounded-lg transition-transform duration-200 group-hover:scale-105`}
+      src={light ? LOGO_SRC_LIGHT : LOGO_SRC}
+      alt="DEAL — Real Estate Solutions"
+      width={600}
+      height={285}
+      className={`${SIZES[size]} w-auto shrink-0 transition-transform duration-200 group-hover:scale-105`}
     />
   </div>
 );

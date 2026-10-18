@@ -288,7 +288,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
         <aside className="lg:col-start-2 lg:row-start-1 lg:sticky lg:top-24 space-y-3">
           <div className="rounded-card bg-brand text-white p-6 shadow-lift">
             {isDeal(unit) && (
-              <div className="-mt-6 -mx-6 mb-5 rounded-t-card bg-gradient-to-r from-[#a33a05] via-[#c24a07] to-[#cc4e08] px-6 py-3.5 flex items-center justify-between text-white font-black shadow-md">
+              <div className="-mt-6 -mx-6 mb-5 rounded-t-card bg-gradient-to-r from-[#e05a08] via-[#ea620a] to-[#f26a0a] px-6 py-3.5 flex items-center justify-between text-white font-black shadow-md">
                 <div className="flex items-center gap-2 text-sm sm:text-base">
                   <Flame className="w-5 h-5 shrink-0 fill-current animate-pulse" />
                   <span>

@@ -77,9 +77,7 @@ const SectionTitle: React.FC<{ title: string; sub?: string; center?: boolean; li
   <div className={center ? 'text-center max-w-2xl mx-auto' : 'max-w-2xl'}>
     {kicker && (
       <p
-        className={`inline-flex items-center rounded-full px-4 py-1.5 text-sm sm:text-base font-bold mb-3 ${
-          light ? 'bg-white/10 text-accent-light' : 'bg-accent-soft text-accent-ink'
-        }`}
+        className="inline-flex items-center rounded-full px-4 py-1.5 text-sm sm:text-base font-bold mb-3 bg-accent text-white"
       >
         {kicker}
       </p>
@@ -278,17 +276,17 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className={`relative ${WIDE} min-h-[23rem] sm:min-h-[25rem] lg:min-h-[27rem] flex flex-col justify-end pt-10 pb-24 sm:pb-36`}>
           {/* لوح غامق ورا الكلام: بيضمن إن النص يفضل مقروء مهما كانت صورة الخلفية */}
           <div className="w-full rounded-3xl bg-brand-ink/55 backdrop-blur-[6px] border border-white/10 p-6 sm:p-8 lg:p-10 shadow-2xl">
-            <p className="hero-in inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 backdrop-blur px-3 py-1 text-xs sm:text-sm font-medium text-white">
-              <ShieldCheck className="w-4 h-4 text-accent-light" />
+            <p className="hero-in inline-flex items-center gap-2.5 rounded-full border border-white/25 bg-white/10 backdrop-blur px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-lg font-bold text-white">
+              <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 text-accent-light" />
               {tx('تنازل رسمي في مقر المطور · من غير عمولة عليك', 'Official transfer at the developer · no fee for you')}
             </p>
             <h1 style={{ animationDelay: '80ms' }} className="hero-in mt-4 text-[2.4rem] sm:text-5xl lg:text-6xl font-extrabold leading-[1.22] text-white [text-shadow:0_2px_16px_rgb(0_0_0/0.55)]">
               {/* نص الجملة للبايع والنص التاني للمشتري — كل واحد بلونه عشان كل طرف يلاقي سطره بنظرة */}
-              <span className="text-white">{tx('البايع ياخد كل اللي دفعه،', 'Sellers get back everything they paid,')}</span>
+              <span className="text-white">{tx('اخرج من الأقساط وفلوسك في إيدك،', 'Step out of your instalments with your money in hand,')}</span>
               <br className="sm:hidden" />{' '}
               <span className="text-accent-light">
                 <span className="relative inline-block">
-                  {tx('والمشتري ياخد سعر يوم التعاقد.', 'buyers get the original contract price.')}
+                  {tx('أو ادخل وحدتك بسعر عقدها القديم.', 'or step into a home at its old contract price.')}
                   <svg aria-hidden="true" viewBox="0 0 200 20" preserveAspectRatio="none" className="underline-draw absolute -bottom-2 inset-x-0 w-full h-3 sm:h-4">
                     <path d="M4 14C40 6 90 4 130 7s56 6 66 4" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" />
                   </svg>
@@ -300,20 +298,20 @@ export const HomePage: React.FC<HomePageProps> = ({
             <div style={{ animationDelay: '140ms' }} className="hero-in mt-6 max-w-3xl space-y-4 [text-shadow:0_2px_12px_rgb(0_0_0/0.6)]">
               <p className="text-lg sm:text-xl text-white/95 leading-[1.85]">
                 <span className="font-bold text-accent-light">
-                  {tx('لو مش قادر تكمّل أقساطك:', "Can't keep up with the instalments?")}{' '}
+                  {tx('صاحب وحدة وتقلت عليك؟', 'Own a unit that has become too heavy?')}{' '}
                 </span>
                 {tx(
-                  'بيع وحدتك من غير أوفر واسترجع فلوسك كاش، بدل ما تخاطر بخسارة توصل لـ 10–15% من سعر الوحدة كلها في الإلغاء حسب عقدك.',
-                  'Sell your unit with no overprice and get your money back in cash, instead of risking a loss of 10–15% of the whole contract price on cancellation, depending on your contract.',
+                  'اعرضها وخد اللي دفعته كاش، أو بدّلها بوحدة تناسبك أكتر. الإلغاء ممكن يكلّفك 10–15% من سعر الوحدة — ولو تكمّل عقدك أحسن ليك، هنقولك بصراحة.',
+                  "List it and take back what you paid in cash, or swap it for one that fits you better. Cancelling can cost you 10–15% of the unit price — and if keeping your contract is better for you, we'll tell you straight.",
                 )}
               </p>
               <p className="text-lg sm:text-xl text-white/95 leading-[1.85]">
                 <span className="font-bold text-accent-light">
-                  {tx('ولو بتدوّر على وحدة:', 'Looking for a unit?')}{' '}
+                  {tx('بتدوّر على وحدة؟', 'Looking for a home?')}{' '}
                 </span>
                 {tx(
-                  'اشتري بسعر يوم التعاقد — أرخص من سعر السوق — وكمّل نفس الأقساط. كل الأرقام متحققة من العقد والإيصالات، وإحنا معاك في إجراءات التنازل خطوة بخطوة لحد ما تقبض.',
-                  'Buy at the original contract price — below market — and continue the same instalments. Every number is checked against the contract and receipts, and we walk you through the transfer, step by step, until you are paid.',
+                  'خدها من مالكها على طول — من غير سماسرة — بسعر عقدها القديم، وكمّل نفس الأقساط. جنب كل رقم مكتوب "متأكد" أو "تقديري"، والعمولة ما بتتدفعش غير لما التنازل يتم.',
+                  'Take it straight from its owner — no brokers — at its old contract price, and carry on with the same instalments. Every number is marked "verified" or "estimate", and the fee is only paid once the transfer completes.',
                 )}
               </p>
             </div>
@@ -565,7 +563,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               options={categoriesShown.map((x) => ({ value: x.o.ar, label: language === 'ar' ? x.o.ar : x.o.en, count: x.count }))}
             />
             <FilterSelect
-              label={tx('النوع', 'Type')}
+              label={tx('نوع الوحده', 'Type')}
               allLabel={tx('كل أنواع الوحدات', 'All unit types')}
               allCount={afterCategory.length}
               value={cardType}

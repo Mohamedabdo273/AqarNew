@@ -120,7 +120,7 @@ export const StatementPage: React.FC<StatementPageProps> = ({ onNavigate, onSent
   };
 
   return (
-    <div id="statement-top" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-10 scroll-mt-20">
+    <div id="statement-top" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-10 scroll-mt-32">
       {/* Hero Header Section */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-surface via-surface to-brand-soft/25 border border-line p-6 sm:p-10 shadow-sm mb-8 sm:mb-10">
         {/* Subtle decorative glow */}
