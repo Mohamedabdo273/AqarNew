@@ -34,6 +34,7 @@ import { useUnits } from './context/UnitsContext';
 import { useLanguage } from './context/LanguageContext';
 import { useAuth } from './context/AuthContext';
 import { SignInSheet } from './components/SignInSheet';
+import { RequireAuth } from './components/RequireAuth';
 import { fetchUnit } from './services/api';
 
 /** Pages reachable by a bare hash (#sell, #contact, …). */
@@ -248,7 +249,12 @@ export default function App() {
             <NotFoundPage variant="unit" suggestions={units.slice(0, 3)} onNavigate={handleNavigate} onSelectUnit={openUnit} />
           ))}
         {activePage === 'sell' && (
-          <SellUnitPage onSubmitted={(code) => go(`thanks/sell/${code}`)} onOpenRules={() => openRules('seller')} onNavigate={handleNavigate} />
+          <RequireAuth
+            title={tx('سجّل دخول الأول عشان تعرض وحدتك', 'Log in first to list your unit')}
+            text={tx('بنربط الطلب بحسابك، فتتابعه وتعدّله من أي جهاز، وإحنا نعرف إن اللي بيعرض هو المالك.', "We tie the request to your account so you can follow and edit it from any device — and we know it's the owner listing.")}
+          >
+            <SellUnitPage onSubmitted={(code) => go(`thanks/sell/${code}`)} onOpenRules={() => openRules('seller')} onNavigate={handleNavigate} />
+          </RequireAuth>
         )}
         {activePage === 'thanks' && (
           <ThanksPage
@@ -267,7 +273,14 @@ export default function App() {
         {activePage === 'compare' && <ComparePage units={units} onSelectUnit={openUnit} onNavigate={handleNavigate} />}
         {activePage === 'market-comparisons' && <MarketComparisonsPage units={units} onSelectUnit={openUnit} onNavigate={handleNavigate} />}
         {activePage === 'verify' && <VerifyPage initialCode={verifyCode} onSelectUnit={openUnit} />}
-        {activePage === 'statement' && <StatementPage onNavigate={handleNavigate} onSent={() => go('thanks/statement')} />}
+        {activePage === 'statement' && (
+          <RequireAuth
+            title={tx('سجّل دخول الأول عشان تطلب كشف حساب', 'Log in first to ask for a statement')}
+            text={tx('بنبعتلك الكشف ونتابع معاك على حسابك.', 'We send the statement and follow up through your account.')}
+          >
+            <StatementPage onNavigate={handleNavigate} onSent={() => go('thanks/statement')} />
+          </RequireAuth>
+        )}
         {activePage === 'contact' && <ContactPage onNavigate={handleNavigate} onSent={() => go('thanks/contact')} />}
         {activePage === 'about' && <AboutPage onNavigate={handleNavigate} />}
         {activePage === 'rules' && <RulesPage tab={rulesTab} onTabChange={setRulesTab} onNavigate={handleNavigate} />}

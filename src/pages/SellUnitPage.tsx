@@ -6,7 +6,7 @@ import { useRequests } from '../context/RequestsContext';
 import { useUnits } from '../context/UnitsContext';
 import { useAuth } from '../context/AuthContext';
 import { errorText } from '../services/api';
-import { PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, REGIONS, SUB_AREAS, CANCELLATION_PENALTY_MIN_RATE, cancellationLoss, currency, money } from '../lib/unitHelpers';
+import { PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, REGIONS, SUB_AREAS, CANCELLATION_PENALTY_MIN_RATE, CANCELLATION_PENALTY_RATE, cancellationLoss, currency, money } from '../lib/unitHelpers';
 import { DeliveryStatus } from '../types';
 import { EMPTY_SELL_FORM, SellForm, isValidPhone, netToSeller } from '../lib/sellForm';
 import { ChipSelect, CheckBox, Field, FilePick, FilePickMany, MoneyInput, Toggle } from '../components/sell/FormBits';
@@ -36,7 +36,11 @@ const DELIVERY_MONTHS = [
   { m: 12, ar: 'ديسمبر', en: 'December' },
 ];
 
-const DELIVERY_YEARS = [2026, 2027, 2028, 2029, 2030, 2031, 2032];
+// From this year, 12 years ahead. A delivery date can't be in the past (an already-delivered unit has its own button).
+const THIS_YEAR = new Date().getFullYear();
+const THIS_MONTH = new Date().getMonth() + 1;
+const DELIVERY_YEARS = Array.from({ length: 12 }, (_, i) => THIS_YEAR + i);
+const isPastMonth = (year: number, month: number) => year < THIS_YEAR || (year === THIS_YEAR && month < THIS_MONTH);
 
 /**
  * Phase 1 of listing: only what we need to call the seller back.
@@ -77,12 +81,17 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
   const [deliveryModalOpen, setDeliveryModalOpen] = useState(false);
   const [pickerYear, setPickerYear] = useState<number>(() => {
     const num = Number(form.deliveryStatus?.replace(/\D/g, ''));
-    return num >= 2026 ? num : 2027;
+    return DELIVERY_YEARS.includes(num) ? num : THIS_YEAR + 1;
   });
   const [pickerMonth, setPickerMonth] = useState<number>(() => {
     const matched = DELIVERY_MONTHS.find((m) => form.deliveryDate?.includes(m.ar) || form.deliveryDate?.includes(m.en));
     return matched ? matched.m : 6;
   });
+  // Moving to this year with a month that's already gone jumps to the current month.
+  const pickYear = (yr: number) => {
+    setPickerYear(yr);
+    if (isPastMonth(yr, pickerMonth)) setPickerMonth(THIS_MONTH);
+  };
 
   useEffect(() => {
     if (!deliveryModalOpen) return;
@@ -97,7 +106,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
     if (deliveryModalOpen) {
       if (form.deliveryStatus) {
         const num = Number(form.deliveryStatus.replace(/\D/g, ''));
-        if (num >= 2026 && num <= 2035) setPickerYear(num);
+        if (DELIVERY_YEARS.includes(num)) setPickerYear(num);
       }
       if (form.deliveryDate) {
         const matched = DELIVERY_MONTHS.find((m) => form.deliveryDate.includes(m.ar) || form.deliveryDate.includes(m.en));
@@ -225,6 +234,13 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
 
   const validMoney = form.paidAmount > 0 && form.paidAmount <= form.contractPrice;
   const { net, discount, fines } = netToSeller(form);
+  // The penalty is 10–15% of the whole contract, but nobody can lose more than they paid — so it's capped there.
+  const penaltyMin = Math.round(form.contractPrice * CANCELLATION_PENALTY_MIN_RATE);
+  const penaltyMax = Math.round(form.contractPrice * CANCELLATION_PENALTY_RATE);
+  const lossMin = cancellationLoss(form.contractPrice, form.paidAmount, CANCELLATION_PENALTY_MIN_RATE);
+  const lossMax = cancellationLoss(form.contractPrice, form.paidAmount);
+  // Under 1% of the price paid is almost always a typo (a missing zero or two).
+  const paidLooksLow = form.contractPrice > 0 && form.paidAmount > 0 && form.paidAmount < form.contractPrice * 0.01;
 
   const confirmDeliveryDate = (year: number, monthNum: number) => {
     const monthObj = DELIVERY_MONTHS.find((m) => m.m === monthNum) || DELIVERY_MONTHS[5];
@@ -499,7 +515,11 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
             <Field label={tx('سعر الوحدة في العقد', 'Contract price')} required htmlFor="price">
               <MoneyInput id="price" value={form.contractPrice} onChange={(n) => set('contractPrice', n)} placeholder="5,000,000" />
             </Field>
-            <Field label={tx('دفعت كام لحد النهارده؟', 'Paid so far')} required htmlFor="paid" hint={tx('المقدم + الأقساط اللي اتدفعت', 'Down payment + paid installments')}>
+            <Field label={tx('دفعت كام لحد النهارده؟', 'Paid so far')} required htmlFor="paid" hint={
+                paidLooksLow
+                  ? tx('الرقم ده صغير أوي مقارنة بسعر الوحدة — اتأكد إنك كاتبه صح', 'That is very small next to the unit price — double-check it')
+                  : tx('المقدم + الأقساط اللي اتدفعت', 'Down payment + paid installments')
+              }>
               <MoneyInput id="paid" value={form.paidAmount} onChange={(n) => set('paidAmount', n)} placeholder="1,500,000" />
             </Field>
           </div>
@@ -723,13 +743,36 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
                 <div className="mt-5 rounded-xl bg-danger-soft p-4 flex items-center gap-3">
                   <TrendingDown className="w-5 h-5 text-danger shrink-0" />
                   <p className="text-sm text-ink-soft">
-                    {tx('لو لغيت مع المطور ممكن تخسر من', 'Cancelling could cost you')}{' '}
-                    <span className="num font-bold text-danger">
-                      {money(cancellationLoss(form.contractPrice, form.paidAmount, CANCELLATION_PENALTY_MIN_RATE), language)}
-                      {tx(' لـ ', ' – ')}
-                      {money(cancellationLoss(form.contractPrice, form.paidAmount), language)}
+                    {lossMin >= form.paidAmount ? (
+                      <>
+                        {tx('لو لغيت مع المطور ممكن تخسر', 'Cancelling could cost you')}{' '}
+                        <span className="font-bold text-danger">{tx('كل اللي دفعته', 'everything you paid')}</span>{' '}
+                        <span className="num font-bold text-danger">({money(form.paidAmount, language)})</span>
+                      </>
+                    ) : lossMax >= form.paidAmount ? (
+                      <>
+                        {tx('لو لغيت مع المطور ممكن تخسر من', 'Cancelling could cost you from')}{' '}
+                        <span className="num font-bold text-danger">{money(lossMin, language)}</span>{' '}
+                        {tx('لحد كل اللي دفعته', 'up to everything you paid')}
+                      </>
+                    ) : (
+                      <>
+                        {tx('لو لغيت مع المطور ممكن تخسر من', 'Cancelling could cost you')}{' '}
+                        <span className="num font-bold text-danger">
+                          {money(lossMin, language)}
+                          {tx(' لحد ', ' – ')}
+                          {money(lossMax, language)}
+                        </span>
+                      </>
+                    )}
+                    <span className="block text-xs text-muted mt-0.5">
+                      {lossMax >= form.paidAmount
+                        ? tx(
+                            `الغرامة 10–15% من سعر الوحدة (${money(penaltyMin, language)} – ${money(penaltyMax, language)}) — أكبر من اللي دفعته`,
+                            `The penalty is 10–15% of the unit price (${money(penaltyMin, language)} – ${money(penaltyMax, language)}) — more than you paid`,
+                          )
+                        : tx('(10% – 15% من سعر الوحدة)', '(10–15% of the unit price)')}
                     </span>
-                    <span className="block text-xs text-muted mt-0.5">{tx('(10% – 15% من سعر الوحدة)', '(10–15% of the unit price)')}</span>
                   </p>
                 </div>
               </>
@@ -791,13 +834,13 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
                 <label className="block text-sm font-bold text-ink mb-2.5">
                   {tx('سنة الاستلام', 'Delivery Year')}
                 </label>
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                   {DELIVERY_YEARS.map((yr) => (
                     <button
                       key={yr}
                       type="button"
-                      onClick={() => setPickerYear(yr)}
-                      className={`px-4 py-2 rounded-xl text-sm font-bold transition-all cursor-pointer ${
+                      onClick={() => pickYear(yr)}
+                      className={`num px-2 py-2 rounded-xl text-sm font-bold transition-all cursor-pointer ${
                         pickerYear === yr
                           ? 'bg-brand text-white shadow-sm ring-2 ring-brand/20'
                           : 'bg-paper text-ink border border-line hover:border-brand-soft'
@@ -819,8 +862,9 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
                     <button
                       key={m.m}
                       type="button"
+                      disabled={isPastMonth(pickerYear, m.m)}
                       onClick={() => setPickerMonth(m.m)}
-                      className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                      className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-center transition-all cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed disabled:line-through ${
                         pickerMonth === m.m
                           ? 'bg-brand text-white border-brand shadow-sm'
                           : 'bg-paper text-ink border-line hover:border-brand-soft hover:bg-surface'
@@ -848,8 +892,9 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
                     <button
                       key={q.m}
                       type="button"
+                      disabled={isPastMonth(pickerYear, q.m)}
                       onClick={() => setPickerMonth(q.m)}
-                      className={`py-1.5 px-2 rounded-lg border text-center font-semibold transition-colors cursor-pointer ${
+                      className={`py-1.5 px-2 rounded-lg border text-center font-semibold transition-colors cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed ${
                         pickerMonth === q.m
                           ? 'bg-brand-soft border-brand/40 text-brand-ink'
                           : 'bg-paper border-line text-ink-soft hover:bg-surface'
@@ -899,8 +944,9 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               </button>
               <button
                 type="button"
+                disabled={isPastMonth(pickerYear, pickerMonth)}
                 onClick={() => confirmDeliveryDate(pickerYear, pickerMonth)}
-                className="btn-primary flex-1 min-h-12 text-sm cursor-pointer"
+                className="btn-primary flex-1 min-h-12 text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Check className="w-4 h-4" />
                 {tx('تأكيد تاريخ الاستلام', 'Confirm Date')}

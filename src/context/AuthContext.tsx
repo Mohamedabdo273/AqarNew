@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState, ReactNode } from 'react';
 import {
   AccountUser,
   ApiError,
@@ -34,6 +34,12 @@ interface AuthContextType {
   /** Opens the sign-in sheet from anywhere (navbar, saving a favorite, …). */
   openSignIn: () => void;
   closeSignIn: () => void;
+  /**
+   * Gate for any action (listing a unit, booking a viewing, a swap request, a favorite…).
+   * Signed in: runs it now and returns true. Guest: opens the sign-in sheet, runs it right
+   * after a successful sign-in, and returns false. Closing the sheet drops it.
+   */
+  requireAuth: (action?: () => void) => boolean;
   signInOpen: boolean;
 }
 
@@ -43,6 +49,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<AccountUser | null>(null);
   const [checking, setChecking] = useState(() => !!getSession());
   const [signInOpen, setSignInOpen] = useState(false);
+  const pending = useRef<(() => void) | null>(null);
+  const afterSignIn = useRef<(() => void) | null>(null);
 
   // Restore a saved session: the API is the judge of whether it still works.
   useEffect(() => {
@@ -68,7 +76,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const signIn = (auth: AuthResponse) => {
     setSession({ accessToken: auth.accessToken, refreshToken: auth.refreshToken, expiresAt: auth.expiresAt });
     setUser(auth.user);
+    // The sheet closes (and drops `pending`) right after this, so hand the waiting action over first.
+    afterSignIn.current = pending.current;
+    pending.current = null;
   };
+
+  // Runs after the new user is committed, so the action sees signed-in state everywhere.
+  useEffect(() => {
+    const next = afterSignIn.current;
+    if (!user || !next) return;
+    afterSignIn.current = null;
+    next();
+  }, [user]);
 
   const login = async (phone: string, password: string) => signIn(await loginRequest(phone, password));
 
@@ -94,11 +113,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const openSignIn = useCallback(() => setSignInOpen(true), []);
-  const closeSignIn = useCallback(() => setSignInOpen(false), []);
+  const closeSignIn = useCallback(() => {
+    pending.current = null;
+    setSignInOpen(false);
+  }, []);
+
+  const requireAuth = (action?: () => void) => {
+    if (user) {
+      action?.();
+      return true;
+    }
+    pending.current = action ?? null;
+    setSignInOpen(true);
+    return false;
+  };
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated: !!user, checking, login, startSignUp, finishSignUp, sendResetCode, resetPassword, logout, openSignIn, closeSignIn, signInOpen }}
+      value={{ user, isAuthenticated: !!user, checking, login, startSignUp, finishSignUp, sendResetCode, resetPassword, logout, openSignIn, closeSignIn, requireAuth, signInOpen }}
     >
       {children}
     </AuthContext.Provider>

@@ -35,7 +35,7 @@ const UnitsContext = createContext<UnitsContextType | undefined>(undefined);
 const STORAGE_KEY_SAVED = 'tanazul_saved_units_v1';
 
 export const UnitsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { user } = useAuth();
+  const { user, requireAuth } = useAuth();
 
   const [units, setUnits] = useState<RealEstateUnit[]>([]);
   const [unitsStatus, setUnitsStatus] = useState<UnitsStatus>('loading');
@@ -98,13 +98,18 @@ export const UnitsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
     const local = savedRef.current.map(Number).filter((n) => Number.isInteger(n) && n > 0);
     syncFavorites(local)
-      .then((ids) => syncedFor.current === uid && setSavedUnitIds(ids.map(String)))
+      .then((ids) => {
+        if (syncedFor.current !== uid) return;
+        // Keep anything saved while the sync was in flight (e.g. the favorite that asked for the sign-in).
+        const sent = new Set(local.map(String));
+        setSavedUnitIds((prev) => [...new Set([...ids.map(String), ...prev.filter((id) => !sent.has(id))])]);
+      })
       .catch((e) => console.error('Failed to sync favorites', e));
   }, [user?.id]);
 
   const isUnitSaved = (id: string) => savedUnitIds.includes(id);
 
-  const toggleSaveUnit = (id: string) => {
+  const doToggle = (id: string) => {
     const exists = savedUnitIds.includes(id);
     setSavedUnitIds((prev) => (exists ? prev.filter((item) => item !== id) : [...prev, id]));
     showToast(exists ? 'اتشالت من المفضلة' : 'اتحفظت في المفضلة');
@@ -114,6 +119,12 @@ export const UnitsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       setSavedUnitIds((prev) => (exists ? [...prev, id] : prev.filter((item) => item !== id)));
       showToast('ما قدرناش نحفظ التغيير ده، جرّب تاني');
     });
+  };
+  // The sign-in sheet runs the save after login — through the ref, so it uses that render's state, not the guest's.
+  const toggleRef = useRef(doToggle);
+  toggleRef.current = doToggle;
+  const toggleSaveUnit = (id: string) => {
+    requireAuth(() => toggleRef.current(id));
   };
 
   const submitInquiry = async (input: InquiryInput) => {

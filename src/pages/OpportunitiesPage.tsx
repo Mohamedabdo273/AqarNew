@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Search, SlidersHorizontal, X, BellRing, Flame, Sparkles } from 'lucide-react';
 import { RealEstateUnit } from '../types';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import { UnitCard } from '../components/UnitCard';
 import { Budget } from '../components/BudgetFinder';
 import { FilterPanel } from '../components/FilterPanel';
@@ -40,7 +41,8 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
 }) => {
   const { language, tx, isRTL } = useLanguage();
   const [filters, setFilters] = useState<Filters>(() => ({ ...EMPTY_FILTERS, discounted: dealsOnly, ...preset?.filters }));
-  const [alertPhone, setAlertPhone] = useState('');
+  const { user, requireAuth } = useAuth();
+  const [alertPhone, setAlertPhone] = useState(user?.phone ?? '');
   const [alertTried, setAlertTried] = useState(false);
   const [alertSending, setAlertSending] = useState(false);
   const [alertError, setAlertError] = useState('');
@@ -295,6 +297,8 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
                 noValidate
                 onSubmit={async (e) => {
                   e.preventDefault();
+                  // Sign in first; they send it again once they're in.
+                  if (!requireAuth()) return;
                   setAlertTried(true);
                   const phone = alertPhone.replace(/\s/g, '');
                   if (!/^01\d{9}$/.test(phone) || alertSending) return;

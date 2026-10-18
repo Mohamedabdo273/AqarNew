@@ -25,6 +25,7 @@ import {
 import { PageId, RealEstateUnit } from '../types';
 import { BRAND, whatsappLink } from '../config/brand';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import { useUnits } from '../context/UnitsContext';
 import { errorText } from '../services/api';
 import { UnitCard } from '../components/UnitCard';
@@ -70,12 +71,19 @@ export const similarUnits = (unit: RealEstateUnit, units: RealEstateUnit[], n = 
 export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelectUnit, onOpenBuyerRules, onNavigate, onBooked }) => {
   const { language, tx, isRTL } = useLanguage();
   const { isUnitSaved, toggleSaveUnit, submitInquiry } = useUnits();
+  const { user, requireAuth } = useAuth();
   const [imgIdx, setImgIdx] = useState(0);
   const [booking, setBooking] = useState(false);
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [name, setName] = useState(user?.fullName ?? '');
+  const [phone, setPhone] = useState(user?.phone ?? '');
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState('');
+  // Signed in from the "book a viewing" button: fill in what the account already knows.
+  useEffect(() => {
+    if (!user) return;
+    setName((n) => n || user.fullName);
+    setPhone((p) => p || user.phone);
+  }, [user]);
   const [copied, setCopied] = useState(false);
   const Back = isRTL ? ArrowRight : ArrowLeft;
 
@@ -335,7 +343,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
 
             {!booking ? (
               <div className="mt-6 grid gap-2">
-                <button onClick={() => setBooking(true)} className="btn bg-white text-ink hover:bg-brand-soft min-h-13 w-full">
+                <button onClick={() => requireAuth(() => setBooking(true))} className="btn bg-white text-ink hover:bg-brand-soft min-h-13 w-full">
                   <CalendarCheck className="w-5 h-5" />
                   {tx('احجز معاينة ببلاش', 'Book a free viewing')}
                 </button>

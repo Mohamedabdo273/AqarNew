@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Repeat, ArrowDownUp, MessageCircle, ArrowDown, ArrowUp, X, ClipboardList, Search, Handshake } from 'lucide-react';
 import { RealEstateUnit } from '../types';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import { UnitCard } from '../components/UnitCard';
 import { Pagination } from '../components/Pagination';
 import { Field, MoneyInput, Toggle } from '../components/sell/FormBits';
@@ -26,6 +27,7 @@ const PAGE_SIZE = 12;
  */
 export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSelectUnit, onRequested }) => {
   const { language, tx, isRTL } = useLanguage();
+  const { requireAuth } = useAuth();
   const [myPaid, setMyPaid] = useState(0);
   const [myMonthly, setMyMonthly] = useState(0);
   const [hasArrears, setHasArrears] = useState(false);
@@ -222,7 +224,7 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          setTarget(u);
+                          requireAuth(() => setTarget(u));
                         }}
                         className="btn-primary w-full min-h-12"
                       >
@@ -288,8 +290,9 @@ const SwapRequestSheet: React.FC<{
   onSent: () => void;
 }> = ({ target, myPaid, myArrears, diff, myMonthly, onClose, onSent }) => {
   const { language, tx, isRTL } = useLanguage();
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
+  const { user } = useAuth();
+  const [name, setName] = useState(user?.fullName ?? '');
+  const [phone, setPhone] = useState(user?.phone ?? '');
   const [tried, setTried] = useState(false);
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState('');
