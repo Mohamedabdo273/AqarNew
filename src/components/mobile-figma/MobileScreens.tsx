@@ -610,7 +610,7 @@ export const MobileScreens: React.FC<MobileScreensProps> = ({
         {/* Sticky Mobile Floating Actions */}
         <div className="fixed bottom-7 start-0 end-0 bg-surface/95 backdrop-blur-md border-t border-line p-3 flex items-center gap-2 z-30">
           <button
-            onClick={() => alert('جاري الاتصال بخدمة عملاء فرصة')}
+            onClick={() => alert('جاري الاتصال بخدمة عملاء DEAL')}
             className="w-11 h-11 rounded-xl bg-field border border-line flex items-center justify-center text-ink shrink-0"
           >
             <Phone className="w-4 h-4" />
@@ -796,7 +796,7 @@ export const MobileScreens: React.FC<MobileScreensProps> = ({
     <div className="pb-20 text-ink text-start">
       <div className="sticky top-0 z-20 bg-paper/95 backdrop-blur-md px-4 py-3 border-b border-line flex items-center justify-between">
         <span className="font-bold text-sm">حسابي وتسجيل الدخول</span>
-        <span className="text-xs text-muted">فرصة</span>
+        <span className="text-xs text-muted">DEAL</span>
       </div>
 
       <div className="p-4 space-y-4">

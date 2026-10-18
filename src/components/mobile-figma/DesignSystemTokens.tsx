@@ -27,12 +27,12 @@ export const DesignSystemTokens: React.FC = () => {
     { role: 'Headline (عناوين الكروت)', ar: 'IBM Plex Sans Arabic', size: '16px / 1.4', weight: '700 (Bold)', sample: 'شقة فاخرة بحري بإطلالة بحيرات في بالم هيلز' },
     { role: 'Body (النصوص العامة)', ar: 'IBM Plex Sans Arabic', size: '14px / 1.6', weight: '500 (Medium)', sample: 'استرد كاشك لو مش قادر تكمل الأقساط — فحص قانوني معتمد 100%' },
     { role: 'Caption & Meta (الأرقام والميتا)', ar: 'Plus Jakarta Sans + Arabic', size: '12px / 1.4', weight: '600 (SemiBold)', sample: '1,850,000 EGP · 175 m² · 3 Beds' },
-    { role: 'Brand Calligraphy (شعار فرصة)', ar: 'El Messiri', size: '24px', weight: '700 (Bold)', sample: 'فُـرصـة' },
+    { role: 'Brand Typography (شعار DEAL)', ar: 'Arial / Display', size: '24px', weight: '700 (Bold)', sample: 'DEAL' },
   ];
 
   const figmaJson = JSON.stringify(
     {
-      designSystem: 'Forsa Real Estate Mobile DS',
+      designSystem: 'DEAL Real Estate Mobile DS',
       version: '2.4.0',
       platforms: ['iOS 18 (SF Pro + IBM Plex Arabic)', 'Android 15 (Material 3)'],
       colorTokens: colors,

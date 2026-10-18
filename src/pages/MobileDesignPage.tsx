@@ -265,7 +265,7 @@ export const MobileDesignPage: React.FC<MobileDesignPageProps> = ({ onNavigate }
                 <span>لوحة شاشات التصميم الشاملة (Figma Artboards Canvas)</span>
               </div>
               <h2 className="text-2xl font-bold text-white">
-                شاشات تطبيق فرصة لكلا نظامي iOS و Android
+                شاشات تطبيق DEAL لكلا نظامي iOS و Android
               </h2>
               <p className="text-xs text-white/60 mt-1">
                 جميع الشاشات الست الأساسية مصممة بأعلى معايير تجربة المستخدم (UI/UX) مع الحفاظ على هوية المنصة (اللون الطوبي، فلاتر المطورين، 0 أوفر برايس). اضغط على أي شاشة لتشغيلها في المحاكي التفاعلي.

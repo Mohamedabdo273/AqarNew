@@ -62,8 +62,8 @@ export const VerifyPage: React.FC<VerifyPageProps> = ({ initialCode, onSelectUni
       <h1 className="mt-5 text-3xl sm:text-4xl font-bold text-ink">{tx('اتأكد من الوحدة', 'Verify a unit')}</h1>
       <p className="mt-3 text-ink-soft leading-relaxed">
         {tx(
-          'حد بعتلك وحدة وقالك إنها على وحدتي؟ اكتب الكود اللي عليها واتأكد إنها عندنا فعلاً ومتراجعة — قبل ما تدفع أي حاجة.',
-          'Someone sent you a unit saying it is on Forsa? Enter its code and check it is really ours and reviewed — before you pay anything.',
+          'حد بعتلك وحدة وقالك إنها على DEAL؟ اكتب الكود اللي عليها واتأكد إنها عندنا فعلاً ومتراجعة — قبل ما تدفع أي حاجة.',
+          'Someone sent you a unit saying it is on DEAL? Enter its code and check it is really ours and reviewed — before you pay anything.',
         )}
       </p>
 
@@ -153,8 +153,8 @@ export const VerifyPage: React.FC<VerifyPageProps> = ({ initialCode, onSelectUni
           </p>
           <p className="mt-2 text-ink-soft">
             {tx(
-              'اتأكد إنك كتبته صح. لو حد بيقولك إنها على وحدتي وطالب منك فلوس، ما تدفعش — وكلّمنا.',
-              "Check you typed it right. If someone says it's on Forsa and asks you for money, don't pay — and tell us.",
+              'اتأكد إنك كتبته صح. لو حد بيقولك إنها على DEAL وطالب منك فلوس، ما تدفعش — وكلّمنا.',
+              "Check you typed it right. If someone says it's on DEAL and asks you for money, don't pay — and tell us.",
             )}
           </p>
           <a href={whatsappLink(tx(`حد بعتلي وحدة بكود ${checked} ومش لاقيها`, `Someone sent me unit code ${checked} and I can't find it`))} target="_blank" rel="noreferrer" className="btn-primary mt-4">

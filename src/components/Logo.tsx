@@ -15,20 +15,19 @@ const LOGO_SRC_LIGHT = '/brand/deal-logo-white.svg?v=4';
 const MARK_SRC = '/brand/forsa-mark.png';
 const MARK_SRC_LIGHT = '/brand/forsa-mark-white.png';
 
-/** العلامة لوحدها: بيت جوّاه مصافحة — من غير خلفية، عشان بتتحط على صفحات فاتحة. */
+/** العلامة: لوجو DEAL */
 export const LogoMark: React.FC<{ size?: number; className?: string; light?: boolean }> = ({
   size = 40,
-  className,
+  className = '',
   light = false,
 }) => (
   <img
-    src={light ? MARK_SRC_LIGHT : MARK_SRC}
-    alt=""
-    aria-hidden="true"
+    src={light ? LOGO_SRC_LIGHT : LOGO_SRC}
+    alt="DEAL"
     width={size}
-    height={Math.round((size * 214) / 254)}
-    className={className}
-    style={{ width: size, height: 'auto' }}
+    height={size}
+    className={`shrink-0 object-contain ${className}`}
+    style={{ height: size, width: 'auto' }}
   />
 );
 

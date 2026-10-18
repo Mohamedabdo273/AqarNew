@@ -103,7 +103,7 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
                 {!islandExpanded ? (
                   <>
                     <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-[10px] font-medium text-white/80 tracking-wide">فرصة</span>
+                    <span className="text-[10px] font-medium text-white/80 tracking-wide">DEAL</span>
                     <div className="w-3 h-3 rounded-full bg-black border border-white/20 flex items-center justify-center">
                       <div className="w-1.5 h-1.5 rounded-full bg-white/40" />
                     </div>
@@ -112,10 +112,10 @@ export const DeviceFrame: React.FC<DeviceFrameProps> = ({
                   <div className="w-full flex items-center justify-between gap-2 text-xs">
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-lg bg-accent text-white flex items-center justify-center font-bold text-[10px]">
-                        ف
+                        D
                       </div>
                       <div className="text-start leading-tight">
-                        <div className="font-bold text-[11px] text-white">فرصة اليوم</div>
+                        <div className="font-bold text-[11px] text-white">DEAL اليوم</div>
                         <div className="text-[9px] text-white/70">شقة بالم هيلز · 0 أوفر</div>
                       </div>
                     </div>

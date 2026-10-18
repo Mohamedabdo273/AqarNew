@@ -1,7 +1,7 @@
 /** Single source for brand identity and contact details. Change here, it updates everywhere. */
 export const BRAND = {
-  nameAr: 'فرصة',
-  nameEn: 'Forsa',
+  nameAr: 'DEAL',
+  nameEn: 'DEAL',
   taglineAr: 'مش قادر تكمّل الأقساط؟ بيع وحدتك واسترد فلوسك — حتى لو عليك متأخرات.',
   taglineEn: "Can't keep up with the instalments? Sell your unit and get your money back — even with arrears.",
   hotline: '17143',

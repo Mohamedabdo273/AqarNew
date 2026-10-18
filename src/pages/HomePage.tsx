@@ -591,7 +591,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       {/* ───────── 3b. The three ways out, side by side ───────── */}
       <ThreeWays onSell={() => onNavigate('sell')} />
 
-      {/* ───────── 5. Swap — only on Forsa ───────── */}
+      {/* ───────── 5. Swap — only on DEAL ───────── */}
       <SwapFeature onSwap={() => onNavigate('swap')} />
 
       {/* ───────── 6. Money safety ───────── */}
@@ -966,8 +966,8 @@ const HeroCalculator: React.FC = () => {
   const share = async () => {
     const url = `${window.location.origin}${window.location.pathname}`;
     const text = tx(
-      `وحدتي بـ ${money(contract, language)} ودفعت ${money(safePaid, language)}.\nلو لغيت مع المطور: ترجعلي من ${money(cancelBackMin, language)} لـ ${money(cancelBack, language)} على أقساط — يعني هخسر من ${money(lossMin, language)} لـ ${money(loss, language)}.\nلو بعتها عن طريق وحدتي: هقبض ${money(safePaid, language)} كاش.\nإيه رأيك؟`,
-      `My unit is ${money(contract, language)} and I've paid ${money(safePaid, language)}.\nCancelling returns ${money(cancelBackMin, language)}–${money(cancelBack, language)} over years — I'd lose ${money(lossMin, language)}–${money(loss, language)}.\nSelling through Forsa: ${money(safePaid, language)} cash.\nWhat do you think?`,
+      `وحدتي بـ ${money(contract, language)} ودفعت ${money(safePaid, language)}.\nلو لغيت مع المطور: ترجعلي من ${money(cancelBackMin, language)} لـ ${money(cancelBack, language)} على أقساط — يعني هخسر من ${money(lossMin, language)} لـ ${money(loss, language)}.\nلو بعتها عن طريق DEAL: هقبض ${money(safePaid, language)} كاش.\nإيه رأيك؟`,
+      `My unit is ${money(contract, language)} and I've paid ${money(safePaid, language)}.\nCancelling returns ${money(cancelBackMin, language)}–${money(cancelBack, language)} over years — I'd lose ${money(lossMin, language)}–${money(loss, language)}.\nSelling through DEAL: ${money(safePaid, language)} cash.\nWhat do you think?`,
     );
     if (navigator.share) {
       try {
@@ -1163,7 +1163,7 @@ const SwapFeature: React.FC<{ onSwap: () => void }> = ({ onSwap }) => {
       <div className="page-wrap py-14 sm:py-20 grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
       <div>
         <SectionTitle
-          kicker={tx('حصري على فرصة', 'Only on Forsa')}
+          kicker={tx('حصري على DEAL', 'Only on DEAL')}
           title={tx('عايز تغيّر وحدتك؟ بدّلها.', 'Want a different unit? Swap it.')}
           sub={tx(
             'لاقي حد عايز يبدل معاك: انت تاخد وحدته وهو ياخد وحدتك، وكل واحد يكمّل أقساط اللي خده. اللي بيتدفع هو الفرق في المدفوع بس.',
