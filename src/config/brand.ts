@@ -15,7 +15,7 @@ export const BRAND = {
   /** People photos used around the site. Placeholder stock photos — replace with your own team and handovers. */
   peopleImage: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=1200&q=70',
   keysImage: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=70',
-  heroImage: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2000&q=70',
+  heroImage: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=2400&q=80',
   /** Contact page details. Placeholders until the real ones are set — an empty value hides that line. */
   email: 'hello@wahdety.com',
   addressAr: 'القاهرة الجديدة، التجمع الخامس',

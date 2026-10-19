@@ -43,7 +43,7 @@ export const useHomeRole = (onHome: boolean) => {
   return [role, setRole] as const;
 };
 
-/* "I want to: buy · sell · swap" — a segmented pill in the slim bar under the header on the home page. */
+/* "I want to: buy · sell · swap" — pills on the navy bar under the header on the home page. */
 export const RoleSwitch: React.FC<{ role: HomeRole; onChange: (r: HomeRole) => void }> = ({ role, onChange }) => {
   const { tx } = useLanguage();
   const options: [HomeRole, string, React.ElementType][] = [
@@ -52,7 +52,7 @@ export const RoleSwitch: React.FC<{ role: HomeRole; onChange: (r: HomeRole) => v
     ['swap', tx('أبدّل وحدتي', 'Swap my unit'), Repeat],
   ];
   return (
-    <div role="tablist" aria-label={tx('أنا عاوز', 'I want to')} className="flex w-full sm:w-auto p-1 rounded-full bg-surface border border-line shadow-xs"
+    <div role="tablist" aria-label={tx('أنا عاوز', 'I want to')} className="flex w-full sm:w-auto gap-1 sm:gap-1.5"
     >
       {options.map(([k, label, Icon]) => (
         <button
@@ -64,7 +64,7 @@ export const RoleSwitch: React.FC<{ role: HomeRole; onChange: (r: HomeRole) => v
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           className={`flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-full px-3 sm:px-7 min-h-10 sm:min-h-11 text-sm sm:text-base font-bold whitespace-nowrap transition-colors ${
-            role === k ? 'bg-accent text-white shadow-sm' : 'text-ink-soft hover:text-accent hover:bg-accent-soft'
+            role === k ? 'bg-accent text-white shadow-sm' : 'text-white/80 hover:text-white hover:bg-white/10'
           }`}
         >
           <Icon className="w-4 h-4 sm:w-5 sm:h-5" />

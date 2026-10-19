@@ -271,7 +271,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
   const swapUnits = useMemo(() => units.filter((u) => u.eligibleForSwap).slice(0, 6), [units]);
 
-  const HEROES: Record<HomeRole, { badge: string; line1: string; line2: string; lead: string; body: string; cards: { icon: React.ElementType; t: string; d: string }[] }> = {
+  const HEROES: Record<HomeRole, { badge: string; line1: string; line2: string; lead: string; body: string; points: string[]; cards: { icon: React.ElementType; t: string; d: string }[] }> = {
     buy: {
       badge: tx('تنازل رسمي في مقر المطور · من غير أوفر', 'Official transfer at the developer · no overprice'),
       line1: tx('اشتري بسعر يوم التعاقد،', 'Buy at the original contract price,'),
@@ -281,6 +281,12 @@ export const HomePage: React.FC<HomePageProps> = ({
         'اشتري بسعر يوم التعاقد — أرخص من سعر السوق — وكمّل نفس الأقساط. كل الأرقام متحققة من العقد والإيصالات، وإحنا معاك في إجراءات التنازل خطوة بخطوة.',
         'Buy at the original contract price — below market — and continue the same instalments. Every number is checked against the contract and receipts, and we walk you through the transfer step by step.',
       ),
+      points: [
+        tx('كل وحدة متراجعة: العقد وإيصالات الدفع وكشف حساب المطور', 'Every unit is checked: contract, payment receipts and developer statement'),
+        tx('بتشوف المطلوب كاش والقسط والمتبقي قبل ما تكلّم حد', 'See the cash needed, monthly and balance before talking to anyone'),
+        tx('المعاينة ببلاش، وإحنا اللي بنرتبها مع المالك', 'Viewings are free — we arrange them with the owner'),
+        tx('العمولة بتتدفع بس لما التنازل يتم في مقر المطور', 'The fee is paid only once the transfer completes at the developer'),
+      ],
       cards: [
         { icon: Wallet, t: tx('بسعر زمان', 'At the old price'), d: tx('أرخص من سعر المطور النهارده', 'Below the developer’s price today') },
         { icon: ShieldCheck, t: tx('ورق متراجع', 'Papers checked'), d: tx('العقد والمديونية متأكدين', 'Contract and dues verified') },
@@ -296,6 +302,12 @@ export const HomePage: React.FC<HomePageProps> = ({
         'بيع وحدتك من غير أوفر واسترجع فلوسك كاش، بدل ما تخاطر بخسارة توصل لـ 10–15% من سعر الوحدة كلها في الإلغاء حسب عقدك.',
         'Sell your unit with no overprice and get your money back in cash, instead of risking a loss of 10–15% of the whole contract price on cancellation, depending on your contract.',
       ),
+      points: [
+        tx('بتبعت بيانات وحدتك في دقيقة، وكشف الحساب مجاني', 'Send your unit details in a minute — the statement is free'),
+        tx('اسمك ورقمك مش بيظهروا غير لمشتري جاد', 'Your name and number go only to a serious buyer'),
+        tx('المتأخرات بتتخصم يوم التنازل — مش لازم تسددها الأول', 'Arrears come off on transfer day — no need to clear them first'),
+        tx('بتقبض بشيك مصرفي في مقر المطور، ولو تكمّل عقدك أحسن ليك هنقولك بصراحة', 'Paid by bank cheque at the developer — and if keeping your contract is better, we’ll say so'),
+      ],
       cards: [
         { icon: ShieldCheck, t: tx('ما تلغيش وتخسر', "Don't cancel & lose"), d: tx('بنبيع وحدتك بالسعر اللي دفعته', 'Sold for what you paid') },
         { icon: Receipt, t: tx('عليك متأخرات؟', 'Have arrears?'), d: tx('بتتخصم عادي يوم التنازل', 'Deducted on transfer day') },
@@ -311,6 +323,12 @@ export const HomePage: React.FC<HomePageProps> = ({
         'اختار وحدة صاحبها عايز يبدّل، وشوف الفرق والقسط الجديد قبل ما تقرر. بناخد موافقة الطرف التاني ونراجع العقدين، وتبدلوا في نفس اليوم — واللي وحدته أغلى ياخد الفرق.',
         'Pick a unit whose owner wants to swap and see the difference and new monthly before you decide. We get the other owner’s OK and check both contracts, and you swap the same day — the pricier side gets the difference.',
       ),
+      points: [
+        tx('قولنا وحدتك وعاوز إيه: المنطقة والنوع والقسط اللي يريحك', 'Tell us your unit and what you want: area, type and a comfortable monthly'),
+        tx('بنوريك الفرق في المدفوع والقسط الجديد قبل ما تقرر', 'See the difference in what was paid and the new monthly before deciding'),
+        tx('مفيش بدل غير بموافقة المالكين الاتنين، وبنراجع العقدين', 'No swap without both owners agreeing — and both contracts checked'),
+        tx('التنازلين بيتموا في نفس اليوم، وكل واحد يكمّل أقساط اللي خده', 'Both transfers happen the same day; each carries on the plan they took'),
+      ],
       cards: [
         { icon: ArrowLeftRight, t: tx('تبديل حقيقي', 'A real swap'), d: tx('بين مالكين موافقين', 'Between two willing owners') },
         { icon: ShieldCheck, t: tx('العقدين متراجعين', 'Both contracts checked'), d: tx('قبل ما حد يمضي', 'Before anyone signs') },
@@ -322,10 +340,9 @@ export const HomePage: React.FC<HomePageProps> = ({
 
   return (
     <div>
-      {/* ───────── Who are you? A slim bar under the header that stays while scrolling; the whole page follows it ───────── */}
-      <div className="sticky top-24 sm:top-28 z-30 bg-paper/90 backdrop-blur-md border-b border-line">
-        <div className="page-wrap py-2.5 flex items-center justify-center gap-3">
-          <span className="hidden sm:inline text-sm font-bold text-ink-soft">{tx('أنا عاوز', 'I want to')}</span>
+      {/* ───────── Who are you? A navy bar under the header, joined to the hero; stays while scrolling and the whole page follows it ───────── */}
+      <div className="sticky top-24 sm:top-28 z-30 bg-brand-ink shadow-md">
+        <div className="page-wrap py-2 flex justify-center">
           <RoleSwitch role={role} onChange={onRoleChange} />
         </div>
       </div>
@@ -334,13 +351,13 @@ export const HomePage: React.FC<HomePageProps> = ({
       <section className="relative overflow-hidden bg-brand-ink text-white">
         {/* A real home behind the message; two washes keep the words readable over any photo. */}
         <img src={BRAND.heroImage} alt="" aria-hidden="true" className="absolute inset-0 w-full h-full object-cover" fetchPriority="high" />
-        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-brand-ink/90 via-brand-ink/50 to-brand-ink/20" />
-        <div aria-hidden="true" className="absolute inset-0 ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-brand-ink/70 via-brand-ink/30 to-transparent" />
+        <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-brand-ink/60 via-brand-ink/10 to-transparent" />
 
         {/* Short band like a search site: title and one line at the bottom, the search card overlapping it. */}
-        <div className={`relative ${WIDE} min-h-[23rem] sm:min-h-[25rem] lg:min-h-[27rem] flex flex-col justify-end pt-10 pb-24 sm:pb-36`}>
+        {/* The text panel runs wider than the search card under it (92% of the screen on desktop). */}
+        <div className={`relative w-full mx-auto px-4 sm:px-6 lg:px-0 lg:w-[92%] max-w-[120rem] min-h-[23rem] sm:min-h-[25rem] lg:min-h-[27rem] flex flex-col justify-end pt-10 pb-24 sm:pb-36`}>
           {/* لوح غامق ورا الكلام: بيضمن إن النص يفضل مقروء مهما كانت صورة الخلفية */}
-          <div className="w-full rounded-3xl bg-brand-ink/55 backdrop-blur-[6px] border border-white/10 p-6 sm:p-8 lg:p-10 shadow-2xl">
+          <div className="w-full rounded-3xl bg-brand-ink/70 backdrop-blur-[2px] border border-white/10 p-6 sm:p-8 lg:p-10 shadow-2xl">
             <p className="hero-in inline-flex items-center gap-2.5 rounded-full border border-white/25 bg-white/10 backdrop-blur px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-lg font-bold text-white">
               <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 text-accent-light" />
               {hero.badge}
@@ -357,10 +374,21 @@ export const HomePage: React.FC<HomePageProps> = ({
                 </span>
               </span>
             </h1>
-            <p style={{ animationDelay: '140ms' }} className="hero-in mt-6 max-w-3xl text-lg sm:text-xl text-white/95 leading-[1.85] [text-shadow:0_2px_12px_rgb(0_0_0/0.6)]">
+            <p style={{ animationDelay: '140ms' }} className="hero-in mt-6 max-w-4xl text-xl sm:text-2xl text-white/95 leading-[1.8] [text-shadow:0_2px_12px_rgb(0_0_0/0.6)]">
               <span className="font-bold text-accent-light">{hero.lead} </span>
               {hero.body}
             </p>
+            {/* The details people ask about next, one line each */}
+            <ul style={{ animationDelay: '180ms' }} className="hero-in mt-5 grid sm:grid-cols-2 gap-x-8 gap-y-3 [text-shadow:0_2px_12px_rgb(0_0_0/0.6)]">
+              {hero.points.map((p) => (
+                <li key={p} className="flex items-start gap-3 text-lg sm:text-xl text-white/95 leading-relaxed">
+                  <span className="mt-1.5 grid place-items-center w-6 h-6 rounded-full bg-accent shrink-0">
+                    <Check className="w-4 h-4 text-white" strokeWidth={3} />
+                  </span>
+                  {p}
+                </li>
+              ))}
+            </ul>
 
             <div style={{ animationDelay: '220ms' }} className="hero-in mt-6 sm:mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 w-full">
               {hero.cards.map((c) => (
