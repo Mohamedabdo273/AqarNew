@@ -116,7 +116,8 @@ export default function App() {
       }
       if (head === 'requests') return setActivePage('requests');
       if (hash === 'figma' || hash === 'mobile-design' || hash === 'mobile') return setActivePage('mobile-design');
-      if (hash === '') return setActivePage('home');
+      // #home/buy · #home/sell · #home/swap — the home page for that visitor (the page reads which one)
+      if (hash === '' || head === 'home') return setActivePage('home');
       if (hash === 'listings') return setActivePage('opportunities');
       setActivePage(PAGES.includes(hash as PageId) ? (hash as PageId) : 'notfound');
     };

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -63,6 +63,24 @@ export interface HomeSearch {
   /** Most the buyer can pay a month; turns the budget filter on. */
   monthly?: number;
 }
+
+/** Who the visitor is. The whole home page is built for one of them at a time. */
+export type HomeRole = 'buy' | 'sell' | 'swap';
+const ROLE_KEY = 'home_role';
+const ROLES: HomeRole[] = ['buy', 'sell', 'swap'];
+
+/** #home/sell opens straight on the seller's page (handy for ads); otherwise the last choice, else the buyer's. */
+const initialRole = (): HomeRole => {
+  const fromHash = window.location.hash.replace('#', '').split('/')[1] as HomeRole;
+  if (ROLES.includes(fromHash)) return fromHash;
+  try {
+    const saved = localStorage.getItem(ROLE_KEY) as HomeRole;
+    if (ROLES.includes(saved)) return saved;
+  } catch {
+    /* ignore */
+  }
+  return 'buy';
+};
 
 /** The hero search block is wider than the rest of the page, like a search site: ~78% of the screen on desktop. */
 const WIDE = 'w-full mx-auto px-4 sm:px-6 lg:px-0 lg:w-[78%] max-w-[110rem]';
@@ -263,8 +281,73 @@ export const HomePage: React.FC<HomePageProps> = ({
     setCardType('');
   };
 
+  const [role, setRole] = useState<HomeRole>(initialRole);
+  // Remember the choice, and keep it in the link so it can be shared or used in an ad.
+  useEffect(() => {
+    try {
+      localStorage.setItem(ROLE_KEY, role);
+    } catch {
+      /* ignore */
+    }
+    history.replaceState(null, '', `#home/${role}`);
+  }, [role]);
+
+  const swapUnits = useMemo(() => units.filter((u) => u.eligibleForSwap).slice(0, 6), [units]);
+
+  const HEROES: Record<HomeRole, { badge: string; line1: string; line2: string; lead: string; body: string; cards: { icon: React.ElementType; t: string; d: string }[] }> = {
+    buy: {
+      badge: tx('تنازل رسمي في مقر المطور · من غير أوفر', 'Official transfer at the developer · no overprice'),
+      line1: tx('اشتري بسعر يوم التعاقد،', 'Buy at the original contract price,'),
+      line2: tx('أرخص من سعر السوق.', 'below today’s market.'),
+      lead: tx('بتدوّر على وحدة؟', 'Looking for a unit?'),
+      body: tx(
+        'اشتري بسعر يوم التعاقد — أرخص من سعر السوق — وكمّل نفس الأقساط. كل الأرقام متحققة من العقد والإيصالات، وإحنا معاك في إجراءات التنازل خطوة بخطوة.',
+        'Buy at the original contract price — below market — and continue the same instalments. Every number is checked against the contract and receipts, and we walk you through the transfer step by step.',
+      ),
+      cards: [
+        { icon: Wallet, t: tx('بسعر زمان', 'At the old price'), d: tx('أرخص من سعر المطور النهارده', 'Below the developer’s price today') },
+        { icon: ShieldCheck, t: tx('ورق متراجع', 'Papers checked'), d: tx('العقد والمديونية متأكدين', 'Contract and dues verified') },
+        { icon: UserCheck, t: tx('من المالك على طول', 'Straight from the owner'), d: tx('من غير سماسرة ولا أوفر', 'No brokers, no overprice') },
+      ],
+    },
+    sell: {
+      badge: tx('تنازل رسمي في مقر المطور · من غير عمولة عليك', 'Official transfer at the developer · no fee for you'),
+      line1: tx('البايع ياخد كل اللي دفعه،', 'Sellers get back everything they paid,'),
+      line2: tx('من غير عمولة عليه.', 'with no fee.'),
+      lead: tx('لو مش قادر تكمّل أقساطك:', "Can't keep up with the instalments?"),
+      body: tx(
+        'بيع وحدتك من غير أوفر واسترجع فلوسك كاش، بدل ما تخاطر بخسارة توصل لـ 10–15% من سعر الوحدة كلها في الإلغاء حسب عقدك.',
+        'Sell your unit with no overprice and get your money back in cash, instead of risking a loss of 10–15% of the whole contract price on cancellation, depending on your contract.',
+      ),
+      cards: [
+        { icon: ShieldCheck, t: tx('ما تلغيش وتخسر', "Don't cancel & lose"), d: tx('بنبيع وحدتك بالسعر اللي دفعته', 'Sold for what you paid') },
+        { icon: Receipt, t: tx('عليك متأخرات؟', 'Have arrears?'), d: tx('بتتخصم عادي يوم التنازل', 'Deducted on transfer day') },
+        { icon: EyeOff, t: tx('سرية وأمان', '100% Confidential'), d: tx('محدش هيعرف إنك بتبيع', 'No one knows you sell') },
+      ],
+    },
+    swap: {
+      badge: tx('تبديل رسمي في مقر المطور · بموافقة الطرفين', 'Official swap at the developer · both owners agree'),
+      line1: tx('بدّل وحدتك', 'Swap your unit'),
+      line2: tx('بوحدة تناسبك أكتر.', 'for one that fits you better.'),
+      lead: tx('عايز وحدة غير اللي معاك؟', 'Want a different unit?'),
+      body: tx(
+        'اختار وحدة صاحبها عايز يبدّل، وشوف الفرق والقسط الجديد قبل ما تقرر. بناخد موافقة الطرف التاني ونراجع العقدين، وتبدلوا في نفس اليوم — واللي وحدته أغلى ياخد الفرق.',
+        'Pick a unit whose owner wants to swap and see the difference and new monthly before you decide. We get the other owner’s OK and check both contracts, and you swap the same day — the pricier side gets the difference.',
+      ),
+      cards: [
+        { icon: ArrowLeftRight, t: tx('تبديل حقيقي', 'A real swap'), d: tx('بين مالكين موافقين', 'Between two willing owners') },
+        { icon: ShieldCheck, t: tx('العقدين متراجعين', 'Both contracts checked'), d: tx('قبل ما حد يمضي', 'Before anyone signs') },
+        { icon: Handshake, t: tx('في نفس اليوم', 'Same day'), d: tx('في مقر المطور', 'At the developer') },
+      ],
+    },
+  };
+  const hero = HEROES[role];
+
   return (
     <div>
+      {/* ───────── Who are you? Stays under the navbar while scrolling, so it can be changed any time ───────── */}
+      <RoleBar role={role} onChange={setRole} />
+
       {/* ───────── 1. Hero — one message, for the owner who's behind ───────── */}
       <section className="relative overflow-hidden bg-brand-ink text-white">
         {/* A real home behind the message; two washes keep the words readable over any photo. */}
@@ -278,95 +361,47 @@ export const HomePage: React.FC<HomePageProps> = ({
           <div className="w-full rounded-3xl bg-brand-ink/55 backdrop-blur-[6px] border border-white/10 p-6 sm:p-8 lg:p-10 shadow-2xl">
             <p className="hero-in inline-flex items-center gap-2.5 rounded-full border border-white/25 bg-white/10 backdrop-blur px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-lg font-bold text-white">
               <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 text-accent-light" />
-              {tx('تنازل رسمي في مقر المطور · من غير عمولة عليك', 'Official transfer at the developer · no fee for you')}
+              {hero.badge}
             </p>
             <h1 style={{ animationDelay: '80ms' }} className="hero-in mt-4 text-[2.4rem] sm:text-5xl lg:text-6xl font-extrabold leading-[1.22] text-white [text-shadow:0_2px_16px_rgb(0_0_0/0.55)]">
-              {/* نص الجملة للبايع والنص التاني للمشتري — كل واحد بلونه عشان كل طرف يلاقي سطره بنظرة */}
-              <span className="text-white">{tx('اخرج من الأقساط وفلوسك في إيدك،', 'Step out of your instalments with your money in hand,')}</span>
+              <span className="text-white">{hero.line1}</span>
               <br className="sm:hidden" />{' '}
               <span className="text-accent-light">
                 <span className="relative inline-block">
-                  {tx('أو ادخل وحدتك بسعر عقدها القديم.', 'or step into a home at its old contract price.')}
+                  {hero.line2}
                   <svg aria-hidden="true" viewBox="0 0 200 20" preserveAspectRatio="none" className="underline-draw absolute -bottom-2 inset-x-0 w-full h-3 sm:h-4">
                     <path d="M4 14C40 6 90 4 130 7s56 6 66 4" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" />
                   </svg>
                 </span>
               </span>
             </h1>
-            {/* الشرح: فقرة لكل طرف، كل واحدة بمقدمة بارزة بلونها.
-                كانت فقرة واحدة بـ <br/> في نُصّها، فالكلام كان بيبقى كتلة واحدة. */}
-            <div style={{ animationDelay: '140ms' }} className="hero-in mt-6 max-w-3xl space-y-4 [text-shadow:0_2px_12px_rgb(0_0_0/0.6)]">
-              <p className="text-lg sm:text-xl text-white/95 leading-[1.85]">
-                <span className="font-bold text-accent-light">
-                  {tx('صاحب وحدة وتقلت عليك؟', 'Own a unit that has become too heavy?')}{' '}
-                </span>
-                {tx(
-                  'اعرضها وخد اللي دفعته كاش، أو بدّلها بوحدة تناسبك أكتر. الإلغاء ممكن يكلّفك 10–15% من سعر الوحدة — ولو تكمّل عقدك أحسن ليك، هنقولك بصراحة.',
-                  "List it and take back what you paid in cash, or swap it for one that fits you better. Cancelling can cost you 10–15% of the unit price — and if keeping your contract is better for you, we'll tell you straight.",
-                )}
-              </p>
-              <p className="text-lg sm:text-xl text-white/95 leading-[1.85]">
-                <span className="font-bold text-accent-light">
-                  {tx('بتدوّر على وحدة؟', 'Looking for a home?')}{' '}
-                </span>
-                {tx(
-                  'خدها من مالكها على طول — من غير سماسرة — بسعر عقدها القديم، وكمّل نفس الأقساط. جنب كل رقم مكتوب "متأكد" أو "تقديري"، والعمولة ما بتتدفعش غير لما التنازل يتم.',
-                  'Take it straight from its owner — no brokers — at its old contract price, and carry on with the same instalments. Every number is marked "verified" or "estimate", and the fee is only paid once the transfer completes.',
-                )}
-              </p>
-            </div>
+            <p style={{ animationDelay: '140ms' }} className="hero-in mt-6 max-w-3xl text-lg sm:text-xl text-white/95 leading-[1.85] [text-shadow:0_2px_12px_rgb(0_0_0/0.6)]">
+              <span className="font-bold text-accent-light">{hero.lead} </span>
+              {hero.body}
+            </p>
 
-            {/* The 3 key promises transformed into sleek micro-cards spanning full width */}
             <div style={{ animationDelay: '220ms' }} className="hero-in mt-6 sm:mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 w-full">
-              <div className="flex items-center gap-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-md p-4 sm:p-5 transition shadow-sm">
-                <div className="w-14 h-14 rounded-xl bg-accent-light/20 border border-accent-light/30 flex items-center justify-center shrink-0 text-accent-light">
-                  <ShieldCheck className="w-7 h-7" />
+              {hero.cards.map((c) => (
+                <div key={c.t} className="flex items-center gap-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-md p-4 sm:p-5 transition shadow-sm">
+                  <div className="w-14 h-14 rounded-xl bg-accent-light/20 border border-accent-light/30 flex items-center justify-center shrink-0 text-accent-light">
+                    <c.icon className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <span className="block text-lg sm:text-xl font-extrabold text-white leading-tight">{c.t}</span>
+                    <span className="block text-[15px] sm:text-[17px] text-white/90 font-medium leading-snug mt-1">{c.d}</span>
+                  </div>
                 </div>
-                <div>
-                  <span className="block text-lg sm:text-xl font-extrabold text-white leading-tight">
-                    {tx('ما تلغيش وتخسر', "Don't cancel & lose")}
-                  </span>
-                  <span className="block text-[15px] sm:text-[17px] text-white/90 font-medium leading-snug mt-1">
-                    {tx('بنبيع وحدتك بالسعر اللي دفعته', 'Sold for what you paid')}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-md p-4 sm:p-5 transition shadow-sm">
-                <div className="w-14 h-14 rounded-xl bg-accent-light/20 border border-accent-light/30 flex items-center justify-center shrink-0 text-accent-light">
-                  <Receipt className="w-7 h-7" />
-                </div>
-                <div>
-                  <span className="block text-lg sm:text-xl font-extrabold text-white leading-tight">
-                    {tx('عليك متأخرات؟', 'Have arrears?')}
-                  </span>
-                  <span className="block text-[15px] sm:text-[17px] text-white/90 font-medium leading-snug mt-1">
-                    {tx('بتتخصم عادي يوم التنازل', 'Deducted on transfer day')}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-md p-4 sm:p-5 transition shadow-sm">
-                <div className="w-14 h-14 rounded-xl bg-accent-light/20 border border-accent-light/30 flex items-center justify-center shrink-0 text-accent-light">
-                  <EyeOff className="w-7 h-7" />
-                </div>
-                <div>
-                  <span className="block text-lg sm:text-xl font-extrabold text-white leading-tight">
-                    {tx('سرية وأمان', '100% Confidential')}
-                  </span>
-                  <span className="block text-[15px] sm:text-[17px] text-white/90 font-medium leading-snug mt-1">
-                    {tx('محدش هيعرف إنك بتبيع', 'No one knows you sell')}
-                  </span>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* ───────── 1b. One search card over the band: buy · sell · swap ───────── */}
-      <HeroSearch onSearch={onSearch} onNavigate={onNavigate} />
+      {/* ───────── The search card (buyers) or the one next step (sellers, swappers) ───────── */}
+      <HeroSearch mode={role} onSearch={onSearch} onNavigate={onNavigate} />
 
+      {role === 'sell' && (
+        <>
       {/* ───────── 1b'. For the owner who's behind: the promises and the two ways to start ───────── */}
       <section className={`${WIDE} pt-5`}>
         <div className="rounded-3xl border border-line bg-surface shadow-sm p-4 sm:p-6">
@@ -452,11 +487,15 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </section>
 
-      {/* ───────── 1b''. How it works — right after the promises, before anything to browse ───────── */}
+        </>
+      )}
+
       <div className="mt-10 sm:mt-12">
-        <HowItWorks />
+        <HowItWorks tab={role} />
       </div>
 
+      {role === 'buy' && (
+        <>
       {/* ───────── 1c. Areas, as photos ───────── */}
       <RegionsRow units={units} onPick={(r) => onSearch({ filters: { regions: [r] } })} />
 
@@ -483,27 +522,6 @@ export const HomePage: React.FC<HomePageProps> = ({
               <Arrow className="w-5 h-5" />
             </button>
           </div>
-        </div>
-      </section>
-
-      {/* ───────── 2b. Sellers: the cancel-vs-sell calculator, compact ───────── */}
-      <section className="mt-14 sm:mt-20 bg-surface border-y border-line">
-        <div className="page-wrap py-14 sm:py-20 grid lg:grid-cols-[1fr_1.1fr] gap-8 lg:gap-14 items-center">
-          <div>
-            <SectionTitle
-              kicker={tx('لو بتفكر تلغي', 'Thinking of cancelling?')}
-              title={tx('احسب هتخسر كام لو لغيت', 'See what cancelling would cost you')}
-              sub={tx(
-                'المطور بيخصم 10–15% من سعر العقد كله لو لغيت، وبيرجعلك الباقي على أقساط. حط أرقامك وشوف الفرق.',
-                'Developers deduct 10–15% of the whole contract on cancellation and refund the rest in instalments. Try your numbers.',
-              )}
-            />
-            <button onClick={() => onNavigate('sell')} className="btn-accent rounded-full mt-6">
-              <Tag className="w-5 h-5" />
-              {tx('اعرض وحدتك', 'List your unit')}
-            </button>
-          </div>
-          <HeroCalculator />
         </div>
       </section>
 
@@ -585,23 +603,115 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </section>
 
-      {/* ───────── 4. Why sell through us — the free statement and four promises ───────── */}
-      <SellerPromises onStatement={() => onNavigate('statement')} />
+        </>
+      )}
 
-      {/* ───────── 3b. The three ways out, side by side ───────── */}
-      <ThreeWays onSell={() => onNavigate('sell')} />
+      {role === 'sell' && (
+        <>
+      {/* ───────── 2b. Sellers: the cancel-vs-sell calculator, compact ───────── */}
+      <section className="mt-14 sm:mt-20 bg-surface border-y border-line">
+        <div className="page-wrap py-14 sm:py-20 grid lg:grid-cols-[1fr_1.1fr] gap-8 lg:gap-14 items-center">
+          <div>
+            <SectionTitle
+              kicker={tx('لو بتفكر تلغي', 'Thinking of cancelling?')}
+              title={tx('احسب هتخسر كام لو لغيت', 'See what cancelling would cost you')}
+              sub={tx(
+                'المطور بيخصم 10–15% من سعر العقد كله لو لغيت، وبيرجعلك الباقي على أقساط. حط أرقامك وشوف الفرق.',
+                'Developers deduct 10–15% of the whole contract on cancellation and refund the rest in instalments. Try your numbers.',
+              )}
+            />
+            <button onClick={() => onNavigate('sell')} className="btn-accent rounded-full mt-6">
+              <Tag className="w-5 h-5" />
+              {tx('اعرض وحدتك', 'List your unit')}
+            </button>
+          </div>
+          <HeroCalculator />
+        </div>
+      </section>
 
-      {/* ───────── 5. Swap — only on DEAL ───────── */}
-      <SwapFeature onSwap={() => onNavigate('swap')} />
+          <SellerPromises onStatement={() => onNavigate('statement')} />
+          <ThreeWays onSell={() => onNavigate('sell')} />
+        </>
+      )}
 
-      {/* ───────── 6. Money safety ───────── */}
+      {role === 'swap' && (
+        <>
+          <SwapFeature onSwap={() => onNavigate('swap')} />
+      {/* ───────── Swap: units whose owners want to swap ───────── */}
+      <section>
+        <div className="page-wrap py-14 sm:py-20">
+          <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
+            <SectionTitle
+              title={tx('وحدات أصحابها عايزين يبدّلوا', 'Units whose owners want to swap')}
+              sub={tx('اختار واحدة، وشوف الفرق والقسط الجديد قبل ما تقرر', 'Pick one and see the difference and new monthly first')}
+            />
+            <button onClick={() => onNavigate('swap')} className="hidden sm:inline-flex items-center gap-1.5 text-brand font-semibold hover:underline whitespace-nowrap min-h-11">
+              {tx('شوف الكل', 'See all')}
+              <Arrow className="w-4 h-4" />
+            </button>
+          </div>
+          {swapUnits.length > 0 ? (
+            <div className="-mx-4 px-4 sm:mx-0 sm:px-0 flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 overflow-x-auto snap-x snap-mandatory no-scrollbar items-stretch">
+              {swapUnits.map((u) => (
+                <div key={u.id} className="w-[82%] shrink-0 snap-start sm:w-auto h-full">
+                  <UnitCard unit={u} onOpen={onSelectUnit} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="card p-8 text-center text-ink-soft">
+              {tx('لسه مفيش وحدات معروضة للبدل — اعرض وحدتك وعلّم على "أقبل أبدّلها" وهنوصلك بأول حد مناسب.', 'No units open to swap yet — list yours, tick "open to swap", and we\'ll match you first.')}
+            </div>
+          )}
+          <button onClick={() => onNavigate('swap')} className="btn-primary w-full sm:w-auto mt-6 min-h-13 px-8">
+            <Repeat className="w-5 h-5" />
+            {tx('ابدأ البدل', 'Start a swap')}
+          </button>
+        </div>
+      </section>
+
+        </>
+      )}
+
       <RulesPreview onOpenRules={onOpenRules} />
-
-      {/* ───────── 8. FAQ ───────── */}
       <Faq />
 
+      {role === 'buy' && (
+      <section className="page-wrap py-16">
+        <div className="relative overflow-hidden rounded-card bg-brand-ink text-white p-7 sm:p-12 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <img src={BRAND.keysImage} alt="" aria-hidden="true" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+          <div aria-hidden="true" className="absolute inset-0 ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-brand-ink/95 via-brand-ink/80 to-brand-ink/50" />
+          <div className="relative max-w-xl">
+            <p className="font-display text-2xl sm:text-3xl font-bold">{tx('لقيت وحدة عاجباك؟', 'Found one you like?')}</p>
+            <p className="mt-2 text-white/80">{tx('المعاينة ببلاش، والورق متراجع قبل ما تدفع حاجة.', 'Viewings are free, and the papers are checked before you pay anything.')}</p>
+          </div>
+          <button onClick={() => onBrowseWithBudget()} className="relative btn bg-white text-brand hover:bg-brand-soft min-h-13 px-6">
+            <Search className="w-5 h-5" />
+            {tx('شوف كل الفرص', 'See all offers')}
+          </button>
+        </div>
+      </section>
+      )}
+      {role === 'swap' && (
+      <section className="page-wrap py-16">
+        <div className="relative overflow-hidden rounded-card bg-brand-ink text-white p-7 sm:p-12 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <img src={BRAND.keysImage} alt="" aria-hidden="true" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+          <div aria-hidden="true" className="absolute inset-0 ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-brand-ink/95 via-brand-ink/80 to-brand-ink/50" />
+          <div className="relative max-w-xl">
+            <p className="font-display text-2xl sm:text-3xl font-bold">{tx('وحدتك مش مناسبة ليك؟', 'Your unit no longer fits?')}</p>
+            <p className="mt-2 text-white/80">{tx('قولنا وحدتك وعاوز إيه، وإحنا ندوّرلك على اللي يبدّل معاك.', 'Tell us your unit and what you want — we find someone to swap with.')}</p>
+          </div>
+          <button onClick={() => onNavigate('swap')} className="relative btn bg-white text-brand hover:bg-brand-soft min-h-13 px-6">
+            <Repeat className="w-5 h-5" />
+            {tx('ابدأ البدل', 'Start a swap')}
+          </button>
+        </div>
+      </section>
+      )}
+      {role === 'sell' && (
+        <>
       {/* ───────── 9. One closing call ───────── */}
-      <section className="page-wrap pb-16">
+      <section className="page-wrap py-16">
         {/* Same photo-and-wash treatment as the hero, so the page opens and closes the same way. */}
         <div className="relative overflow-hidden rounded-card bg-brand-ink text-white p-7 sm:p-12 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <img src={BRAND.keysImage} alt="" aria-hidden="true" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
@@ -628,14 +738,51 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
         <p className="mt-6 text-center text-sm text-muted">{tx('الأرقام استرشادية، والمراجعة النهائية بتكون على العقد الفعلي.', 'Figures are indicative; final review is on the actual contract.')}</p>
       </section>
+        </>
+      )}
+    </div>
+  );
+};
+
+/* "I want to: buy · sell · swap" — sticks under the navbar so the visitor can switch at any point. */
+const RoleBar: React.FC<{ role: HomeRole; onChange: (r: HomeRole) => void }> = ({ role, onChange }) => {
+  const { tx } = useLanguage();
+  const options: [HomeRole, string, React.ElementType][] = [
+    ['buy', tx('أشتري', 'Buy'), Search],
+    ['sell', tx('أبيع وحدتي', 'Sell my unit'), Tag],
+    ['swap', tx('أبدّل وحدتي', 'Swap my unit'), Repeat],
+  ];
+  return (
+    <div className="sticky top-24 sm:top-28 z-30 bg-paper/95 backdrop-blur-md border-b border-line">
+      <div className={`${WIDE} py-2.5 flex items-center gap-3`}>
+        <span className="hidden sm:block shrink-0 font-bold text-ink">{tx('أنا عاوز:', 'I want to:')}</span>
+        <div role="tablist" className="flex-1 grid grid-cols-3 gap-2">
+          {options.map(([k, label, Icon]) => (
+            <button
+              key={k}
+              role="tab"
+              aria-selected={role === k}
+              onClick={() => {
+                onChange(k);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className={`inline-flex items-center justify-center gap-2 min-h-12 rounded-xl text-sm sm:text-lg font-bold border transition-colors ${
+                role === k ? 'bg-accent border-accent text-white shadow-sm' : 'bg-surface border-line text-ink-soft hover:border-accent hover:text-accent'
+              }`}
+            >
+              <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
 
 /* Buy · sell · swap in one card that sits over the bottom of the hero band. */
-const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (page: PageId) => void }> = ({ onSearch, onNavigate }) => {
+const HeroSearch: React.FC<{ mode: HomeRole; onSearch: (s: HomeSearch) => void; onNavigate: (page: PageId) => void }> = ({ mode, onSearch, onNavigate }) => {
   const { language, tx } = useLanguage();
-  const [mode, setMode] = useState<'buy' | 'sell' | 'swap'>('buy');
   const [query, setQuery] = useState('');
   const [region, setRegion] = useState('');
   const [subArea, setSubArea] = useState('');
@@ -664,32 +811,6 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
   return (
     <section className={`relative -mt-16 sm:-mt-28 ${WIDE}`}>
       <div className="card shadow-lift overflow-hidden">
-        <div className="px-4 sm:px-8 pt-3 sm:pt-4">
-          {/* Underline tabs, full width. */}
-          <div role="tablist" className="grid grid-cols-3 border-b-2 border-line">
-            {([
-              ['buy', tx('اشتري', 'Buy'), Search],
-              ['sell', tx('بيع', 'Sell'), Tag],
-              ['swap', tx('بدل', 'Swap'), Repeat],
-            ] as const).map(([k, label, Icon]) => (
-              <button
-                key={k}
-                role="tab"
-                aria-selected={mode === k}
-                onClick={() => setMode(k)}
-                className={`relative -mb-[2px] inline-flex items-center justify-center gap-2.5 min-h-15 text-xl sm:text-2xl font-bold border-b-2 rounded-t-xl cursor-pointer transition-colors ${
-                  mode === k
-                    ? 'border-brand text-brand bg-brand-soft'
-                    : 'border-transparent text-ink-soft bg-transparent hover:bg-paper hover:text-brand hover:border-line-strong'
-                }`}
-              >
-                <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-
         <div className="p-4 sm:p-8 sm:pt-6">
           {mode === 'buy' && (
             <form onSubmit={submit} className="grid gap-3">
@@ -809,12 +930,12 @@ const HeroSearch: React.FC<{ onSearch: (s: HomeSearch) => void; onNavigate: (pag
                 <p className="mt-1 text-ink-soft">
                   {mode === 'sell'
                     ? tx('صفر عمولة عليك، في سرية، وحتى لو عليك متأخرات.', 'Zero fee, fully private — even with arrears.')
-                    : tx('أي وحدة على الموقع، وتدفع أو تاخد الفرق بس.', 'Any listed unit — pay or receive only the difference.')}
+                    : tx('مع مالك تاني عايز وحدتك — واللي وحدته أغلى ياخد الفرق.', 'With another owner who wants yours — the pricier side gets the difference.')}
                 </p>
               </div>
               <button onClick={() => onNavigate(mode === 'sell' ? 'sell' : 'swap')} className="btn-primary h-14 px-8 text-base shrink-0">
                 {mode === 'sell' ? <Tag className="w-5 h-5" /> : <Repeat className="w-5 h-5" />}
-                {mode === 'sell' ? tx('اعرض وحدتك', 'List your unit') : tx('جرّب التبديل', 'Try a swap')}
+                {mode === 'sell' ? tx('اعرض وحدتك', 'List your unit') : tx('ابدأ البدل', 'Start a swap')}
               </button>
             </div>
           )}
@@ -1291,9 +1412,8 @@ const SellerPromises: React.FC<{ onStatement: () => void }> = ({ onStatement }) 
   );
 };
 
-const HowItWorks: React.FC = () => {
+const HowItWorks: React.FC<{ tab: HomeRole }> = ({ tab }) => {
   const { tx } = useLanguage();
-  const [tab, setTab] = useState<'sell' | 'buy' | 'swap'>('sell');
 
   const steps =
     tab === 'sell'
@@ -1321,19 +1441,6 @@ const HowItWorks: React.FC = () => {
     <section className="bg-surface border-y border-line">
       <div className="page-wrap py-14 sm:py-20">
         <SectionTitle center kicker={tx('إزاي بنشتغل', 'How it works')} title={tx('4 خطوات وبس', 'Four steps, that’s it')} />
-        <div className="mt-6 flex justify-center">
-          <div className="inline-flex p-1 rounded-full bg-paper border border-line">
-            {(['sell', 'buy', 'swap'] as const).map((k) => (
-              <button
-                key={k}
-                onClick={() => setTab(k)}
-                className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-colors ${tab === k ? 'bg-brand text-white' : 'text-ink-soft hover:text-brand'}`}
-              >
-                {k === 'sell' ? tx('للبايع', 'Sellers') : k === 'buy' ? tx('للمشتري', 'Buyers') : tx('للبدل', 'Swap')}
-              </button>
-            ))}
-          </div>
-        </div>
         <ol className="mt-8 sm:mt-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
           {steps.map((s, i) => (
             <li key={s.t} className="relative flex sm:block items-center gap-4 rounded-card border border-line bg-paper p-4 sm:p-6">
