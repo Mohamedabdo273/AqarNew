@@ -3,6 +3,7 @@ import { Phone, MessageCircle } from 'lucide-react';
 import { PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { Logo } from './Logo';
+import { withBrand } from './BrandWord';
 import { BRAND, whatsappLink } from '../config/brand';
 
 interface FooterProps {
@@ -67,7 +68,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
       <div className="border-t border-white/10">
         <div className="page-wrap py-5 flex flex-wrap items-center justify-between gap-3 text-xs text-white/50">
           <p>
-            © {new Date().getFullYear()} {language === 'ar' ? BRAND.nameAr : BRAND.nameEn}. {tx('جميع الحقوق محفوظة', 'All rights reserved')}
+            © {new Date().getFullYear()} {withBrand(language === 'ar' ? BRAND.nameAr : BRAND.nameEn, 'onDark')}. {tx('جميع الحقوق محفوظة', 'All rights reserved')}
           </p>
           <div className="flex gap-4">
             <button onClick={() => onNavigate('terms')} className="hover:text-white min-h-11">{tx('الشروط والأحكام', 'Terms')}</button>

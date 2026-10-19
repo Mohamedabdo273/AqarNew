@@ -36,6 +36,7 @@ import { Filters, SortKey } from '../lib/unitFilters';
 import { PageId, RealEstateUnit } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { UnitCard } from '../components/UnitCard';
+import { withBrand } from '../components/BrandWord';
 import { HomeRole, RoleSwitch } from '../components/RoleSwitch';
 import { IlloForm, IlloKeys, IlloPeople, IlloReview } from '../components/Illustrations';
 import { useAnimatedNumber } from '../lib/useAnimatedNumber';
@@ -83,10 +84,10 @@ const SectionTitle: React.FC<{ title: string; sub?: string; center?: boolean; li
       <p
         className="inline-flex items-center rounded-full px-4 py-1.5 text-sm sm:text-base font-bold mb-3 bg-accent text-white"
       >
-        {kicker}
+        {withBrand(kicker, 'onAccent')}
       </p>
     )}
-    <h2 className={`text-2xl sm:text-[2rem] font-bold leading-tight ${light ? 'text-white' : 'text-brand'}`}>{title}</h2>
+    <h2 className={`text-2xl sm:text-[2rem] font-bold leading-tight ${light ? 'text-white' : 'text-brand'}`}>{withBrand(title, light ? 'onDark' : 'color')}</h2>
     {sub && <p className={`mt-3 text-[15px] sm:text-base leading-relaxed ${light ? 'text-white/60' : 'text-muted'}`}>{sub}</p>}
   </div>
 );

@@ -19,6 +19,7 @@ import {
 import { PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { LogoMark } from '../components/Logo';
+import { withBrand } from '../components/BrandWord';
 import { BRAND, whatsappLink } from '../config/brand';
 
 interface AboutPageProps {
@@ -61,7 +62,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
       <section className="max-w-4xl mx-auto px-4 sm:px-6 pt-12 sm:pt-20 pb-14 text-center">
         <LogoMark size={64} className="mx-auto" />
         <h1 className="mt-6 text-4xl sm:text-5xl font-bold tracking-tight text-ink">
-          {tx('احنا', 'We are')} <span className="text-brand">{name}</span>
+          {tx('احنا', 'We are')} <span className="text-brand">{withBrand(name)}</span>
         </h1>
         <p className="mt-5 text-lg sm:text-xl text-ink-soft leading-relaxed max-w-2xl mx-auto">
           {tx(

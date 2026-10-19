@@ -4,6 +4,7 @@
     { "name": "aqar-dev", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 3000, "autoPort": true, "env": { "VITE_API_URL": "" } },
     { "name": "aqar-api", "runtimeExecutable": "dotnet", "runtimeArgs": ["run", "--project", "E:/Aqar/AqarApi/src/Aqar.Api", "--launch-profile", "http"], "port": 5080 },
     { "name": "aqar-admin", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "E:/Aqar/AqarAdmin", "run", "dev"], "port": 5174 },
+    { "name": "lokasher-admin", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "E:/LokaSher", "run", "dev"], "port": 5180 },
     { "name": "aqar-admin-azure", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "E:/Aqar/AqarAdmin", "run", "dev"], "port": 5174, "env": { "API_URL": "https://forsa-h3bmgghpcybshtfg.westus3-01.azurewebsites.net" } }
   ]
 }

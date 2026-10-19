@@ -1,3 +1,4 @@
+import { withBrand } from './BrandWord';
 import React, { useState } from 'react';
 import { CalendarDays, CheckCircle2, ChevronDown, MessageCircle, Phone } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
@@ -89,7 +90,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ title, updated, summaryTit
                       <span>{p.slice(2)}</span>
                     </p>
                   ) : (
-                    <p key={j}>{p}</p>
+                    <p key={j}>{withBrand(p)}</p>
                   )
                 )}
               </div>

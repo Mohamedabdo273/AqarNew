@@ -1,3 +1,4 @@
+import { withBrand } from '../components/BrandWord';
 import React, { useEffect, useState } from 'react';
 import { ShieldCheck, ShieldAlert, Search, CheckCircle2, MinusCircle, MessageCircle, Loader2 } from 'lucide-react';
 import { RealEstateUnit } from '../types';
@@ -61,10 +62,10 @@ export const VerifyPage: React.FC<VerifyPageProps> = ({ initialCode, onSelectUni
       </span>
       <h1 className="mt-5 text-3xl sm:text-4xl font-bold text-ink">{tx('اتأكد من الوحدة', 'Verify a unit')}</h1>
       <p className="mt-3 text-ink-soft leading-relaxed">
-        {tx(
+        {withBrand(tx(
           'حد بعتلك وحدة وقالك إنها على DEAL؟ اكتب الكود اللي عليها واتأكد إنها عندنا فعلاً ومتراجعة — قبل ما تدفع أي حاجة.',
           'Someone sent you a unit saying it is on DEAL? Enter its code and check it is really ours and reviewed — before you pay anything.',
-        )}
+        ))}
       </p>
 
       <form
@@ -152,10 +153,10 @@ export const VerifyPage: React.FC<VerifyPageProps> = ({ initialCode, onSelectUni
             {tx('مش لاقيين وحدة بالكود ده.', "We can't find a unit with this code.")}
           </p>
           <p className="mt-2 text-ink-soft">
-            {tx(
+            {withBrand(tx(
               'اتأكد إنك كتبته صح. لو حد بيقولك إنها على DEAL وطالب منك فلوس، ما تدفعش — وكلّمنا.',
               "Check you typed it right. If someone says it's on DEAL and asks you for money, don't pay — and tell us.",
-            )}
+            ))}
           </p>
           <a href={whatsappLink(tx(`حد بعتلي وحدة بكود ${checked} ومش لاقيها`, `Someone sent me unit code ${checked} and I can't find it`))} target="_blank" rel="noreferrer" className="btn-primary mt-4">
             <MessageCircle className="w-5 h-5" />

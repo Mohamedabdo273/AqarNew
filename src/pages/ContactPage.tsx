@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Phone, MessageCircle, Mail, MapPin, Clock, ExternalLink, Send, ArrowLeft, ArrowRight } from 'lucide-react';
+import { withBrand } from '../components/BrandWord';
 import { BRAND, whatsappLink } from '../config/brand';
 import { useLanguage } from '../context/LanguageContext';
 import { PageId } from '../types';
@@ -110,10 +111,10 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onSent }) 
             <div className="pt-4 border-t border-line">
               <p className="text-sm text-muted">{tx('مين احنا', 'Who we are')}</p>
               <p className="mt-1 text-ink-soft leading-relaxed">
-                {tx(
+                {withBrand(tx(
                   `${BRAND.nameAr} منصة مصرية بتوصّل اللي عايز يخرج من وحدته باللي عايز يشتري بسعر زمان، أو يبدّل.`,
                   `${BRAND.nameEn} is an Egyptian platform connecting owners who want out with buyers at old prices — or swappers.`,
-                )}
+                ))}
               </p>
               <button type="button" onClick={() => onNavigate('about')} className="mt-2 inline-flex items-center gap-1.5 text-sm font-semibold text-ink hover:underline min-h-11">
                 {tx('اعرف أكتر عننا', 'More about us')}

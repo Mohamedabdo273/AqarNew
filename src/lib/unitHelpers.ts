@@ -136,7 +136,7 @@ export const SUB_AREAS: Record<RealEstateUnit['region'], { ar: string; en: strin
   'العين السخنة': [
     { ar: 'الجلالة', en: 'Galala' },
     { ar: 'بورتو السخنة', en: 'Porto Sokhna' },
-    { ar: 'العين الباردة', en: 'Ain Sokhna Bay' },
+    { ar: 'طريق السويس – الزعفرانة', en: 'Suez–Zaafarana Road' },
     { ar: 'الزعفرانة', en: 'Zaafarana' },
   ],
   'الساحل الشمالي': [
