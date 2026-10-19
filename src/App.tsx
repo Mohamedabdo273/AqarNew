@@ -35,6 +35,7 @@ import { useLanguage } from './context/LanguageContext';
 import { useAuth } from './context/AuthContext';
 import { SignInSheet } from './components/SignInSheet';
 import { RequireAuth } from './components/RequireAuth';
+import { useHomeRole } from './components/RoleSwitch';
 import { fetchUnit } from './services/api';
 
 /** Pages reachable by a bare hash (#sell, #contact, …). */
@@ -116,7 +117,7 @@ export default function App() {
       }
       if (head === 'requests') return setActivePage('requests');
       if (hash === 'figma' || hash === 'mobile-design' || hash === 'mobile') return setActivePage('mobile-design');
-      // #home/buy · #home/sell · #home/swap — the home page for that visitor (the page reads which one)
+      // #home/buy · #home/sell · #home/swap — the home page for that visitor
       if (hash === '' || head === 'home') return setActivePage('home');
       if (hash === 'listings') return setActivePage('opportunities');
       setActivePage(PAGES.includes(hash as PageId) ? (hash as PageId) : 'notfound');
@@ -125,6 +126,8 @@ export default function App() {
     window.addEventListener('hashchange', handleHash);
     return () => window.removeEventListener('hashchange', handleHash);
   }, []);
+
+  const [homeRole, setHomeRole] = useHomeRole(activePage === 'home');
 
   const go = (hash: string) => {
     navigatedInApp.current = true;
@@ -204,6 +207,8 @@ export default function App() {
         )}
         {activePage === 'home' && (
           <HomePage
+            role={homeRole}
+            onRoleChange={setHomeRole}
             units={units}
             budget={budget}
             onBudgetChange={setBudget}

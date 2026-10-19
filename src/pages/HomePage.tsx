@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -36,6 +36,7 @@ import { Filters, SortKey } from '../lib/unitFilters';
 import { PageId, RealEstateUnit } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { UnitCard } from '../components/UnitCard';
+import { HomeRole, RoleSwitch } from '../components/RoleSwitch';
 import { IlloForm, IlloKeys, IlloPeople, IlloReview } from '../components/Illustrations';
 import { useAnimatedNumber } from '../lib/useAnimatedNumber';
 import { BRAND, whatsappLink } from '../config/brand';
@@ -54,6 +55,9 @@ interface HomePageProps {
   onOpenDeals: () => void;
   /** Opens the listings with these filters (hero search, quick chips, areas). */
   onSearch: (s: HomeSearch) => void;
+  /** Buyer, seller or swapper — picked in the header; the whole page follows it. */
+  role: HomeRole;
+  onRoleChange: (r: HomeRole) => void;
 }
 
 /** What the listings page should open with after a search on the home page. */
@@ -63,24 +67,6 @@ export interface HomeSearch {
   /** Most the buyer can pay a month; turns the budget filter on. */
   monthly?: number;
 }
-
-/** Who the visitor is. The whole home page is built for one of them at a time. */
-export type HomeRole = 'buy' | 'sell' | 'swap';
-const ROLE_KEY = 'home_role';
-const ROLES: HomeRole[] = ['buy', 'sell', 'swap'];
-
-/** #home/sell opens straight on the seller's page (handy for ads); otherwise the last choice, else the buyer's. */
-const initialRole = (): HomeRole => {
-  const fromHash = window.location.hash.replace('#', '').split('/')[1] as HomeRole;
-  if (ROLES.includes(fromHash)) return fromHash;
-  try {
-    const saved = localStorage.getItem(ROLE_KEY) as HomeRole;
-    if (ROLES.includes(saved)) return saved;
-  } catch {
-    /* ignore */
-  }
-  return 'buy';
-};
 
 /** The hero search block is wider than the rest of the page, like a search site: ~78% of the screen on desktop. */
 const WIDE = 'w-full mx-auto px-4 sm:px-6 lg:px-0 lg:w-[78%] max-w-[110rem]';
@@ -205,6 +191,8 @@ export const HomePage: React.FC<HomePageProps> = ({
   onOpenRules,
   onOpenDeals,
   onSearch,
+  role,
+  onRoleChange,
 }) => {
   const { language, tx, isRTL } = useLanguage();
   const Arrow = isRTL ? ArrowLeft : ArrowRight;
@@ -281,17 +269,6 @@ export const HomePage: React.FC<HomePageProps> = ({
     setCardType('');
   };
 
-  const [role, setRole] = useState<HomeRole>(initialRole);
-  // Remember the choice, and keep it in the link so it can be shared or used in an ad.
-  useEffect(() => {
-    try {
-      localStorage.setItem(ROLE_KEY, role);
-    } catch {
-      /* ignore */
-    }
-    history.replaceState(null, '', `#home/${role}`);
-  }, [role]);
-
   const swapUnits = useMemo(() => units.filter((u) => u.eligibleForSwap).slice(0, 6), [units]);
 
   const HEROES: Record<HomeRole, { badge: string; line1: string; line2: string; lead: string; body: string; cards: { icon: React.ElementType; t: string; d: string }[] }> = {
@@ -345,8 +322,13 @@ export const HomePage: React.FC<HomePageProps> = ({
 
   return (
     <div>
-      {/* ───────── Who are you? Stays under the navbar while scrolling, so it can be changed any time ───────── */}
-      <RoleBar role={role} onChange={setRole} />
+      {/* ───────── Who are you? A slim bar under the header that stays while scrolling; the whole page follows it ───────── */}
+      <div className="sticky top-24 sm:top-28 z-30 bg-paper/90 backdrop-blur-md border-b border-line">
+        <div className="page-wrap py-2.5 flex items-center justify-center gap-3">
+          <span className="hidden sm:inline text-sm font-bold text-ink-soft">{tx('أنا عاوز', 'I want to')}</span>
+          <RoleSwitch role={role} onChange={onRoleChange} />
+        </div>
+      </div>
 
       {/* ───────── 1. Hero — one message, for the owner who's behind ───────── */}
       <section className="relative overflow-hidden bg-brand-ink text-white">
@@ -740,42 +722,6 @@ export const HomePage: React.FC<HomePageProps> = ({
       </section>
         </>
       )}
-    </div>
-  );
-};
-
-/* "I want to: buy · sell · swap" — sticks under the navbar so the visitor can switch at any point. */
-const RoleBar: React.FC<{ role: HomeRole; onChange: (r: HomeRole) => void }> = ({ role, onChange }) => {
-  const { tx } = useLanguage();
-  const options: [HomeRole, string, React.ElementType][] = [
-    ['buy', tx('أشتري', 'Buy'), Search],
-    ['sell', tx('أبيع وحدتي', 'Sell my unit'), Tag],
-    ['swap', tx('أبدّل وحدتي', 'Swap my unit'), Repeat],
-  ];
-  return (
-    <div className="sticky top-24 sm:top-28 z-30 bg-paper/95 backdrop-blur-md border-b border-line">
-      <div className={`${WIDE} py-2.5 flex items-center gap-3`}>
-        <span className="hidden sm:block shrink-0 font-bold text-ink">{tx('أنا عاوز:', 'I want to:')}</span>
-        <div role="tablist" className="flex-1 grid grid-cols-3 gap-2">
-          {options.map(([k, label, Icon]) => (
-            <button
-              key={k}
-              role="tab"
-              aria-selected={role === k}
-              onClick={() => {
-                onChange(k);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`inline-flex items-center justify-center gap-2 min-h-12 rounded-xl text-sm sm:text-lg font-bold border transition-colors ${
-                role === k ? 'bg-accent border-accent text-white shadow-sm' : 'bg-surface border-line text-ink-soft hover:border-accent hover:text-accent'
-              }`}
-            >
-              <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
     </div>
   );
 };
