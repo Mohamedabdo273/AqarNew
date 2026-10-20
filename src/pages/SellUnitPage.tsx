@@ -9,7 +9,7 @@ import { errorText } from '../services/api';
 import { PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, REGIONS, SUB_AREAS, CANCELLATION_PENALTY_MIN_RATE, CANCELLATION_PENALTY_RATE, cancellationLoss, currency, money } from '../lib/unitHelpers';
 import { DeliveryStatus } from '../types';
 import { EMPTY_SELL_FORM, SellForm, isValidPhone, netToSeller } from '../lib/sellForm';
-import { ChipSelect, CheckBox, Field, FilePick, FilePickMany, MoneyInput, Toggle } from '../components/sell/FormBits';
+import { ChipSelect, CheckBox, Field, FilePick, FilePickMany, MoneyInput, PhotoPick, Toggle } from '../components/sell/FormBits';
 import { DeveloperSelect } from '../components/sell/DeveloperSelect';
 import { whatsappLink } from '../config/brand';
 
@@ -65,6 +65,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
   });
   // The picked files themselves, uploaded once the request exists.
   const [contractPageFiles, setContractPageFiles] = useState<File[]>([]);
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [scheduleFile, setScheduleFile] = useState<File | null>(null);
   const [planFile, setPlanFile] = useState<File | null>(null);
   const [sending, setSending] = useState(false);
@@ -134,7 +135,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
   const STEPS = [
     { n: 1 as const, label: tx('الوحدة', 'The unit') },
     { n: 2 as const, label: tx('الفلوس', 'The money') },
-    { n: 3 as const, label: tx('المستندات', 'Documents') },
+    { n: 3 as const, label: tx('الصور والمستندات', 'Photos & papers') },
     { n: 4 as const, label: tx('بياناتك', 'Your details') },
   ];
 
@@ -214,7 +215,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
     try {
       const { code, failedUploads } = await createRequest(
         { ...form, developer: form.developer.trim(), compound: form.compound.trim(), ownerName: form.ownerName.trim() },
-        { contractPages: contractPageFiles, paymentSchedule: scheduleFile, unitPlan: planFile },
+        { contractPages: contractPageFiles, paymentSchedule: scheduleFile, unitPlan: planFile, photos: photoFiles },
       );
       try {
         localStorage.removeItem(DRAFT_KEY);
@@ -547,6 +548,11 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
 
           {step === 3 && (
           <div className="space-y-7">
+            <div>
+              <p className="mb-3 font-bold text-ink">{tx('صور الوحدة', 'Unit photos')}</p>
+              <PhotoPick files={photoFiles} onChange={setPhotoFiles} max={10} />
+            </div>
+
             <p className="rounded-xl bg-brand-soft px-4 py-3 text-[15px] leading-relaxed text-brand-ink">
               {tx(
                 'المستندات دي بتخلّي المراجعة أسرع، ومش بتظهر لأي مشتري ولا بتتنشر.',

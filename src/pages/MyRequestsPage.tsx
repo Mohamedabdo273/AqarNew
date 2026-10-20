@@ -23,6 +23,8 @@ import {
   Scale,
   ShieldCheck,
   ExternalLink,
+  ImagePlus,
+  X,
 } from 'lucide-react';
 import { PageId } from '../types';
 import { IlloEmpty } from '../components/Illustrations';
@@ -35,7 +37,7 @@ import { DETAIL_SECTIONS, DetailSection, completeness, netToSeller, sectionDone 
 import { fullMoney, money, currency } from '../lib/unitHelpers';
 import { SellDetailsWizard } from '../components/sell/SellDetailsWizard';
 import { ADMIN_URL, whatsappLink } from '../config/brand';
-import { ApiError, SellRequestTracker, USER_ROLE, trackSellRequest } from '../services/api';
+import { ApiError, SellRequestTracker, USER_ROLE, errorText, mediaUrl, trackSellRequest } from '../services/api';
 
 interface MyRequestsPageProps {
   code: string | null;
@@ -396,6 +398,8 @@ const RequestDetail: React.FC<{ req: SellRequest; onBack: () => void }> = ({ req
             </div>
           )}
 
+          <PhotosCard req={req} />
+
           {/* Tracker */}
           <div className="card p-6 sm:p-7">
             <p className="font-bold text-ink mb-5">{tx('طلبك فين دلوقتي؟', 'Where is my request?')}</p>
@@ -467,6 +471,113 @@ const RequestDetail: React.FC<{ req: SellRequest; onBack: () => void }> = ({ req
           </dl>
         </aside>
       </div>
+    </div>
+  );
+};
+
+/* ───────────── Listing photos: add / remove while the request is editable ───────────── */
+
+const MAX_PHOTOS = 12;
+
+const PhotosCard: React.FC<{ req: SellRequest }> = ({ req }) => {
+  const { tx } = useLanguage();
+  const { uploadPhoto, deletePhoto } = useRequests();
+  const [busy, setBusy] = useState(false);
+  const [removing, setRemoving] = useState<string | null>(null);
+  const [error, setError] = useState('');
+  const photos = req.photos;
+  const canAdd = req.canEdit && photos.length < MAX_PHOTOS;
+
+  const add = async (files: File[]) => {
+    setError('');
+    setBusy(true);
+    // One at a time, so they keep the order picked.
+    for (const f of files.slice(0, MAX_PHOTOS - photos.length)) {
+      try {
+        await uploadPhoto(req.code, f);
+      } catch (e) {
+        setError(errorText(e));
+        break;
+      }
+    }
+    setBusy(false);
+  };
+
+  const remove = async (url: string) => {
+    setError('');
+    setRemoving(url);
+    try {
+      await deletePhoto(req.code, url);
+    } catch (e) {
+      setError(errorText(e));
+    } finally {
+      setRemoving(null);
+    }
+  };
+
+  if (!req.canEdit && !photos.length) return null;
+
+  return (
+    <div className="card p-6">
+      <div className="flex items-center justify-between gap-3">
+        <p className="font-bold text-ink">{tx('صور الوحدة', 'Unit photos')}</p>
+        <span className="num text-sm text-muted">
+          {photos.length}/{MAX_PHOTOS}
+        </span>
+      </div>
+      <p className="mt-1 text-sm text-muted">
+        {req.canEdit
+          ? tx('الصور بتبان للمشترين لما الوحدة تتنشر — أول صورة هي الغلاف.', 'Buyers see these once the unit is listed — the first photo is the cover.')
+          : tx('الوحدة اتنشرت — لتغيير الصور كلمنا.', 'The unit is listed — to change photos, contact us.')}
+      </p>
+
+      {(photos.length > 0 || canAdd) && (
+        <div className="mt-4 grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+          {photos.map((url, i) => (
+            <div key={url} className="relative aspect-[4/3] rounded-lg overflow-hidden bg-surface">
+              <img src={mediaUrl(url)} alt="" loading="lazy" className={`w-full h-full object-cover ${removing === url ? 'opacity-40' : ''}`} />
+              {i === 0 && (
+                <span className="absolute bottom-1 start-1 rounded-md bg-accent px-1.5 py-0.5 text-[11px] font-bold text-white">{tx('الغلاف', 'Cover')}</span>
+              )}
+              {req.canEdit && (
+                <button
+                  type="button"
+                  onClick={() => remove(url)}
+                  disabled={busy || removing !== null}
+                  className="absolute top-1 end-1 grid place-items-center w-7 h-7 rounded-full bg-ink/70 text-white hover:bg-danger disabled:opacity-50"
+                  aria-label={tx('شيل الصورة', 'Remove photo')}
+                >
+                  {removing === url ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
+                </button>
+              )}
+            </div>
+          ))}
+          {canAdd && (
+            <label
+              className={`aspect-[4/3] grid place-items-center rounded-lg border border-dashed border-line-strong bg-surface text-brand ${busy ? 'opacity-60' : 'cursor-pointer hover:border-brand'}`}
+            >
+              <span className="flex flex-col items-center gap-1 text-sm font-semibold">
+                {busy ? <Loader2 className="w-6 h-6 animate-spin" /> : <ImagePlus className="w-6 h-6" />}
+                {busy ? tx('بنرفع…', 'Uploading…') : tx('ضيف صور', 'Add photos')}
+              </span>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                disabled={busy}
+                className="sr-only"
+                onChange={(e) => {
+                  const picked = [...(e.target.files ?? [])];
+                  e.target.value = '';
+                  if (picked.length) add(picked);
+                }}
+              />
+            </label>
+          )}
+        </div>
+      )}
+      {req.canEdit && <p className="mt-3 text-xs text-muted">{tx(`لحد ${MAX_PHOTOS} صورة — JPG أو PNG أو WEBP`, `Up to ${MAX_PHOTOS} photos — JPG, PNG or WEBP`)}</p>}
+      {error && <p role="alert" className="mt-2 text-sm text-danger">{error}</p>}
     </div>
   );
 };

@@ -9,12 +9,12 @@ async function startServer() {
   const app = express();
   const PORT = Number(process.env.PORT) || 3000;
 
-  // Everything under /api except the built-in admin mock goes to the real API (AqarApi, .NET).
+  // Everything under /api except the built-in admin mock — plus public /media files — goes to the real API (AqarApi, .NET).
   // Piped raw — before express.json() — so multipart uploads and bodies pass through untouched.
   const apiUrl = new URL(process.env.API_URL || 'https://forsa-h3bmgghpcybshtfg.westus3-01.azurewebsites.net');
   app.use((req, res, next) => {
     const url = req.originalUrl || req.url || '';
-    if (!url.startsWith('/api/') || url.startsWith('/api/admin') || url === '/api/health') return next();
+    if (!(url.startsWith('/api/') || url.startsWith('/media/')) || url.startsWith('/api/admin') || url === '/api/health') return next();
     const client = apiUrl.protocol === 'https:' ? https : http;
     const upstream = client.request(
       {

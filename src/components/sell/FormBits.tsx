@@ -1,5 +1,5 @@
-import React from 'react';
-import { Check, Minus, Plus, Upload, X } from 'lucide-react';
+import React, { useEffect, useMemo } from 'react';
+import { Check, ImagePlus, Minus, Plus, Upload, X } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { currency } from '../../lib/unitHelpers';
 
@@ -266,6 +266,58 @@ export const FilePickMany: React.FC<{
           ))}
         </ul>
       )}
+    </div>
+  );
+};
+
+/** Listing photos with thumbnails. The first one is the cover on the unit card. */
+export const PhotoPick: React.FC<{ files: File[]; onChange: (files: File[]) => void; max: number }> = ({ files, onChange, max }) => {
+  const { tx } = useLanguage();
+  const previews = useMemo(() => files.map((f) => URL.createObjectURL(f)), [files]);
+  useEffect(() => () => previews.forEach((u) => URL.revokeObjectURL(u)), [previews]);
+  const full = files.length >= max;
+
+  return (
+    <div className={`rounded-xl border-2 border-dashed p-4 transition-colors ${files.length ? 'border-brand bg-brand-soft/50' : 'border-field-border'}`}>
+      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+        {previews.map((src, i) => (
+          <div key={src} className="relative aspect-[4/3] rounded-lg overflow-hidden bg-surface">
+            <img src={src} alt="" className="w-full h-full object-cover" />
+            {i === 0 && (
+              <span className="absolute bottom-1 start-1 rounded-md bg-accent px-1.5 py-0.5 text-[11px] font-bold text-white">{tx('الغلاف', 'Cover')}</span>
+            )}
+            <button
+              type="button"
+              onClick={() => onChange(files.filter((_, j) => j !== i))}
+              className="absolute top-1 end-1 grid place-items-center w-7 h-7 rounded-full bg-ink/70 text-white hover:bg-danger"
+              aria-label={tx('شيل الصورة', 'Remove photo')}
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        ))}
+        {!full && (
+          <label className="aspect-[4/3] grid place-items-center rounded-lg border border-line bg-surface text-brand cursor-pointer hover:border-brand">
+            <span className="flex flex-col items-center gap-1 text-sm font-semibold">
+              <ImagePlus className="w-6 h-6" />
+              {tx('ضيف صور', 'Add photos')}
+            </span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              className="sr-only"
+              onChange={(e) => {
+                onChange([...files, ...(e.target.files ?? [])].slice(0, max));
+                e.target.value = '';
+              }}
+            />
+          </label>
+        )}
+      </div>
+      <p className="num mt-3 text-sm text-muted">
+        {tx(`${files.length} من ${max} — أول صورة هي اللي بتظهر على الكارت`, `${files.length} of ${max} — the first one shows on the card`)}
+      </p>
     </div>
   );
 };

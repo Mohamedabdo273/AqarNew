@@ -283,7 +283,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         'Buy at the original contract price — below market — and continue the same instalments. Every number is checked against the contract and receipts, and we walk you through the transfer step by step.',
       ),
       points: [
-        tx('كل وحدة متراجعة: العقد وإيصالات الدفع وكشف حساب المطور', 'Every unit is checked: contract, payment receipts and developer statement'),
+        tx('كل وحدة متراجعة على العقد وإيصالات الدفع قبل ما تتنشر', 'Every unit is checked against its contract and payment receipts before listing'),
         tx('بتشوف المطلوب كاش والقسط والمتبقي قبل ما تكلّم حد', 'See the cash needed, monthly and balance before talking to anyone'),
         tx('المعاينة ببلاش، وإحنا اللي بنرتبها مع المالك', 'Viewings are free — we arrange them with the owner'),
         tx('العمولة بتتدفع بس لما التنازل يتم في مقر المطور', 'The fee is paid only once the transfer completes at the developer'),
@@ -305,7 +305,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       ),
       points: [
         tx('بتبعت بيانات وحدتك في دقيقة، وكشف الحساب مجاني', 'Send your unit details in a minute — the statement is free'),
-        tx('اسمك ورقمك مش بيظهروا غير لمشتري جاد', 'Your name and number go only to a serious buyer'),
+        tx('اسمك ورقمك مش بيظهروا لأي حد — المشتري بيكلّمنا إحنا', 'Your name and number never appear — buyers talk to us'),
         tx('المتأخرات بتتخصم يوم التنازل — مش لازم تسددها الأول', 'Arrears come off on transfer day — no need to clear them first'),
         tx('بتقبض بشيك مصرفي في مقر المطور، ولو تكمّل عقدك أحسن ليك هنقولك بصراحة', 'Paid by bank cheque at the developer — and if keeping your contract is better, we’ll say so'),
       ],
@@ -1343,7 +1343,7 @@ const SellerPromises: React.FC<{ onStatement: () => void }> = ({ onStatement }) 
       <SectionTitle
         center
         kicker={tx('لو مش قادر تكمّل', "If you can't keep up")}
-        title={tx(`ليه تبيع عن طريق ${BRAND.nameAr}؟`, `Why sell through ${BRAND.nameEn}?`)}
+        title={tx(`ليه تبيع عن طريق ${BRAND.nameAr} ؟`, `Why sell through ${BRAND.nameEn} ?`)}
       />
       <div className="mt-10 grid lg:grid-cols-[1fr_1.4fr] gap-4 sm:gap-5">
         <div className="rounded-card border border-line bg-surface shadow-soft overflow-hidden flex flex-col">

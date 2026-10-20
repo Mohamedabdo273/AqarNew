@@ -226,6 +226,8 @@ export interface SellRequestDto {
   canEdit: boolean;
   form: SellFormBody;
   documents: SellRequestDocument[];
+  /** Listing photos (public URLs), shown on the unit once it's published. */
+  photos: string[];
 }
 
 export interface SellRequestTracker {
@@ -262,6 +264,19 @@ export function uploadSellDocument(code: string, token: string | undefined, docT
   body.append('file', file);
   return request<SellRequestDocument>(`/sell-requests/${encodeURIComponent(code)}/documents`, { method: 'POST', headers: tokenHeader(token), body });
 }
+
+/** A listing photo — unlike documents, buyers see these once the unit is published. */
+export function uploadSellPhoto(code: string, token: string | undefined, file: File) {
+  const body = new FormData();
+  body.append('file', file);
+  return request<{ url: string }>(`/sell-requests/${encodeURIComponent(code)}/photos`, { method: 'POST', headers: tokenHeader(token), body });
+}
+
+/** A stored file's URL as the API returns it (/media/...) → one the browser can load: on the API host, or via the proxy. */
+export const mediaUrl = (url: string) => (url.startsWith('/') ? `${API_BASE}${url}` : url);
+
+export const deleteSellPhoto = (code: string, token: string | undefined, url: string) =>
+  request<void>(`/sell-requests/${encodeURIComponent(code)}/photos?url=${encodeURIComponent(url)}`, { method: 'DELETE', headers: tokenHeader(token) });
 
 /* ───────────── Inquiries ───────────── */
 

@@ -7,10 +7,12 @@ import {
   SellRequestDocument,
   SellRequestDto,
   createSellRequest,
+  deleteSellPhoto,
   fetchMySellRequests,
   getSellRequest,
   updateSellRequest,
   uploadSellDocument,
+  uploadSellPhoto,
 } from '../services/api';
 
 /** Where a seller request stands. Mirrors the tracker shown to the seller. */
@@ -28,6 +30,8 @@ export interface SellRequest {
   /** Set when the team sent the request back asking for more. */
   needsInfoReason: string | null;
   documents: SellRequestDocument[];
+  /** Listing photo URLs (/media/...), in order — the first is the cover. */
+  photos: string[];
   form: SellForm;
 }
 
@@ -36,6 +40,8 @@ export interface SellUploads {
   contractPages?: File[];
   paymentSchedule?: File | null;
   unitPlan?: File | null;
+  /** Listing photos — public once the unit is published. */
+  photos?: File[];
 }
 
 interface RequestsContextType {
@@ -46,6 +52,8 @@ interface RequestsContextType {
   createRequest: (form: SellForm, uploads?: SellUploads) => Promise<{ code: string; failedUploads: number }>;
   updateRequest: (code: string, form: SellForm) => Promise<void>;
   uploadDocument: (code: string, docType: DocType, file: File) => Promise<void>;
+  uploadPhoto: (code: string, file: File) => Promise<void>;
+  deletePhoto: (code: string, url: string) => Promise<void>;
   getRequest: (code: string) => SellRequest | undefined;
 }
 
@@ -99,6 +107,7 @@ const fromDto = (dto: SellRequestDto): SellRequest => {
     canEdit: dto.canEdit,
     needsInfoReason: dto.needsInfoReason,
     documents: docs,
+    photos: dto.photos ?? [],
     form,
   };
 };
@@ -172,11 +181,20 @@ export const RequestsProvider: React.FC<{ children: ReactNode }> = ({ children }
       ...(uploads.paymentSchedule ? [[DOC_TYPE.schedule, uploads.paymentSchedule] as [DocType, File]] : []),
       ...(uploads.unitPlan ? [[DOC_TYPE.plan, uploads.unitPlan] as [DocType, File]] : []),
     ];
+    const photos = uploads.photos ?? [];
     const results = await Promise.allSettled(jobs.map(([type, file]) => uploadSellDocument(code, accessToken, type, file)));
-    const failedUploads = results.filter((r) => r.status === 'rejected').length;
+    let failedUploads = results.filter((r) => r.status === 'rejected').length;
+    // Photos one at a time, so they keep the order the seller picked (the first is the cover).
+    for (const f of photos) {
+      try {
+        await uploadSellPhoto(code, accessToken, f);
+      } catch {
+        failedUploads++;
+      }
+    }
 
-    // Re-read so the list shows the uploaded documents too.
-    const fresh = jobs.length ? await getSellRequest(code, accessToken).catch(() => request) : request;
+    // Re-read so the list shows the uploaded documents and photos too.
+    const fresh = jobs.length || photos.length ? await getSellRequest(code, accessToken).catch(() => request) : request;
     setRequests((prev) => [fromDto(fresh), ...prev.filter((r) => r.code !== code)]);
     return { code, failedUploads };
   };
@@ -192,10 +210,22 @@ export const RequestsProvider: React.FC<{ children: ReactNode }> = ({ children }
     replace(await getSellRequest(code, token));
   };
 
+  const uploadPhoto: RequestsContextType['uploadPhoto'] = async (code, file) => {
+    const token = tokenFor(code);
+    await uploadSellPhoto(code, token, file);
+    replace(await getSellRequest(code, token));
+  };
+
+  const deletePhoto: RequestsContextType['deletePhoto'] = async (code, url) => {
+    const token = tokenFor(code);
+    await deleteSellPhoto(code, token, url);
+    replace(await getSellRequest(code, token));
+  };
+
   const getRequest = (code: string) => requests.find((r) => r.code === code);
 
   return (
-    <RequestsContext.Provider value={{ requests, loading, createRequest, updateRequest, uploadDocument, getRequest }}>{children}</RequestsContext.Provider>
+    <RequestsContext.Provider value={{ requests, loading, createRequest, updateRequest, uploadDocument, uploadPhoto, deletePhoto, getRequest }}>{children}</RequestsContext.Provider>
   );
 };
 
