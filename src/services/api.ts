@@ -378,3 +378,107 @@ export const removeFavorite = (unitId: number) => request<void>(`/me/favorites/$
 export const syncFavorites = (unitIds: number[]) => request<number[]>('/me/favorites/sync', json('POST', { unitIds }));
 
 export const fetchMySellRequests = () => request<SellRequestDto[]>('/me/sell-requests');
+
+/* ───────────── Offers ("اعرض سعرك") & notifications ───────────── */
+
+/** Matches OfferThreadStatus on the API. */
+export const OFFER_STATUS = { awaitingSeller: 1, awaitingBuyer: 2, agreed: 3, rejected: 4, withdrawn: 5, expired: 6, closed: 7 } as const;
+export type OfferStatus = (typeof OFFER_STATUS)[keyof typeof OFFER_STATUS];
+/** Matches OfferMoveType on the API. */
+export const OFFER_MOVE = { offer: 1, counter: 2, accept: 3, reject: 4, withdraw: 5, expire: 6, close: 7, extend: 8 } as const;
+/** Matches OfferActor on the API. */
+export const OFFER_ACTOR = { buyer: 1, seller: 2, system: 3, staff: 4 } as const;
+
+export type OfferAction = 'accept' | 'counter' | 'reject' | 'raise' | 'withdraw';
+
+export interface OfferMove {
+  type: number;
+  actor: number;
+  amount: number | null;
+  note: string | null;
+  at: string;
+}
+
+/** One negotiation as the caller sees it. The other side is only "مشتري N" / "صاحب الوحدة". */
+export interface OfferThread {
+  id: number;
+  unitId: number;
+  unitCode: string;
+  unitTitle: string;
+  unitImage: string | null;
+  role: 'buyer' | 'seller';
+  buyerLabel: string;
+  status: OfferStatus;
+  askingPrice: number;
+  floorPrice: number;
+  lastBuyerOffer: number;
+  lastSellerCounter: number | null;
+  agreedPrice: number | null;
+  buyerFee: number;
+  buyerMovesLeft: number;
+  sellerMovesLeft: number;
+  deadlineAt: string | null;
+  closeReason: string | null;
+  actions: OfferAction[];
+  nextMin: number | null;
+  nextMax: number | null;
+  moves: OfferMove[];
+  createdAt: string;
+  updatedAt: string | null;
+}
+
+export interface UnitOfferState {
+  negotiable: boolean;
+  isOwner: boolean;
+  canOffer: boolean;
+  reason: string | null;
+  askingPrice: number;
+  floorPrice: number;
+  maxOffer: number;
+  step: number;
+  buyerFeePercent: number;
+  openThreadsOnUnit: number;
+  thread: OfferThread | null;
+}
+
+export const fetchUnitOfferState = (unitId: number | string) => request<UnitOfferState>(`/offers/unit/${encodeURIComponent(String(unitId))}`);
+export const createOffer = (unitId: number, amount: number) => request<OfferThread>('/offers', json('POST', { unitId, amount }));
+export const fetchOffer = (id: number) => request<OfferThread>(`/offers/${id}`);
+export const offerAction = (id: number, action: OfferAction, amount?: number) =>
+  request<OfferThread>(`/offers/${id}/${action}`, amount === undefined ? { method: 'POST' } : json('POST', { amount }));
+export const fetchMyOffers = () => request<OfferThread[]>('/me/offers');
+export const fetchReceivedOffers = () => request<OfferThread[]>('/me/offers/received');
+
+/** Matches NotificationType on the API. */
+export const NOTIFICATION_TYPE = {
+  offerReceived: 1,
+  offerCountered: 2,
+  offerRaised: 3,
+  offerAccepted: 4,
+  offerRejected: 5,
+  offerExpired: 6,
+  offerWithdrawn: 7,
+  unitReserved: 8,
+  offerClosed: 9,
+  offerExtended: 10,
+  offerReopened: 11,
+  staffCallParties: 12,
+} as const;
+
+export interface AppNotification {
+  id: number;
+  type: number;
+  /** Arabic, ready to show. */
+  title: string;
+  body: string | null;
+  unitId: number | null;
+  unitCode: string | null;
+  offerThreadId: number | null;
+  amount: number | null;
+  createdAt: string;
+  isRead: boolean;
+}
+
+export const fetchNotifications = () => request<{ items: AppNotification[]; unreadCount: number }>('/me/notifications');
+export const markNotificationRead = (id: number) => request<void>(`/me/notifications/${id}/read`, { method: 'POST' });
+export const markAllNotificationsRead = () => request<void>('/me/notifications/read-all', { method: 'POST' });

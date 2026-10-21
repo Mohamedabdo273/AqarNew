@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Home, Search, Tag, Repeat, Globe, Menu, X, Info, ShieldCheck, MessageCircle, Heart, ClipboardList, Phone, Bell, MoreHorizontal, UserRound, Scale, Sparkles, LogIn, LogOut } from 'lucide-react';
+import { Home, Search, Tag, Repeat, Globe, Menu, X, Info, ShieldCheck, MessageCircle, Heart, ClipboardList, Phone, Bell, MoreHorizontal, UserRound, Scale, Sparkles, LogIn, LogOut, HandCoins } from 'lucide-react';
 import { PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useUnits } from '../context/UnitsContext';
@@ -8,6 +8,8 @@ import { useCompare } from '../context/CompareContext';
 import { useAuth } from '../context/AuthContext';
 import { Logo } from './Logo';
 import { whatsappLink } from '../config/brand';
+import { useNotifications } from '../lib/useNotifications';
+import { notificationTitle } from '../lib/offers';
 
 interface NavbarProps {
   activePage: PageId;
@@ -27,6 +29,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
   const { requests } = useRequests();
   const { compareIds } = useCompare();
   const { user, checking, openSignIn, logout } = useAuth();
+  const server = useNotifications(!!user);
   const firstName = user?.fullName.trim().split(/\s+/)[0] ?? '';
   const [menuOpen, setMenuOpen] = useState(false);
   const [openPanel, setOpenPanel] = useState<null | 'bell' | 'more'>(null);
@@ -63,6 +66,9 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
       at: new Date(r.updatedAt).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-GB', { day: 'numeric', month: 'short' }),
     }));
 
+  const shortDate = (iso: string) => new Date(iso).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-GB', { day: 'numeric', month: 'short' });
+  const bellCount = server.unread + notifications.length;
+
   type Link = { id: PageId; label: string; icon: React.ElementType };
   const buy: Link = { id: 'opportunities', label: tx('اشتري', 'Buy'), icon: Search };
   const sell: Link = { id: 'sell', label: tx('اعرض وحدتك', 'List your unit'), icon: Tag };
@@ -90,6 +96,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
     { id: 'market-comparisons', label: tx('مقارنات السوق', 'Market Comparisons'), icon: Sparkles },
     { id: 'saved', label: tx('المفضلة', 'Saved'), icon: Heart },
     { id: 'requests', label: tx('حسابي', 'My account'), icon: ClipboardList },
+    { id: 'offers', label: tx('العروض والتفاوض', 'Offers'), icon: HandCoins },
     { id: 'about', label: tx('احنا مين', 'About us'), icon: Info },
   ];
 
@@ -139,12 +146,42 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
                 }`}
               >
                 <Bell className="w-5 h-5" />
-                <Badge n={notifications.length} />
+                <Badge n={bellCount} />
               </button>
               {openPanel === 'bell' && (
-                <div className="absolute top-full mt-2 end-0 w-72 card p-2 shadow-lift z-50">
-                  <p className="px-2 py-1.5 text-sm font-bold text-ink">{tx('الإشعارات', 'Notifications')}</p>
-                  {notifications.length === 0 ? (
+                <div className="absolute top-full mt-2 end-0 w-80 max-w-[calc(100vw-2rem)] card p-2 shadow-lift z-50">
+                  <div className="flex items-center justify-between gap-2 px-2 py-1.5">
+                    <p className="text-sm font-bold text-ink">{tx('الإشعارات', 'Notifications')}</p>
+                    {server.unread > 0 && (
+                      <button onClick={server.markAllRead} className="text-xs font-semibold text-brand hover:underline">
+                        {tx('علّم الكل مقروء', 'Mark all read')}
+                      </button>
+                    )}
+                  </div>
+                  {server.items.length > 0 && (
+                    <ul className="max-h-80 overflow-y-auto">
+                      {server.items.map((n) => (
+                        <li key={n.id}>
+                          <button
+                            onClick={() => {
+                              setOpenPanel(null);
+                              server.markRead(n.id);
+                              window.location.hash = n.offerThreadId ? `offers/${n.offerThreadId}` : 'offers';
+                            }}
+                            className={`w-full flex gap-2 text-start rounded-xl px-2 py-2 hover:bg-paper ${n.isRead ? '' : 'bg-brand-soft/60'}`}
+                          >
+                            <span className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${n.isRead ? 'bg-transparent' : 'bg-accent'}`} />
+                            <span className="min-w-0">
+                              <span className={`block text-sm text-ink ${n.isRead ? '' : 'font-semibold'}`}>{notificationTitle(n, tx)}</span>
+                              {n.body && language === 'ar' && <span className="block text-xs text-ink-soft">{n.body}</span>}
+                              <span className="block text-xs text-muted">{shortDate(n.createdAt)}</span>
+                            </span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {notifications.length === 0 && server.items.length === 0 ? (
                     <p className="px-2 pb-2 text-sm text-muted">{tx('مفيش إشعارات لسه', 'Nothing yet')}</p>
                   ) : (
                     <ul className="max-h-72 overflow-y-auto">
@@ -187,6 +224,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
                 <div className="absolute top-full mt-2 end-0 w-56 card p-2 shadow-lift z-50">
                   {[
                     { id: 'requests' as PageId, label: tx('حسابي', 'My account'), icon: ClipboardList, n: requests.length },
+                    { id: 'offers' as PageId, label: tx('العروض والتفاوض', 'Offers'), icon: HandCoins, n: 0 },
                     { id: 'market-comparisons' as PageId, label: tx('مقارنات السوق', 'Market Comparisons'), icon: Sparkles, n: 0 },
                     { id: 'about' as PageId, label: tx('احنا مين', 'About us'), icon: Info, n: 0 },
                   ].map((m) => (

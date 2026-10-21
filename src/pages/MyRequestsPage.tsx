@@ -147,6 +147,13 @@ export const MyRequestsPage: React.FC<MyRequestsPageProps> = ({ code, onOpenRequ
           </button>
         ))}
       </div>
+      <a href="#offers" className="mt-3 card p-4 flex items-center gap-3 transition-all hover:shadow-lift hover:border-brand/40">
+        <Handshake className="w-5 h-5 text-brand shrink-0" />
+        <span className="flex-1">
+          <span className="block font-semibold text-ink">{tx('العروض والتفاوض', 'Offers')}</span>
+          <span className="block text-sm text-muted">{tx('عروضك على الوحدات، والعروض اللي وصلت على وحداتك', 'Your offers, and offers on your units')}</span>
+        </span>
+      </a>
 
       {/* Sell requests */}
       <div id="my-requests" className="mt-10 scroll-mt-24 flex flex-wrap items-end justify-between gap-3">

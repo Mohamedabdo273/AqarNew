@@ -83,6 +83,7 @@ export type PageId =
   | 'rules'
   | 'saved'
   | 'requests'
+  | 'offers'
   | 'privacy'
   | 'terms'
   | 'sell' 

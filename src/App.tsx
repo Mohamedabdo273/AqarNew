@@ -10,6 +10,7 @@ import { PropertySwapPage } from './pages/PropertySwapPage';
 import { AboutPage } from './pages/AboutPage';
 import { RulesPage, RulesTab } from './pages/RulesPage';
 import { MyRequestsPage } from './pages/MyRequestsPage';
+import { OffersPage } from './pages/OffersPage';
 import { SavedPage } from './pages/SavedPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { TermsPage } from './pages/TermsPage';
@@ -39,7 +40,7 @@ import { useHomeRole } from './components/RoleSwitch';
 import { fetchUnit } from './services/api';
 
 /** Pages reachable by a bare hash (#sell, #contact, …). */
-const PAGES: PageId[] = ['home', 'opportunities', 'sell', 'statement', 'compare', 'market-comparisons', 'verify', 'swap', 'contact', 'about', 'rules', 'saved', 'requests', 'privacy', 'terms', 'admin', 'mobile-design'];
+const PAGES: PageId[] = ['home', 'opportunities', 'sell', 'statement', 'compare', 'market-comparisons', 'verify', 'swap', 'contact', 'about', 'rules', 'saved', 'requests', 'offers', 'privacy', 'terms', 'admin', 'mobile-design'];
 const THANKS: ThanksKind[] = ['sell', 'statement', 'viewing', 'swap', 'contact', 'alert'];
 
 /*
@@ -48,6 +49,8 @@ const THANKS: ThanksKind[] = ['sell', 'statement', 'viewing', 'swap', 'contact',
  *   #opportunities, #sell, …       a page
  *   #unit/<id>                     one unit, as a full page (shareable link)
  *   #requests/WHD-12345            one seller request
+ *   #offers, #offers/received      offers I made / offers on my units
+ *   #offers/<threadId>             one negotiation, opened
  *   #thanks/sell/WHD-12345         confirmation after listing a unit
  *   #thanks/viewing/<unitId>       confirmation after booking a viewing
  *   #thanks/swap/<unitId>          confirmation after a swap request
@@ -60,6 +63,7 @@ export default function App() {
   const { language, tx } = useLanguage();
   const [activePage, setActivePage] = useState<PageId>('home');
   const [requestCode, setRequestCode] = useState<string | null>(null);
+  const [offerTarget, setOfferTarget] = useState<string | null>(null);
   const [unitId, setUnitId] = useState<string | null>(null);
   const [thanks, setThanks] = useState<{ kind: ThanksKind; ref: string | null }>({ kind: 'contact', ref: null });
   // Sections and cards fade up as they scroll in; re-armed on every page change.
@@ -105,6 +109,7 @@ export default function App() {
 
       setUnitId(head === 'unit' ? tail : null);
       setRequestCode(head === 'requests' && tail ? tail : null);
+      setOfferTarget(head === 'offers' && tail ? tail : null);
 
       if (head === 'unit' && tail) return setActivePage('unit');
       if (head === 'verify') {
@@ -116,6 +121,7 @@ export default function App() {
         return setActivePage('thanks');
       }
       if (head === 'requests') return setActivePage('requests');
+      if (head === 'offers') return setActivePage('offers');
       if (hash === 'figma' || hash === 'mobile-design' || hash === 'mobile') return setActivePage('mobile-design');
       // #home/buy · #home/sell · #home/swap — the home page for that visitor
       if (hash === '' || head === 'home') return setActivePage('home');
@@ -276,6 +282,14 @@ export default function App() {
         {activePage === 'swap' && <PropertySwapPage units={units} onSelectUnit={openUnit} onRequested={(u) => go(`thanks/swap/${u.id}`)} />}
         {activePage === 'saved' && <SavedPage onSelectUnit={openUnit} onNavigate={handleNavigate} />}
         {activePage === 'requests' && <MyRequestsPage code={requestCode} onOpenRequest={openRequest} onNavigate={handleNavigate} />}
+        {activePage === 'offers' && (
+          <RequireAuth
+            title={tx('سجّل دخول عشان تشوف عروضك', 'Log in to see your offers')}
+            text={tx('العروض اللي عملتها، والعروض اللي وصلت على وحداتك، في مكان واحد.', 'Offers you made and offers on your units, in one place.')}
+          >
+            <OffersPage target={offerTarget} onNavigate={handleNavigate} />
+          </RequireAuth>
+        )}
         {activePage === 'compare' && <ComparePage units={units} onSelectUnit={openUnit} onNavigate={handleNavigate} />}
         {activePage === 'market-comparisons' && <MarketComparisonsPage units={units} onSelectUnit={openUnit} onNavigate={handleNavigate} />}
         {activePage === 'verify' && <VerifyPage initialCode={verifyCode} onSelectUnit={openUnit} />}

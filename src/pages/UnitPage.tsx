@@ -31,6 +31,7 @@ import { errorText } from '../services/api';
 import { UnitCard } from '../components/UnitCard';
 import { SourceTag } from '../components/SourceTag';
 import { AqarExitComparison } from '../components/AqarExitComparison';
+import { OfferPanel } from '../components/offers/OfferPanel';
 import {
   cashPrice,
   currency,
@@ -427,6 +428,8 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
               </form>
             )}
           </div>
+
+          {isNegotiable(unit) && <OfferPanel unitId={unit.id} />}
 
           <ul className="card p-4 grid gap-2.5 text-sm">
             {[

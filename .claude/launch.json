@@ -5,6 +5,9 @@
     { "name": "aqar-api", "runtimeExecutable": "dotnet", "runtimeArgs": ["run", "--project", "E:/Aqar/AqarApi/src/Aqar.Api", "--launch-profile", "http"], "port": 5080 },
     { "name": "aqar-admin", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "E:/Aqar/AqarAdmin", "run", "dev"], "port": 5174 },
     { "name": "lokasher-admin", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "E:/LokaSher", "run", "dev"], "port": 5180 },
+    { "name": "aqar-api-localdb", "runtimeExecutable": "dotnet", "runtimeArgs": ["C:/Users/Mostafa/AppData/Local/Temp/aqar-api-preview/Aqar.Api.dll", "--contentRoot", "C:/Users/Mostafa/AppData/Local/Temp/aqar-api-preview"], "port": 5080, "env": { "ASPNETCORE_ENVIRONMENT": "Development", "ASPNETCORE_URLS": "http://localhost:5080", "SalamtakOtp__Enabled": "false", "ConnectionStrings__Default": "Server=(localdb)\\MSSQLLocalDB;Database=AqarOffersPreview;Trusted_Connection=True;TrustServerCertificate=True" } },
+    { "name": "aqar-dev-local-api", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 3001, "autoPort": true, "env": { "VITE_API_URL": "", "API_URL": "http://localhost:5080", "PORT": "3001" } },
+    { "name": "aqar-admin-local-api", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "E:/Aqar/AqarAdmin", "run", "dev", "--", "--port", "5175", "--strictPort"], "port": 5175, "env": { "VITE_API_URL": "", "API_URL": "http://localhost:5080" } },
     { "name": "aqar-admin-azure", "runtimeExecutable": "npm", "runtimeArgs": ["--prefix", "E:/Aqar/AqarAdmin", "run", "dev"], "port": 5174, "env": { "API_URL": "https://forsa-h3bmgghpcybshtfg.westus3-01.azurewebsites.net" } }
   ]
 }
