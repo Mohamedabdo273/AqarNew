@@ -4,7 +4,7 @@ import { RealEstateUnit } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { Budget, BudgetFinder } from './BudgetFinder';
 import { Filters } from '../lib/unitFilters';
-import { DELIVERY_OPTIONS, FINISHING_OPTIONS, FREQUENCY_OPTIONS, PROPERTY_CATEGORIES, REGIONS, subAreasFor, typesFor, pick } from '../lib/unitHelpers';
+import { DELIVERY_OPTIONS, FINISHING_OPTIONS, VIEW_OPTIONS, FREQUENCY_OPTIONS, PROPERTY_CATEGORIES, REGIONS, subAreasFor, typesFor, pick } from '../lib/unitHelpers';
 
 interface FilterPanelProps {
   units: RealEstateUnit[];
@@ -124,6 +124,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
     (f.areaMin || f.areaMax ? 1 : 0) +
     f.delivery.length +
     f.finishing.length +
+    f.views.length +
     f.frequency.length +
     (f.discounted ? 1 : 0) +
     (f.negotiable ? 1 : 0) +
@@ -267,6 +268,14 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
           options={DELIVERY_OPTIONS.map((d) => ({ value: d.ar, label: language === 'ar' ? d.short : d.en }))}
           selected={f.delivery}
           onToggle={(v) => onChange({ delivery: toggle(f.delivery, v) })}
+        />
+      </Section>
+
+      <Section title={tx('الفيو', 'View')} active={f.views.length}>
+        <Chips
+          options={VIEW_OPTIONS.map((v) => ({ value: v.key, label: language === 'ar' ? v.ar : v.en }))}
+          selected={f.views}
+          onToggle={(v) => onChange({ views: toggle(f.views, v) })}
         />
       </Section>
 

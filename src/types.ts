@@ -1,3 +1,6 @@
+/** What a unit looks out on. Matches Catalog.Views on the API. */
+export type UnitView = 'open' | 'water' | 'landscape' | 'street' | 'sea' | 'clubhouse';
+
 export type Language = 'ar' | 'en';
 
 export type UserRole = 'seller' | 'buyer' | 'investor';
@@ -163,6 +166,8 @@ export interface RealEstateUnit {
   phaseName?: string; // Phase name inside compound
   phaseNameEn?: string;
   viewOrientation?: 'بحري صريح' | 'بحري شرقي' | 'قبلي' | 'شرقي' | 'غربي';
+  /** What it looks out on — keys of VIEW_OPTIONS; a unit can have several. */
+  views?: UnitView[];
   viewOrientationEn?: string;
   gardenAreaM2?: number; // Garden area for ground units
   roofAreaM2?: number; // Roof area for penthouses

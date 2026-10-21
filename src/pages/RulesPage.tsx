@@ -69,7 +69,7 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
     { icon: Banknote, t: tx('تدفع اللي البايع دفعه بس', 'Pay only what the seller paid'), d: tx('والباقي أقساط للمطور بنفس نظامها القديم.', 'The rest continues as installments to the developer.') },
     { icon: Percent, t: tx(`عمولتنا ${fee}% بس`, `Our fee is only ${fee}%`), d: tx('من سعر العقد، وبتتدفع بس لو التنازل تم. لو ما تمش لأي سبب، مفيش عمولة على حد.', "Of the contract price, and only if the transfer completes. If it doesn't, for any reason, nobody pays a fee.") },
     { icon: Receipt, t: tx('رسوم التنازل واضحة', 'Transfer fee is clear'), d: tx('كل إعلان مكتوب فيه مين بيدفع رسوم المطور ونسبتها.', 'Every listing states who pays the developer fee and how much.') },
-    { icon: Eye, t: tx('المعاينة ببلاش', 'Free viewing'), d: tx('احجزها من صفحة الوحدة وفريقنا يرتبها.', 'Book from the unit page and we arrange it.') },
+    { icon: Eye, t: tx('الحجز ببلاش', 'Booking is free'), d: tx('احجز من صفحة الوحدة وفريقنا يكلّمك يكمّل معاك.', 'Book from the unit page and our team calls you to go ahead.') },
     { icon: AlertTriangle, t: tx('المتأخرات مش عليك', "Overdues aren't on you"), d: tx('بتتسدد للمطور يوم التنازل وتتخصم من البايع.', "They're settled on transfer day and deducted from the seller.") },
     { icon: FileSignature, t: tx('العقد بيبقى باسمك', 'The contract becomes yours'), d: tx('بعد التنازل العقد والشيكات الجديدة باسمك.', 'After transfer, the contract and new cheques are in your name.') },
     { icon: Undo2, t: tx('تقدر تنسحب', 'You can withdraw'), d: tx('قبل التوقيع تنسحب من غير أي تكلفة.', 'Back out free before signing.') },

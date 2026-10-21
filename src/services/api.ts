@@ -247,14 +247,16 @@ const toBody = (f: SellForm): SellFormBody => {
 /** Requests sent from this device carry their token; ones owned by the signed-in account don't need it. */
 const tokenHeader = (token?: string): Record<string, string> => (token ? { 'X-Request-Token': token } : {});
 
-export const createSellRequest = (form: SellForm) =>
-  request<{ code: string; accessToken: string; request: SellRequestDto }>('/sell-requests', json('POST', toBody(form)));
+/** `draft`: save the form so far (each "Next"); it stays out of review until submitted. */
+export const createSellRequest = (form: SellForm, draft = false) =>
+  request<{ code: string; accessToken: string; request: SellRequestDto }>(`/sell-requests${draft ? '?draft=true' : ''}`, json('POST', toBody(form)));
 
 export const getSellRequest = (code: string, token?: string) =>
   request<SellRequestDto>(`/sell-requests/${encodeURIComponent(code)}`, { headers: tokenHeader(token) });
 
-export const updateSellRequest = (code: string, token: string | undefined, form: SellForm) =>
-  request<SellRequestDto>(`/sell-requests/${encodeURIComponent(code)}`, json('PUT', toBody(form), tokenHeader(token)));
+/** On a draft, `draft: true` saves another step and `false` submits it for review. */
+export const updateSellRequest = (code: string, token: string | undefined, form: SellForm, draft = false) =>
+  request<SellRequestDto>(`/sell-requests/${encodeURIComponent(code)}${draft ? '?draft=true' : ''}`, json('PUT', toBody(form), tokenHeader(token)));
 
 export const trackSellRequest = (code: string) => request<SellRequestTracker>(`/sell-requests/${encodeURIComponent(code)}/track`);
 
@@ -281,7 +283,7 @@ export const deleteSellPhoto = (code: string, token: string | undefined, url: st
 /* ───────────── Inquiries ───────────── */
 
 /** Matches InquiryType on the API. */
-export const INQUIRY_TYPE = { general: 1, viewing: 2, priceOffer: 3, investor: 5 } as const;
+export const INQUIRY_TYPE = { general: 1, viewing: 2, priceOffer: 3, investor: 5, booking: 9 } as const;
 
 interface InquiryCreated {
   id: number;

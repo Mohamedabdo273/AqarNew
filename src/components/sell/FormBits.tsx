@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo } from 'react';
-import { Check, ImagePlus, Minus, Plus, Upload, X } from 'lucide-react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Check, ChevronDown, ImagePlus, Minus, Plus, Upload, X } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { currency } from '../../lib/unitHelpers';
 
@@ -321,6 +321,76 @@ export const PhotoPick: React.FC<{ files: File[]; onChange: (files: File[]) => v
     </div>
   );
 };
+
+/** A drop-down list where several options can be ticked (a native <select multiple> is hard to use). */
+export function MultiSelect<T extends string>({
+  id,
+  options,
+  value,
+  onChange,
+  placeholder,
+}: {
+  id?: string;
+  options: { value: T; label: string }[];
+  value: T[];
+  onChange: (v: T[]) => void;
+  placeholder: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: MouseEvent) => box.current && !box.current.contains(e.target as Node) && setOpen(false);
+    const esc = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
+    document.addEventListener('mousedown', close);
+    document.addEventListener('keydown', esc);
+    return () => {
+      document.removeEventListener('mousedown', close);
+      document.removeEventListener('keydown', esc);
+    };
+  }, [open]);
+  // Shown in the options' order, whatever order they were ticked in.
+  const picked = options.filter((o) => value.includes(o.value));
+
+  return (
+    <div ref={box} className="relative">
+      <button
+        id={id}
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className="field flex items-center justify-between gap-2 text-start"
+      >
+        <span className={`truncate ${picked.length ? 'text-ink' : 'text-muted'}`}>
+          {picked.length ? picked.map((o) => o.label).join('، ') : placeholder}
+        </span>
+        <ChevronDown className={`w-4 h-4 shrink-0 text-ink-soft transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <ul role="listbox" aria-multiselectable="true" className="absolute z-20 mt-1.5 w-full rounded-xl border border-line bg-surface p-1.5 shadow-lift">
+          {options.map((o) => {
+            const on = value.includes(o.value);
+            return (
+              <li key={o.value} role="option" aria-selected={on}>
+                <button
+                  type="button"
+                  onClick={() => onChange(on ? value.filter((v) => v !== o.value) : [...value, o.value])}
+                  className="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-start text-[15px] text-ink hover:bg-paper"
+                >
+                  <span className={`grid place-items-center w-5 h-5 rounded-md border-2 shrink-0 ${on ? 'bg-brand border-brand text-white' : 'border-line-strong'}`}>
+                    {on && <Check className="w-3.5 h-3.5" strokeWidth={3} />}
+                  </span>
+                  {o.label}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 export const Group: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
   <fieldset className="space-y-5">

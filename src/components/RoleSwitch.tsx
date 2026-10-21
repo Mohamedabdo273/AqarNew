@@ -29,7 +29,10 @@ export const useHomeRole = (onHome: boolean) => {
     } catch {
       /* ignore */
     }
-    if (onHome) history.replaceState(null, '', `#home/${role}`);
+    // Only rewrite the link when it really is the home page — on first load the app starts as "home"
+    // before it reads the hash, and rewriting then would turn a #unit/1 link into the home page.
+    const head = window.location.hash.replace('#', '').split('/')[0];
+    if (onHome && (head === '' || head === 'home')) history.replaceState(null, '', `#home/${role}`);
   }, [role, onHome]);
   // A #home/sell link opened while the app is already running.
   useEffect(() => {

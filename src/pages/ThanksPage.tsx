@@ -49,11 +49,11 @@ export const ThanksPage: React.FC<ThanksPageProps> = ({ kind, code, unit, sugges
       ],
     },
     viewing: {
-      title: tx('المعاينة اتسجلت.', 'Viewing requested.'),
-      sub: tx('هنكلمك خلال يوم عمل نحدد معاك ميعاد يناسبك.', "We'll call within one business day to set a time that suits you."),
+      title: tx('طلب الحجز وصل.', 'Booking request received.'),
+      sub: tx('هنكلمك خلال يوم عمل نأكد معاك الحجز ونكمّل الإجراءات.', "We'll call within one business day to confirm and go ahead."),
       steps: [
-        { icon: PhoneCall, t: tx('نكلمك نحدد الميعاد', 'We call to set the time'), d: tx('خلال يوم عمل', 'Within one business day') },
-        { icon: CalendarCheck, t: tx('تعاين ببلاش', 'Free viewing'), d: tx('ومعاك حد مننا', 'With one of our team') },
+        { icon: PhoneCall, t: tx('نكلمك نأكد الحجز', 'We call to confirm'), d: tx('خلال يوم عمل', 'Within one business day') },
+        { icon: CalendarCheck, t: tx('نحجزهالك', 'We hold it for you'), d: tx('مع صاحبها', 'With the owner') },
         { icon: FileSearch, t: tx('تطمن على الورق', 'Check the papers'), d: tx('العقد والمديونية متراجعين قبلها', 'Contract and dues already verified') },
         { icon: Handshake, t: tx('تنازل رسمي', 'Official transfer'), d: tx(`ومفيش ولا جنيه قبله. عمولتنا ${BRAND.buyerFeePercent}% بعد التوقيع`, `No money before it. Our ${BRAND.buyerFeePercent}% is after signing`) },
       ],

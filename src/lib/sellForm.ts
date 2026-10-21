@@ -1,3 +1,4 @@
+import type { UnitView } from '../types';
 import { categoryOfType } from './unitHelpers';
 import { DeliveryStatus, FinishingType, InstallmentFrequency, PropertyCategory, PropertyType, RealEstateUnit } from '../types';
 
@@ -31,6 +32,8 @@ export interface SellForm {
   bathrooms: number;
   floor: string;
   viewOrientation: View | '';
+  /** What it looks out on — any number of VIEW_OPTIONS keys. */
+  views: UnitView[];
   finishing: FinishingType | '';
   alreadyDelivered: boolean | null;
   deliveryStatus: DeliveryStatus | '';
@@ -104,6 +107,7 @@ export const EMPTY_SELL_FORM: SellForm = {
   bathrooms: 0,
   floor: '',
   viewOrientation: '',
+  views: [],
   finishing: '',
   alreadyDelivered: null,
   deliveryStatus: '',

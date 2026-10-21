@@ -38,7 +38,7 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
       title: tx('الموافقة على الشروط', 'Accepting these terms'),
       body: [
         tx(
-          'لما تستخدم المنصة، أو تبعت طلب بيع، أو تحجز معاينة، ده معناه إنك قريت الشروط دي و"القواعد" ووافقت عليهم، ومعاهم سياسة الخصوصية. لو مش موافق، ما تستخدمش المنصة.',
+          'لما تستخدم المنصة، أو تبعت طلب بيع، أو تحجز وحدة، ده معناه إنك قريت الشروط دي و"القواعد" ووافقت عليهم، ومعاهم سياسة الخصوصية. لو مش موافق، ما تستخدمش المنصة.',
           'By using the platform, sending a sell request, or booking a viewing, you confirm you have read and accept these terms, the "Rules", and the privacy policy. If you disagree, please do not use the platform.'
         ),
       ],
@@ -47,7 +47,7 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
       id: 'role',
       title: tx('دورنا بالظبط', 'Our role'),
       body: [
-        tx('• احنا منصة وساطة: بنراجع البيانات، بنعرض الوحدات، وبنرتب التواصل والمعاينة وميعاد التنازل.', '• We are an intermediary: we review data, list units, and arrange contact, viewings and the transfer appointment.'),
+        tx('• احنا منصة وساطة: بنراجع البيانات، بنعرض الوحدات، وبنرتب التواصل والحجز وميعاد التنازل.', '• We are an intermediary: we review data, list units, and arrange contact, bookings and the transfer appointment.'),
         tx('• احنا مش طرف في عقد البيع أو التنازل، ومش بنستلم ثمن الوحدة.', "• We are not a party to the sale or transfer contract and we don't hold the purchase money."),
         tx('• التنازل بيتم حسب إجراءات وشروط المطور، وموافقة المطور مش في إيدنا.', "• Transfers follow the developer's procedures; the developer's approval is not in our control."),
         tx('• اللي بنقدمه معلومات ومساعدة، مش استشارة قانونية أو مالية. ننصحك تراجع العقد مع محامي لو محتاج.', '• What we provide is information and help, not legal or financial advice. Consult a lawyer if needed.'),

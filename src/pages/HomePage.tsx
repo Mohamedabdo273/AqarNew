@@ -285,7 +285,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       points: [
         tx('كل وحدة متراجعة على العقد وإيصالات الدفع قبل ما تتنشر', 'Every unit is checked against its contract and payment receipts before listing'),
         tx('بتشوف المطلوب كاش والقسط والمتبقي قبل ما تكلّم حد', 'See the cash needed, monthly and balance before talking to anyone'),
-        tx('المعاينة ببلاش، وإحنا اللي بنرتبها مع المالك', 'Viewings are free — we arrange them with the owner'),
+        tx('احجز الوحدة من صفحتها، وإحنا نكمّل مع صاحبها', 'Book the unit from its page — we take it from there with the owner'),
         tx('العمولة بتتدفع بس لما التنازل يتم في مقر المطور', 'The fee is paid only once the transfer completes at the developer'),
       ],
       cards: [
@@ -694,7 +694,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           <div aria-hidden="true" className="absolute inset-0 ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-brand-ink/95 via-brand-ink/80 to-brand-ink/50" />
           <div className="relative max-w-xl">
             <p className="font-display text-2xl sm:text-3xl font-bold">{tx('لقيت وحدة عاجباك؟', 'Found one you like?')}</p>
-            <p className="mt-2 text-white/80">{tx('المعاينة ببلاش، والورق متراجع قبل ما تدفع حاجة.', 'Viewings are free, and the papers are checked before you pay anything.')}</p>
+            <p className="mt-2 text-white/80">{tx('احجزها من صفحتها، والورق متراجع قبل ما تدفع حاجة.', 'Book it from its page — the papers are checked before you pay anything.')}</p>
           </div>
           <button onClick={() => onBrowseWithBudget()} className="relative btn bg-white text-brand hover:bg-brand-soft min-h-13 px-6">
             <Search className="w-5 h-5" />
@@ -1401,7 +1401,7 @@ const HowItWorks: React.FC<{ tab: HomeRole }> = ({ tab }) => {
       : tab === 'buy'
       ? [
           { illo: IlloForm, icon: Wallet, t: tx('حدد ميزانيتك', 'Set your budget'), d: tx('الكاش اللي معاك والقسط اللي يريحك', 'Your cash and a comfortable monthly') },
-          { illo: IlloPeople, icon: UserCheck, t: tx('عاين ببلاش', 'Free viewing'), d: tx('بنرتبها معاك', 'We arrange it') },
+          { illo: IlloPeople, icon: UserCheck, t: tx('احجز الوحدة', 'Book the unit'), d: tx('باسمك ورقمك، وإحنا نكلّمك', 'Name and mobile — we call you') },
           { illo: IlloReview, icon: ShieldCheck, t: tx('اطمن على الورق', 'Check the papers'), d: tx('العقد والمديونية متراجعين', 'Contract & dues verified') },
           { illo: IlloKeys, icon: Handshake, t: tx('استلم باسمك', 'Take it over'), d: tx('تنازل رسمي وتكمّل الأقساط', 'Official transfer, continue the plan') },
         ]

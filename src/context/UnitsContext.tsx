@@ -9,7 +9,7 @@ export interface InquiryInput {
   clientPhone: string;
   notes?: string;
   preferredDate?: string;
-  inquiryType?: 'viewing' | 'price_check';
+  inquiryType?: 'booking' | 'price_check';
 }
 
 /** loading → first fetch in flight; error → the API couldn't be reached (the page offers a retry). */
@@ -131,7 +131,7 @@ export const UnitsProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     await sendInquiry({
       contactName: input.clientName,
       contactPhone: input.clientPhone,
-      inquiryType: input.inquiryType === 'price_check' ? INQUIRY_TYPE.priceOffer : INQUIRY_TYPE.viewing,
+      inquiryType: input.inquiryType === 'price_check' ? INQUIRY_TYPE.priceOffer : INQUIRY_TYPE.booking,
       unitId: Number(input.unitId) || undefined,
       message: input.notes,
       preferredDate: input.preferredDate,

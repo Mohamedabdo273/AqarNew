@@ -291,7 +291,7 @@ const RequestDetail: React.FC<{ req: SellRequest; onBack: () => void }> = ({ req
     { icon: Inbox, t: tx('استلمنا طلبك', 'Request received'), d: formatDate(req.createdAt, language) },
     { icon: Search, t: tx('كشف حساب وحدتك', 'Your unit statement'), d: pct < 100 ? tx('بيبدأ لما البيانات تكمل — نراجع العقد والمديونية', 'Starts once details are complete — we check contract and dues') : tx('خلال 24 ساعة', 'Within 24h') },
     { icon: Megaphone, t: tx('نشر الوحدة للمشترين', 'Listed to buyers'), d: tx('بعد المراجعة', 'After review') },
-    { icon: Users, t: tx('معاينة واتفاق مع مشتري', 'Viewing & agreement'), d: tx('بنرتبها معاك', 'We arrange it with you') },
+    { icon: Users, t: tx('مشتري حجز وحدتك', 'A buyer books your unit'), d: tx('ونتفق معاك على ميعاد التنازل', 'We agree the transfer date with you') },
     { icon: Handshake, t: tx('التنازل والقبض', 'Transfer & payout'), d: tx('في مقر المطور بشيك مصرفي', 'At the developer, by bank cheque') },
   ];
 

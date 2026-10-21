@@ -22,6 +22,8 @@ export interface Filters {
   /** Seller accepts lower offers. */
   negotiable: boolean;
   swappable: boolean;
+  /** Any of these views (empty = any). */
+  views: string[];
   noTransferFee: boolean;
   noPenalties: boolean;
 }
@@ -44,6 +46,7 @@ export const EMPTY_FILTERS: Filters = {
   discounted: false,
   negotiable: false,
   swappable: false,
+  views: [],
   noTransferFee: false,
   noPenalties: false,
 };
@@ -89,6 +92,7 @@ export const applyFilters = (
     if (f.discounted && !isDeal(u)) return false;
     if (f.negotiable && !isNegotiable(u)) return false;
     if (f.swappable && u.eligibleForSwap === false) return false;
+    if (f.views.length && !f.views.some((v) => u.views?.includes(v as never))) return false;
     if (f.noTransferFee && u.transferFeePolicy !== 'معفي من رسوم التنازل') return false;
     if (f.noPenalties && u.hasLatePenalties) return false;
     if (q) {

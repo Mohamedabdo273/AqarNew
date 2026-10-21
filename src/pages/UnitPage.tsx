@@ -44,6 +44,7 @@ import {
   pick,
   savingsAmount,
   savingsPercent,
+  VIEW_OPTIONS,
 } from '../lib/unitHelpers';
 
 interface UnitPageProps {
@@ -118,6 +119,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
     unit.bathrooms > 0 && { icon: Bath, v: tx(`${unit.bathrooms} حمام`, `${unit.bathrooms} baths`) },
     { icon: Paintbrush, v: pick(language, unit.finishing, unit.finishingEn) },
     { icon: KeyRound, v: pick(language, unit.deliveryStatus, unit.deliveryStatusEn) },
+    ...VIEW_OPTIONS.filter((o) => unit.views?.includes(o.key)).map((o) => ({ icon: Eye, v: tx(o.ar, o.en) })),
   ].filter(Boolean) as { icon: React.ElementType; v: string }[];
 
   const checks = [
@@ -157,10 +159,16 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
     },
     ...(unit.taxCategory ? [{ k: tx('الضريبة', 'Tax'), v: tx(TAX[unit.taxCategory][0], TAX[unit.taxCategory][1]) }] : []),
     ...(unit.sellerWillingDiscountAmount
-      ? [{ k: tx('خصم من البائع', 'Seller discount'), v: fullMoney(unit.sellerWillingDiscountAmount, language), tone: 'good' as const }]
+      ? [
+          {
+            k: tx('خصم صاحبها', "Owner's discount"),
+            v: tx(`${fullMoney(unit.sellerWillingDiscountAmount, language)} أقل من اللي دفعه`, `${fullMoney(unit.sellerWillingDiscountAmount, language)} below what he paid`),
+            tone: 'good' as const,
+          },
+        ]
       : []),
     ...(unit.eligibleForSwap
-      ? [{ k: tx('يقبل مبادلة', 'Open to swap'), v: pick(language, unit.swapTargetType || tx('أيوه', 'Yes'), unit.swapTargetTypeEn) }]
+      ? [{ k: tx('صاحبها يقبل يبدّلها بـ', 'Owner would swap it for'), v: pick(language, unit.swapTargetType || tx('أي وحدة مناسبة', 'Any suitable unit'), unit.swapTargetTypeEn) }]
       : []),
   ];
 
@@ -199,7 +207,13 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
     setSending(true);
     setSendError('');
     try {
-      await submitInquiry({ unitId: unit.id, clientName: name.trim(), clientPhone: phone, inquiryType: 'viewing' });
+      await submitInquiry({
+        unitId: unit.id,
+        clientName: name.trim(),
+        clientPhone: phone,
+        inquiryType: 'booking',
+        notes: tx(`عايز أحجز الوحدة ${unit.compound} (${unit.verificationCode})`, `I'd like to book ${unit.compoundEn || unit.compound} (${unit.verificationCode})`),
+      });
       onBooked(unit);
     } catch (err) {
       setSendError(errorText(err));
@@ -345,7 +359,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
               <div className="mt-6 grid gap-2">
                 <button onClick={() => requireAuth(() => setBooking(true))} className="btn bg-white text-ink hover:bg-brand-soft min-h-13 w-full">
                   <CalendarCheck className="w-5 h-5" />
-                  {tx('احجز معاينة ببلاش', 'Book a free viewing')}
+                  {tx('احجز الوحدة دي', 'Book this unit')}
                 </button>
                 <a href={whatsappLink(waText)} target="_blank" rel="noreferrer" className="btn border border-white/20 text-white hover:bg-white/10 min-h-12 w-full">
                   <MessageCircle className="w-5 h-5" />
@@ -355,7 +369,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
             ) : (
               <form onSubmit={book} className="mt-6 grid gap-2.5">
                 <div className="flex items-center justify-between text-xs text-white/80 mb-0.5">
-                  <span className="font-semibold">{tx('بيانات حجز المعاينة المجانية', 'Free viewing details')}</span>
+                  <span className="font-semibold">{tx('بياناتك عشان نكمّل الحجز', 'Your details to go ahead')}</span>
                   <button
                     type="button"
                     onClick={() => setBooking(false)}
@@ -397,7 +411,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
                   disabled={!name.trim() || !phoneValid || sending}
                   className="btn bg-accent text-white hover:bg-accent-hover active:scale-[0.98] min-h-13 w-full font-bold shadow-md disabled:bg-white/20 disabled:text-white/40 disabled:cursor-not-allowed"
                 >
-                  {sending ? tx('بنبعت...', 'Sending...') : tx('أكّد المعاينة', 'Confirm viewing')}
+                  {sending ? tx('بنبعت...', 'Sending...') : tx('أكّد الحجز', 'Confirm booking')}
                 </button>
                 {sendError && <p role="alert" className="text-sm text-white bg-danger/80 rounded-lg px-3 py-2">{sendError}</p>}
                 <p className="text-center text-xs text-white/50">
@@ -418,7 +432,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
             {[
               { icon: Ban, t: tx('ما تدفعش عربون لأي حد', 'Never pay anyone a deposit') },
               { icon: Percent, t: tx(`عمولتنا ${BRAND.buyerFeePercent}% بعد توقيع التنازل بس`, `Our ${BRAND.buyerFeePercent}% fee only after signing`) },
-              { icon: Eye, t: tx('المعاينة ببلاش، وبنرتبها معاك', 'Free viewing, arranged with you') },
+              { icon: Eye, t: tx('بعد الحجز بنكلّمك خلال يوم عمل نكمّل الإجراءات', 'After booking we call within one business day to go ahead') },
             ].map((r) => (
               <li key={r.t} className="flex items-center gap-2.5 text-ink-soft">
                 <r.icon className="w-4 h-4 text-ink shrink-0" />
@@ -525,9 +539,9 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
           {/* Dues & terms — what the buyer takes on beyond the cash */}
           <div className="card p-5">
             <p className="font-bold text-ink mb-4">{tx('المديونية والشروط', 'Dues & terms')}</p>
-            <dl className="grid sm:grid-cols-2 gap-x-8 gap-y-3 text-[15px]">
+            <dl className="grid sm:grid-cols-2 gap-2.5 text-[15px]">
               {terms.map((r) => (
-                <div key={r.k} className="flex justify-between gap-3">
+                <div key={r.k} className="flex justify-between gap-3 rounded-xl bg-paper px-4 py-3">
                   <dt className="text-muted">{r.k}</dt>
                   <dd className={`num font-semibold text-end ${r.tone === 'bad' ? 'text-danger' : 'text-ink'}`}>{r.v}</dd>
                 </div>

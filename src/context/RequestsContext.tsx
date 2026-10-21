@@ -44,12 +44,23 @@ export interface SellUploads {
   photos?: File[];
 }
 
+/** A request saved part-way through the sell form, and the token that lets this device keep editing it. */
+export interface SellDraft {
+  code: string;
+  token: string;
+}
+
 interface RequestsContextType {
   requests: SellRequest[];
   /** True while the saved requests are being fetched on load. */
   loading: boolean;
-  /** Creates the request on the server, then uploads the files. Returns the code; a failed upload doesn't undo the request. */
-  createRequest: (form: SellForm, uploads?: SellUploads) => Promise<{ code: string; failedUploads: number }>;
+  /** Saves the form so far as a draft (each "Next" in the sell form). Pass the draft from the last save to update it. */
+  saveDraft: (form: SellForm, draft?: SellDraft | null) => Promise<SellDraft>;
+  /**
+   * Sends the request for review (submitting the draft when there is one), then uploads the files.
+   * Returns the code; a failed upload doesn't undo the request.
+   */
+  createRequest: (form: SellForm, uploads?: SellUploads, draft?: SellDraft | null) => Promise<{ code: string; failedUploads: number }>;
   updateRequest: (code: string, form: SellForm) => Promise<void>;
   uploadDocument: (code: string, docType: DocType, file: File) => Promise<void>;
   uploadPhoto: (code: string, file: File) => Promise<void>;
@@ -172,8 +183,19 @@ export const RequestsProvider: React.FC<{ children: ReactNode }> = ({ children }
 
   const replace = (dto: SellRequestDto) => setRequests((prev) => prev.map((r) => (r.code === dto.code ? fromDto(dto) : r)));
 
-  const createRequest: RequestsContextType['createRequest'] = async (form, uploads = {}) => {
-    const { code, accessToken, request } = await createSellRequest(form);
+  const saveDraft: RequestsContextType['saveDraft'] = async (form, draft) => {
+    if (draft) {
+      await updateSellRequest(draft.code, draft.token, form, true);
+      return draft;
+    }
+    const created = await createSellRequest(form, true);
+    return { code: created.code, token: created.accessToken };
+  };
+
+  const createRequest: RequestsContextType['createRequest'] = async (form, uploads = {}, draft) => {
+    const { code, accessToken, request } = draft
+      ? { code: draft.code, accessToken: draft.token, request: await updateSellRequest(draft.code, draft.token, form) }
+      : await createSellRequest(form);
     setStored((prev) => [{ code, token: accessToken }, ...prev.filter((s) => s.code !== code)]);
 
     const jobs: [DocType, File][] = [
@@ -225,7 +247,7 @@ export const RequestsProvider: React.FC<{ children: ReactNode }> = ({ children }
   const getRequest = (code: string) => requests.find((r) => r.code === code);
 
   return (
-    <RequestsContext.Provider value={{ requests, loading, createRequest, updateRequest, uploadDocument, uploadPhoto, deletePhoto, getRequest }}>{children}</RequestsContext.Provider>
+    <RequestsContext.Provider value={{ requests, loading, saveDraft, createRequest, updateRequest, uploadDocument, uploadPhoto, deletePhoto, getRequest }}>{children}</RequestsContext.Provider>
   );
 };
 

@@ -81,6 +81,16 @@ export const REGIONS: { ar: RealEstateUnit['region']; en: string }[] = [
 ];
 
 /** المناطق التفصيلية تحت كل إقليم. عدّل القوايم دي وبس — الفلاتر والفورم بيقروا منها. */
+/** The views a unit can look out on (pick any). */
+export const VIEW_OPTIONS: { key: import('../types').UnitView; ar: string; en: string }[] = [
+  { key: 'open', ar: 'فيو مفتوح', en: 'Open view' },
+  { key: 'water', ar: 'مسطحات مائية', en: 'Water features' },
+  { key: 'landscape', ar: 'لاند سكيب', en: 'Landscape' },
+  { key: 'street', ar: 'على شارع', en: 'Street view' },
+  { key: 'sea', ar: 'فيو بحر', en: 'Sea view' },
+  { key: 'clubhouse', ar: 'كلوب هاوس', en: 'Club house' },
+];
+
 export const SUB_AREAS: Record<RealEstateUnit['region'], { ar: string; en: string }[]> = {
   'قاهرة': [
     { ar: 'التجمع والقاهرة الجديدة', en: 'New Cairo & Fifth Settlement' },

@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { AlertTriangle, ShieldCheck, TrendingDown, Clock, ScrollText, Send, Check, Repeat, MessageCircle, ArrowLeft, ArrowRight, Coins, EyeOff, Calendar, CheckCircle2, X } from 'lucide-react';
 import { PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
-import { useRequests } from '../context/RequestsContext';
+import { SellDraft, useRequests } from '../context/RequestsContext';
 import { useUnits } from '../context/UnitsContext';
 import { useAuth } from '../context/AuthContext';
 import { errorText } from '../services/api';
-import { PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, REGIONS, SUB_AREAS, CANCELLATION_PENALTY_MIN_RATE, CANCELLATION_PENALTY_RATE, cancellationLoss, currency, money } from '../lib/unitHelpers';
+import { PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, REGIONS, SUB_AREAS, CANCELLATION_PENALTY_MIN_RATE, CANCELLATION_PENALTY_RATE, VIEW_OPTIONS, cancellationLoss, currency, money } from '../lib/unitHelpers';
 import { DeliveryStatus } from '../types';
 import { EMPTY_SELL_FORM, SellForm, isValidPhone, netToSeller } from '../lib/sellForm';
-import { ChipSelect, CheckBox, Field, FilePick, FilePickMany, MoneyInput, PhotoPick, Toggle } from '../components/sell/FormBits';
+import { ChipSelect, CheckBox, Field, FilePick, FilePickMany, MoneyInput, MultiSelect, PhotoPick, Toggle } from '../components/sell/FormBits';
 import { DeveloperSelect } from '../components/sell/DeveloperSelect';
 import { whatsappLink } from '../config/brand';
 
@@ -20,6 +20,8 @@ interface SellUnitPageProps {
 }
 
 const DRAFT_KEY = 'wahdety_sell_quick_draft_v1';
+/** The draft saved on the server (code + token), so a reload carries on from where the seller was. */
+const SERVER_DRAFT_KEY = 'deal_sell_server_draft_v1';
 
 const DELIVERY_MONTHS = [
   { m: 1, ar: 'يناير', en: 'January' },
@@ -49,7 +51,7 @@ const isPastMonth = (year: number, month: number) => year < THIS_YEAR || (year =
 export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenRules, onNavigate }) => {
   const { language, tx, isRTL } = useLanguage();
   const Arrow = isRTL ? ArrowLeft : ArrowRight;
-  const { createRequest } = useRequests();
+  const { createRequest, saveDraft } = useRequests();
   const { showToast, units } = useUnits();
   const { user } = useAuth();
   const [form, setForm] = useState<SellForm>(() => {
@@ -69,6 +71,16 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
   const [scheduleFile, setScheduleFile] = useState<File | null>(null);
   const [planFile, setPlanFile] = useState<File | null>(null);
   const [sending, setSending] = useState(false);
+  // The request as saved on the server so far — each "Next" updates it, the last step submits it.
+  const [draft, setDraft] = useState<SellDraft | null>(() => {
+    try {
+      const raw = localStorage.getItem(SERVER_DRAFT_KEY);
+      return raw ? (JSON.parse(raw) as SellDraft) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [saving, setSaving] = useState(false);
   const [sendError, setSendError] = useState('');
 
   // Signed in: fill the owner's name and mobile from the account, without overwriting what they typed.
@@ -133,16 +145,20 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
   };
 
   const STEPS = [
-    { n: 1 as const, label: tx('الوحدة', 'The unit') },
-    { n: 2 as const, label: tx('الفلوس', 'The money') },
-    { n: 3 as const, label: tx('الصور والمستندات', 'Photos & papers') },
-    { n: 4 as const, label: tx('بياناتك', 'Your details') },
+    { n: 1 as const, label: tx('بياناتك', 'Your details') },
+    { n: 2 as const, label: tx('الوحدة', 'The unit') },
+    { n: 3 as const, label: tx('الفلوس', 'The money') },
+    { n: 4 as const, label: tx('الصور والمستندات', 'Photos & papers') },
   ];
 
   /** كل خطوة بتتحقق من حقولها هي بس — عشان محدش يتقالّه "ناقص" على حاجة لسه مشفهاش. */
   const stepErrors = (target: 1 | 2 | 3 | 4): string[] => {
     const e: string[] = [];
     if (target === 1) {
+      if (!form.ownerName.trim()) e.push(tx('اسمك', 'Your name'));
+      if (!isValidPhone(form.ownerPhone)) e.push(tx('موبايل صحيح (01xxxxxxxxx)', 'Valid mobile (01xxxxxxxxx)'));
+    }
+    if (target === 2) {
       if (!form.region) e.push(tx('المنطقة', 'Area'));
       if (form.region && !form.subArea) e.push(tx('الموقع', 'Location'));
       if (!form.developer.trim()) e.push(tx('المطور', 'Developer'));
@@ -155,17 +171,15 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
         setDeliveryModalOpen(true);
       }
     }
-    if (target === 2) {
+    if (target === 3) {
       if (!form.contractPrice) e.push(tx('سعر العقد', 'Contract price'));
       if (!form.paidAmount) e.push(tx('المدفوع', 'Amount paid'));
       if (form.paidAmount > form.contractPrice && form.contractPrice) e.push(tx('المدفوع أكبر من سعر العقد', 'Paid is more than contract price'));
-    }
-    // المستندات (خطوة 3) اختيارية — مش هنوقف البايع عشان صورة
-    if (target === 4) {
-      if (!form.ownerName.trim()) e.push(tx('اسمك', 'Your name'));
-      if (!isValidPhone(form.ownerPhone)) e.push(tx('موبايل صحيح (01xxxxxxxxx)', 'Valid mobile (01xxxxxxxxx)'));
       if (form.willingToDiscount && !form.discountAmount) e.push(tx('قيمة الخصم', 'Discount amount'));
       if (form.willingToDiscount && form.discountAmount >= form.paidAmount && form.paidAmount) e.push(tx('الخصم أكبر من المدفوع', 'Discount is more than what you paid'));
+    }
+    // الصور والمستندات اختيارية — مش هنوقف البايع عشان صورة، بس لازم يوافق على القواعد
+    if (target === 4) {
       if (!form.ackOwner || !form.ackNoOverprice || !form.ackDeclareDues) e.push(tx('الموافقة على القواعد التلاتة', 'Agree to the three rules'));
     }
     return e;
@@ -179,11 +193,42 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
     backToTop();
   };
 
-  const goNext = () => {
+  const cleanForm = (): SellForm => ({ ...form, developer: form.developer.trim(), compound: form.compound.trim(), ownerName: form.ownerName.trim() });
+
+  const keepDraft = (d: SellDraft | null) => {
+    setDraft(d);
+    try {
+      if (d) localStorage.setItem(SERVER_DRAFT_KEY, JSON.stringify(d));
+      else localStorage.removeItem(SERVER_DRAFT_KEY);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const goNext = async () => {
+    if (saving) return;
     const e = stepErrors(step);
     setErrors(e);
     backToTop();
-    if (!e.length && step < 4) setStep((step + 1) as 1 | 2 | 3 | 4);
+    if (e.length || step >= 4) return;
+    setSaving(true);
+    setSendError('');
+    try {
+      let saved: SellDraft;
+      try {
+        saved = await saveDraft(cleanForm(), draft);
+      } catch (err) {
+        // The old draft is gone (sent from another tab, or cleared) — start a new one.
+        if (draft && (err as { status?: number })?.status === 404) saved = await saveDraft(cleanForm(), null);
+        else throw err;
+      }
+      keepDraft(saved);
+      setStep((step + 1) as 1 | 2 | 3 | 4);
+    } catch (err) {
+      setSendError(errorText(err));
+    } finally {
+      setSaving(false);
+    }
   };
 
   useEffect(() => {
@@ -214,9 +259,11 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
     setSendError('');
     try {
       const { code, failedUploads } = await createRequest(
-        { ...form, developer: form.developer.trim(), compound: form.compound.trim(), ownerName: form.ownerName.trim() },
+        cleanForm(),
         { contractPages: contractPageFiles, paymentSchedule: scheduleFile, unitPlan: planFile, photos: photoFiles },
+        draft,
       );
+      keepDraft(null);
       try {
         localStorage.removeItem(DRAFT_KEY);
       } catch {
@@ -357,26 +404,65 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
 
           {step === 1 && (
           <div className="space-y-7">
-          {/* 1. المنطقة */}
-          <Field label={tx('المنطقة', 'Area')} required>
-            <ChipSelect
-              options={L(REGIONS)}
-              value={form.region}
-              onChange={(v) => {
-                set('region', v);
-                set('subArea', ''); // الإقليم اتغير، فالاختيار التفصيلي القديم مابقاش صالح
-              }}
-            />
-          </Field>
-          {form.region && (
-            <Field label={tx('الموقع', 'Location')} required>
-              <ChipSelect
-                options={(SUB_AREAS[form.region] ?? []).map((o) => ({ value: o.ar, label: language === 'ar' ? o.ar : o.en }))}
-                value={form.subArea}
-                onChange={(v) => set('subArea', v)}
+          <div className="grid sm:grid-cols-2 gap-4">
+            <Field label={tx('اسمك زي العقد', 'Name as in contract')} required htmlFor="oname">
+              <input id="oname" value={form.ownerName} onChange={(e) => set('ownerName', e.target.value)} className="field" />
+            </Field>
+            <Field label={tx('موبايل (واتساب)', 'Mobile (WhatsApp)')} required htmlFor="ophone">
+              <input
+                id="ophone"
+                value={form.ownerPhone}
+                onChange={(e) => set('ownerPhone', e.target.value)}
+                inputMode="tel"
+                dir="ltr"
+                placeholder="01xxxxxxxxx"
+                className={`field ${isRTL ? 'text-right' : 'text-left'}`}
               />
             </Field>
+          </div>
+
+          </div>
           )}
+
+          {step === 2 && (
+          <div className="space-y-7">
+          {/* 1. المنطقة والموقع — قايمتين منسدلتين جنب بعض */}
+          <div className="grid sm:grid-cols-2 gap-4">
+            <Field label={tx('المنطقة', 'Area')} required htmlFor="region">
+              <select
+                id="region"
+                value={form.region}
+                onChange={(e) => {
+                  set('region', e.target.value as SellForm['region']);
+                  set('subArea', ''); // الإقليم اتغير، فالاختيار التفصيلي القديم مابقاش صالح
+                }}
+                className="field"
+              >
+                <option value="">{tx('اختار المنطقة', 'Choose an area')}</option>
+                {REGIONS.map((o) => (
+                  <option key={o.ar} value={o.ar}>
+                    {language === 'ar' ? o.ar : o.en}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label={tx('الموقع', 'Location')} required htmlFor="subarea">
+              <select
+                id="subarea"
+                value={form.subArea}
+                onChange={(e) => set('subArea', e.target.value)}
+                disabled={!form.region}
+                className="field disabled:opacity-60"
+              >
+                <option value="">{form.region ? tx('اختار الموقع', 'Choose a location') : tx('اختار المنطقة الأول', 'Choose the area first')}</option>
+                {(form.region ? SUB_AREAS[form.region] ?? [] : []).map((o) => (
+                  <option key={o.ar} value={o.ar}>
+                    {language === 'ar' ? o.ar : o.en}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          </div>
 
           {/* 2. المطور والكمبوند */}
           <div className="space-y-4">
@@ -399,26 +485,54 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
             </Field>
           </div>
 
-          {/* 3. النشاط ونوع الوحدة */}
-          <Field label={tx('النشاط', 'Activity')} required>
-            <ChipSelect
-              options={L(PROPERTY_CATEGORIES)}
-              value={form.propertyCategory}
-              onChange={(v) => {
-                set('propertyCategory', v);
-                set('propertyType', ''); // التصنيف اتغير، فالنوع القديم مابقاش تحته
-              }}
+          {/* 3. النشاط ونوع الوحدة والفيو — قوايم منسدلة */}
+          <div className="grid sm:grid-cols-2 gap-4">
+            <Field label={tx('النشاط', 'Activity')} required htmlFor="category">
+              <select
+                id="category"
+                value={form.propertyCategory}
+                onChange={(e) => {
+                  set('propertyCategory', e.target.value as SellForm['propertyCategory']);
+                  set('propertyType', ''); // التصنيف اتغير، فالنوع القديم مابقاش تحته
+                }}
+                className="field"
+              >
+                <option value="">{tx('اختار النشاط', 'Choose an activity')}</option>
+                {PROPERTY_CATEGORIES.map((o) => (
+                  <option key={o.ar} value={o.ar}>
+                    {language === 'ar' ? o.ar : o.en}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label={tx('نوع الوحدة', 'Unit type')} required htmlFor="ptype">
+              <select
+                id="ptype"
+                value={form.propertyType}
+                onChange={(e) => set('propertyType', e.target.value as SellForm['propertyType'])}
+                disabled={!form.propertyCategory}
+                className="field disabled:opacity-60"
+              >
+                <option value="">{form.propertyCategory ? tx('اختار نوع الوحدة', 'Choose a unit type') : tx('اختار النشاط الأول', 'Choose the activity first')}</option>
+                {(form.propertyCategory ? TYPES_BY_CATEGORY[form.propertyCategory] ?? [] : []).map((o) => (
+                  <option key={o.ar} value={o.ar}>
+                    {language === 'ar' ? o.ar : o.en}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          </div>
+
+          {/* الفيو — الوحدة ممكن تطل على أكتر من حاجة، فبنعلّم على كل اللي ينطبق */}
+          <Field label={tx('الفيو', 'View')} htmlFor="views" hint={tx('ممكن تختار أكتر من واحد', 'You can pick more than one')}>
+            <MultiSelect
+              id="views"
+              options={VIEW_OPTIONS.map((o) => ({ value: o.key, label: language === 'ar' ? o.ar : o.en }))}
+              value={form.views}
+              onChange={(v) => set('views', v)}
+              placeholder={tx('اختار الفيو', 'Choose the view')}
             />
           </Field>
-          {form.propertyCategory && (
-            <Field label={tx('نوع الوحدة', 'Unit type')} required>
-              <ChipSelect
-                options={(TYPES_BY_CATEGORY[form.propertyCategory] ?? []).map((o) => ({ value: o.ar, label: language === 'ar' ? o.ar : o.en }))}
-                value={form.propertyType}
-                onChange={(v) => set('propertyType', v)}
-              />
-            </Field>
-          )}
 
           {/* 4. تم الاستلام بالفعل (نعم / لا) */}
           <div className="rounded-xl border border-line bg-surface p-5 space-y-4">
@@ -510,7 +624,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
           </div>
           )}
 
-          {step === 2 && (
+          {step === 3 && (
           <div className="space-y-7">
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label={tx('سعر الوحدة في العقد', 'Contract price')} required htmlFor="price">
@@ -542,68 +656,6 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
           >
             <MoneyInput id="market" value={form.currentMarketPrice} onChange={(n) => set('currentMarketPrice', n)} placeholder="9,000,000" />
           </Field>
-
-          </div>
-          )}
-
-          {step === 3 && (
-          <div className="space-y-7">
-            <div>
-              <p className="mb-3 font-bold text-ink">{tx('صور الوحدة', 'Unit photos')}</p>
-              <PhotoPick files={photoFiles} onChange={setPhotoFiles} max={10} />
-            </div>
-
-            <p className="rounded-xl bg-brand-soft px-4 py-3 text-[15px] leading-relaxed text-brand-ink">
-              {tx(
-                'المستندات دي بتخلّي المراجعة أسرع، ومش بتظهر لأي مشتري ولا بتتنشر.',
-                "These speed up the review. They are never shown to buyers or published — you can skip now and upload later from \"My account\".",
-              )}
-            </p>
-
-            <FilePickMany
-              label={tx('أول 4 صور في العقد', 'First 4 pages of the contract')}
-              hint={tx('الصفحات اللي فيها بياناتك وبيانات الوحدة والسعر', 'The pages with your details, the unit and the price')}
-              max={4}
-              value={form.contractPages}
-              onChange={(v) => set('contractPages', v)}
-              files={contractPageFiles}
-              onFilesChange={setContractPageFiles}
-            />
-            <FilePick
-              label={tx('جدول سداد الأقساط', 'Payment schedule')}
-              hint={tx('الملحق بالعقد', 'The contract annex')}
-              value={form.paymentScheduleFile}
-              onChange={(v) => set('paymentScheduleFile', v)}
-              onFile={setScheduleFile}
-            />
-            <FilePick
-              label={tx('صورة بلان الوحدة', 'Unit plan')}
-              hint={tx('الملحق بالعقد', 'The contract annex')}
-              value={form.unitPlanFile}
-              onChange={(v) => set('unitPlanFile', v)}
-              onFile={setPlanFile}
-            />
-          </div>
-          )}
-
-          {step === 4 && (
-          <div className="space-y-7">
-          <div className="grid sm:grid-cols-2 gap-4">
-            <Field label={tx('اسمك زي العقد', 'Name as in contract')} required htmlFor="oname">
-              <input id="oname" value={form.ownerName} onChange={(e) => set('ownerName', e.target.value)} className="field" />
-            </Field>
-            <Field label={tx('موبايل (واتساب)', 'Mobile (WhatsApp)')} required htmlFor="ophone">
-              <input
-                id="ophone"
-                value={form.ownerPhone}
-                onChange={(e) => set('ownerPhone', e.target.value)}
-                inputMode="tel"
-                dir="ltr"
-                placeholder="01xxxxxxxxx"
-                className={`field ${isRTL ? 'text-right' : 'text-left'}`}
-              />
-            </Field>
-          </div>
 
           {/* Our own levers, shown before sending — not buried in the details later. */}
           <div className="space-y-3">
@@ -665,6 +717,46 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
             </button>
           </div>
 
+          </div>
+          )}
+
+          {step === 4 && (
+          <div className="space-y-7">
+            <div>
+              <p className="mb-3 font-bold text-ink">{tx('صور الوحدة', 'Unit photos')}</p>
+              <PhotoPick files={photoFiles} onChange={setPhotoFiles} max={10} />
+            </div>
+
+            <p className="rounded-xl bg-brand-soft px-4 py-3 text-[15px] leading-relaxed text-brand-ink">
+              {tx(
+                'المستندات دي بتخلّي المراجعة أسرع، ومش بتظهر لأي مشتري ولا بتتنشر.',
+                "These speed up the review. They are never shown to buyers or published — you can skip now and upload later from \"My account\".",
+              )}
+            </p>
+
+            <FilePickMany
+              label={tx('أول 4 صور في العقد', 'First 4 pages of the contract')}
+              hint={tx('الصفحات اللي فيها بياناتك وبيانات الوحدة والسعر', 'The pages with your details, the unit and the price')}
+              max={4}
+              value={form.contractPages}
+              onChange={(v) => set('contractPages', v)}
+              files={contractPageFiles}
+              onFilesChange={setContractPageFiles}
+            />
+            <FilePick
+              label={tx('جدول سداد الأقساط', 'Payment schedule')}
+              hint={tx('الملحق بالعقد', 'The contract annex')}
+              value={form.paymentScheduleFile}
+              onChange={(v) => set('paymentScheduleFile', v)}
+              onFile={setScheduleFile}
+            />
+            <FilePick
+              label={tx('صورة بلان الوحدة', 'Unit plan')}
+              hint={tx('الملحق بالعقد', 'The contract annex')}
+              value={form.unitPlanFile}
+              onChange={(v) => set('unitPlanFile', v)}
+              onFile={setPlanFile}
+            />
           {/* The three seller rules that matter most, agreed to right where they apply. */}
           <div className="rounded-xl bg-paper p-5 space-y-4">
             <div className="flex items-center justify-between gap-3">
@@ -695,9 +787,9 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               </button>
             )}
             {step < 4 ? (
-              <button type="button" onClick={goNext} className="btn-primary flex-1 min-h-14 text-base">
-                {tx('التالي', 'Next')}
-                <Arrow className="w-5 h-5" />
+              <button type="button" onClick={goNext} disabled={saving} className="btn-primary flex-1 min-h-14 text-base">
+                {saving ? tx('بنحفظ...', 'Saving...') : tx('التالي', 'Next')}
+                {!saving && <Arrow className="w-5 h-5" />}
               </button>
             ) : (
               <button onClick={submit} disabled={sending} className="btn-primary flex-1 min-h-14 text-base">
