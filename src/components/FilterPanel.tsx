@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { ChevronDown, Search, Check, SlidersHorizontal } from 'lucide-react';
+import { ChevronDown, Search, Check } from 'lucide-react';
 import { RealEstateUnit } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { Budget, BudgetFinder } from './BudgetFinder';
@@ -36,7 +36,8 @@ const Section: React.FC<{ title: string; active?: number; defaultOpen?: boolean;
   defaultOpen = false,
   children,
 }) => {
-  const [open, setOpen] = useState(defaultOpen);
+  // A section with something selected in it opens by itself, so nothing active is ever hidden.
+  const [open, setOpen] = useState(defaultOpen || active > 0);
   return (
     <div className="border-b border-line last:border-0 py-5 first:pt-0">
       <button onClick={() => setOpen(!open)} aria-expanded={open} className="w-full flex items-center justify-between gap-2 text-start">
@@ -103,7 +104,6 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
 }) => {
   const { language, tx } = useLanguage();
   const [devQuery, setDevQuery] = useState('');
-  const [moreOpen, setMoreOpen] = useState(false);
 
   const developers = useMemo(() => {
     const map = new Map<string, { value: string; label: string; count: number }>();
@@ -117,20 +117,6 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
 
   const shownDevs = developers.filter((d) => d.label.toLowerCase().includes(devQuery.trim().toLowerCase()));
 
-  // كام فلتر شغال جوه "فلاتر أكتر" — عشان يبان على الزرار وهو مقفول
-  const moreCount =
-    f.developers.length +
-    (f.bedrooms !== null ? 1 : 0) +
-    (f.areaMin || f.areaMax ? 1 : 0) +
-    f.delivery.length +
-    f.finishing.length +
-    f.views.length +
-    f.frequency.length +
-    (f.discounted ? 1 : 0) +
-    (f.negotiable ? 1 : 0) +
-    (f.swappable ? 1 : 0) +
-    (f.noTransferFee ? 1 : 0) +
-    (f.noPenalties ? 1 : 0);
   const L = (o: { ar: string; en: string }) => ({ value: o.ar, label: language === 'ar' ? o.ar : o.en });
 
   const extras: { key: 'discounted' | 'negotiable' | 'swappable' | 'noTransferFee' | 'noPenalties'; label: string }[] = [
@@ -194,26 +180,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
         <Chips options={typesFor(f.categories).map(L)} selected={f.types} onToggle={(v) => onChange({ types: toggle(f.types, v) })} />
       </Section>
 
-      {/* الباقي فلاتر تفصيلية: المشتري هنا بيسأل عن الكاش والقسط والمكان الأول */}
-      <button
-        type="button"
-        onClick={() => setMoreOpen((v) => !v)}
-        aria-expanded={moreOpen}
-        className="w-full flex items-center justify-between gap-3 py-4 text-start font-bold text-brand"
-      >
-        <span className="flex items-center gap-2">
-          <SlidersHorizontal className="w-4 h-4" />
-          {moreOpen ? tx('فلاتر أقل', 'Fewer filters') : tx('فلاتر أكتر', 'More filters')}
-          {!moreOpen && moreCount > 0 && (
-            <span className="num grid place-items-center min-w-5 h-5 px-1.5 rounded-full bg-brand text-white text-xs">{moreCount}</span>
-          )}
-        </span>
-        <ChevronDown className={`w-4 h-4 transition-transform ${moreOpen ? 'rotate-180' : ''}`} />
-      </button>
-
-      {moreOpen && (
-      <>
-      <Section title={tx('المطور', 'Developer')} active={f.developers.length}>
+      <Section title={tx('المطور', 'Developer')} active={f.developers.length} defaultOpen={false}>
         {developers.length > 6 && (
           <div className="relative mb-3">
             <Search className="absolute top-1/2 -translate-y-1/2 start-3 w-4 h-4 text-muted" />
@@ -242,7 +209,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
         </ul>
       </Section>
 
-      <Section title={tx('عدد الغرف', 'Bedrooms')} active={f.bedrooms !== null ? 1 : 0}>
+      <Section title={tx('عدد الغرف', 'Bedrooms')} active={f.bedrooms !== null ? 1 : 0} defaultOpen={false}>
         <div className="grid grid-cols-6 gap-1.5">
           {[null, 1, 2, 3, 4, 5].map((n) => (
             <button
@@ -259,11 +226,11 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
         </div>
       </Section>
 
-      <Section title={tx('المساحة', 'Size')} active={f.areaMin || f.areaMax ? 1 : 0}>
+      <Section title={tx('المساحة', 'Size')} active={f.areaMin || f.areaMax ? 1 : 0} defaultOpen={false}>
         <RangeFields min={f.areaMin} max={f.areaMax} unit={tx('م²', 'm²')} onChange={(areaMin, areaMax) => onChange({ areaMin, areaMax })} />
       </Section>
 
-      <Section title={tx('الاستلام', 'Delivery')} active={f.delivery.length}>
+      <Section title={tx('الاستلام', 'Delivery')} active={f.delivery.length} defaultOpen={false}>
         <Chips
           options={DELIVERY_OPTIONS.map((d) => ({ value: d.ar, label: language === 'ar' ? d.short : d.en }))}
           selected={f.delivery}
@@ -271,7 +238,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
         />
       </Section>
 
-      <Section title={tx('الفيو', 'View')} active={f.views.length}>
+      <Section title={tx('الفيو', 'View')} active={f.views.length} defaultOpen={false}>
         <Chips
           options={VIEW_OPTIONS.map((v) => ({ value: v.key, label: language === 'ar' ? v.ar : v.en }))}
           selected={f.views}
@@ -279,15 +246,15 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
         />
       </Section>
 
-      <Section title={tx('التشطيب', 'Finishing')} active={f.finishing.length}>
+      <Section title={tx('التشطيب', 'Finishing')} active={f.finishing.length} defaultOpen={false}>
         <Chips options={FINISHING_OPTIONS.map(L)} selected={f.finishing} onToggle={(v) => onChange({ finishing: toggle(f.finishing, v) })} />
       </Section>
 
-      <Section title={tx('نظام القسط', 'Installment plan')} active={f.frequency.length}>
+      <Section title={tx('نظام القسط', 'Installment plan')} active={f.frequency.length} defaultOpen={false}>
         <Chips options={FREQUENCY_OPTIONS.map(L)} selected={f.frequency} onToggle={(v) => onChange({ frequency: toggle(f.frequency, v) })} />
       </Section>
 
-      <Section title={tx('مميزات', 'Extras')} active={extras.filter((e) => f[e.key]).length}>
+      <Section title={tx('مميزات', 'Extras')} active={extras.filter((e) => f[e.key]).length} defaultOpen={false}>
         <div className="space-y-4">
           {extras.map((e) => (
             <div key={e.key} className="flex items-center justify-between gap-3">
@@ -297,8 +264,6 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
           ))}
         </div>
       </Section>
-      </>
-      )}
     </div>
   );
 };

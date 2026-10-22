@@ -21,6 +21,8 @@ import {
   Images,
   Flame,
   ArrowDown,
+  BadgeCheck,
+  TrendingDown,
 } from 'lucide-react';
 import { PageId, RealEstateUnit } from '../types';
 import { BRAND, whatsappLink } from '../config/brand';
@@ -107,21 +109,24 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
   const oldPct = Math.round((unit.originalContractPrice / unit.currentMarketPrice) * 100);
   const phoneValid = /^01\d{9}$/.test(phone.replace(/\s/g, ''));
 
+  // The money a buyer weighs, in one row.
   const keyNumbers = [
-    { l: tx('باقي للمطور', 'Left to developer'), v: money(unit.remainingAmount, language) },
-    { l: tx('سعر العقد', 'Contract price'), v: money(unit.originalContractPrice, language) },
-    { l: tx('الاستلام', 'Delivery'), v: deliveryLabel(unit, language), noCurrency: true },
-    { l: tx('المساحة', 'Area'), v: `${unit.areaM2} ${tx('م²', 'm²')}`, noCurrency: true },
+    { l: tx('صاحبها دفع', 'Owner paid'), v: fullMoney(unit.paidCashAmount, language) },
+    { l: tx('باقي للمطور', 'Left to developer'), v: fullMoney(unit.remainingAmount, language) },
+    { l: tx('سعر العقد', 'Contract price'), v: fullMoney(unit.originalContractPrice, language) },
+    { l: tx('القسط في الشهر تقريباً', 'Monthly, roughly'), v: fullMoney(monthlyInstallment(unit), language) },
   ];
 
-  const specs = [
-    { icon: Maximize2, v: `${unit.areaM2} ${tx('م²', 'm²')}` },
-    unit.bedrooms > 0 && { icon: BedDouble, v: tx(`${unit.bedrooms} غرف`, `${unit.bedrooms} beds`) },
-    unit.bathrooms > 0 && { icon: Bath, v: tx(`${unit.bathrooms} حمام`, `${unit.bathrooms} baths`) },
-    { icon: Paintbrush, v: pick(language, unit.finishing, unit.finishingEn) },
-    { icon: KeyRound, v: pick(language, unit.deliveryStatus, unit.deliveryStatusEn) },
-    ...VIEW_OPTIONS.filter((o) => unit.views?.includes(o.key)).map((o) => ({ icon: Eye, v: tx(o.ar, o.en) })),
-  ].filter(Boolean) as { icon: React.ElementType; v: string }[];
+  // What the unit is, at a glance, under the title.
+  const facts = [
+    { icon: Building2, l: tx('النوع', 'Type'), v: pick(language, unit.propertyType, unit.propertyTypeEn) },
+    { icon: Maximize2, l: tx('المساحة', 'Area'), v: `${unit.areaM2} ${tx('م²', 'm²')}` },
+    unit.bedrooms > 0 && { icon: BedDouble, l: tx('الغرف', 'Bedrooms'), v: String(unit.bedrooms) },
+    unit.bathrooms > 0 && { icon: Bath, l: tx('الحمامات', 'Bathrooms'), v: String(unit.bathrooms) },
+    { icon: Paintbrush, l: tx('التشطيب', 'Finishing'), v: pick(language, unit.finishing, unit.finishingEn) },
+    { icon: KeyRound, l: tx('الاستلام', 'Delivery'), v: unit.deliveryStatus === 'استلام فوري' ? tx('فوري', 'Ready now') : deliveryLabel(unit, language) },
+  ].filter(Boolean) as { icon: React.ElementType; l: string; v: string }[];
+  const views = VIEW_OPTIONS.filter((o) => unit.views?.includes(o.key));
 
   const checks = [
     { ok: unit.verifiedContract, l: tx('العقد أصلي ومراجَع', 'Contract verified') },
@@ -223,73 +228,63 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
     }
   };
 
-  const side = unit.images.slice(1, 3);
+  const side = unit.images.map((src, i) => ({ src, i })).filter((x) => x.i !== imgIdx).slice(0, 2);
 
   return (
     <div className="page-wrap py-6 sm:py-10">
-      <button onClick={onBack} className="inline-flex items-center gap-2 text-sm font-semibold text-ink-soft hover:text-ink min-h-11">
-        <Back className="w-4 h-4" />
-        {tx('رجوع للوحدات', 'Back to units')}
-      </button>
+      <nav className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted">
+        <button onClick={onBack} className="inline-flex items-center gap-1.5 font-semibold text-ink-soft hover:text-ink min-h-10">
+          <Back className="w-4 h-4" />
+          {tx('الوحدات', 'Units')}
+        </button>
+        <span aria-hidden>/</span>
+        <span>{pick(language, unit.region, unit.regionEn)}</span>
+        <span aria-hidden>/</span>
+        <span className="text-ink-soft font-medium truncate max-w-[16rem]">{compound}</span>
+      </nav>
 
-      {/* Gallery: one large photo and two smaller ones on desktop; one photo and a thumbnail strip on phones */}
-      <div className="mt-3 grid lg:grid-cols-[2fr_1fr] gap-2 sm:gap-3">
-        <div className="relative rounded-card overflow-hidden bg-line">
-          <img src={unit.images[imgIdx]} alt={compound} className="w-full aspect-[4/3] sm:aspect-[16/10] lg:aspect-auto lg:h-[460px] object-cover" />
-          <span className="absolute bottom-3 start-3 inline-flex items-center gap-1.5 rounded-full bg-brand/80 text-white px-3 py-1 text-xs font-semibold">
-            <Images className="w-3.5 h-3.5" />
-            {imgIdx + 1} / {unit.images.length}
-          </span>
-        </div>
-        {side.length > 0 && (
-          <div className="hidden lg:grid grid-rows-2 gap-3 h-[460px]">
-            {side.map((src, i) => (
-              <button key={src} onClick={() => setImgIdx(i + 1)} className="rounded-card overflow-hidden bg-line">
-                <img src={src} alt="" className="w-full h-full object-cover transition-transform duration-500 hover:scale-[1.03]" />
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-      {unit.images.length > 1 && (
-        <div className="mt-2 flex gap-2 overflow-x-auto no-scrollbar">
-          {unit.images.map((src, i) => (
-            <button
-              key={src}
-              onClick={() => setImgIdx(i)}
-              aria-label={`${i + 1}`}
-              className={`shrink-0 w-20 h-14 rounded-xl overflow-hidden border-2 transition ${i === imgIdx ? 'border-brand' : 'border-transparent opacity-70 hover:opacity-100'}`}
-            >
-              <img src={src} alt="" className="w-full h-full object-cover" />
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Title + quick actions */}
-      <div className="mt-6 sm:mt-8 flex flex-wrap items-start justify-between gap-4">
+      {/* Title first: what it is and where, with the reasons to look closer as badges */}
+      <header className="mt-3 flex flex-wrap items-end justify-between gap-4">
         <div className="min-w-0">
-          {/* Wraps as whole pieces so a long developer name and the code never break mid-word. */}
-          <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
+          <div className="flex flex-wrap items-center gap-2">
+            {isDeal(unit) && (
+              <span className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-base font-extrabold text-white shadow-md">
+                <Flame className="w-4 h-4 fill-current" />
+                {tx(`أوفر ${money(sellerDiscount(unit), language)} من اللي صاحبها دفعه`, `${money(sellerDiscount(unit), language)} below what the owner paid`)}
+              </span>
+            )}
+            {isNegotiable(unit) && (
+              <span className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-base font-extrabold text-white shadow-md">
+                <TrendingDown className="w-5 h-5" />
+                {tx('قابل للتفاوض', 'Negotiable')}
+              </span>
+            )}
+            {unit.verifiedContract && (
+              <span className="inline-flex items-center gap-2 rounded-full bg-brand-soft px-4 py-2 text-base font-bold text-brand">
+                <BadgeCheck className="w-4 h-4" />
+                {tx('متحقق بالمستندات', 'Documents verified')}
+              </span>
+            )}
+          </div>
+          <h1 className="mt-3 text-3xl sm:text-4xl font-extrabold leading-tight text-ink">{compound}</h1>
+          <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-ink-soft">
             <span className="inline-flex items-center gap-1.5">
-              <Building2 className="w-4 h-4" />
+              <MapPin className="w-4 h-4 text-muted" />
+              {pick(language, unit.location, unit.locationEn)}
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Building2 className="w-4 h-4 text-muted" />
               <bdi>{pick(language, unit.developer, unit.developerEn)}</bdi>
             </span>
-            <span className="num text-xs whitespace-nowrap" dir="ltr">
-              {unit.verificationCode}
+            <span className="inline-flex items-center gap-1.5 text-sm text-muted">
+              <span className="num" dir="ltr">{unit.verificationCode}</span>
+              <a href={`#verify/${encodeURIComponent(unit.verificationCode)}`} className="font-semibold text-brand underline">
+                {tx('اتأكد منها', 'Verify')}
+              </a>
             </span>
-            <a href={`#verify/${encodeURIComponent(unit.verificationCode)}`} className="text-xs font-semibold text-brand underline whitespace-nowrap">
-              {tx('اتأكد منها', 'Verify')}
-            </a>
-          </p>
-          <h1 className="mt-1 text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-ink">{compound}</h1>
-          <p className="mt-2 flex items-center gap-1.5 text-ink-soft">
-            <MapPin className="w-4 h-4 text-muted" />
-            {pick(language, unit.location, unit.locationEn)}
           </p>
         </div>
-        <div className="relative flex items-center flex-wrap gap-2">
-
+        <div className="relative flex items-center gap-2">
           <button onClick={share} className="btn-ghost min-h-11 px-4 text-sm">
             <Share2 className="w-4 h-4" />
             {tx('شارك', 'Share')}
@@ -304,9 +299,102 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
             </span>
           )}
         </div>
-      </div>
+      </header>
 
-      <div className="mt-6 sm:mt-8 grid lg:grid-cols-[minmax(0,1fr)_380px] gap-6 lg:gap-10 items-start">
+      {/* Gallery: the layout follows how many photos there are, so there's never an empty slot */}
+      <div
+        className={`mt-5 grid gap-2 sm:gap-3 ${
+          side.length === 0 ? '' : side.length === 1 ? 'lg:grid-cols-[3fr_2fr]' : 'lg:grid-cols-[2fr_1fr]'
+        }`}
+      >
+        <div className="relative rounded-card overflow-hidden bg-line">
+          <img src={unit.images[imgIdx]} alt={compound} className="w-full aspect-[4/3] sm:aspect-[16/9] lg:aspect-auto lg:h-[480px] object-cover" />
+          {isNegotiable(unit) && (
+            <span className="absolute top-4 start-4 inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 text-lg sm:text-xl font-extrabold text-white shadow-lift">
+              <TrendingDown className="w-6 h-6" />
+              {tx('قابل للتفاوض', 'Negotiable')}
+            </span>
+          )}
+          {isDeal(unit) && (
+            <span
+              className={`absolute ${isNegotiable(unit) ? 'top-20 sm:top-[5.5rem]' : 'top-4'} start-4 inline-flex items-center gap-2 rounded-2xl bg-accent px-5 py-3 text-lg sm:text-xl font-extrabold text-white shadow-lift`}
+            >
+              <Flame className="w-6 h-6 fill-current" />
+              {tx(`أوفر ${money(sellerDiscount(unit), language)}`, `${money(sellerDiscount(unit), language)} off`)}
+            </span>
+          )}
+          <span className="absolute bottom-3 start-3 inline-flex items-center gap-1.5 rounded-full bg-ink/70 backdrop-blur-xs text-white px-3 py-1.5 text-sm font-semibold">
+            <Images className="w-4 h-4" />
+            {imgIdx + 1} / {unit.images.length}
+          </span>
+        </div>
+        {side.length > 0 && (
+          <div className={`hidden lg:grid gap-3 h-[480px] ${side.length === 2 ? 'grid-rows-2' : 'grid-rows-1'}`}>
+            {side.map(({ src, i: at }, i) => (
+              <button key={src} onClick={() => setImgIdx(at)} className="relative rounded-card overflow-hidden bg-line group">
+                <img src={src} alt="" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+                {i === side.length - 1 && unit.images.length > side.length + 1 && (
+                  <span className="absolute inset-0 grid place-items-center bg-ink/45 text-white text-lg font-bold">
+                    +{unit.images.length - side.length - 1} {tx('صور', 'photos')}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+      {unit.images.length > 1 && (
+        <div className="mt-2 flex gap-2 overflow-x-auto no-scrollbar lg:hidden">
+          {unit.images.map((src, i) => (
+            <button
+              key={src}
+              onClick={() => setImgIdx(i)}
+              aria-label={`${i + 1}`}
+              className={`shrink-0 w-20 h-14 rounded-xl overflow-hidden border-2 transition ${i === imgIdx ? 'border-brand' : 'border-transparent opacity-70 hover:opacity-100'}`}
+            >
+              <img src={src} alt="" className="w-full h-full object-cover" />
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Negotiable units: suggesting a price gets its own strip, right under the photos */}
+      {isNegotiable(unit) && (
+        <div className="mt-5">
+          <OfferPanel unitId={unit.id} />
+        </div>
+      )}
+
+      {/* Key facts */}
+      <div className="mt-5 card grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 divide-line">
+        {facts.map((f, i) => (
+          <div
+            key={f.l}
+            className={`flex items-center gap-3 p-4 ${i > 0 ? 'lg:border-s border-line' : ''} ${i % 2 === 1 ? 'border-s sm:border-s-0 lg:border-s' : ''} ${i >= 2 ? 'border-t sm:border-t-0' : ''} ${i >= 3 ? 'sm:border-t lg:border-t-0' : ''}`}
+          >
+            <span className="grid place-items-center w-10 h-10 rounded-xl bg-brand-soft text-brand shrink-0">
+              <f.icon className="w-5 h-5" />
+            </span>
+            <span className="min-w-0">
+              <span className="block text-xs text-muted">{f.l}</span>
+              <span className="num block font-bold text-ink truncate">{f.v}</span>
+            </span>
+          </div>
+        ))}
+      </div>
+      {views.length > 0 && (
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+          <span className="text-muted">{tx('الفيو:', 'View:')}</span>
+          {views.map((o) => (
+            <span key={o.key} className="inline-flex items-center gap-1.5 rounded-full bg-surface border border-line px-3 py-1 font-medium text-ink-soft">
+              <Eye className="w-4 h-4 text-muted" />
+              {tx(o.ar, o.en)}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-6 sm:mt-8 grid lg:grid-cols-[minmax(0,1fr)_380px] gap-6 lg:gap-8 items-start">
         {/* Price + booking — first on phones, sticky side column on desktop */}
         <aside className="lg:col-start-2 lg:row-start-1 lg:sticky lg:top-24 space-y-3">
           <div className="rounded-card bg-brand text-white p-6 shadow-lift">
@@ -429,8 +517,6 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
             )}
           </div>
 
-          {isNegotiable(unit) && <OfferPanel unitId={unit.id} />}
-
           <ul className="card p-4 grid gap-2.5 text-sm">
             {[
               { icon: Ban, t: tx('ما تدفعش عربون لأي حد', 'Never pay anyone a deposit') },
@@ -449,10 +535,23 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
         </aside>
 
         <div className="lg:col-start-1 lg:row-start-1 space-y-5 sm:space-y-6 min-w-0">
+          {/* The numbers */}
+          <section className="card p-5 sm:p-6">
+            <h2 className="text-lg font-bold text-ink">{tx('الأرقام', 'The numbers')}</h2>
+            <dl className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {keyNumbers.map((k) => (
+                <div key={k.l} className="rounded-xl bg-paper px-4 py-3">
+                  <dt className="text-xs text-muted">{k.l}</dt>
+                  <dd className="num mt-1 text-base sm:text-lg font-bold text-ink">{k.v}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+
           {/* Savings — the reason to buy here */}
-          <div className="card p-5 sm:p-7">
+          <div className="card p-5 sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="font-display text-xl font-bold text-ink">{tx('هتوفّر قد إيه؟', 'How much you save')}</p>
+              <h2 className="text-lg font-bold text-ink">{tx('هتوفّر قد إيه؟', 'How much you save')}</h2>
               <span className="rounded-full bg-accent-soft text-accent px-3 py-1 text-sm font-bold">
                 {money(savingsAmount(unit), language)} {currency(language)} · {savingsPercent(unit)}%
               </span>
@@ -484,42 +583,21 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {keyNumbers.map((k) => (
-              <div key={k.l} className="card p-4">
-                <p className="text-xs text-muted">{k.l}</p>
-                <p className="num mt-1 text-lg sm:text-xl font-bold text-ink">
-                  {k.v}
-                  {!k.noCurrency && <span className="text-xs font-medium text-muted"> {currency(language)}</span>}
-                </p>
-              </div>
-            ))}
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {specs.map((s) => (
-              <span key={s.v} className="chip-off pointer-events-none">
-                <s.icon className="w-4 h-4 text-muted" />
-                {s.v}
-              </span>
-            ))}
-          </div>
-
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="card p-5">
-              <p className="font-bold text-ink mb-4">{tx('راجعنالك', "We've checked")}</p>
+            <div className="card p-5 sm:p-6">
+              <h2 className="text-lg font-bold text-ink mb-4">{tx('راجعنالك', "We've checked")}</h2>
               <ul className="space-y-3">
                 {checks.map((c) => (
                   <li key={c.l} className={`flex items-center gap-2.5 ${c.ok ? 'text-ink' : 'text-muted line-through'}`}>
-                    <CheckCircle2 className={`w-5 h-5 shrink-0 ${c.ok ? 'text-ink' : 'text-line-strong'}`} />
+                    <CheckCircle2 className={`w-5 h-5 shrink-0 ${c.ok ? 'text-emerald-600' : 'text-line-strong'}`} />
                     {c.l}
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div className="card p-5">
-              <p className="font-bold text-ink mb-4">{tx('خطة السداد', 'Payment plan')}</p>
+            <div className="card p-5 sm:p-6">
+              <h2 className="text-lg font-bold text-ink mb-4">{tx('خطة السداد', 'Payment plan')}</h2>
               <dl className="space-y-3 text-[15px]">
                 {[
                   [tx('القسط', 'Installment'), fullMoney(unit.installmentValue, language)],
@@ -540,8 +618,8 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
           </div>
 
           {/* Dues & terms — what the buyer takes on beyond the cash */}
-          <div className="card p-5">
-            <p className="font-bold text-ink mb-4">{tx('المديونية والشروط', 'Dues & terms')}</p>
+          <div className="card p-5 sm:p-6">
+            <h2 className="text-lg font-bold text-ink mb-4">{tx('المديونية والشروط', 'Dues & terms')}</h2>
             <dl className="grid sm:grid-cols-2 gap-2.5 text-[15px]">
               {terms.map((r) => (
                 <div key={r.k} className="flex justify-between gap-3 rounded-xl bg-paper px-4 py-3">
@@ -562,10 +640,12 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
             )}
           </div>
 
-          <div>
-            <p className="font-bold text-ink mb-2">{tx('عن الوحدة', 'About the unit')}</p>
-            <p className="text-ink-soft leading-relaxed">{pick(language, unit.description, unit.descriptionEn)}</p>
-          </div>
+          {pick(language, unit.description, unit.descriptionEn) && (
+            <section className="card p-5 sm:p-6">
+              <h2 className="text-lg font-bold text-ink mb-3">{tx('عن الوحدة', 'About the unit')}</h2>
+              <p className="text-ink-soft leading-relaxed">{pick(language, unit.description, unit.descriptionEn)}</p>
+            </section>
+          )}
         </div>
       </div>
 

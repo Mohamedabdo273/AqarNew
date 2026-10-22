@@ -391,10 +391,16 @@ export const OFFER_ACTOR = { buyer: 1, seller: 2, system: 3, staff: 4 } as const
 
 export type OfferAction = 'accept' | 'counter' | 'reject' | 'raise' | 'withdraw';
 
+/** How the buyer hands over the cash: full, or needs instalments (details agreed by phone). Matches OfferCashPlan on the API. */
+export const CASH_PLAN = { full: 1, installments: 2 } as const;
+export type CashPlan = (typeof CASH_PLAN)[keyof typeof CASH_PLAN];
+
 export interface OfferMove {
   type: number;
   actor: number;
   amount: number | null;
+  /** The cash plan proposed with an offer/counter. */
+  cashPlan: CashPlan | null;
   note: string | null;
   at: string;
 }
@@ -413,6 +419,8 @@ export interface OfferThread {
   floorPrice: number;
   lastBuyerOffer: number;
   lastSellerCounter: number | null;
+  /** The cash plan on the table (whoever moved last set it). */
+  cashPlan: CashPlan;
   agreedPrice: number | null;
   buyerFee: number;
   buyerMovesLeft: number;
@@ -442,10 +450,11 @@ export interface UnitOfferState {
 }
 
 export const fetchUnitOfferState = (unitId: number | string) => request<UnitOfferState>(`/offers/unit/${encodeURIComponent(String(unitId))}`);
-export const createOffer = (unitId: number, amount: number) => request<OfferThread>('/offers', json('POST', { unitId, amount }));
+export const createOffer = (unitId: number, amount: number, cashPlan: CashPlan) =>
+  request<OfferThread>('/offers', json('POST', { unitId, amount, cashPlan }));
 export const fetchOffer = (id: number) => request<OfferThread>(`/offers/${id}`);
-export const offerAction = (id: number, action: OfferAction, amount?: number) =>
-  request<OfferThread>(`/offers/${id}/${action}`, amount === undefined ? { method: 'POST' } : json('POST', { amount }));
+export const offerAction = (id: number, action: OfferAction, amount?: number, cashPlan?: CashPlan) =>
+  request<OfferThread>(`/offers/${id}/${action}`, amount === undefined ? { method: 'POST' } : json('POST', { amount, cashPlan }));
 export const fetchMyOffers = () => request<OfferThread[]>('/me/offers');
 export const fetchReceivedOffers = () => request<OfferThread[]>('/me/offers/received');
 

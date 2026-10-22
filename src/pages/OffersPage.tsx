@@ -109,7 +109,7 @@ export const OffersPage: React.FC<{ target: string | null; onNavigate: (page: Pa
           {tab === 'mine' ? (
             <>
               <p className="text-ink font-semibold">{tx('لسه ما عملتش أي عرض', "You haven't made an offer yet")}</p>
-              <p className="text-sm text-muted">{tx('على أي وحدة مكتوب عليها "قابل للتفاوض" هتلاقي زرار "اعرض سعرك".', 'Units marked "negotiable" have a "Make an offer" button.')}</p>
+              <p className="text-sm text-muted">{tx('على أي وحدة مكتوب عليها "قابل للتفاوض" هتلاقي زرار "فاوض على السعر".', 'Units marked "negotiable" have a "Negotiate the price" button.')}</p>
               <button onClick={() => onNavigate('opportunities')} className="btn-primary min-h-11 px-5">
                 {tx('شوف الوحدات', 'Browse units')}
               </button>

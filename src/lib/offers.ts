@@ -1,4 +1,4 @@
-import { OFFER_ACTOR, OFFER_MOVE, OFFER_STATUS, OfferMove, OfferThread, NOTIFICATION_TYPE, AppNotification } from '../services/api';
+import { CASH_PLAN, CashPlan, OFFER_ACTOR, OFFER_MOVE, OFFER_STATUS, OfferMove, OfferThread, NOTIFICATION_TYPE, AppNotification } from '../services/api';
 
 type Tx = (ar: string, en: string) => string;
 
@@ -108,3 +108,19 @@ const NOTE_EN: Record<number, string> = {
 /** The server writes Arabic; English is rebuilt from the type. */
 export const notificationTitle = (n: AppNotification, tx: Tx) =>
   tx(n.title, `${NOTE_EN[n.type] ?? 'Update'}${n.unitCode ? ` · ${n.unitCode}` : ''}`);
+
+/** The cash plans, in the order the picker shows them. */
+export const CASH_PLANS: { value: CashPlan; ar: string; en: string; hint: [string, string] }[] = [
+  { value: CASH_PLAN.full, ar: 'كاش كامل', en: 'Full cash', hint: ['هتدفع المبلغ كله عند التنازل', 'You pay it all at the transfer'] },
+  {
+    value: CASH_PLAN.installments,
+    ar: 'محتاج تقسيط',
+    en: 'I need instalments',
+    hint: ['فريقنا يتفق معاكم على التفاصيل', 'Our team agrees the details with you both'],
+  },
+];
+
+export const cashPlanLabel = (plan: CashPlan | null | undefined, tx: Tx) => {
+  const p = CASH_PLANS.find((x) => x.value === plan) ?? CASH_PLANS[0];
+  return plan === CASH_PLAN.installments ? tx('الكاش بالتقسيط', 'Cash in instalments') : tx(p.ar, p.en);
+};

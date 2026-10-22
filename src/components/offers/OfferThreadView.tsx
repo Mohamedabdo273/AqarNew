@@ -1,10 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import { Check, Clock, Handshake, Undo2, X, ArrowUp, ArrowDown } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
-import { errorText, offerAction, OfferAction, OfferThread } from '../../services/api';
+import { CashPlan, errorText, offerAction, OfferAction, OfferThread } from '../../services/api';
 import { fullMoney } from '../../lib/unitHelpers';
 import { BRAND } from '../../config/brand';
-import { isOpenOffer, moveSide, moveText, offerLadder, offerStatusLabel, timeLeft } from '../../lib/offers';
+import { cashPlanLabel, isOpenOffer, moveSide, moveText, offerLadder, offerStatusLabel, timeLeft } from '../../lib/offers';
+import { AmountPicker, CashPlanPicker } from './OfferPickers';
 
 const STEP = 10_000;
 
@@ -16,7 +17,7 @@ const TONE: Record<string, string> = {
 };
 
 /**
- * One negotiation as chat bubbles: every move is a type + amount + time, no free text.
+ * One negotiation as chat bubbles: every move is a type + amount + cash plan + time, no free text.
  * Shows only the buttons the server says the caller may press right now.
  */
 export const OfferThreadView: React.FC<{ thread: OfferThread; onChange: (t: OfferThread) => void }> = ({ thread: t, onChange }) => {
@@ -32,9 +33,10 @@ export const OfferThreadView: React.FC<{ thread: OfferThread; onChange: (t: Offe
     [moving, t.nextMin, t.nextMax],
   );
   // Counters start high (close to asking), raises start low (close to the last offer) — both sides open with their own interest.
-  const [idx, setIdx] = useState<number | null>(null);
-  const pickIdx = idx ?? (moving === 'counter' ? ladder.length - 1 : 0);
-  const amount = ladder[Math.min(pickIdx, ladder.length - 1)];
+  const [picked, setPicked] = useState<number | null>(null);
+  const amount = picked !== null && ladder.includes(picked) ? picked : moving === 'counter' ? ladder[ladder.length - 1] : ladder[0];
+  const [plan, setPlan] = useState<CashPlan | null>(null);
+  const nextPlan = plan ?? t.cashPlan;
 
   const status = offerStatusLabel(t, tx);
   const left = isOpenOffer(t) ? timeLeft(t.deadlineAt, tx) : null;
@@ -44,10 +46,11 @@ export const OfferThreadView: React.FC<{ thread: OfferThread; onChange: (t: Offe
     setBusy(true);
     setError('');
     try {
-      onChange(await offerAction(t.id, action, value));
+      onChange(await offerAction(t.id, action, value, value === undefined ? undefined : nextPlan));
       setConfirm(null);
       setPicking(false);
-      setIdx(null);
+      setPicked(null);
+      setPlan(null);
     } catch (e) {
       setError(errorText(e));
     } finally {
@@ -58,8 +61,14 @@ export const OfferThreadView: React.FC<{ thread: OfferThread; onChange: (t: Offe
   const confirmText: Partial<Record<OfferAction, string>> = {
     accept:
       t.role === 'buyer'
-        ? tx(`هتوافق على ${money(t.lastSellerCounter ?? 0)} والوحدة هتتحجز لك. متأكد؟`, `Accept ${money(t.lastSellerCounter ?? 0)} and reserve the unit?`)
-        : tx(`هتبيع بـ ${money(t.lastBuyerOffer)} والوحدة هتتحجز للمشتري. متأكد؟`, `Sell for ${money(t.lastBuyerOffer)} and reserve the unit?`),
+        ? tx(
+            `هتوافق على ${money(t.lastSellerCounter ?? 0)} (${cashPlanLabel(t.cashPlan, tx)}) والوحدة هتتحجز لك. متأكد؟`,
+            `Accept ${money(t.lastSellerCounter ?? 0)} (${cashPlanLabel(t.cashPlan, tx)}) and reserve the unit?`,
+          )
+        : tx(
+            `هتبيع بـ ${money(t.lastBuyerOffer)} (${cashPlanLabel(t.cashPlan, tx)}) والوحدة هتتحجز للمشتري. متأكد؟`,
+            `Sell for ${money(t.lastBuyerOffer)} (${cashPlanLabel(t.cashPlan, tx)}) and reserve the unit?`,
+          ),
     reject: tx('لو رفضت، المشتري ده مش هيقدر يعرض تاني على الوحدة دي. متأكد؟', "If you reject, this buyer can't offer on this unit again. Sure?"),
     withdraw: tx('هتسحب عرضك وتقفل التفاوض. متأكد؟', 'Withdraw your offer and end this negotiation?'),
   };
@@ -79,6 +88,8 @@ export const OfferThreadView: React.FC<{ thread: OfferThread; onChange: (t: Offe
       <div className="rounded-xl bg-paper border border-line p-3 grid grid-cols-2 gap-2 text-xs">
         <span className="text-muted">{tx('السعر المطلوب', 'Asking')}</span>
         <span className="num text-end font-semibold text-ink">{money(t.askingPrice)}</span>
+        <span className="text-muted">{t.agreedPrice !== null ? tx('طريقة الدفع المتفق عليها', 'Agreed payment') : tx('طريقة الدفع المطروحة', 'Payment on the table')}</span>
+        <span className="text-end font-semibold text-ink">{cashPlanLabel(t.cashPlan, tx)}</span>
         {t.role === 'buyer' && (
           <>
             <span className="text-muted">{tx(`عمولتنا ${BRAND.buyerFeePercent}% على ${t.agreedPrice ? 'المتفق عليه' : 'آخر رقم'}`, `Our ${BRAND.buyerFeePercent}% fee on ${t.agreedPrice ? 'the agreed price' : 'the latest figure'}`)}</span>
@@ -116,6 +127,7 @@ export const OfferThreadView: React.FC<{ thread: OfferThread; onChange: (t: Offe
             >
               <span className={`block text-xs ${side === 'mine' ? 'text-white/70' : 'text-muted'}`}>{moveText(m, t, i, tx)}</span>
               {m.amount !== null && <span className="num block font-display text-lg font-bold">{money(m.amount)}</span>}
+              {m.cashPlan !== null && <span className={`block text-xs font-semibold ${side === 'mine' ? 'text-white/85' : 'text-ink-soft'}`}>{cashPlanLabel(m.cashPlan, tx)}</span>}
               <span className={`block text-[11px] ${side === 'mine' ? 'text-white/60' : 'text-muted'}`}>{at}</span>
             </li>
           );
@@ -127,10 +139,13 @@ export const OfferThreadView: React.FC<{ thread: OfferThread; onChange: (t: Offe
           <Handshake className="inline w-4 h-4 me-1" />
           {t.role === 'buyer'
             ? tx(
-                `اتفقتوا على ${money(t.agreedPrice)} + عمولتنا ${money(t.buyerFee)} بعد التوقيع. فريقنا هيكلمك خلال يوم عمل.`,
-                `Agreed at ${money(t.agreedPrice)} + our ${money(t.buyerFee)} fee after signing. We'll call within one business day.`,
+                `اتفقتوا على ${money(t.agreedPrice)} (${cashPlanLabel(t.cashPlan, tx)}) + عمولتنا ${money(t.buyerFee)} بعد التوقيع. فريقنا هيكلمك خلال يوم عمل.`,
+                `Agreed at ${money(t.agreedPrice)} (${cashPlanLabel(t.cashPlan, tx)}) + our ${money(t.buyerFee)} fee after signing. We'll call within one business day.`,
               )
-            : tx(`اتفقتوا على ${money(t.agreedPrice)}. فريقنا هيكلمك خلال يوم عمل يرتب الخطوات.`, `Agreed at ${money(t.agreedPrice)}. We'll call within one business day.`)}
+            : tx(
+                `اتفقتوا على ${money(t.agreedPrice)} (${cashPlanLabel(t.cashPlan, tx)}). فريقنا هيكلمك خلال يوم عمل يرتب الخطوات.`,
+                `Agreed at ${money(t.agreedPrice)} (${cashPlanLabel(t.cashPlan, tx)}). We'll call within one business day.`,
+              )}
         </p>
       )}
       {!isOpenOffer(t) && t.agreedPrice === null && t.closeReason && <p className="text-xs text-muted">{t.closeReason}</p>}
@@ -149,7 +164,7 @@ export const OfferThreadView: React.FC<{ thread: OfferThread; onChange: (t: Offe
           {moving && ladder.length > 0 && (
             <button disabled={busy} onClick={() => setPicking(true)} className="btn-ghost min-h-11 w-full">
               {moving === 'counter' ? <ArrowDown className="w-4 h-4" /> : <ArrowUp className="w-4 h-4" />}
-              {moving === 'counter' ? tx('رد بسعر تاني', 'Counter with a price') : tx('علّي عرضك', 'Raise your offer')}
+              {moving === 'counter' ? tx('رد بسعر أو طريقة دفع تانية', 'Counter with another price or payment') : tx('علّي عرضك', 'Raise your offer')}
             </button>
           )}
           <div className="flex gap-2">
@@ -170,27 +185,19 @@ export const OfferThreadView: React.FC<{ thread: OfferThread; onChange: (t: Offe
       )}
 
       {picking && moving && amount !== undefined && (
-        <div className="rounded-xl border border-line bg-surface p-3 grid gap-2">
-          <p className="text-xs text-muted">
-            {moving === 'counter'
-              ? tx('رقمك لازم يكون أعلى من عرض المشتري وأقل من آخر سعر طلبته.', "Above the buyer's offer and no higher than your last price.")
-              : tx('عرضك الجديد لازم يكون أعلى من اللي فات وأقل من رقم صاحب الوحدة.', "Above your last offer and below the owner's price.")}
-          </p>
-          <p className="num text-center font-display text-2xl font-extrabold text-ink">{money(amount)}</p>
-          <input
-            type="range"
-            min={0}
-            max={Math.max(0, ladder.length - 1)}
-            step={1}
-            value={Math.min(pickIdx, ladder.length - 1)}
-            onChange={(e) => setIdx(Number(e.target.value))}
-            disabled={ladder.length < 2}
-            aria-label={tx('المبلغ', 'Amount')}
-            className="w-full"
-          />
-          <div className="flex justify-between text-[11px] text-muted num">
-            <span>{money(ladder[0])}</span>
-            <span>{money(ladder[ladder.length - 1])}</span>
+        <div className="rounded-xl border border-line bg-surface p-4 grid gap-4">
+          <div className="grid gap-2">
+            <p className="text-sm font-bold text-ink">{moving === 'counter' ? tx('السعر اللي تقبله', 'The price you accept') : tx('عرضك الجديد', 'Your new offer')}</p>
+            <p className="text-xs text-muted">
+              {moving === 'counter'
+                ? tx('أعلى من عرض المشتري، ومش أعلى من آخر سعر طلبته.', "Above the buyer's offer and no higher than your last price.")
+                : tx('أعلى من عرضك اللي فات، وأقل من رقم صاحب الوحدة.', "Above your last offer and below the owner's price.")}
+            </p>
+            <AmountPicker values={ladder} value={amount} onChange={setPicked} reference={t.askingPrice} />
+          </div>
+          <div className="grid gap-2">
+            <p className="text-sm font-bold text-ink">{tx('طريقة دفع الكاش', 'How the cash is paid')}</p>
+            <CashPlanPicker value={nextPlan} onChange={setPlan} />
           </div>
           {t.role === 'buyer' && (
             <p className="text-xs text-muted text-center">
@@ -198,10 +205,10 @@ export const OfferThreadView: React.FC<{ thread: OfferThread; onChange: (t: Offe
             </p>
           )}
           <div className="flex gap-2">
-            <button disabled={busy} onClick={() => run(moving, amount)} className="btn-primary flex-1 min-h-11">
-              {busy ? tx('بنبعت...', 'Sending...') : tx('ابعت', 'Send')}
+            <button disabled={busy} onClick={() => run(moving, amount)} className="btn-primary flex-1 min-h-12">
+              {busy ? tx('بنبعت...', 'Sending...') : tx(`ابعت ${money(amount)}`, `Send ${money(amount)}`)}
             </button>
-            <button disabled={busy} onClick={() => setPicking(false)} className="btn-ghost min-h-11 px-4">
+            <button disabled={busy} onClick={() => setPicking(false)} className="btn-ghost min-h-12 px-4">
               {tx('إلغاء', 'Cancel')}
             </button>
           </div>
