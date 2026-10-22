@@ -193,19 +193,28 @@ export const RequestsProvider: React.FC<{ children: ReactNode }> = ({ children }
   };
 
   const createRequest: RequestsContextType['createRequest'] = async (form, uploads = {}, draft) => {
-    const { code, accessToken, request } = draft
-      ? { code: draft.code, accessToken: draft.token, request: await updateSellRequest(draft.code, draft.token, form) }
-      : await createSellRequest(form);
-    setStored((prev) => [{ code, token: accessToken }, ...prev.filter((s) => s.code !== code)]);
-
     const jobs: [DocType, File][] = [
       ...(uploads.contractPages ?? []).map((f): [DocType, File] => [DOC_TYPE.contract, f]),
       ...(uploads.paymentSchedule ? [[DOC_TYPE.schedule, uploads.paymentSchedule] as [DocType, File]] : []),
       ...(uploads.unitPlan ? [[DOC_TYPE.plan, uploads.unitPlan] as [DocType, File]] : []),
     ];
+    let failedUploads = 0;
+    let code: string;
+    let accessToken: string;
+    let request: SellRequestDto;
+    if (draft) {
+      // The papers are required, so they go up to the draft first; the API only accepts the submit once they're there.
+      // Uploads that fail throw here, and the draft stays a draft for the seller to try again.
+      for (const [type, file] of jobs) await uploadSellDocument(draft.code, draft.token, type, file);
+      ({ code, token: accessToken } = draft);
+      request = await updateSellRequest(draft.code, draft.token, form);
+    } else {
+      ({ code, accessToken, request } = await createSellRequest(form));
+      const results = await Promise.allSettled(jobs.map(([type, file]) => uploadSellDocument(code, accessToken, type, file)));
+      failedUploads = results.filter((r) => r.status === 'rejected').length;
+    }
+    setStored((prev) => [{ code, token: accessToken }, ...prev.filter((s) => s.code !== code)]);
     const photos = uploads.photos ?? [];
-    const results = await Promise.allSettled(jobs.map(([type, file]) => uploadSellDocument(code, accessToken, type, file)));
-    let failedUploads = results.filter((r) => r.status === 'rejected').length;
     // Photos one at a time, so they keep the order the seller picked (the first is the cover).
     for (const f of photos) {
       try {

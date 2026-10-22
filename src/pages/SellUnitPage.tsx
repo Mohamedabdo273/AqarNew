@@ -178,8 +178,11 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
       if (form.willingToDiscount && !form.discountAmount) e.push(tx('قيمة الخصم', 'Discount amount'));
       if (form.willingToDiscount && form.discountAmount >= form.paidAmount && form.paidAmount) e.push(tx('الخصم أكبر من المدفوع', 'Discount is more than what you paid'));
     }
-    // الصور والمستندات اختيارية — مش هنوقف البايع عشان صورة، بس لازم يوافق على القواعد
+    // الصور اختيارية، بس المستندات التلاتة لازم تترفع، ولازم يوافق على القواعد
     if (target === 4) {
+      if (!contractPageFiles.length) e.push(tx('صور العقد', 'Contract pages'));
+      if (!scheduleFile) e.push(tx('جدول سداد الأقساط', 'Payment schedule'));
+      if (!planFile) e.push(tx('بلان الوحدة', 'Unit plan'));
       if (!form.ackOwner || !form.ackNoOverprice || !form.ackDeclareDues) e.push(tx('الموافقة على القواعد التلاتة', 'Agree to the three rules'));
     }
     return e;
@@ -729,8 +732,8 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
 
             <p className="rounded-xl bg-brand-soft px-4 py-3 text-[15px] leading-relaxed text-brand-ink">
               {tx(
-                'المستندات دي بتخلّي المراجعة أسرع، ومش بتظهر لأي مشتري ولا بتتنشر.',
-                "These speed up the review. They are never shown to buyers or published — you can skip now and upload later from \"My account\".",
+                'المستندات دي لازم عشان نراجع وحدتك، ومش بتظهر لأي مشتري ولا بتتنشر.',
+                'We need these to review your unit. They are never shown to buyers or published.',
               )}
             </p>
 
@@ -742,6 +745,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               onChange={(v) => set('contractPages', v)}
               files={contractPageFiles}
               onFilesChange={setContractPageFiles}
+              required
             />
             <FilePick
               label={tx('جدول سداد الأقساط', 'Payment schedule')}
@@ -749,6 +753,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               value={form.paymentScheduleFile}
               onChange={(v) => set('paymentScheduleFile', v)}
               onFile={setScheduleFile}
+              required
             />
             <FilePick
               label={tx('صورة بلان الوحدة', 'Unit plan')}
@@ -756,6 +761,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               value={form.unitPlanFile}
               onChange={(v) => set('unitPlanFile', v)}
               onFile={setPlanFile}
+              required
             />
           {/* The three seller rules that matter most, agreed to right where they apply. */}
           <div className="rounded-xl bg-paper p-5 space-y-4">

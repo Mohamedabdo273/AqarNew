@@ -4,7 +4,7 @@ import { PageId, RealEstateUnit } from '../types';
 import { BRAND, whatsappLink } from '../config/brand';
 import { useLanguage } from '../context/LanguageContext';
 import { UnitCard } from '../components/UnitCard';
-import { pick } from '../lib/unitHelpers';
+import { buyerFee, cashPrice, deliveryLabel, fullMoney, monthlyInstallment, pick } from '../lib/unitHelpers';
 
 export type ThanksKind = 'sell' | 'statement' | 'viewing' | 'swap' | 'contact' | 'alert';
 
@@ -114,7 +114,74 @@ export const ThanksPage: React.FC<ThanksPageProps> = ({ kind, code, unit, sugges
             </button>
           </div>
         )}
-        {(kind === 'viewing' || kind === 'swap') && unit && (
+        {/* A booking: the unit's full figures, so the buyer has them in front of them before we call */}
+        {kind === 'viewing' && unit && (
+          <div className="mt-8 card overflow-hidden">
+            <div className="flex items-center gap-4 p-3 border-b border-line">
+              <img src={unit.images[0]} alt="" className="w-24 h-20 rounded-xl object-cover shrink-0" />
+              <div className="min-w-0">
+                <p className="font-bold text-lg text-ink truncate">{pick(language, unit.compound, unit.compoundEn)}</p>
+                <p className="text-sm text-muted truncate">{pick(language, unit.location, unit.locationEn)}</p>
+                <p className="num text-xs text-muted mt-0.5" dir="ltr">
+                  {unit.verificationCode}
+                </p>
+              </div>
+            </div>
+
+            {/* The money */}
+            <dl className="p-4 sm:p-5 grid gap-2.5 text-[15px]">
+              {[
+                { k: tx('المطلوب كاش دلوقتي', 'Cash now'), v: fullMoney(cashPrice(unit), language) },
+                { k: tx(`عمولتنا ${BRAND.buyerFeePercent}% (بعد التوقيع)`, `Our ${BRAND.buyerFeePercent}% fee (after signing)`), v: fullMoney(buyerFee(unit), language) },
+                // The real instalment as the contract has it (not the per-month figure the cards compare on).
+                {
+                  k: tx('القسط', 'Instalment'),
+                  v: unit.installmentFrequency
+                    ? `${fullMoney(unit.installmentValue, language)} · ${pick(language, unit.installmentFrequency, unit.installmentFrequencyEn)}`
+                    : fullMoney(monthlyInstallment(unit), language),
+                },
+                { k: tx('الباقي للمطور', 'Left to the developer'), v: fullMoney(unit.remainingAmount, language) },
+                ...((unit.overdueFinesAmount ?? 0) > 0
+                  ? [{ k: tx('متأخرات بتتخصم يوم التنازل', 'Arrears deducted on transfer day'), v: fullMoney(unit.overdueFinesAmount ?? 0, language) }]
+                  : []),
+              ].map((r) => (
+                <div key={r.k} className="flex items-baseline justify-between gap-3">
+                  <dt className="text-muted">{r.k}</dt>
+                  <dd className="num font-semibold text-ink text-end">{r.v}</dd>
+                </div>
+              ))}
+              <div className="mt-1 pt-3 border-t border-line flex items-baseline justify-between gap-3">
+                <dt className="font-bold text-ink">{tx('هتدفع إجمالي دلوقتي', 'Total you pay now')}</dt>
+                <dd className="num font-display text-xl font-bold text-ink">
+                  {fullMoney(cashPrice(unit) + buyerFee(unit), language)}
+                </dd>
+              </div>
+            </dl>
+
+            {/* The unit */}
+            <div className="px-4 sm:px-5 pb-5 flex flex-wrap gap-2">
+              {[
+                pick(language, unit.propertyType, unit.propertyTypeEn),
+                `${unit.areaM2} ${tx('م²', 'm²')}`,
+                unit.bedrooms > 0 ? tx(`${unit.bedrooms} غرف`, `${unit.bedrooms} beds`) : '',
+                unit.bathrooms > 0 ? tx(`${unit.bathrooms} حمام`, `${unit.bathrooms} baths`) : '',
+                unit.floor ? tx(`الدور ${unit.floor}`, `Floor ${unit.floor}`) : '',
+                pick(language, unit.finishing, unit.finishingEn),
+                deliveryLabel(unit, language),
+              ]
+                .filter(Boolean)
+                .map((t) => (
+                  <span key={t} className="num rounded-full bg-paper border border-line px-3 py-1 text-sm text-ink-soft">
+                    {t}
+                  </span>
+                ))}
+            </div>
+            <button onClick={() => onSelectUnit(unit)} className="w-full border-t border-line py-3 text-sm font-semibold text-brand hover:bg-paper">
+              {tx('افتح صفحة الوحدة', 'Open the unit page')}
+            </button>
+          </div>
+        )}
+        {kind === 'swap' && unit && (
           <button onClick={() => onSelectUnit(unit)} className="mt-8 w-full card p-3 flex items-center gap-4 text-start hover:shadow-lift transition-shadow">
             <img src={unit.images[0]} alt="" className="w-24 h-20 rounded-xl object-cover shrink-0" />
             <div className="min-w-0">

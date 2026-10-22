@@ -179,19 +179,23 @@ export const CheckBox: React.FC<{ checked: boolean; onChange: (v: boolean) => vo
 );
 
 /** `onFile` gets the picked File itself, for callers that upload it. */
-export const FilePick: React.FC<{ label: string; hint: string; value: string; onChange: (name: string) => void; onFile?: (file: File | null) => void }> = ({
+export const FilePick: React.FC<{ label: string; hint: string; value: string; onChange: (name: string) => void; onFile?: (file: File | null) => void; required?: boolean }> = ({
   label,
   hint,
   value,
   onChange,
   onFile,
+  required,
 }) => (
   <label className={`flex items-center gap-4 rounded-xl border-2 border-dashed p-4 cursor-pointer transition-colors ${value ? 'border-brand bg-brand-soft/50' : 'border-field-border hover:border-brand'}`}>
     <span className={`grid place-items-center w-11 h-11 rounded-xl shrink-0 ${value ? 'bg-brand text-white' : 'bg-brand-soft text-brand'}`}>
       {value ? <Check className="w-5 h-5" /> : <Upload className="w-5 h-5" />}
     </span>
     <span className="min-w-0">
-      <span className="block font-semibold text-ink">{label}</span>
+      <span className="block font-semibold text-ink">
+        {label}
+        {required && <span className="text-danger"> *</span>}
+      </span>
       <span className="block text-sm text-muted truncate">{value || hint}</span>
     </span>
     <input
@@ -217,7 +221,8 @@ export const FilePickMany: React.FC<{
   /** The picked Files, kept in the same order as `value`. */
   files?: File[];
   onFilesChange?: (files: File[]) => void;
-}> = ({ label, hint, max, value, onChange, files = [], onFilesChange }) => {
+  required?: boolean;
+}> = ({ label, hint, max, value, onChange, files = [], onFilesChange, required }) => {
   const full = value.length >= max;
   return (
     <div className={`rounded-xl border-2 border-dashed p-4 transition-colors ${value.length ? 'border-brand bg-brand-soft/50' : 'border-field-border'}`}>
@@ -227,7 +232,8 @@ export const FilePickMany: React.FC<{
         </span>
         <span className="min-w-0">
           <span className="block font-semibold text-ink">
-            {label} <span className="num text-sm font-normal text-muted">({value.length}/{max})</span>
+            {label}
+            {required && <span className="text-danger"> *</span>} <span className="num text-sm font-normal text-muted">({value.length}/{max})</span>
           </span>
           <span className="block text-sm text-muted truncate">{hint}</span>
         </span>
