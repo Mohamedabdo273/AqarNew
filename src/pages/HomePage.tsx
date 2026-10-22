@@ -987,7 +987,7 @@ const RegionsRow: React.FC<{ units: RealEstateUnit[]; onPick: (region: string) =
 
   return (
     <section className="page-wrap pt-10 sm:pt-12">
-      <h2 className="text-2xl sm:text-[2rem] font-bold text-brand">{tx('فين الفرص دلوقتي؟', 'Where the deals are')}</h2>
+      <h2 className="text-2xl sm:text-[2rem] font-bold text-brand">{tx('أقوى الـ Deals حسب المنطقة', 'Top deals by area')}</h2>
       <p className="mt-1 text-muted">{tx('دوس على المنطقة وشوف وحداتها', 'Tap a region to see its units')}</p>
 
       <div className="mt-6 -mx-4 px-4 sm:mx-0 sm:px-0 flex lg:justify-between gap-5 sm:gap-7 overflow-x-auto no-scrollbar pb-1">
