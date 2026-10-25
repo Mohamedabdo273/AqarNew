@@ -9,7 +9,7 @@ import { OfferThreadView } from './OfferThreadView';
 import { AmountPicker, CashPlanPicker } from './OfferPickers';
 
 /**
- * "فاوض على السعر" on a negotiable unit: a price from 90% of the asking cash up to asking − 10,000 plus how the cash
+ * "فاوض على السعر" on a negotiable unit: a price from 75% of the asking cash up to asking − 10,000 plus how the cash
  * is paid, then the negotiation itself once the offer is in. The owner sees a link to the offers on their unit instead.
  * If the API doesn't know about offers yet (not deployed), the panel simply stays hidden.
  */
@@ -35,7 +35,12 @@ export const OfferPanel: React.FC<{ unitId: string }> = ({ unitId }) => {
     };
   }, [unitId, user?.id]);
 
-  const ladder = useMemo(() => (state ? offerLadder(state.floorPrice, state.maxOffer, state.step, true) : []), [state]);
+  // Paying the cash in instalments can keep the full asking price — the ask is about how to pay, not how much.
+  const ladder = useMemo(() => {
+    if (!state) return [];
+    const base = offerLadder(state.floorPrice, state.maxOffer, state.step, true);
+    return plan === CASH_PLAN.installments && !base.includes(state.askingPrice) ? [...base, state.askingPrice] : base;
+  }, [state, plan]);
   if (!state || !state.negotiable) return null;
 
   const money = (v: number) => fullMoney(v, language);
@@ -125,7 +130,7 @@ export const OfferPanel: React.FC<{ unitId: string }> = ({ unitId }) => {
             <div className="grid gap-3">
               <p className="flex items-center gap-2 text-lg font-extrabold text-ink">
                 <span className="num grid place-items-center w-7 h-7 rounded-full bg-brand text-white text-sm font-bold shrink-0">1</span>
-                {tx('عايز تدفع كام كاش؟', 'How much cash do you offer?')}
+                {tx('عايز تدفع كام؟', 'How much do you offer?')}
               </p>
               <AmountPicker values={ladder} value={amount} onChange={setPicked} reference={state.askingPrice} />
             </div>
@@ -154,10 +159,17 @@ export const OfferPanel: React.FC<{ unitId: string }> = ({ unitId }) => {
                 <span className="text-sm text-muted">{tx('طريقة الدفع', 'Payment')}</span>
                 <span className="text-sm font-bold text-ink text-end">{cashPlanLabel(plan, tx)}</span>
               </div>
-              <div className="flex items-center justify-between gap-3 px-4 py-3 bg-emerald-50">
-                <span className="text-sm font-bold text-emerald-800">{tx('هتوفّر لو وافق', 'You save if accepted')}</span>
-                <span className="num text-lg font-extrabold text-emerald-700">{money(state.askingPrice - amount)}</span>
-              </div>
+              {amount < state.askingPrice ? (
+                <div className="flex items-center justify-between gap-3 px-4 py-3 bg-emerald-50">
+                  <span className="text-sm font-bold text-emerald-800">{tx('هتوفّر لو وافق', 'You save if accepted')}</span>
+                  <span className="num text-lg font-extrabold text-emerald-700">{money(state.askingPrice - amount)}</span>
+                </div>
+              ) : (
+                // Full price, cash in instalments: the ask is only about how to pay.
+                <p className="px-4 py-3 bg-brand-soft text-sm font-semibold text-brand-ink">
+                  {tx('بالسعر المطلوب — بتطلب بس تقسّط الكاش', 'At the asking price — you only ask to pay the cash in instalments')}
+                </p>
+              )}
             </div>
 
             <ol className="grid gap-2">

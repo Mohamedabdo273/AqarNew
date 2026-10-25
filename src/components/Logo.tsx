@@ -8,12 +8,10 @@ interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-/* لوجو DEAL: الحروف مباني، حرف برتقاني وحرف كحلي، وتحتها REAL ESTATE.
-   على الخلفيات الغامقة (الفوتر) الكحلي بيبقى أبيض. */
-const LOGO_SRC = '/brand/deal-logo.svg?v=4';
-const LOGO_SRC_LIGHT = '/brand/deal-logo-white.svg?v=4';
-const MARK_SRC = '/brand/forsa-mark.png';
-const MARK_SRC_LIGHT = '/brand/forsa-mark-white.png';
+/* لوجو DEAL النهائي زي ما هو: البادج البرتقالي، والبيت والإيدين وDEAL والسطر اللي تحته بالأبيض.
+   بخلفيته البرتقالي فبيبان على الفاتح والغامق، فمفيش نسخة تانية للفوتر. (من FINAL LOGO.pdf) */
+const LOGO_SRC = '/brand/deal-badge.svg?v=3';
+const LOGO_SRC_LIGHT = LOGO_SRC;
 
 /** العلامة: لوجو DEAL */
 export const LogoMark: React.FC<{ size?: number; className?: string; light?: boolean }> = ({
@@ -32,7 +30,7 @@ export const LogoMark: React.FC<{ size?: number; className?: string; light?: boo
 );
 
 /** عرض اللوجو — الارتفاع بيتحسب لوحده من نسبة الصورة. */
-const SIZES = { sm: 'h-24', md: 'h-20 sm:h-24', lg: 'h-28' };
+const SIZES = { sm: 'h-16', md: 'h-16 sm:h-[5.5rem]', lg: 'h-24' };
 
 /** اللوجو الكامل: DEAL + REAL ESTATE. */
 export const Logo: React.FC<LogoProps> = ({ onClick, className = '', size = 'md', light = false }) => (
@@ -48,8 +46,8 @@ export const Logo: React.FC<LogoProps> = ({ onClick, className = '', size = 'md'
     <img
       src={light ? LOGO_SRC_LIGHT : LOGO_SRC}
       alt="DEAL — Real Estate Solutions"
-      width={600}
-      height={285}
+      width={688}
+      height={237}
       className={`${SIZES[size]} w-auto shrink-0 transition-transform duration-200 group-hover:scale-105`}
     />
   </div>

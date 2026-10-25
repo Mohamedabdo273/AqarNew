@@ -4,7 +4,7 @@ type Tx = (ar: string, en: string) => string;
 
 /**
  * The amounts a slider can land on between `min` and `max`.
- * The first offer walks up from the floor in fixed steps (90%, 90% + 10,000, …); counters and raises snap to round
+ * The first offer walks up from the floor in fixed steps (75%, 75% + 10,000, …); counters and raises snap to round
  * figures, falling back to finer steps when the two sides are already close.
  */
 export function offerLadder(min: number, max: number, step: number, anchored = false): number[] {
