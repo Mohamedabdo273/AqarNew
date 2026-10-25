@@ -10,7 +10,7 @@ interface LogoProps {
 
 /* لوجو DEAL النهائي زي ما هو: البادج البرتقالي، والبيت والإيدين وDEAL والسطر اللي تحته بالأبيض.
    بخلفيته البرتقالي فبيبان على الفاتح والغامق، فمفيش نسخة تانية للفوتر. (من FINAL LOGO.pdf) */
-const LOGO_SRC = '/brand/deal-badge.svg?v=3';
+const LOGO_SRC = '/brand/deal-badge.svg?v=4';
 const LOGO_SRC_LIGHT = LOGO_SRC;
 
 /** العلامة: لوجو DEAL */

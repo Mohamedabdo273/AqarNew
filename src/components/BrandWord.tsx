@@ -5,9 +5,9 @@ export type BrandTone = 'color' | 'onDark' | 'onAccent';
 
 // The final badge reads on every background (white letters on its own orange), so all tones use it.
 const SRC: Record<BrandTone, string> = {
-  color: '/brand/deal-badge.svg?v=3',
-  onDark: '/brand/deal-badge.svg?v=3',
-  onAccent: '/brand/deal-badge.svg?v=3',
+  color: '/brand/deal-badge.svg?v=4',
+  onDark: '/brand/deal-badge.svg?v=4',
+  onAccent: '/brand/deal-badge.svg?v=4',
 };
 
 /** The DEAL logo standing in for the word "DEAL" inside a sentence — about one capital letter tall. */
