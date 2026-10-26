@@ -141,7 +141,7 @@ export const VerifyPage: React.FC<VerifyPageProps> = ({ initialCode, onSelectUni
             </button>
           </div>
           <p className="px-5 pb-5 text-xs text-muted">
-            {tx('وبرضه: ما تدفعش عربون لأي حد. الفلوس بتتدفع يوم التنازل في مقر المطور بس.', 'And still: never pay a deposit. Money changes hands only on transfer day, at the developer.')}
+            {tx('وبرضه: تأكد دائماً من صحة البيانات ومطابقتها للعقد المعتمد لدى المطور.', 'And always make sure details are accurate and match the contract verified at the developer.')}
           </p>
         </div>
       )}

@@ -51,7 +51,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
 
   const promises = [
     { icon: Eye, t: tx('وضوح', 'Clarity'), d: tx('كل رقم قدامك: المدفوع، الباقي، المديونية، والرسوم.', 'Every number upfront: paid, remaining, dues, fees.') },
-    { icon: Lock, t: tx('أمان', 'Safety'), d: tx('مفيش فلوس بتتحرك غير في مقر المطور يوم التنازل.', 'No money moves except at the developer on transfer day.') },
+    { icon: Lock, t: tx('أمان', 'Safety'), d: tx('إجراءات موثقة تضمن حقوق الطرفين وتنازل رسمي معتمد.', 'Documented procedures protecting both parties and official transfer.') },
     { icon: Zap, t: tx('سرعة', 'Speed'), d: tx('مراجعة خلال 24 ساعة، ومتابعة لحد ما تقبض.', 'Review within 24h, and support until you’re paid.') },
     { icon: Wallet, t: tx('عدل', 'Fairness'), d: tx(`البايع ما بيدفعش حاجة، والمشتري ${BRAND.buyerFeePercent}% بس.`, `Sellers pay nothing; buyers only ${BRAND.buyerFeePercent}%.`) },
   ];

@@ -1176,7 +1176,7 @@ const ThreeWays: React.FC<{ onSell: () => void }> = ({ onSell }) => {
     },
     {
       k: tx('فلوسك في أمان؟', 'Is the money safe?'),
-      v: [tx('—', '—'), tx('عربون وكاش في إيد', 'Deposits and cash in hand'), tx('مفيش فلوس قبل التنازل، في مقر المطور', 'No money before transfer, at the developer')],
+      v: [tx('—', '—'), tx('معاملات فردية وتداول يدوي', 'Individual unregulated deals'), tx('تنازل رسمي موثق في مقر المطور', 'Official documented transfer at the developer')],
       bad: [false, true],
     },
     {
@@ -1466,7 +1466,7 @@ const HowItWorks: React.FC<{ tab: HomeRole }> = ({ tab }) => {
 const RulesPreview: React.FC<{ onOpenRules: (tab: 'seller' | 'buyer') => void }> = ({ onOpenRules }) => {
   const { tx } = useLanguage();
   const rules = [
-    { icon: HandCoins, t: tx('مفيش فلوس قبل التنازل', 'No money before transfer'), d: tx('ولا عربون ولا مقدم في إيد حد', 'No deposit, no cash in anyone’s hand') },
+    { icon: ShieldCheck, t: tx('تنازل رسمي موثّق', 'Official documented transfer'), d: tx('إجراءات رسمية تضمن حقوق الطرفين', 'Official procedures protecting both parties') },
     { icon: Landmark, t: tx('شيك مصرفي في مقر المطور', 'Bank cheque at the developer'), d: tx('الفلوس والتنازل في نفس المكان والوقت', 'Payment and transfer at the same time and place') },
     { icon: Ban, t: tx('صفر أوفر برايس', 'Zero overprice'), d: tx('السعر هو اللي البايع دفعه، مش جنيه زيادة', 'The price is what the seller paid') },
     { icon: FileText, t: tx('المديونية مكتوبة', 'Dues in writing'), d: tx('أي متأخرات بتظهر في الإعلان', 'Any overdues shown on the listing') },

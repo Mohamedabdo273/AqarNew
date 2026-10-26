@@ -48,7 +48,7 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
 
   const golden: Rule[] = [
     { icon: Ban, t: tx('صفر أوفر برايس', 'Zero overprice'), d: tx('السعر هو اللي البايع دفعه. مش جنيه زيادة.', 'The price is what the seller paid. Not a pound more.') },
-    { icon: HandCoins, t: tx('مفيش فلوس قبل التنازل', 'No money before transfer'), d: tx('كل الفلوس بتتدفع في مقر المطور يوم التنازل.', 'All money changes hands at the developer on transfer day.') },
+    { icon: ShieldCheck, t: tx('تنازل رسمي موثّق', 'Official documented transfer'), d: tx('إجراءات موثقة تضمن حقوق الطرفين وسداد المبالغ بأمان.', 'Documented procedures protecting both parties and payment safety.') },
     { icon: FileCheck2, t: tx('كل حاجة مكتوبة', 'Everything in writing'), d: tx('المديونية والرسوم مكتوبة في الإعلان قبل ما تقرر.', 'Dues and fees are listed before you decide.') },
     { icon: BadgeCheck, t: tx('كل رقم معروف مصدره', 'Every number shows its source'), d: tx('اللي اتأكدنا منه بالمستندات مكتوب عليه "متأكد"، والتقديري مكتوب عليه "تقديري".', 'Figures checked against documents say "verified"; estimates say "estimate".') },
   ];
@@ -60,7 +60,6 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
     { icon: AlertTriangle, t: tx('قول على المديونية', 'Declare all dues'), d: tx('أي أقساط متأخرة أو غرامات لازم تتكتب. لو اتخبّت، الإعلان بيتشال.', 'Any overdue installments or fines must be listed. Hidden dues get the listing removed.') },
     { icon: FileSearch, t: tx('مراجعة قبل النشر', 'Reviewed before listing'), d: tx('بنراجع العقد وكشف الحساب مع المطور خلال 24 ساعة.', 'We check the contract and statement with the developer within 24h.') },
     { icon: Building2, t: tx('تقبض في مقر المطور', 'Paid at the developer'), d: tx('بشيك مصرفي، وشيكاتك القديمة بترجعلك في نفس اليوم.', 'By bank cheque, and your old cheques are returned the same day.') },
-    { icon: EyeOff, t: tx('تقدر تختار العرض الخاص', 'Private listing if you want'), d: tx('وحدتك ما تظهرش في الموقع خالص، وبنعرضها بس على مشترين متحقق منهم ومناسبين ليها.', "Your unit isn't shown on the site at all — only to vetted buyers who match it.") },
     { icon: MessageSquareHeart, t: tx('نصيحة بصراحة', 'Honest advice'), d: tx('بنعرض عليك كل الاختيارات، ولو الأحسن ليك إنك تكمّل تعاقدك هنقولك.', "We lay out every option — and if you're better off keeping your contract, we'll say so.") },
     { icon: Undo2, t: tx('تقدر تنسحب', 'You can withdraw'), d: tx('قبل التوقيع تشيل إعلانك في أي وقت ومن غير تكلفة.', 'Remove your listing any time before signing, free.') },
   ];
@@ -78,14 +77,14 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
   const forbidden =
     tab === 'seller'
       ? [
-          tx('تستلم عربون أو أي فلوس برّه يوم التنازل', 'Taking a deposit or any money outside transfer day'),
-          tx('تطلب أي مبلغ فوق اللي دفعته', 'Asking for anything above what you paid'),
-          tx('تسلّم أصل العقد أو الشيكات لحد قبل التنازل', 'Handing over the original contract or cheques before transfer'),
+          tx('تطلب أي مبلغ فوق اللي دفعته (ممنوع الأوفر برايس)', 'Asking for anything above what you paid (no overprice)'),
+          tx('إخفاء أي أقساط متأخرة أو غرامات على الوحدة', 'Hiding any overdue installments or fines on the unit'),
+          tx('تسلّم أصل العقد أو الشيكات لحد قبل التنازل الرسمي', 'Handing over the original contract or cheques before official transfer'),
         ]
       : [
-          tx('تدفع عربون أو أي فلوس قبل التنازل في مقر المطور', 'Paying a deposit or anything before the transfer at the developer'),
-          tx('تحوّل فلوس على حساب شخصي', 'Transferring money to a personal account'),
+          tx('تحوّل فلوس على حسابات شخصية مجهولة دون إيصالات', 'Transferring money to unknown personal accounts without receipts'),
           tx(`تصدّق حد بيقول إنه من طرفنا من غير ما تتأكد على ${BRAND.hotline}`, `Trusting anyone claiming to be us without checking on ${BRAND.hotline}`),
+          tx('التنازل دون الرجوع لمقر المطور العقاري والتحقق من المديونية', 'Transferring without the developer office and verifying dues'),
         ];
 
   const dealDay = [

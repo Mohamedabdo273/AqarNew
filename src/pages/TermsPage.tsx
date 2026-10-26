@@ -17,7 +17,7 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
   const summary = [
     tx('احنا وسيط بنوصّل البايع بالمشتري، مش طرف في العقد', "We connect sellers and buyers; we're not a party to the contract"),
     tx('البايع ما بيدفعش عمولة، والمشتري بيدفع ' + fee + '% بعد التوقيع', `Sellers pay no fee; buyers pay ${fee}% after signing`),
-    tx('مفيش أوفر برايس، ومفيش فلوس قبل التنازل في مقر المطور', 'No overprice, and no money before the transfer at the developer'),
+    tx('مفيش أوفر برايس، والتنازل رسمي بمقر المطور', 'No overprice, and official transfer at the developer'),
     tx('أي بيانات غلط أو مديونية متخبية = الإعلان بيتشال', 'False data or hidden dues = listing removed'),
   ];
 
@@ -69,7 +69,6 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
         tx('• كل البيانات صحيحة: السعر، المدفوع، الأقساط، والمستندات.', '• All data is accurate: price, amount paid, installments and documents.'),
         tx('• يذكر أي أقساط متأخرة أو غرامات أو أي نزاع على الوحدة.', '• Declare any overdue installments, fines or disputes.'),
         tx('• المطلوب من المشتري هو اللي البايع دفعه بس (ناقص أي خصم يوافق عليه). ممنوع أي أوفر برايس.', '• The buyer is asked only for what the seller paid (less any agreed discount). No overprice.'),
-        tx('• ما يستلمش عربون أو أي فلوس قبل التنازل في مقر المطور.', '• Take no deposit or money before the transfer at the developer.'),
         tx('• ما يبيعش الوحدة لحد تاني وهي في مرحلة اتفاق معانا من غير ما يبلّغنا.', '• Not sell the unit elsewhere during an agreement stage without telling us.'),
         tx('• يقدر يسحب إعلانه في أي وقت قبل توقيع التنازل من غير تكلفة.', '• May withdraw the listing any time before signing, free of charge.'),
       ],
@@ -81,7 +80,7 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
         tx('• يدفع للبايع المبلغ المتفق عليه بشيك مصرفي يوم التنازل في مقر المطور.', '• Pay the agreed amount to the seller by bank cheque on transfer day at the developer.'),
         tx('• يكمّل الأقساط الباقية للمطور بنفس نظام العقد، أو زي ما المطور يحدد.', "• Continue the remaining installments per the contract or as the developer sets."),
         tx('• يتحمّل رسوم التنازل عند المطور لو الإعلان بيقول كده.', '• Pay the developer transfer fee when the listing says so.'),
-        tx('• ما يدفعش أي فلوس لحد قبل التنازل، ولا يحوّل على حساب شخصي.', '• Pay nobody anything before the transfer, and never to a personal account.'),
+        tx('• عدم تحويل أموال على حسابات شخصية مجهولة دون إيصالات وتوثيق.', '• Do not transfer money to personal accounts without official documentation.'),
       ],
     },
     {

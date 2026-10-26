@@ -528,7 +528,6 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
 
           <ul className="card p-4 grid gap-2.5 text-sm">
             {[
-              { icon: Ban, t: tx('ما تدفعش عربون لأي حد', 'Never pay anyone a deposit') },
               { icon: Percent, t: tx(`عمولتنا ${BRAND.buyerFeePercent}% بعد توقيع التنازل بس`, `Our ${BRAND.buyerFeePercent}% fee only after signing`) },
               { icon: Eye, t: tx('بعد الحجز بنكلّمك خلال يوم عمل نكمّل الإجراءات', 'After booking we call within one business day to go ahead') },
             ].map((r) => (

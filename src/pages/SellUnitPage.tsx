@@ -928,7 +928,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               <b>{tx('أنا المالك ومش سمسار ولا وسيط', "I'm the owner, not a broker or middleman")}</b> — {tx('العقد باسمي أو معايا توكيل رسمي. لو اتضح إني وسيط، الوحدة بتتشال نهائياً.', "the contract is in my name or I hold a formal POA. If I turn out to be a middleman, the unit is removed for good.")}
             </CheckBox>
             <CheckBox checked={form.ackNoOverprice} onChange={(v) => set('ackNoOverprice', v)}>
-              <b>{tx('مفيش أوفر برايس', 'No overprice')}</b> — {tx('هاخد اللي دفعته بس، ومش هاخد عربون برّه', "I'll take only what I paid, and no side deposits")}
+              <b>{tx('مفيش أوفر برايس', 'No overprice')}</b> — {tx('هاخد اللي دفعته بس (سعر العقد الأصلي)', "I'll take only what I paid (original contract price)")}
             </CheckBox>
             <CheckBox checked={form.ackDeclareDues} onChange={(v) => set('ackDeclareDues', v)}>
               <b>{tx('هقول على المديونية', "I'll declare dues")}</b> — {tx('أي أقساط متأخرة أو غرامات', 'any overdue installments or fines')}
