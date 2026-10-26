@@ -13,8 +13,13 @@ export interface SellForm {
   // Basics — phase 1
   developer: string;
   compound: string;
-  region: RealEstateUnit['region'] | '';
+  /** المنطقة ← الموقع ← المنطقة التفصيلية (اختيارية) بالـ id (GET /api/locations/…)؛ الأسامي جنبهم للعرض بس. */
+  regionId: number | null;
+  subAreaId: number | null;
+  districtId: number | null;
+  region: string;
   subArea: string;
+  district: string;
   propertyCategory: PropertyCategory | '';
   propertyType: PropertyType | '';
   contractPrice: number;
@@ -89,8 +94,12 @@ export interface SellForm {
 export const EMPTY_SELL_FORM: SellForm = {
   developer: '',
   compound: '',
+  regionId: null,
+  subAreaId: null,
+  districtId: null,
   region: '',
   subArea: '',
+  district: '',
   propertyCategory: '',
   propertyType: '',
   contractPrice: 0,
@@ -148,6 +157,10 @@ export const EMPTY_SELL_FORM: SellForm = {
   receiptFile: '',
   idFile: '',
 };
+
+/** A form saved before places had ids: its place has to be picked again from the lists. */
+export const fitPlace = (f: SellForm): SellForm =>
+  f.regionId ? f : { ...f, regionId: null, subAreaId: null, districtId: null, region: '', subArea: '', district: '' };
 
 export const isValidPhone = (phone: string) => /^01\d{9}$/.test(phone.replace(/\s/g, ''));
 

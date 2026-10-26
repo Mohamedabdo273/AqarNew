@@ -110,10 +110,16 @@ export interface RealEstateUnit {
   compoundEn?: string;
   location: string;
   locationEn?: string;
-  region: 'قاهرة' | 'جيزة' | 'إسكندرية' | 'دلتا' | 'الصعيد' | 'مدن القناة' | 'الساحل الشمالي' | 'العين السخنة';
-  /** المنطقة التفصيلية جوه الإقليم — من SUB_AREAS */
-  subArea?: string;
+  /** المنطقة ← الموقع ← المنطقة التفصيلية (اختيارية): الـ ids من GET /api/locations/…، والأسامي جنبهم للعرض. */
+  regionId?: number;
+  region: string;
   regionEn?: string;
+  subAreaId?: number;
+  subArea?: string;
+  subAreaEn?: string;
+  districtId?: number;
+  district?: string;
+  districtEn?: string;
   propertyType: PropertyType;
   /** بيتشتق من النوع — مش بيتخزن في كل وحدة. */
   propertyCategory?: PropertyCategory;

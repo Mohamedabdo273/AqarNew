@@ -7,7 +7,8 @@ import { UnitCard } from '../components/UnitCard';
 import { Pagination } from '../components/Pagination';
 import { Field, MoneyInput, Toggle } from '../components/sell/FormBits';
 import { BRAND, whatsappLink } from '../config/brand';
-import { PROPERTY_TYPES, REGIONS, buyerFee, cashPrice, currency, money, monthlyInstallment, pick } from '../lib/unitHelpers';
+import { PROPERTY_TYPES, buyerFee, cashPrice, currency, money, monthlyInstallment, pick } from '../lib/unitHelpers';
+import { placeName, useRegions } from '../lib/places';
 import { isResidential, isValidPhone } from '../lib/sellForm';
 import { errorText, sendSwap } from '../services/api';
 
@@ -32,7 +33,8 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
   const [myMonthly, setMyMonthly] = useState(0);
   const [hasArrears, setHasArrears] = useState(false);
   const [arrearsAmount, setArrearsAmount] = useState(0);
-  const [wantRegion, setWantRegion] = useState('');
+  const regions = useRegions();
+  const [wantRegion, setWantRegion] = useState<number | null>(null);
   // 'residential' is a group, not a type: most people swapping out of a home want another home.
   const [wantType, setWantType] = useState('residential');
   const [lowerOnly, setLowerOnly] = useState(true);
@@ -53,7 +55,7 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
     () =>
       units
         .filter((u) => u.eligibleForSwap === true)
-        .filter((u) => !wantRegion || u.region === wantRegion)
+        .filter((u) => !wantRegion || u.regionId === wantRegion)
         .filter((u) => !wantType || (wantType === 'residential' ? isResidential(u.propertyType) : u.propertyType === wantType))
         .filter((u) => !filterLower || monthlyInstallment(u) < myMonthly)
         .sort((a, b) =>
@@ -158,12 +160,12 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
             onChange={setLowerOnly}
           />
           <div className="flex flex-wrap gap-2">
-            <button onClick={() => setWantRegion('')} className={wantRegion === '' ? 'chip-on' : 'chip-off'}>
+            <button onClick={() => setWantRegion(null)} className={wantRegion === null ? 'chip-on' : 'chip-off'}>
               {tx('أي منطقة', 'Any area')}
             </button>
-            {REGIONS.map((r) => (
-              <button key={r.ar} onClick={() => setWantRegion(r.ar)} className={wantRegion === r.ar ? 'chip-on' : 'chip-off'}>
-                {language === 'ar' ? r.ar : r.en}
+            {regions.map((r) => (
+              <button key={r.id} onClick={() => setWantRegion(r.id)} className={wantRegion === r.id ? 'chip-on' : 'chip-off'}>
+                {placeName(r, language)}
               </button>
             ))}
           </div>

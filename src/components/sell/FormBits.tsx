@@ -398,6 +398,107 @@ export function MultiSelect<T extends string>({
   );
 }
 
+/** A single-choice drop-down with a search box — for long lists (some locations have 50+ districts). */
+export function SearchSelect({
+  id,
+  options,
+  value,
+  onChange,
+  placeholder,
+  clearLabel,
+  disabled,
+}: {
+  id?: string;
+  /** `search` = extra text to match (e.g. the other language's name). */
+  options: { value: string; label: string; search?: string }[];
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+  /** First row that empties the choice (the field is optional). */
+  clearLabel?: string;
+  disabled?: boolean;
+}) {
+  const { tx } = useLanguage();
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: MouseEvent) => box.current && !box.current.contains(e.target as Node) && setOpen(false);
+    const esc = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
+    document.addEventListener('mousedown', close);
+    document.addEventListener('keydown', esc);
+    return () => {
+      document.removeEventListener('mousedown', close);
+      document.removeEventListener('keydown', esc);
+    };
+  }, [open]);
+  const shown = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return q ? options.filter((o) => `${o.label} ${o.search ?? ''}`.toLowerCase().includes(q)) : options;
+  }, [options, query]);
+  const picked = options.find((o) => o.value === value);
+  const pick = (v: string) => {
+    onChange(v);
+    setOpen(false);
+    setQuery('');
+  };
+
+  return (
+    <div ref={box} className="relative">
+      <button
+        id={id}
+        type="button"
+        disabled={disabled}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className="field flex items-center justify-between gap-2 text-start disabled:opacity-60"
+      >
+        <span className={`truncate ${picked ? 'text-ink' : 'text-muted'}`}>{picked?.label ?? (value || placeholder)}</span>
+        <ChevronDown className={`w-4 h-4 shrink-0 text-ink-soft transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="absolute z-20 mt-1.5 w-full rounded-xl border border-line bg-surface p-1.5 shadow-lift">
+          {options.length > 8 && (
+            <input
+              autoFocus
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={tx('دوّر…', 'Search…')}
+              aria-label={tx('دوّر', 'Search')}
+              className="field mb-1.5 py-2"
+            />
+          )}
+          <ul role="listbox" className="max-h-64 overflow-y-auto">
+            {clearLabel && !query && (
+              <li role="option" aria-selected={!value}>
+                <button type="button" onClick={() => pick('')} className="w-full rounded-lg px-3 py-2.5 text-start text-[15px] text-muted hover:bg-paper">
+                  {clearLabel}
+                </button>
+              </li>
+            )}
+            {shown.map((o) => (
+              <li key={o.value} role="option" aria-selected={o.value === value}>
+                <button
+                  type="button"
+                  onClick={() => pick(o.value)}
+                  className="w-full flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-start text-[15px] text-ink hover:bg-paper"
+                >
+                  {o.label}
+                  {o.value === value && <Check className="w-4 h-4 shrink-0 text-brand" strokeWidth={3} />}
+                </button>
+              </li>
+            ))}
+            {!shown.length && <li className="px-3 py-2.5 text-sm text-muted">{tx('مفيش نتايج', 'No matches')}</li>}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export const Group: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
   <fieldset className="space-y-5">
     <legend className="text-sm font-bold text-muted uppercase tracking-wide mb-4">{title}</legend>

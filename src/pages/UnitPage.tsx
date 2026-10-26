@@ -45,6 +45,7 @@ import {
   money,
   monthlyInstallment,
   pick,
+  placeLabel,
   savingsAmount,
   savingsPercent,
   VIEW_OPTIONS,
@@ -61,12 +62,14 @@ interface UnitPageProps {
   onBooked: (unit: RealEstateUnit) => void;
 }
 
-/** Units to suggest next to this one: same area first, then the closest cash amount. */
+/** Units to suggest next to this one: same district, then location, then region, then the closest cash amount. */
 export const similarUnits = (unit: RealEstateUnit, units: RealEstateUnit[], n = 3) =>
   units
     .filter((u) => u.id !== unit.id)
     .sort(
       (a, b) =>
+        Number(!!unit.districtId && b.districtId === unit.districtId) - Number(!!unit.districtId && a.districtId === unit.districtId) ||
+        Number(!!unit.subAreaId && b.subAreaId === unit.subAreaId) - Number(!!unit.subAreaId && a.subAreaId === unit.subAreaId) ||
         Number(b.region === unit.region) - Number(a.region === unit.region) ||
         Math.abs(cashPrice(a) - cashPrice(unit)) - Math.abs(cashPrice(b) - cashPrice(unit)),
     )
@@ -239,6 +242,12 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
         </button>
         <span aria-hidden>/</span>
         <span>{pick(language, unit.region, unit.regionEn)}</span>
+        {unit.subArea && (
+          <>
+            <span aria-hidden>/</span>
+            <span>{placeLabel(unit, language)}</span>
+          </>
+        )}
         <span aria-hidden>/</span>
         <span className="text-ink-soft font-medium truncate max-w-[16rem]">{compound}</span>
       </nav>

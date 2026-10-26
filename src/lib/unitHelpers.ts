@@ -69,18 +69,6 @@ export const CANCELLATION_PENALTY_MIN_RATE = 0.1;
 export const cancellationLoss = (contractPrice: number, paid: number, rate = CANCELLATION_PENALTY_RATE) =>
   Math.min(paid, Math.round(contractPrice * rate));
 
-export const REGIONS: { ar: RealEstateUnit['region']; en: string }[] = [
-  { ar: 'قاهرة', en: 'Cairo' },
-  { ar: 'جيزة', en: 'Giza' },
-  { ar: 'الساحل الشمالي', en: 'North Coast' },
-  { ar: 'العين السخنة', en: 'Ain Sokhna' },
-  { ar: 'إسكندرية', en: 'Alexandria' },
-  { ar: 'دلتا', en: 'Delta' },
-  { ar: 'الصعيد', en: 'Upper Egypt' },
-  { ar: 'مدن القناة', en: 'Canal cities' },
-];
-
-/** المناطق التفصيلية تحت كل إقليم. عدّل القوايم دي وبس — الفلاتر والفورم بيقروا منها. */
 /** The views a unit can look out on (pick any). */
 export const VIEW_OPTIONS: { key: import('../types').UnitView; ar: string; en: string }[] = [
   { key: 'open', ar: 'فيو مفتوح', en: 'Open view' },
@@ -91,79 +79,10 @@ export const VIEW_OPTIONS: { key: import('../types').UnitView; ar: string; en: s
   { key: 'clubhouse', ar: 'كلوب هاوس', en: 'Club house' },
 ];
 
-export const SUB_AREAS: Record<RealEstateUnit['region'], { ar: string; en: string }[]> = {
-  'قاهرة': [
-    { ar: 'التجمع والقاهرة الجديدة', en: 'New Cairo & Fifth Settlement' },
-    { ar: 'العاصمة الإدارية', en: 'New Capital' },
-    { ar: 'مدينة نصر ومصر الجديدة', en: 'Nasr City & Heliopolis' },
-    { ar: 'المعادي وحلوان', en: 'Maadi & Helwan' },
-    { ar: 'مدينتي والشروق والعبور', en: 'Madinaty, Shorouk & Obour' },
-    { ar: 'المستقبل سيتي', en: 'Mostakbal City' },
-    { ar: 'وسط البلد والزمالك', en: 'Downtown & Zamalek' },
-    { ar: 'شبرا والقليوبية', en: 'Shubra & Qalyubia' },
-  ],
-  'جيزة': [
-    { ar: 'الشيخ زايد', en: 'Sheikh Zayed' },
-    { ar: 'الشيخ زايد الجديدة', en: 'New Zayed' },
-    { ar: '6 أكتوبر وحدائق أكتوبر', en: '6th of October & October Gardens' },
-    { ar: 'المهندسين والدقي', en: 'Mohandessin & Dokki' },
-    { ar: 'الهرم وفيصل', en: 'Haram & Faisal' },
-  ],
-  'إسكندرية': [
-    { ar: 'سموحة وسيدي جابر', en: 'Smouha & Sidi Gaber' },
-    { ar: 'سان ستيفانو وجليم', en: 'San Stefano & Gleem' },
-    { ar: 'المنتزه والمعمورة', en: 'Montaza & Maamoura' },
-    { ar: 'ميامي وسيدي بشر', en: 'Miami & Sidi Bishr' },
-    { ar: 'العجمي والبيطاش', en: 'Agami & Bitash' },
-    { ar: 'برج العرب الجديدة', en: 'New Borg El Arab' },
-    { ar: 'كينج مريوط', en: 'King Mariout' },
-  ],
-  'دلتا': [
-    { ar: 'المنصورة', en: 'Mansoura' },
-    { ar: 'طنطا', en: 'Tanta' },
-    { ar: 'المحلة الكبرى', en: 'Mahalla' },
-    { ar: 'دمياط ورأس البر', en: 'Damietta & Ras El Bar' },
-    { ar: 'الزقازيق', en: 'Zagazig' },
-    { ar: 'بنها', en: 'Banha' },
-    { ar: 'دمنهور', en: 'Damanhour' },
-    { ar: 'كفر الشيخ', en: 'Kafr El Sheikh' },
-  ],
-  'الصعيد': [
-    { ar: 'الفيوم', en: 'Fayoum' },
-    { ar: 'بني سويف', en: 'Beni Suef' },
-    { ar: 'المنيا', en: 'Minya' },
-    { ar: 'أسيوط', en: 'Asyut' },
-    { ar: 'سوهاج', en: 'Sohag' },
-    { ar: 'قنا', en: 'Qena' },
-    { ar: 'الأقصر', en: 'Luxor' },
-    { ar: 'أسوان', en: 'Aswan' },
-  ],
-  'مدن القناة': [
-    { ar: 'بورسعيد', en: 'Port Said' },
-    { ar: 'الإسماعيلية', en: 'Ismailia' },
-    { ar: 'السويس', en: 'Suez' },
-  ],
-  'العين السخنة': [
-    { ar: 'الجلالة', en: 'Galala' },
-    { ar: 'بورتو السخنة', en: 'Porto Sokhna' },
-    { ar: 'طريق السويس – الزعفرانة', en: 'Suez–Zaafarana Road' },
-    { ar: 'الزعفرانة', en: 'Zaafarana' },
-  ],
-  'الساحل الشمالي': [
-    { ar: 'سيدي عبد الرحمن', en: 'Sidi Abdel Rahman' },
-    { ar: 'رأس الحكمة', en: 'Ras El Hekma' },
-    { ar: 'العلمين الجديدة', en: 'New Alamein' },
-    { ar: 'مارينا', en: 'Marina' },
-    { ar: 'الضبعة وفوكا', en: 'Dabaa & Fouka' },
-    { ar: 'سيدي كرير والهانوفيل', en: 'Sidi Krir' },
-    { ar: 'مرسى مطروح', en: 'Marsa Matrouh' },
-  ],
-};
-
-/** المناطق التفصيلية للأقاليم المختارة — لو مفيش اختيار، بتجيب الكل. */
-export const subAreasFor = (regions: string[]) => {
-  const keys = regions.length ? regions : Object.keys(SUB_AREAS);
-  return keys.flatMap((r) => SUB_AREAS[r as RealEstateUnit['region']] ?? []);
+/** "التجمع الخامس، القاهرة الجديدة" — أدق مكان معروف للوحدة، من غير تكرار المنطقة. */
+export const placeLabel = (unit: Pick<RealEstateUnit, 'region' | 'regionEn' | 'subArea' | 'subAreaEn' | 'district' | 'districtEn'>, language: Language) => {
+  const parts = [pick(language, unit.district ?? '', unit.districtEn), pick(language, unit.subArea ?? '', unit.subAreaEn)].filter(Boolean);
+  return (parts.length ? parts : [pick(language, unit.region, unit.regionEn)]).join(language === 'en' ? ', ' : '، ');
 };
 
 /** تصنيف الوحدة — المستوى الأول. */

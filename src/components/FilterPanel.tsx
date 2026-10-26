@@ -4,7 +4,8 @@ import { RealEstateUnit } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { Budget, BudgetFinder } from './BudgetFinder';
 import { Filters } from '../lib/unitFilters';
-import { DELIVERY_OPTIONS, FINISHING_OPTIONS, VIEW_OPTIONS, FREQUENCY_OPTIONS, PROPERTY_CATEGORIES, REGIONS, subAreasFor, typesFor, pick } from '../lib/unitHelpers';
+import { DELIVERY_OPTIONS, FINISHING_OPTIONS, VIEW_OPTIONS, FREQUENCY_OPTIONS, PROPERTY_CATEGORIES, typesFor, pick } from '../lib/unitHelpers';
+import { useDistricts, useRegions, useSubAreas } from '../lib/places';
 
 interface FilterPanelProps {
   units: RealEstateUnit[];
@@ -68,6 +69,50 @@ const Chips: React.FC<{ options: { value: string; label: string }[]; selected: s
   </div>
 );
 
+/**
+ * Chips for a long list (a region has up to ~30 locations, a location up to ~55 districts): places that have units come
+ * first with their count, the rest wait behind "show all", and a search box appears once the list is long.
+ */
+const PlaceChips: React.FC<{
+  options: { value: string; label: string; search: string }[];
+  counts: Map<string, number>;
+  selected: string[];
+  onToggle: (v: string) => void;
+}> = ({ options, counts, selected, onToggle }) => {
+  const { tx } = useLanguage();
+  const [query, setQuery] = useState('');
+  const [all, setAll] = useState(false);
+  const q = query.trim().toLowerCase();
+  const ranked = [...options].sort((a, b) => (counts.get(b.value) ?? 0) - (counts.get(a.value) ?? 0));
+  const matching = q ? ranked.filter((o) => `${o.label} ${o.search}`.toLowerCase().includes(q)) : ranked;
+  const SHORT = 10;
+  const shown = q || all ? matching : matching.filter((o, i) => i < SHORT || selected.includes(o.value));
+  return (
+    <div>
+      {options.length > SHORT && (
+        <div className="relative mb-3">
+          <Search className="absolute top-1/2 -translate-y-1/2 start-3 w-4 h-4 text-muted" />
+          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={tx('دوّر…', 'Search…')} className="field h-10 text-sm ps-9" />
+        </div>
+      )}
+      <div className="flex flex-wrap gap-2">
+        {shown.map((o) => (
+          <button key={o.value} onClick={() => onToggle(o.value)} aria-pressed={selected.includes(o.value)} className={selected.includes(o.value) ? 'chip-on' : 'chip-off'}>
+            {o.label}
+            {!!counts.get(o.value) && <span className="num opacity-60 ms-1">({counts.get(o.value)})</span>}
+          </button>
+        ))}
+      </div>
+      {!q && matching.length > shown.length && (
+        <button onClick={() => setAll(true)} className="mt-3 text-sm font-semibold text-brand">
+          {tx(`عرض الكل (${matching.length})`, `Show all (${matching.length})`)}
+        </button>
+      )}
+      {q && !matching.length && <p className="text-sm text-muted">{tx('مفيش نتايج', 'No matches')}</p>}
+    </div>
+  );
+};
+
 const RangeFields: React.FC<{ min: number; max: number; onChange: (min: number, max: number) => void; unit: string; money?: boolean }> = ({
   min,
   max,
@@ -115,6 +160,29 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
     return [...map.values()].sort((a, b) => b.count - a.count);
   }, [units, language]);
 
+  // المنطقة ← الموقع ← التفصيلية: كل قايمة جاية من الـ API حسب اللي اتختار في اللي قبلها، والفلتر بيخزّن الـ ids.
+  const regions = useRegions();
+  const subAreas = useSubAreas(f.regionIds);
+  const districts = useDistricts(f.subAreaIds);
+  const placeCounts = useMemo(() => {
+    const subAreaCounts = new Map<string, number>();
+    const districtCounts = new Map<string, number>();
+    units.forEach((u) => {
+      if (u.subAreaId) subAreaCounts.set(String(u.subAreaId), (subAreaCounts.get(String(u.subAreaId)) ?? 0) + 1);
+      if (u.districtId) districtCounts.set(String(u.districtId), (districtCounts.get(String(u.districtId)) ?? 0) + 1);
+    });
+    return { subAreas: subAreaCounts, districts: districtCounts };
+  }, [units]);
+  const P = (o: { id: number; ar: string; en: string }) => ({ value: String(o.id), label: tx(o.ar, o.en), search: tx(o.en, o.ar) });
+  const ids = (list: number[]) => list.map(String);
+  const toggleId = (list: number[], v: string) => toggle(ids(list), v).map(Number);
+  /** نشيل أي موقع (ومنطقته التفصيلية) بقى تابع لمنطقة أو موقع مش مختار. */
+  const pickPlaces = (regionIds: number[], subAreaIds: number[]) => {
+    const keptSubAreas = subAreaIds.filter((id) => subAreas.some((s) => s.id === id && regionIds.includes(s.regionId)));
+    const keptDistricts = f.districtIds.filter((id) => districts.some((d) => d.id === id && keptSubAreas.includes(d.subAreaId)));
+    onChange({ regionIds, subAreaIds: keptSubAreas, districtIds: keptDistricts });
+  };
+
   const shownDevs = developers.filter((d) => d.label.toLowerCase().includes(devQuery.trim().toLowerCase()));
 
   const L = (o: { ar: string; en: string }) => ({ value: o.ar, label: language === 'ar' ? o.ar : o.en });
@@ -139,26 +207,33 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
         </div>
       </Section>
 
-      <Section title={tx('المنطقة', 'Area')} active={f.regions.length} defaultOpen>
+      <Section title={tx('المنطقة', 'Area')} active={f.regionIds.length} defaultOpen>
         <Chips
-          options={REGIONS.map(L)}
-          selected={f.regions}
-          onToggle={(v) => {
-            const regions = toggle(f.regions, v);
-            // نشيل أي منطقة تفصيلية بقت تابعة لإقليم مش مختار
-            const allowed = new Set(subAreasFor(regions).map((s) => s.ar));
-            onChange({ regions, subAreas: f.subAreas.filter((s) => allowed.has(s)) });
-          }}
+          options={regions.map(P)}
+          selected={ids(f.regionIds)}
+          onToggle={(v) => pickPlaces(toggleId(f.regionIds, v), f.subAreaIds)}
         />
       </Section>
 
-      {/* من غير إقليم مختار دي بتبقى 46 خيار مخلوطين — مالهاش لازمة قبل الاختيار */}
-      {f.regions.length > 0 && (
-        <Section title={tx('الموقع', 'Location')} active={f.subAreas.length} defaultOpen>
-          <Chips
-            options={subAreasFor(f.regions).map((o) => ({ value: o.ar, label: tx(o.ar, o.en) }))}
-            selected={f.subAreas}
-            onToggle={(v) => onChange({ subAreas: toggle(f.subAreas, v) })}
+      {/* من غير منطقة مختارة دي بتبقى 90 موقع مخلوطين — مالهاش لازمة قبل الاختيار */}
+      {subAreas.length > 0 && (
+        <Section title={tx('الموقع', 'Location')} active={f.subAreaIds.length} defaultOpen>
+          <PlaceChips
+            options={subAreas.map(P)}
+            counts={placeCounts.subAreas}
+            selected={ids(f.subAreaIds)}
+            onToggle={(v) => pickPlaces(f.regionIds, toggleId(f.subAreaIds, v))}
+          />
+        </Section>
+      )}
+
+      {districts.length > 0 && (
+        <Section title={tx('المنطقة التفصيلية', 'Neighbourhood')} active={f.districtIds.length} defaultOpen>
+          <PlaceChips
+            options={districts.map(P)}
+            counts={placeCounts.districts}
+            selected={ids(f.districtIds)}
+            onToggle={(v) => onChange({ districtIds: toggleId(f.districtIds, v) })}
           />
         </Section>
       )}

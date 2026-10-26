@@ -4,8 +4,10 @@ import { cashPrice, categoryOf, isDeal, isNegotiable, monthlyInstallment, saving
 
 export interface Filters {
   query: string;
-  regions: string[];
-  subAreas: string[];
+  /** Place filters by id (GET /api/locations/…): regions, their sub-areas, those sub-areas' districts. */
+  regionIds: number[];
+  subAreaIds: number[];
+  districtIds: number[];
   categories: string[];
   types: string[];
   developers: string[];
@@ -30,8 +32,9 @@ export interface Filters {
 
 export const EMPTY_FILTERS: Filters = {
   query: '',
-  regions: [],
-  subAreas: [],
+  regionIds: [],
+  subAreaIds: [],
+  districtIds: [],
   categories: [],
   types: [],
   developers: [],
@@ -76,8 +79,9 @@ export const applyFilters = (
   const q = f.query.trim().toLowerCase();
   const list = units.filter((u) => {
     if (budget && !fitsBudget(u, budget)) return false;
-    if (f.regions.length && !f.regions.includes(u.region)) return false;
-    if (f.subAreas.length && !f.subAreas.includes(u.subArea ?? '')) return false;
+    if (f.regionIds.length && !f.regionIds.includes(u.regionId ?? 0)) return false;
+    if (f.subAreaIds.length && !f.subAreaIds.includes(u.subAreaId ?? 0)) return false;
+    if (f.districtIds.length && !f.districtIds.includes(u.districtId ?? 0)) return false;
     if (f.categories.length && !f.categories.includes(categoryOf(u))) return false;
     if (f.types.length && !f.types.includes(u.propertyType)) return false;
     if (f.developers.length && !f.developers.includes(u.developer)) return false;
@@ -96,7 +100,7 @@ export const applyFilters = (
     if (f.noTransferFee && u.transferFeePolicy !== 'معفي من رسوم التنازل') return false;
     if (f.noPenalties && u.hasLatePenalties) return false;
     if (q) {
-      const hay = [u.compound, u.compoundEn, u.developer, u.developerEn, u.location, u.locationEn, u.verificationCode]
+      const hay = [u.compound, u.compoundEn, u.developer, u.developerEn, u.location, u.locationEn, u.subArea, u.subAreaEn, u.district, u.districtEn, u.verificationCode]
         .join(' ')
         .toLowerCase();
       if (!hay.includes(q)) return false;

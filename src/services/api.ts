@@ -172,6 +172,27 @@ function splitGreaterCairo(unit: UnitDto): UnitDto {
   return { ...unit, subArea, region: isGiza ? 'جيزة' : 'قاهرة' };
 }
 
+/** One entry of the place lists (GET /api/locations/…). Units and filters refer to places by id. */
+export interface PlaceOption {
+  id: number;
+  ar: string;
+  en: string;
+}
+export interface SubAreaOption extends PlaceOption {
+  /** 0 = no district list under it. */
+  districtsCount: number;
+}
+
+/** The place lists hardly ever change, so each one is fetched once per visit (a failed fetch is retried next time). */
+const placeCache = new Map<string, Promise<unknown>>();
+function cachedPlaces<T>(path: string): Promise<T> {
+  if (!placeCache.has(path)) placeCache.set(path, request<T>(path).catch((e) => (placeCache.delete(path), Promise.reject(e))));
+  return placeCache.get(path) as Promise<T>;
+}
+export const fetchRegions = () => cachedPlaces<PlaceOption[]>('/locations/regions');
+export const fetchSubAreas = (regionId: number) => cachedPlaces<SubAreaOption[]>(`/locations/regions/${regionId}/sub-areas`);
+export const fetchDistricts = (subAreaId: number) => cachedPlaces<PlaceOption[]>(`/locations/sub-areas/${subAreaId}/districts`);
+
 /** Every published unit, all pages. The listing filters and sorts on the client. */
 export async function fetchAllUnits(): Promise<RealEstateUnit[]> {
   const all: RealEstateUnit[] = [];

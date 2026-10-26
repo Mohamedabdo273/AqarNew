@@ -6,11 +6,12 @@ import { SellDraft, useRequests } from '../context/RequestsContext';
 import { useUnits } from '../context/UnitsContext';
 import { useAuth } from '../context/AuthContext';
 import { errorText } from '../services/api';
-import { PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, REGIONS, SUB_AREAS, CANCELLATION_PENALTY_MIN_RATE, CANCELLATION_PENALTY_RATE, VIEW_OPTIONS, cancellationLoss, currency, money } from '../lib/unitHelpers';
+import { PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, CANCELLATION_PENALTY_MIN_RATE, CANCELLATION_PENALTY_RATE, VIEW_OPTIONS, cancellationLoss, currency, money } from '../lib/unitHelpers';
 import { DeliveryStatus } from '../types';
-import { EMPTY_SELL_FORM, SellForm, isValidPhone, netToSeller } from '../lib/sellForm';
-import { ChipSelect, CheckBox, Field, FilePick, FilePickMany, MoneyInput, MultiSelect, PhotoPick, Toggle } from '../components/sell/FormBits';
+import { EMPTY_SELL_FORM, SellForm, fitPlace, isValidPhone, netToSeller } from '../lib/sellForm';
+import { ChipSelect, CheckBox, Field, FilePick, FilePickMany, MoneyInput, MultiSelect, PhotoPick, SearchSelect, Toggle } from '../components/sell/FormBits';
 import { DeveloperSelect } from '../components/sell/DeveloperSelect';
+import { placeName, useDistricts, useRegions, useSubAreas } from '../lib/places';
 import { whatsappLink } from '../config/brand';
 
 interface SellUnitPageProps {
@@ -59,7 +60,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
       const raw = localStorage.getItem(DRAFT_KEY);
       // The draft can't hold the files themselves, so their names are dropped too — otherwise they'd look uploaded.
       return raw
-        ? { ...EMPTY_SELL_FORM, ...JSON.parse(raw), contractPages: [], paymentScheduleFile: '', unitPlanFile: '' }
+        ? fitPlace({ ...EMPTY_SELL_FORM, ...JSON.parse(raw), contractPages: [], paymentScheduleFile: '', unitPlanFile: '' })
         : EMPTY_SELL_FORM;
     } catch {
       return EMPTY_SELL_FORM;
@@ -159,8 +160,8 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
       if (!isValidPhone(form.ownerPhone)) e.push(tx('موبايل صحيح (01xxxxxxxxx)', 'Valid mobile (01xxxxxxxxx)'));
     }
     if (target === 2) {
-      if (!form.region) e.push(tx('المنطقة', 'Area'));
-      if (form.region && !form.subArea) e.push(tx('الموقع', 'Location'));
+      if (!form.regionId) e.push(tx('المنطقة', 'Area'));
+      if (form.regionId && !form.subAreaId) e.push(tx('الموقع', 'Location'));
       if (!form.developer.trim()) e.push(tx('المطور', 'Developer'));
       if (!form.compound.trim()) e.push(tx('الكمبوند', 'Compound'));
       if (!form.propertyCategory) e.push(tx('النشاط', 'Activity'));
@@ -243,6 +244,22 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
   }, [form]);
 
   const set = <K extends keyof SellForm>(key: K, value: SellForm[K]) => setForm((f) => ({ ...f, [key]: value }));
+  // المنطقة ← الموقع ← التفصيلية من الـ API؛ الفورم بيخزّن الـ id والاسم مع بعض، واختيار مستوى بيمسح اللي تحته.
+  const regions = useRegions();
+  const subAreas = useSubAreas(form.regionId ? [form.regionId] : []);
+  const districts = useDistricts(form.subAreaId ? [form.subAreaId] : []);
+  const pickRegion = (id: number) => {
+    const r = regions.find((x) => x.id === id);
+    setForm((f) => ({ ...f, regionId: r?.id ?? null, region: r?.ar ?? '', subAreaId: null, subArea: '', districtId: null, district: '' }));
+  };
+  const pickSubArea = (id: number) => {
+    const a = subAreas.find((x) => x.id === id);
+    setForm((f) => ({ ...f, subAreaId: a?.id ?? null, subArea: a?.ar ?? '', districtId: null, district: '' }));
+  };
+  const pickDistrict = (id: number) => {
+    const d = districts.find((x) => x.id === id);
+    setForm((f) => ({ ...f, districtId: d?.id ?? null, district: d?.ar ?? '' }));
+  };
   const L = <T extends string>(list: { ar: T; en: string }[]) => list.map((o) => ({ value: o.ar, label: language === 'ar' ? o.ar : o.en }));
 
   const submit = async () => {
@@ -429,22 +446,19 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
 
           {step === 2 && (
           <div className="space-y-7">
-          {/* 1. المنطقة والموقع — قايمتين منسدلتين جنب بعض */}
+          {/* 1. المنطقة والموقع جنب بعض، وتحتهم المنطقة التفصيلية (اختيارية) لو الموقع ليه قايمة */}
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label={tx('المنطقة', 'Area')} required htmlFor="region">
               <select
                 id="region"
-                value={form.region}
-                onChange={(e) => {
-                  set('region', e.target.value as SellForm['region']);
-                  set('subArea', ''); // الإقليم اتغير، فالاختيار التفصيلي القديم مابقاش صالح
-                }}
+                value={form.regionId ?? ''}
+                onChange={(e) => pickRegion(Number(e.target.value))}
                 className="field"
               >
                 <option value="">{tx('اختار المنطقة', 'Choose an area')}</option>
-                {REGIONS.map((o) => (
-                  <option key={o.ar} value={o.ar}>
-                    {language === 'ar' ? o.ar : o.en}
+                {regions.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {placeName(o, language)}
                   </option>
                 ))}
               </select>
@@ -452,19 +466,33 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
             <Field label={tx('الموقع', 'Location')} required htmlFor="subarea">
               <select
                 id="subarea"
-                value={form.subArea}
-                onChange={(e) => set('subArea', e.target.value)}
-                disabled={!form.region}
+                value={form.subAreaId ?? ''}
+                onChange={(e) => pickSubArea(Number(e.target.value))}
+                disabled={!form.regionId}
                 className="field disabled:opacity-60"
               >
-                <option value="">{form.region ? tx('اختار الموقع', 'Choose a location') : tx('اختار المنطقة الأول', 'Choose the area first')}</option>
-                {(form.region ? SUB_AREAS[form.region] ?? [] : []).map((o) => (
-                  <option key={o.ar} value={o.ar}>
-                    {language === 'ar' ? o.ar : o.en}
+                <option value="">{form.regionId ? tx('اختار الموقع', 'Choose a location') : tx('اختار المنطقة الأول', 'Choose the area first')}</option>
+                {subAreas.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {placeName(o, language)}
                   </option>
                 ))}
               </select>
             </Field>
+            {districts.length > 0 && (
+              <div className="sm:col-span-2">
+                <Field label={tx('المنطقة التفصيلية (اختياري)', 'Neighbourhood (optional)')} htmlFor="district">
+                  <SearchSelect
+                    id="district"
+                    value={form.districtId ? String(form.districtId) : ''}
+                    onChange={(v) => pickDistrict(Number(v))}
+                    placeholder={tx('اختار لو تعرفها', 'Pick one if you know it')}
+                    clearLabel={tx('من غير تحديد', 'Not specified')}
+                    options={districts.map((d) => ({ value: String(d.id), label: placeName(d, language), search: language === 'ar' ? d.en : d.ar }))}
+                  />
+                </Field>
+              </div>
+            )}
           </div>
 
           {/* 2. المطور والكمبوند */}

@@ -42,7 +42,8 @@ import { IlloForm, IlloKeys, IlloPeople, IlloReview } from '../components/Illust
 import { useAnimatedNumber } from '../lib/useAnimatedNumber';
 import { BRAND, whatsappLink } from '../config/brand';
 import { Budget, BudgetFinder, fitsBudget } from '../components/BudgetFinder';
-import { PROPERTY_TYPES, PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, categoryOf, REGIONS, SUB_AREAS, subAreasFor, CANCELLATION_PENALTY_MIN_RATE, cancellationLoss, cashPrice, currency, isDeal, money, sellerDiscount } from '../lib/unitHelpers';
+import { PROPERTY_TYPES, PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, categoryOf, CANCELLATION_PENALTY_MIN_RATE, cancellationLoss, cashPrice, currency, isDeal, money, sellerDiscount } from '../lib/unitHelpers';
+import { placeName, useDistricts, useRegions, useSubAreas } from '../lib/places';
 
 interface HomePageProps {
   units: RealEstateUnit[];
@@ -226,7 +227,10 @@ export const HomePage: React.FC<HomePageProps> = ({
     return order.map((o) => ({ o, count: counts.get(o.ar) ?? 0 }));
   };
 
-  const regionsShown = useMemo(() => tally(featured, (u) => u.region, REGIONS), [featured]);
+  const regions = useRegions();
+  const regionsShown = useMemo(() => tally(featured, (u) => u.region, regions), [featured, regions]);
+  const cardRegionId = regions.find((r) => r.ar === cardRegion)?.id;
+  const cardRegionSubAreas = useSubAreas(cardRegionId ? [cardRegionId] : []);
 
   const afterRegion = useMemo(
     () => (cardRegion ? featured.filter((u) => u.region === cardRegion) : featured),
@@ -234,10 +238,10 @@ export const HomePage: React.FC<HomePageProps> = ({
   );
   // من غير اختيار إقليم بنعرض المناطق الموجودة في المعروض كله — لما كل الوحدات
   // في إقليم واحد، الفلتر المفيد هو التفصيلي مش الإقليم.
-  const subAreasShown = useMemo(
-    () => tally(afterRegion, (u) => u.subArea, cardRegion ? SUB_AREAS[cardRegion as keyof typeof SUB_AREAS] ?? [] : subAreasFor([])),
-    [afterRegion, cardRegion],
-  );
+  const subAreasShown = useMemo(() => {
+    const listed = Array.from(new Map<string, Opt>(afterRegion.filter((u) => u.subArea).map((u) => [u.subArea!, { ar: u.subArea!, en: u.subAreaEn ?? u.subArea! }])).values());
+    return tally(afterRegion, (u) => u.subArea, cardRegion ? cardRegionSubAreas : listed);
+  }, [afterRegion, cardRegion, cardRegionSubAreas]);
 
   const afterSubArea = useMemo(
     () => (cardSubArea ? afterRegion.filter((u) => u.subArea === cardSubArea) : afterRegion),
@@ -508,7 +512,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       {role === 'buy' && (
         <>
       {/* ───────── 1c. Areas, as photos ───────── */}
-      <RegionsRow units={units} onPick={(r) => onSearch({ filters: { regions: [r] } })} />
+      <RegionsRow units={units} onPick={(id) => onSearch({ filters: { regionIds: [id] } })} />
 
       {/* ───────── 2. Buyers — one strip, not a second hero ───────── */}
       <section className="page-wrap -mt-px pt-8 sm:pt-10">
@@ -755,23 +759,38 @@ export const HomePage: React.FC<HomePageProps> = ({
   );
 };
 
+/** Hero search row by how many of area / location / unit type have opened their second list (literal classes for Tailwind). */
+const HERO_COLS = [
+  'lg:grid-cols-[1fr_1fr_1fr_12rem]',
+  'lg:grid-cols-[1fr_1fr_1fr_1fr_10rem]',
+  'lg:grid-cols-[1fr_1fr_1fr_1fr_1fr_9rem]',
+  'lg:grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_8rem]',
+];
+
 /* Buy · sell · swap in one card that sits over the bottom of the hero band. */
 const HeroSearch: React.FC<{ mode: HomeRole; onSearch: (s: HomeSearch) => void; onNavigate: (page: PageId) => void }> = ({ mode, onSearch, onNavigate }) => {
   const { language, tx } = useLanguage();
   const [query, setQuery] = useState('');
   const [region, setRegion] = useState('');
   const [subArea, setSubArea] = useState('');
+  const [district, setDistrict] = useState('');
   const [category, setCategory] = useState('');
   const [type, setType] = useState('');
   const [monthly, setMonthly] = useState('');
+
+  // region / subArea / district hold ids (as select values); each list loads once the one above it is picked.
+  const regions = useRegions();
+  const locations = useSubAreas(region ? [Number(region)] : []);
+  const districts = useDistricts(subArea ? [Number(subArea)] : []);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const m = Number(monthly.replace(/\D/g, ''));
     const filters: Partial<Filters> = {};
     if (query.trim()) filters.query = query.trim();
-    if (region) filters.regions = [region];
-    if (subArea) filters.subAreas = [subArea];
+    if (region) filters.regionIds = [Number(region)];
+    if (subArea) filters.subAreaIds = [Number(subArea)];
+    if (district) filters.districtIds = [Number(district)];
     if (category) filters.categories = [category];
     if (type) filters.types = [type];
     onSearch({ filters, monthly: m > 0 ? m : undefined });
@@ -799,43 +818,49 @@ const HeroSearch: React.FC<{ mode: HomeRole; onSearch: (s: HomeSearch) => void; 
                   className="field h-14 ps-12 text-base"
                 />
               </label>
-              {/* Area and unit type each open a second list once chosen, so the row has 4, 5 or 6 cells. */}
-              <div
-                className={`grid grid-cols-2 gap-3 ${
-                  region && category
-                    ? 'lg:grid-cols-[1fr_1fr_1fr_1fr_1fr_9rem]'
-                    : region || category
-                      ? 'lg:grid-cols-[1fr_1fr_1fr_1fr_10rem]'
-                      : 'lg:grid-cols-[1fr_1fr_1fr_12rem]'
-                }`}
-              >
+              {/* Area opens its locations (and a location its districts), unit type opens its types — so the row has 4 to 7 cells. */}
+              <div className={`grid grid-cols-2 gap-3 ${HERO_COLS[[region, districts.length > 0, category].filter(Boolean).length]}`}>
                 <select
                   value={region}
                   onChange={(e) => {
                     setRegion(e.target.value);
-                    setSubArea(''); // الإقليم اتغير، فاللي كان متختار جواه مابقاش صالح
+                    setSubArea(''); // المنطقة اتغيرت، فاللي كان متختار جواها مابقاش صالح
+                    setDistrict('');
                   }}
                   aria-label={tx('المنطقة', 'Area')}
                   className="field h-14"
                 >
                   <option value="">{tx('كل المناطق', 'All areas')}</option>
-                  {REGIONS.map((r) => (
-                    <option key={r.ar} value={r.ar}>
-                      {language === 'ar' ? r.ar : r.en}
+                  {regions.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {placeName(r, language)}
                     </option>
                   ))}
                 </select>
                 {region && (
                   <select
                     value={subArea}
-                    onChange={(e) => setSubArea(e.target.value)}
+                    onChange={(e) => {
+                      setSubArea(e.target.value);
+                      setDistrict('');
+                    }}
                     aria-label={tx('الموقع', 'Location')}
                     className="field h-14"
                   >
-                    <option value="">{tx('كل مناطق ', 'All of ') + (language === 'ar' ? region : REGIONS.find((r) => r.ar === region)?.en ?? region)}</option>
-                    {(SUB_AREAS[region as keyof typeof SUB_AREAS] ?? []).map((a) => (
-                      <option key={a.ar} value={a.ar}>
-                        {language === 'ar' ? a.ar : a.en}
+                    <option value="">{tx('كل مناطق ', 'All of ') + placeName(regions.find((r) => r.id === Number(region)) ?? { id: 0, ar: '', en: '' }, language)}</option>
+                    {locations.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {placeName(a, language)}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                {districts.length > 0 && (
+                  <select value={district} onChange={(e) => setDistrict(e.target.value)} aria-label={tx('المنطقة التفصيلية', 'Neighbourhood')} className="field h-14">
+                    <option value="">{tx('كل ', 'All of ') + placeName(locations.find((l) => l.id === Number(subArea)) ?? { id: 0, ar: '', en: '' }, language)}</option>
+                    {districts.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        {placeName(d, language)}
                       </option>
                     ))}
                   </select>
@@ -962,14 +987,15 @@ const AREA_PHOTOS: Record<string, string> = {
 };/*
  * Regions as a "where are the deals" overview — the search bar already filters by region, so this row adds what the
  * bar can't: how many units, the lowest cash to get in, and the biggest discount. A click opens that region's listings
- * (an empty one opens the "alert me" form). All regions stay in one row, in the fixed REGIONS order.
+ * (an empty one opens the "alert me" form). All regions stay in one row, in the API's order.
  */
-const RegionsRow: React.FC<{ units: RealEstateUnit[]; onPick: (region: string) => void }> = ({ units, onPick }) => {
+const RegionsRow: React.FC<{ units: RealEstateUnit[]; onPick: (regionId: number) => void }> = ({ units, onPick }) => {
   const { language, tx } = useLanguage();
+  const regions = useRegions();
   const areas = useMemo(
     () =>
-      REGIONS.map((r, i) => {
-        const inRegion = units.filter((u) => u.region === r.ar);
+      regions.map((r, i) => {
+        const inRegion = units.filter((u) => u.regionId === r.id);
         return {
           ...r,
           tint: AREA_TINTS[i % AREA_TINTS.length],
@@ -979,7 +1005,7 @@ const RegionsRow: React.FC<{ units: RealEstateUnit[]; onPick: (region: string) =
           maxDiscount: inRegion.reduce((m, u) => Math.max(m, sellerDiscount(u)), 0),
         };
       }),
-    [units],
+    [units, regions],
   );
   const name = (r: (typeof areas)[number]) => tx(AREA_SHORT[r.ar]?.[0] ?? r.ar, AREA_SHORT[r.ar]?.[1] ?? r.en);
   const unitsLabel = (n: number) =>
@@ -993,8 +1019,8 @@ const RegionsRow: React.FC<{ units: RealEstateUnit[]; onPick: (region: string) =
       <div className="mt-6 -mx-4 px-4 sm:mx-0 sm:px-0 flex lg:justify-between gap-5 sm:gap-7 overflow-x-auto no-scrollbar pb-1">
         {areas.map((r) => (
           <button
-            key={r.ar}
-            onClick={() => onPick(r.ar)}
+            key={r.id}
+            onClick={() => onPick(r.id)}
             title={r.count ? undefined : tx('سيب رقمك ونبلّغك أول ما تنزل وحدة هنا', "Leave your number and we'll tell you when one is listed")}
             className="group flex flex-col items-center shrink-0 text-center"
           >

@@ -14,14 +14,13 @@ import {
   FREQUENCY_OPTIONS,
   PROPERTY_CATEGORIES,
   PROPERTY_TYPES,
-  REGIONS,
   isDeal,
   money,
   pick,
-  subAreasFor,
   typesFor,
 } from '../lib/unitHelpers';
 import { errorText, sendSearchAlert } from '../services/api';
+import { useDistricts, useRegions, useSubAreas } from '../lib/places';
 
 interface OpportunitiesPageProps {
   units: RealEstateUnit[];
@@ -109,6 +108,9 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   const resultsTop = useRef<HTMLDivElement>(null);
 
   const patch = (p: Partial<Filters>) => setFilters((f) => ({ ...f, ...p }));
+  const regions = useRegions();
+  const subAreas = useSubAreas(filters.regionIds);
+  const districts = useDistricts(filters.subAreaIds);
 
   // With "below what was paid" on and no other sort picked, biggest discount comes first.
   const effectiveSort: SortKey = filters.discounted && sort === 'newest' ? 'deals' : sort;
@@ -141,13 +143,26 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
     return o ? (language === 'ar' ? o.ar : o.en) : v;
   };
   const without = (list: string[], v: string) => list.filter((x) => x !== v);
+  const withoutId = (list: number[], v: number) => list.filter((x) => x !== v);
+  const placeLabelOf = (list: { id: number; ar: string; en: string }[], id: number) => {
+    const o = list.find((x) => x.id === id);
+    return o ? (language === 'ar' ? o.ar : o.en) : '…';
+  };
+  /** Keeps only the sub-areas / districts that still sit under what's picked above them. */
+  const pickPlaces = (regionIds: number[], subAreaIds: number[]) => {
+    const keptSubAreas = subAreaIds.filter((id) => subAreas.some((s) => s.id === id && regionIds.includes(s.regionId)));
+    const keptDistricts = filters.districtIds.filter((id) => districts.some((d) => d.id === id && keptSubAreas.includes(d.subAreaId)));
+    patch({ regionIds, subAreaIds: keptSubAreas, districtIds: keptDistricts });
+  };
 
   // Every active filter as a removable pill above the results.
   const pills: { key: string; label: string; remove: () => void }[] = [
     ...(budgetOn
       ? [{ key: 'budget', label: tx(`كاش ≤ ${money(budget.cash, language)} · قسط ≤ ${money(budget.monthly, language)}`, `Cash ≤ ${money(budget.cash, language)} · Monthly ≤ ${money(budget.monthly, language)}`), remove: () => onBudgetOnChange(false) }]
       : []),
-    ...filters.regions.map((v) => ({ key: `r-${v}`, label: labelOf(REGIONS, v), remove: () => patch({ regions: without(filters.regions, v) }) })),
+    ...filters.regionIds.map((v) => ({ key: `r-${v}`, label: placeLabelOf(regions, v), remove: () => pickPlaces(withoutId(filters.regionIds, v), filters.subAreaIds) })),
+    ...filters.subAreaIds.map((v) => ({ key: `s-${v}`, label: placeLabelOf(subAreas, v), remove: () => pickPlaces(filters.regionIds, withoutId(filters.subAreaIds, v)) })),
+    ...filters.districtIds.map((v) => ({ key: `ds-${v}`, label: placeLabelOf(districts, v), remove: () => patch({ districtIds: withoutId(filters.districtIds, v) }) })),
     ...filters.types.map((v) => ({ key: `t-${v}`, label: labelOf(PROPERTY_TYPES, v), remove: () => patch({ types: without(filters.types, v) }) })),
     ...filters.developers.map((v) => {
       const u = units.find((x) => x.developer === v);
@@ -202,7 +217,7 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   const from = results.length ? (current - 1) * PAGE_SIZE + 1 : 0;
   const to = Math.min(current * PAGE_SIZE, results.length);
 
-  const regionCount = filters.regions.length + filters.subAreas.length;
+  const regionCount = filters.regionIds.length + filters.subAreaIds.length + filters.districtIds.length;
   const typeCount = filters.categories.length + filters.types.length;
   const toggleIn = (list: string[], v: string) => (list.includes(v) ? without(list, v) : [...list, v]);
   const bedsLabel = (n: number) => (n === 5 ? '5+' : String(n));
@@ -246,16 +261,14 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
             <QuickFilter label={tx('المنطقة', 'Area')} icon={MapPin} count={regionCount}>
               {() => (
                 <div className="flex flex-wrap gap-2">
-                  {REGIONS.map((r) => (
+                  {regions.map((r) => (
                     <button
-                      key={r.ar}
-                      onClick={() => {
-                        const regions = toggleIn(filters.regions, r.ar);
-                        const allowed = new Set(subAreasFor(regions).map((x) => x.ar));
-                        patch({ regions, subAreas: filters.subAreas.filter((x) => allowed.has(x)) });
-                      }}
-                      aria-pressed={filters.regions.includes(r.ar)}
-                      className={filters.regions.includes(r.ar) ? 'chip-on' : 'chip-off'}
+                      key={r.id}
+                      onClick={() =>
+                        pickPlaces(filters.regionIds.includes(r.id) ? withoutId(filters.regionIds, r.id) : [...filters.regionIds, r.id], filters.subAreaIds)
+                      }
+                      aria-pressed={filters.regionIds.includes(r.id)}
+                      className={filters.regionIds.includes(r.id) ? 'chip-on' : 'chip-off'}
                     >
                       {language === 'ar' ? r.ar : r.en}
                     </button>
