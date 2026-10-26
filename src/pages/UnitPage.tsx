@@ -259,7 +259,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
             {isDeal(unit) && (
               <span className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-base font-extrabold text-white shadow-md">
                 <Flame className="w-4 h-4 fill-current" />
-                {tx(`أوفر ${money(sellerDiscount(unit), language)} من اللي صاحبها دفعه`, `${money(sellerDiscount(unit), language)} below what the owner paid`)}
+                {tx(`خصم ${money(sellerDiscount(unit), language)} من اللي صاحبها دفعه`, `${money(sellerDiscount(unit), language)} below what the owner paid`)}
               </span>
             )}
             {isNegotiable(unit) && (
@@ -329,7 +329,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
               className={`absolute ${isNegotiable(unit) ? 'top-20 sm:top-[5.5rem]' : 'top-4'} start-4 inline-flex items-center gap-2 rounded-2xl bg-accent px-5 py-3 text-lg sm:text-xl font-extrabold text-white shadow-lift`}
             >
               <Flame className="w-6 h-6 fill-current" />
-              {tx(`أوفر ${money(sellerDiscount(unit), language)}`, `${money(sellerDiscount(unit), language)} off`)}
+              {tx(`خصم ${money(sellerDiscount(unit), language)}`, `${money(sellerDiscount(unit), language)} off`)}
             </span>
           )}
           <span className="absolute bottom-3 start-3 inline-flex items-center gap-1.5 rounded-full bg-ink/70 backdrop-blur-xs text-white px-3 py-1.5 text-sm font-semibold">

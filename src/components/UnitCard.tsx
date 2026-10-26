@@ -69,7 +69,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
           {deal && (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-2 text-base font-extrabold text-white shadow-md">
               <Flame className="w-5 h-5 fill-current" />
-              {tx(`أوفر · أقل ${dealPct}%`, `Deal · ${dealPct}% off`)}
+              {tx(`خصم ${dealPct}%`, `Deal · ${dealPct}% off`)}
             </span>
           )}
           {negotiable && (
@@ -157,7 +157,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
         {savings > 0 && (
           <div className="mt-auto pt-3">
             <p className="pt-3 border-t border-line/70 text-base font-bold text-emerald-700">
-              {tx(`أوفر ${money(savings, language)} ${cur} من سعر السوق`, `${money(savings, language)} ${cur} below market`)}
+              {tx(`خصم ${money(savings, language)} ${cur} عن سعر السوق`, `${money(savings, language)} ${cur} below market`)}
             </p>
           </div>
         )}

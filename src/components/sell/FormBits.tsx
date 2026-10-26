@@ -398,7 +398,7 @@ export function MultiSelect<T extends string>({
   );
 }
 
-/** A single-choice drop-down with a search box — for long lists (some locations have 50+ districts). */
+/** A single-choice drop-down with a search box — for long lists (some locations have 50+ districts, developers, compounds). */
 export function SearchSelect({
   id,
   options,
@@ -407,6 +407,9 @@ export function SearchSelect({
   placeholder,
   clearLabel,
   disabled,
+  searchable,
+  allowCustom,
+  customLabel,
 }: {
   id?: string;
   /** `search` = extra text to match (e.g. the other language's name). */
@@ -417,6 +420,9 @@ export function SearchSelect({
   /** First row that empties the choice (the field is optional). */
   clearLabel?: string;
   disabled?: boolean;
+  searchable?: boolean;
+  allowCustom?: boolean;
+  customLabel?: string;
 }) {
   const { tx } = useLanguage();
   const [open, setOpen] = useState(false);
@@ -437,12 +443,14 @@ export function SearchSelect({
     const q = query.trim().toLowerCase();
     return q ? options.filter((o) => `${o.label} ${o.search ?? ''}`.toLowerCase().includes(q)) : options;
   }, [options, query]);
-  const picked = options.find((o) => o.value === value);
+  const picked = options.find((o) => o.value === value || o.label === value);
   const pick = (v: string) => {
     onChange(v);
     setOpen(false);
     setQuery('');
   };
+
+  const showSearchInput = searchable ?? options.length > 8;
 
   return (
     <div ref={box} className="relative">
@@ -453,14 +461,16 @@ export function SearchSelect({
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="field flex items-center justify-between gap-2 text-start disabled:opacity-60"
+        className="field flex items-center justify-between gap-2 text-start disabled:opacity-60 cursor-pointer"
       >
-        <span className={`truncate ${picked ? 'text-ink' : 'text-muted'}`}>{picked?.label ?? (value || placeholder)}</span>
+        <span className={`truncate ${picked || value ? 'text-ink font-medium' : 'text-muted'}`}>
+          {picked?.label ?? (value || placeholder)}
+        </span>
         <ChevronDown className={`w-4 h-4 shrink-0 text-ink-soft transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
         <div className="absolute z-20 mt-1.5 w-full rounded-xl border border-line bg-surface p-1.5 shadow-lift">
-          {options.length > 8 && (
+          {showSearchInput && (
             <input
               autoFocus
               type="search"
@@ -468,30 +478,64 @@ export function SearchSelect({
               onChange={(e) => setQuery(e.target.value)}
               placeholder={tx('دوّر…', 'Search…')}
               aria-label={tx('دوّر', 'Search')}
-              className="field mb-1.5 py-2"
+              className="field mb-1.5 py-2 text-sm"
             />
           )}
           <ul role="listbox" className="max-h-64 overflow-y-auto">
             {clearLabel && !query && (
               <li role="option" aria-selected={!value}>
-                <button type="button" onClick={() => pick('')} className="w-full rounded-lg px-3 py-2.5 text-start text-[15px] text-muted hover:bg-paper">
+                <button type="button" onClick={() => pick('')} className="w-full rounded-lg px-3 py-2 text-start text-sm text-muted hover:bg-paper cursor-pointer">
                   {clearLabel}
                 </button>
               </li>
             )}
-            {shown.map((o) => (
-              <li key={o.value} role="option" aria-selected={o.value === value}>
+
+            {/* Custom search query quick-pick if not found in list */}
+            {allowCustom && query.trim() && !options.some((o) => o.label.toLowerCase() === query.trim().toLowerCase() || o.value.toLowerCase() === query.trim().toLowerCase()) && (
+              <li role="option" className="mb-1">
                 <button
                   type="button"
-                  onClick={() => pick(o.value)}
-                  className="w-full flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-start text-[15px] text-ink hover:bg-paper"
+                  onClick={() => pick(query.trim())}
+                  className="w-full flex items-center gap-2 rounded-lg px-3 py-2 text-start text-xs font-bold text-brand bg-brand-soft/20 hover:bg-brand-soft/40 transition-colors cursor-pointer"
                 >
-                  {o.label}
-                  {o.value === value && <Check className="w-4 h-4 shrink-0 text-brand" strokeWidth={3} />}
+                  <Plus className="w-3.5 h-3.5 shrink-0" />
+                  <span>{tx(`استخدام "${query.trim()}"`, `Use "${query.trim()}"`)}</span>
                 </button>
               </li>
-            ))}
-            {!shown.length && <li className="px-3 py-2.5 text-sm text-muted">{tx('مفيش نتايج', 'No matches')}</li>}
+            )}
+
+            {shown.map((o) => {
+              const isSelected = o.value === value || o.label === value;
+              return (
+                <li key={o.value} role="option" aria-selected={isSelected}>
+                  <button
+                    type="button"
+                    onClick={() => pick(o.value)}
+                    className={`w-full flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-start text-sm cursor-pointer transition-colors ${
+                      isSelected ? 'bg-brand text-white font-bold' : 'text-ink hover:bg-paper'
+                    }`}
+                  >
+                    <span className="truncate">{o.label}</span>
+                    {isSelected && <Check className="w-4 h-4 shrink-0 text-white" strokeWidth={3} />}
+                  </button>
+                </li>
+              );
+            })}
+
+            {!shown.length && !allowCustom && <li className="px-3 py-2.5 text-sm text-muted">{tx('مفيش نتايج', 'No matches')}</li>}
+
+            {allowCustom && (
+              <li role="option" className="border-t border-line mt-1 pt-1">
+                <button
+                  type="button"
+                  onClick={() => pick('__OTHER__')}
+                  className="w-full flex items-center gap-2 rounded-lg px-3 py-2 text-start text-xs font-bold text-brand hover:bg-brand-soft/20 transition-colors cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5 shrink-0" />
+                  <span>{customLabel ?? tx('اختيار آخر (كتابة يدوية)', 'Other (manual entry)')}</span>
+                </button>
+              </li>
+            )}
           </ul>
         </div>
       )}
