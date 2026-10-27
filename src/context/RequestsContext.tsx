@@ -41,6 +41,7 @@ export interface SellUploads {
   contractPages?: File[];
   paymentSchedule?: File | null;
   unitPlan?: File | null;
+  unitLocation?: File | null;
   /** Listing photos — public once the unit is published. */
   photos?: File[];
 }
@@ -105,10 +106,10 @@ const fromDto = (dto: SellRequestDto): SellRequest => {
     ...EMPTY_SELL_FORM,
     ...sent,
     finishing: (sent.finishing && LEGACY_FINISHINGS[sent.finishing]?.ar) || sent.finishing || '',
-    locationUrl: sent.locationUrl ?? '',
     contractPages: namesOf(docs, DOC_TYPE.contract).slice(0, 4),
     paymentScheduleFile: namesOf(docs, DOC_TYPE.schedule)[0] ?? '',
     unitPlanFile: namesOf(docs, DOC_TYPE.plan)[0] ?? '',
+    unitLocationFile: namesOf(docs, DOC_TYPE.location)[0] ?? '',
     contractFile: namesOf(docs, DOC_TYPE.contract)[0] ?? '',
     receiptFile: (namesOf(docs, DOC_TYPE.receipts)[0] ?? namesOf(docs, DOC_TYPE.statement)[0]) ?? '',
     idFile: namesOf(docs, DOC_TYPE.nationalId)[0] ?? '',
@@ -201,6 +202,7 @@ export const RequestsProvider: React.FC<{ children: ReactNode }> = ({ children }
       ...(uploads.contractPages ?? []).map((f): [DocType, File] => [DOC_TYPE.contract, f]),
       ...(uploads.paymentSchedule ? [[DOC_TYPE.schedule, uploads.paymentSchedule] as [DocType, File]] : []),
       ...(uploads.unitPlan ? [[DOC_TYPE.plan, uploads.unitPlan] as [DocType, File]] : []),
+      ...(uploads.unitLocation ? [[DOC_TYPE.location, uploads.unitLocation] as [DocType, File]] : []),
     ];
     let failedUploads = 0;
     let code: string;

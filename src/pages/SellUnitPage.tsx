@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { AlertTriangle, ShieldCheck, TrendingDown, Clock, ScrollText, Send, Check, Repeat, MessageCircle, ArrowLeft, ArrowRight, Coins, EyeOff, Calendar, CheckCircle2, X } from 'lucide-react';
+import { AlertTriangle, ShieldCheck, TrendingDown, Clock, ScrollText, Send, Check, MessageCircle, ArrowLeft, ArrowRight, Coins, EyeOff } from 'lucide-react';
 import { PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { SellDraft, useRequests } from '../context/RequestsContext';
 import { useUnits } from '../context/UnitsContext';
 import { useAuth } from '../context/AuthContext';
 import { errorText } from '../services/api';
-import { PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, CANCELLATION_PENALTY_MIN_RATE, CANCELLATION_PENALTY_RATE, VIEW_OPTIONS, cancellationLoss, currency, money } from '../lib/unitHelpers';
-import { DeliveryStatus } from '../types';
-import { EMPTY_SELL_FORM, SellForm, fitPlace, isMapsUrl, isValidPhone, netToSeller } from '../lib/sellForm';
-import { CheckBox, Field, FilePick, FilePickMany, MoneyInput, MultiSelect, PhotoPick, SearchSelect, Toggle } from '../components/sell/FormBits';
-import { DeveloperSelect } from '../components/sell/DeveloperSelect';
+import { PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, CANCELLATION_PENALTY_MIN_RATE, CANCELLATION_PENALTY_RATE, DELIVERY_OPTIONS, cancellationLoss, currency, money } from '../lib/unitHelpers';
+import { KNOWN_DEVELOPERS } from '../lib/developers';
+import { EMPTY_SELL_FORM, SellForm, fitPlace, isValidPhone, netToSeller } from '../lib/sellForm';
+import { CheckBox, Field, FilePick, FilePickMany, MoneyInput, PhotoPick, SearchSelect, Toggle } from '../components/sell/FormBits';
 import { placeName, useDistricts, useRegions, useSubAreas } from '../lib/places';
 import { whatsappLink } from '../config/brand';
 
@@ -23,27 +22,6 @@ interface SellUnitPageProps {
 const DRAFT_KEY = 'wahdety_sell_quick_draft_v1';
 /** The draft saved on the server (code + token), so a reload carries on from where the seller was. */
 const SERVER_DRAFT_KEY = 'deal_sell_server_draft_v1';
-
-const DELIVERY_MONTHS = [
-  { m: 1, ar: 'يناير', en: 'January' },
-  { m: 2, ar: 'فبراير', en: 'February' },
-  { m: 3, ar: 'مارس', en: 'March' },
-  { m: 4, ar: 'أبريل', en: 'April' },
-  { m: 5, ar: 'مايو', en: 'May' },
-  { m: 6, ar: 'يونيو', en: 'June' },
-  { m: 7, ar: 'يوليو', en: 'July' },
-  { m: 8, ar: 'أغسطس', en: 'August' },
-  { m: 9, ar: 'سبتمبر', en: 'September' },
-  { m: 10, ar: 'أكتوبر', en: 'October' },
-  { m: 11, ar: 'نوفمبر', en: 'November' },
-  { m: 12, ar: 'ديسمبر', en: 'December' },
-];
-
-// From this year, 12 years ahead. A delivery date can't be in the past (an already-delivered unit has its own button).
-const THIS_YEAR = new Date().getFullYear();
-const THIS_MONTH = new Date().getMonth() + 1;
-const DELIVERY_YEARS = Array.from({ length: 12 }, (_, i) => THIS_YEAR + i);
-const isPastMonth = (year: number, month: number) => year < THIS_YEAR || (year === THIS_YEAR && month < THIS_MONTH);
 
 /**
  * Phase 1 of listing: only what we need to call the seller back.
@@ -60,7 +38,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
       const raw = localStorage.getItem(DRAFT_KEY);
       // The draft can't hold the files themselves, so their names are dropped too — otherwise they'd look uploaded.
       return raw
-        ? fitPlace({ ...EMPTY_SELL_FORM, ...JSON.parse(raw), contractPages: [], paymentScheduleFile: '', unitPlanFile: '' })
+        ? fitPlace({ ...EMPTY_SELL_FORM, ...JSON.parse(raw), contractPages: [], paymentScheduleFile: '', unitPlanFile: '', unitLocationFile: '' })
         : EMPTY_SELL_FORM;
     } catch {
       return EMPTY_SELL_FORM;
@@ -71,6 +49,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [scheduleFile, setScheduleFile] = useState<File | null>(null);
   const [planFile, setPlanFile] = useState<File | null>(null);
+  const [locationFile, setLocationFile] = useState<File | null>(null);
   const [sending, setSending] = useState(false);
   // The request as saved on the server so far — each "Next" updates it, the last step submits it.
   const [draft, setDraft] = useState<SellDraft | null>(() => {
@@ -92,59 +71,6 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
   }, [user]);
   const [errors, setErrors] = useState<string[]>([]);
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
-  const [deliveryModalOpen, setDeliveryModalOpen] = useState(false);
-  const [pickerYear, setPickerYear] = useState<number>(() => {
-    const num = Number(form.deliveryStatus?.replace(/\D/g, ''));
-    return DELIVERY_YEARS.includes(num) ? num : THIS_YEAR + 1;
-  });
-  const [pickerMonth, setPickerMonth] = useState<number>(() => {
-    const matched = DELIVERY_MONTHS.find((m) => form.deliveryDate?.includes(m.ar) || form.deliveryDate?.includes(m.en));
-    return matched ? matched.m : 6;
-  });
-  // Moving to this year with a month that's already gone jumps to the current month.
-  const pickYear = (yr: number) => {
-    setPickerYear(yr);
-    if (isPastMonth(yr, pickerMonth)) setPickerMonth(THIS_MONTH);
-  };
-
-  useEffect(() => {
-    if (!deliveryModalOpen) return;
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setDeliveryModalOpen(false);
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [deliveryModalOpen]);
-
-  useEffect(() => {
-    if (deliveryModalOpen) {
-      if (form.deliveryStatus) {
-        const num = Number(form.deliveryStatus.replace(/\D/g, ''));
-        if (DELIVERY_YEARS.includes(num)) setPickerYear(num);
-      }
-      if (form.deliveryDate) {
-        const matched = DELIVERY_MONTHS.find((m) => form.deliveryDate.includes(m.ar) || form.deliveryDate.includes(m.en));
-        if (matched) setPickerMonth(matched.m);
-      }
-    }
-  }, [deliveryModalOpen, form.deliveryDate, form.deliveryStatus]);
-
-  const handleDeliveredClick = () => {
-    set('alreadyDelivered', true);
-    set('deliveryStatus', 'استلام فوري');
-    set('deliveryDate', language === 'ar' ? 'تم الاستلام بالفعل' : 'Already received');
-    setDeliveryModalOpen(false);
-  };
-
-  const handleNotDeliveredClick = () => {
-    set('alreadyDelivered', false);
-    if (form.deliveryStatus === 'استلام فوري') {
-      set('deliveryStatus', '');
-      set('deliveryDate', '');
-    }
-    setDeliveryModalOpen(true);
-  };
-
   const STEPS = [
     { n: 1 as const, label: tx('بياناتك', 'Your details') },
     { n: 2 as const, label: tx('الوحدة', 'The unit') },
@@ -166,11 +92,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
       if (!form.compound.trim()) e.push(tx('الكمبوند', 'Compound'));
       if (!form.propertyCategory) e.push(tx('النشاط', 'Activity'));
       if (form.propertyCategory && !form.propertyType) e.push(tx('نوع الوحدة', 'Unit type'));
-      if (form.alreadyDelivered === null) e.push(tx('موقف الاستلام (تم الاستلام بالفعل؟)', 'Delivery status (Already received?)'));
-      if (form.alreadyDelivered === false && !form.deliveryDate && !form.deliveryStatus) {
-        e.push(tx('تحديد تاريخ الاستلام المتوقع', 'Select expected delivery date'));
-        setDeliveryModalOpen(true);
-      }
+      if (!form.deliveryStatus) e.push(tx('الاستلام', 'Delivery'));
     }
     if (target === 3) {
       if (!form.contractPrice) e.push(tx('سعر العقد', 'Contract price'));
@@ -179,12 +101,12 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
       if (form.willingToDiscount && !form.discountAmount) e.push(tx('قيمة الخصم', 'Discount amount'));
       if (form.willingToDiscount && form.discountAmount >= form.paidAmount && form.paidAmount) e.push(tx('الخصم أكبر من المدفوع', 'Discount is more than what you paid'));
     }
-    // الصور اختيارية، بس المستندات التلاتة ولينك اللوكيشن لازم، ولازم يوافق على القواعد
+    // الصور اختيارية، بس المستندات الأربعة لازم تترفع، ولازم يوافق على القواعد
     if (target === 4) {
       if (!contractPageFiles.length) e.push(tx('صور العقد', 'Contract pages'));
       if (!scheduleFile) e.push(tx('جدول سداد الأقساط', 'Payment schedule'));
       if (!planFile) e.push(tx('بلان الوحدة', 'Unit plan'));
-      if (!isMapsUrl(form.locationUrl)) e.push(tx('لينك لوكيشن الوحدة من جوجل ماب', 'Google Maps link to the unit'));
+      if (!locationFile) e.push(tx('صورة لوكيشن الوحدة', 'Unit location image'));
       if (!form.ackOwner || !form.ackNoOverprice || !form.ackDeclareDues) e.push(tx('الموافقة على القواعد التلاتة', 'Agree to the three rules'));
     }
     return e;
@@ -261,7 +183,21 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
     const d = districts.find((x) => x.id === id);
     setForm((f) => ({ ...f, districtId: d?.id ?? null, district: d?.ar ?? '' }));
   };
-  const L = <T extends string>(list: { ar: T; en: string }[]) => list.map((o) => ({ value: o.ar, label: language === 'ar' ? o.ar : o.en }));
+  // المطورين المعروفين + أي مطور على الموقع؛ والكمبوندات بتاعة المطور المختار.
+  const developerOptions = (() => {
+    const map = new Map<string, { value: string; label: string; search: string }>();
+    for (const d of KNOWN_DEVELOPERS) map.set(d.nameAr, { value: d.nameAr, label: language === 'ar' ? d.nameAr : d.nameEn || d.nameAr, search: `${d.nameAr} ${d.nameEn}` });
+    for (const u of units) if (u.developer && !map.has(u.developer)) map.set(u.developer, { value: u.developer, label: language === 'ar' ? u.developer : u.developerEn || u.developer, search: u.developerEn ?? '' });
+    return [...map.values()];
+  })();
+  const compoundOptions = (() => {
+    if (!form.developer) return [];
+    const map = new Map<string, { value: string; label: string; search: string }>();
+    const known = KNOWN_DEVELOPERS.find((d) => d.nameAr === form.developer || d.nameEn === form.developer);
+    for (const c of known?.compounds ?? []) map.set(c.ar, { value: c.ar, label: language === 'ar' ? c.ar : c.en || c.ar, search: `${c.ar} ${c.en}` });
+    for (const u of units) if (u.developer === form.developer && u.compound && !map.has(u.compound)) map.set(u.compound, { value: u.compound, label: language === 'ar' ? u.compound : u.compoundEn || u.compound, search: u.compoundEn ?? '' });
+    return [...map.values()];
+  })();
 
   const submit = async () => {
     if (sending) return;
@@ -281,7 +217,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
     try {
       const { code, failedUploads } = await createRequest(
         cleanForm(),
-        { contractPages: contractPageFiles, paymentSchedule: scheduleFile, unitPlan: planFile, photos: photoFiles },
+        { contractPages: contractPageFiles, paymentSchedule: scheduleFile, unitPlan: planFile, unitLocation: locationFile, photos: photoFiles },
         draft,
       );
       keepDraft(null);
@@ -310,23 +246,6 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
   const lossMax = cancellationLoss(form.contractPrice, form.paidAmount);
   // Under 1% of the price paid is almost always a typo (a missing zero or two).
   const paidLooksLow = form.contractPrice > 0 && form.paidAmount > 0 && form.paidAmount < form.contractPrice * 0.01;
-
-  const confirmDeliveryDate = (year: number, monthNum: number) => {
-    const monthObj = DELIVERY_MONTHS.find((m) => m.m === monthNum) || DELIVERY_MONTHS[5];
-    const dateStr = language === 'ar' ? `${monthObj.ar} ${year}` : `${monthObj.en} ${year}`;
-    const statusStr: DeliveryStatus =
-      year === 2026
-        ? 'استلام 2026'
-        : year === 2027
-        ? 'استلام 2027'
-        : year === 2028
-        ? 'استلام 2028'
-        : 'استلام 2029+';
-    set('alreadyDelivered', false);
-    set('deliveryDate', dateStr);
-    set('deliveryStatus', statusStr);
-    setDeliveryModalOpen(false);
-  };
 
   return (
     <div id="sell-top" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-12 scroll-mt-32">
@@ -496,23 +415,29 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
             )}
           </div>
 
-          {/* 2. المطور والكمبوند */}
-          <div className="space-y-4">
-            <DeveloperSelect
-              value={form.developer}
-              compoundValue={form.compound}
-              units={units}
-              onChange={(dev) => set('developer', dev)}
-              onCompoundChange={(cmp) => set('compound', cmp)}
-            />
-
-            <Field label={tx('الكمبوند / المشروع', 'Compound / Project')} required htmlFor="cmp">
-              <input
-                id="cmp"
+          {/* 2. المطور والكمبوند — قوايم بحث؛ لو مش موجود يكتبه ويختار "استخدام ..." */}
+          <div className="grid sm:grid-cols-2 gap-4">
+            <Field label={tx('المطور العقاري', 'Developer')} required htmlFor="developer">
+              <SearchSelect
+                id="developer"
+                searchable
+                allowCustom
+                value={form.developer}
+                onChange={(v) => setForm((f) => ({ ...f, developer: v, compound: v === f.developer ? f.compound : '' }))}
+                placeholder={tx('اختار المطور', 'Choose the developer')}
+                options={developerOptions}
+              />
+            </Field>
+            <Field label={tx('الكمبوند / المشروع', 'Compound / Project')} required htmlFor="compound">
+              <SearchSelect
+                id="compound"
+                searchable
+                allowCustom
+                disabled={!form.developer}
                 value={form.compound}
-                onChange={(e) => set('compound', e.target.value)}
-                placeholder={tx('مثلاً: بالم هيلز نيو كايرو (أو اختر من الكمبوندات المقترحة أعلاه)', 'e.g. Palm Hills New Cairo')}
-                className="field"
+                onChange={(v) => set('compound', v)}
+                placeholder={form.developer ? tx('اختار الكمبوند', 'Choose the compound') : tx('اختار المطور الأول', 'Choose the developer first')}
+                options={compoundOptions}
               />
             </Field>
           </div>
@@ -555,103 +480,25 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
             </Field>
           </div>
 
-          {/* الفيو — الوحدة ممكن تطل على أكتر من حاجة، فبنعلّم على كل اللي ينطبق */}
-          <Field label={tx('الفيو', 'View')} htmlFor="views" hint={tx('ممكن تختار أكتر من واحد', 'You can pick more than one')}>
-            <MultiSelect
-              id="views"
-              options={VIEW_OPTIONS.map((o) => ({ value: o.key, label: language === 'ar' ? o.ar : o.en }))}
-              value={form.views}
-              onChange={(v) => set('views', v)}
-              placeholder={tx('اختار الفيو', 'Choose the view')}
-            />
+          {/* 4. الاستلام — قايمة واحدة: اتسلمت خلاص أو سنة الاستلام */}
+          <Field label={tx('الاستلام', 'Delivery')} required htmlFor="delivery">
+            <select
+              id="delivery"
+              value={form.deliveryStatus}
+              onChange={(e) => {
+                const v = e.target.value as SellForm['deliveryStatus'];
+                setForm((f) => ({ ...f, deliveryStatus: v, alreadyDelivered: v ? v === 'استلام فوري' : null, deliveryDate: '' }));
+              }}
+              className="field"
+            >
+              <option value="">{tx('اختار موعد الاستلام', 'Choose delivery')}</option>
+              {DELIVERY_OPTIONS.map((o) => (
+                <option key={o.ar} value={o.ar}>
+                  {o.ar === 'استلام فوري' ? tx('اتسلمت خلاص', 'Already handed over') : tx(o.ar, `Delivery ${o.en}`)}
+                </option>
+              ))}
+            </select>
           </Field>
-
-          {/* 4. تم الاستلام بالفعل (نعم / لا) */}
-          <div className="rounded-xl border border-line bg-surface p-5 space-y-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-ink text-base">
-                  {tx('تم الاستلام بالفعل؟', 'Already received / handed over?')}
-                </span>
-                <span className="text-danger font-bold text-sm">*</span>
-              </div>
-              <p className="text-xs sm:text-sm text-ink-soft mt-1">
-                {tx(
-                  'هل وحدتك تم استلامها بالفعل من المطور وجاهزة أم ما زالت تحت الإنشاء؟',
-                  'Is your unit already handed over, or still under construction?'
-                )}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={handleDeliveredClick}
-                className={`flex items-center justify-center gap-2.5 py-3.5 px-4 rounded-xl border text-sm sm:text-base font-bold transition-all cursor-pointer ${
-                  form.alreadyDelivered === true
-                    ? 'bg-brand text-white border-brand shadow-sm'
-                    : 'bg-paper text-ink border-line hover:border-brand-soft hover:bg-surface'
-                }`}
-              >
-                <CheckCircle2 className={`w-5 h-5 ${form.alreadyDelivered === true ? 'text-white' : 'text-muted'}`} />
-                <span>{tx('نعم (تم الاستلام)', 'Yes (Delivered)')}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleNotDeliveredClick}
-                className={`flex items-center justify-center gap-2.5 py-3.5 px-4 rounded-xl border text-sm sm:text-base font-bold transition-all cursor-pointer ${
-                  form.alreadyDelivered === false
-                    ? 'bg-brand text-white border-brand shadow-sm'
-                    : 'bg-paper text-ink border-line hover:border-brand-soft hover:bg-surface'
-                }`}
-              >
-                <Calendar className={`w-5 h-5 ${form.alreadyDelivered === false ? 'text-white' : 'text-muted'}`} />
-                <span>{tx('لا (تحت الإنشاء)', 'No (Under construction)')}</span>
-              </button>
-            </div>
-
-            {/* If Yes is selected */}
-            {form.alreadyDelivered === true && (
-              <div className="flex items-center gap-2.5 p-3 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200/60 text-sm">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>{tx('الوحدة جاهزة ومستلمة بالفعل من المطور (استلام فوري).', 'The unit is already handed over from the developer (immediate handover).')}</span>
-              </div>
-            )}
-
-            {/* If No is selected */}
-            {form.alreadyDelivered === false && (
-              <div className="space-y-2">
-                {form.deliveryDate ? (
-                  <div className="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-brand-soft border border-brand/20 text-brand-ink">
-                    <div className="flex items-center gap-2.5">
-                      <Calendar className="w-5 h-5 text-brand shrink-0" />
-                      <div>
-                        <span className="text-xs font-semibold block text-muted">{tx('تاريخ الاستلام المتوقع المحدد:', 'Selected expected delivery:')}</span>
-                        <span className="text-base font-bold text-ink">{form.deliveryDate} ({form.deliveryStatus})</span>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setDeliveryModalOpen(true)}
-                      className="px-3 py-1.5 rounded-lg bg-surface border border-line text-xs sm:text-sm font-semibold text-brand hover:border-brand transition-colors whitespace-nowrap cursor-pointer"
-                    >
-                      {tx('تغيير التاريخ', 'Change date')}
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setDeliveryModalOpen(true)}
-                    className="w-full flex items-center justify-center gap-2 p-3.5 rounded-xl bg-accent-soft border border-accent/30 text-accent font-bold text-sm hover:bg-accent/15 transition-colors cursor-pointer"
-                  >
-                    <Calendar className="w-4 h-4" />
-                    <span>{tx('اضغط هنا لتحديد تاريخ الاستلام المتوقع', 'Click here to choose expected delivery date')}</span>
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
 
           </div>
           )}
@@ -711,12 +558,6 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               on={form.negotiable}
               onChange={(v) => set('negotiable', v)}
             />
-            <Toggle
-              label={tx('عرض خاص — ما تظهرش في الموقع', "Private listing — not shown on the site")}
-              hint={tx('بنعرضها بس على مشترين متحقق منهم ومناسبين ليها', 'We offer it only to vetted buyers who match it')}
-              on={form.privateListing}
-              onChange={(v) => set('privateListing', v)}
-            />
             {/* خيار جوه الفورم مش لينك بيخرّجه منه — البايع يقول إنه يقبل التبديل ويكمّل. */}
             <Toggle
               label={tx('أقبل أبدّلها بوحدة تانية', 'Open to swapping it')}
@@ -738,15 +579,6 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
                 />
               </Field>
             </Toggle>
-            <button
-              type="button"
-              onClick={() => onNavigate('swap')}
-              className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline min-h-11"
-            >
-              <Repeat className="w-4 h-4" />
-              {tx('شوف التبديل شغال إزاي', 'See how swapping works')}
-              <Arrow className="w-4 h-4" />
-            </button>
           </div>
 
           </div>
@@ -792,30 +624,14 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               onFile={setPlanFile}
               required
             />
-            <Field
-              label={tx('لوكيشن الوحدة', 'Unit location')}
+            <FilePick
+              label={tx('صورة لوكيشن الوحدة', 'Unit location')}
+              hint={tx('سكرين شوت من جوجل ماب لمكان الوحدة — للفريق بس', 'A Google Maps screenshot of the unit’s spot — for our team only')}
+              value={form.unitLocationFile}
+              onChange={(v) => set('unitLocationFile', v)}
+              onFile={setLocationFile}
               required
-              htmlFor="locurl"
-              hint={
-                form.locationUrl.trim() && !isMapsUrl(form.locationUrl)
-                  ? tx('ده مش لينك جوجل ماب — انسخه زي ما هو من التطبيق', "That isn't a Google Maps link — copy it as is from the app")
-                  : tx(
-                      'افتح جوجل ماب، دوس مطوّل على مكان الوحدة، وبعدين "مشاركة" ← "نسخ الرابط"، والزقه هنا. اللينك ده للفريق بس ومش بيظهر في الموقع.',
-                      'Open Google Maps, long-press the unit’s spot, tap "Share" → "Copy link", and paste it here. Only our team sees it; it is not shown on the site.',
-                    )
-              }
-            >
-              <input
-                id="locurl"
-                type="url"
-                inputMode="url"
-                dir="ltr"
-                value={form.locationUrl}
-                onChange={(e) => set('locationUrl', e.target.value)}
-                placeholder="https://maps.app.goo.gl/..."
-                className={`field ${isRTL ? 'text-right' : 'text-left'}`}
-              />
-            </Field>
+            />
           {/* The three seller rules that matter most, agreed to right where they apply. */}
           <div className="rounded-xl bg-paper p-5 space-y-4">
             <div className="flex items-center justify-between gap-3">
@@ -947,171 +763,6 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
         </aside>
       </div>
 
-      {/* نافذة اختيار تاريخ الاستلام */}
-      {deliveryModalOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="delivery-modal-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 backdrop-blur-xs"
-          onClick={() => setDeliveryModalOpen(false)}
-        >
-          <div
-            className="w-full max-w-lg bg-surface rounded-2xl border border-line shadow-2xl p-6 sm:p-7 relative max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div className="flex items-start justify-between gap-4 pb-4 border-b border-line">
-              <div className="flex items-center gap-3">
-                <span className="grid place-items-center w-10 h-10 rounded-xl bg-brand-soft text-brand shrink-0">
-                  <Calendar className="w-5 h-5" />
-                </span>
-                <div>
-                  <h3 id="delivery-modal-title" className="text-xl font-bold text-ink">
-                    {tx('تاريخ الاستلام المتوقع', 'Expected Delivery Date')}
-                  </h3>
-                  <p className="text-xs sm:text-sm text-ink-soft mt-0.5">
-                    {tx('حدد الشهر والسنة المتوقع استلام وحدتك فيهما من المطور', 'Select the month and year you expect handover')}
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setDeliveryModalOpen(false)}
-                aria-label={tx('إغلاق', 'Close')}
-                className="grid place-items-center w-9 h-9 rounded-full text-muted hover:text-ink hover:bg-paper transition-colors shrink-0 cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="py-5 space-y-6">
-              {/* Year Selector */}
-              <div>
-                <label className="block text-sm font-bold text-ink mb-2.5">
-                  {tx('سنة الاستلام', 'Delivery Year')}
-                </label>
-                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-                  {DELIVERY_YEARS.map((yr) => (
-                    <button
-                      key={yr}
-                      type="button"
-                      onClick={() => pickYear(yr)}
-                      className={`num px-2 py-2 rounded-xl text-sm font-bold transition-all cursor-pointer ${
-                        pickerYear === yr
-                          ? 'bg-brand text-white shadow-sm ring-2 ring-brand/20'
-                          : 'bg-paper text-ink border border-line hover:border-brand-soft'
-                      }`}
-                    >
-                      {yr}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Month Selector */}
-              <div>
-                <label className="block text-sm font-bold text-ink mb-2.5">
-                  {tx('شهر الاستلام', 'Delivery Month')}
-                </label>
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                  {DELIVERY_MONTHS.map((m) => (
-                    <button
-                      key={m.m}
-                      type="button"
-                      disabled={isPastMonth(pickerYear, m.m)}
-                      onClick={() => setPickerMonth(m.m)}
-                      className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-center transition-all cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed disabled:line-through ${
-                        pickerMonth === m.m
-                          ? 'bg-brand text-white border-brand shadow-sm'
-                          : 'bg-paper text-ink border-line hover:border-brand-soft hover:bg-surface'
-                      }`}
-                    >
-                      <span className="text-xs opacity-75">{m.m}</span>
-                      <span className="text-xs sm:text-sm font-bold mt-0.5">
-                        {language === 'ar' ? m.ar : m.en}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Quick Quarters */}
-              <div>
-                <span className="text-xs text-muted block mb-2">{tx('اختصارات ربع سنوية سريعة:', 'Quick quarterly shortcuts:')}</span>
-                <div className="grid grid-cols-4 gap-1.5 text-xs">
-                  {[
-                    { label: tx('الربع 1 (مارس)', 'Q1 (Mar)'), m: 3 },
-                    { label: tx('الربع 2 (يونيو)', 'Q2 (Jun)'), m: 6 },
-                    { label: tx('الربع 3 (سبتمبر)', 'Q3 (Sep)'), m: 9 },
-                    { label: tx('الربع 4 (ديسمبر)', 'Q4 (Dec)'), m: 12 },
-                  ].map((q) => (
-                    <button
-                      key={q.m}
-                      type="button"
-                      disabled={isPastMonth(pickerYear, q.m)}
-                      onClick={() => setPickerMonth(q.m)}
-                      className={`py-1.5 px-2 rounded-lg border text-center font-semibold transition-colors cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed ${
-                        pickerMonth === q.m
-                          ? 'bg-brand-soft border-brand/40 text-brand-ink'
-                          : 'bg-paper border-line text-ink-soft hover:bg-surface'
-                      }`}
-                    >
-                      {q.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Selected Preview */}
-              <div className="rounded-xl bg-brand-soft p-4 border border-brand/20 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                  <Calendar className="w-5 h-5 text-brand shrink-0" />
-                  <div>
-                    <span className="text-xs font-semibold text-muted block">
-                      {tx('التاريخ المحدد:', 'Selected date:')}
-                    </span>
-                    <span className="text-base font-bold text-ink">
-                      {language === 'ar'
-                        ? `${DELIVERY_MONTHS.find((m) => m.m === pickerMonth)?.ar || ''} ${pickerYear}`
-                        : `${DELIVERY_MONTHS.find((m) => m.m === pickerMonth)?.en || ''} ${pickerYear}`}
-                    </span>
-                  </div>
-                </div>
-                <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-surface border border-line text-brand-ink">
-                  {pickerYear === 2026
-                    ? tx('استلام 2026', '2026 Handover')
-                    : pickerYear === 2027
-                    ? tx('استلام 2027', '2027 Handover')
-                    : pickerYear === 2028
-                    ? tx('استلام 2028', '2028 Handover')
-                    : tx('استلام 2029+', '2029+ Handover')}
-                </span>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex items-center gap-3 pt-3 border-t border-line">
-              <button
-                type="button"
-                onClick={() => setDeliveryModalOpen(false)}
-                className="btn-ghost flex-1 min-h-12 text-sm cursor-pointer"
-              >
-                {tx('إلغاء', 'Cancel')}
-              </button>
-              <button
-                type="button"
-                disabled={isPastMonth(pickerYear, pickerMonth)}
-                onClick={() => confirmDeliveryDate(pickerYear, pickerMonth)}
-                className="btn-primary flex-1 min-h-12 text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Check className="w-4 h-4" />
-                {tx('تأكيد تاريخ الاستلام', 'Confirm Date')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

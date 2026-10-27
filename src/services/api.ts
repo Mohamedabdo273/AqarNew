@@ -229,7 +229,7 @@ export const verifyCode = (code: string) => request<VerifyResult>(`/verify/${enc
 /* ───────────── Sell requests ───────────── */
 
 /** Matches DocumentType on the API. */
-export const DOC_TYPE = { contract: 1, receipts: 2, nationalId: 3, developerLetter: 4, statement: 5, schedule: 6, plan: 7, other: 99 } as const;
+export const DOC_TYPE = { contract: 1, receipts: 2, nationalId: 3, developerLetter: 4, statement: 5, schedule: 6, plan: 7, location: 8, other: 99 } as const;
 export type DocType = (typeof DOC_TYPE)[keyof typeof DOC_TYPE];
 
 export interface SellRequestDocument {
@@ -242,7 +242,7 @@ export interface SellRequestDocument {
 }
 
 /** The API's SellFormDto: the form without the file-name fields (files are uploaded separately). */
-type SellFormBody = Omit<SellForm, 'contractPages' | 'paymentScheduleFile' | 'unitPlanFile' | 'contractFile' | 'receiptFile' | 'idFile'>;
+type SellFormBody = Omit<SellForm, 'contractPages' | 'paymentScheduleFile' | 'unitPlanFile' | 'unitLocationFile' | 'contractFile' | 'receiptFile' | 'idFile'>;
 
 export interface SellRequestDto {
   code: string;
@@ -271,7 +271,7 @@ export interface SellRequestTracker {
 }
 
 const toBody = (f: SellForm): SellFormBody => {
-  const { contractPages, paymentScheduleFile, unitPlanFile, contractFile, receiptFile, idFile, ...rest } = f;
+  const { contractPages, paymentScheduleFile, unitPlanFile, unitLocationFile, contractFile, receiptFile, idFile, ...rest } = f;
   return rest;
 };
 

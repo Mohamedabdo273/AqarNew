@@ -86,8 +86,8 @@ export interface SellForm {
   paymentScheduleFile: string;
   /** بلان الوحدة الملحق بالعقد. */
   unitPlanFile: string;
-  /** لينك جوجل ماب للوحدة — للفريق بس، مش بيظهر في الموقع. */
-  locationUrl: string;
+  /** صورة لوكيشن الوحدة على الخريطة — للفريق بس، مش بتظهر في الموقع. */
+  unitLocationFile: string;
   contractFile: string;
   receiptFile: string;
   idFile: string;
@@ -155,7 +155,7 @@ export const EMPTY_SELL_FORM: SellForm = {
   contractPages: [],
   paymentScheduleFile: '',
   unitPlanFile: '',
-  locationUrl: '',
+  unitLocationFile: '',
   contractFile: '',
   receiptFile: '',
   idFile: '',
@@ -166,24 +166,6 @@ export const fitPlace = (f: SellForm): SellForm =>
   f.regionId ? f : { ...f, regionId: null, subAreaId: null, districtId: null, region: '', subArea: '', district: '' };
 
 export const isValidPhone = (phone: string) => /^01\d{9}$/.test(phone.replace(/\s/g, ''));
-
-/** A Google Maps link as the app's "Share" or the browser's address bar gives it (maps.app.goo.gl, goo.gl/maps, google.com/maps…). Mirrors the API's check. */
-export const isMapsUrl = (value: string) => {
-  try {
-    const u = new URL(value.trim());
-    if (u.protocol !== 'https:' && u.protocol !== 'http:') return false;
-    const host = u.hostname.toLowerCase().replace(/^www\./, '');
-    return (
-      host === 'maps.app.goo.gl' ||
-      host === 'maps.google.com' ||
-      (host === 'goo.gl' && u.pathname.startsWith('/maps')) ||
-      (/^google\.[a-z.]+$/.test(host) && u.pathname.startsWith('/maps'))
-    );
-  } catch {
-    return false;
-  }
-};
-
 /** سكني = أي نوع تحت نشاط "سكني". لسه ماختارش نوع → بنعامله سكني (أغلب الوحدات). */
 export const isResidential = (type: PropertyType | '') => !type || categoryOfType(type) === 'سكني';
 
