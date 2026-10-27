@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -8,6 +8,8 @@ import {
   UserCheck,
   Handshake,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   TrendingDown,
   Ban,
   FileText,
@@ -970,6 +972,8 @@ const AREA_SHORT: Record<string, [string, string]> = {
   'مدن القناة': ['مدن القناة', 'Canal cities'],
   'الساحل الشمالي': ['الساحل الشمالي', 'North Coast'],
   'العين السخنة': ['العين السخنة', 'Ain Sokhna'],
+  'البحر الأحمر': ['البحر الأحمر', 'Red Sea'],
+  'جنوب سيناء': ['جنوب سيناء', 'South Sinai'],
 };
 
 /* One photo per area that says "this place" at a glance (not a unit's interior). Stock photos — swap for real ones of each area. */
@@ -983,14 +987,21 @@ const AREA_PHOTOS: Record<string, string> = {
   'مدن القناة': areaPhoto('1587634552378-199c247a85c5'), // كوبري على القناة
   'الساحل الشمالي': areaPhoto('1507525428034-b723cf961d3e'), // رمل أبيض وبحر
   'العين السخنة': areaPhoto('1519046904884-53103b34b206'), // نخل وشاطئ
-};/*
+  'البحر الأحمر': areaPhoto('1544551763-46a013bb70d5'), // مياه وشواطئ البحر الأحمر والجونة
+  'جنوب سيناء': areaPhoto('1569949381669-ecf31ae8e613'), // دهاب وشرم الشيخ وجبال سيناء
+};
+
+/*
  * Regions as a "where are the deals" overview — the search bar already filters by region, so this row adds what the
  * bar can't: how many units, the lowest cash to get in, and the biggest discount. A click opens that region's listings
  * (an empty one opens the "alert me" form). All regions stay in one row, in the API's order.
  */
 const RegionsRow: React.FC<{ units: RealEstateUnit[]; onPick: (regionId: number) => void }> = ({ units, onPick }) => {
-  const { language, tx } = useLanguage();
+  const { language, tx, isRTL } = useLanguage();
   const regions = useRegions();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScroll, setCanScroll] = useState({ left: false, right: false });
+
   const areas = useMemo(
     () =>
       regions.map((r, i) => {
@@ -1006,33 +1017,101 @@ const RegionsRow: React.FC<{ units: RealEstateUnit[]; onPick: (regionId: number)
       }),
     [units, regions],
   );
+
+  const checkScroll = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    if (maxScroll <= 5) {
+      setCanScroll({ left: false, right: false });
+      return;
+    }
+    const current = Math.abs(el.scrollLeft);
+    if (isRTL) {
+      setCanScroll({
+        right: current > 10,
+        left: maxScroll - current > 10,
+      });
+    } else {
+      setCanScroll({
+        left: el.scrollLeft > 10,
+        right: maxScroll - el.scrollLeft > 10,
+      });
+    }
+  };
+
+  useEffect(() => {
+    checkScroll();
+    const el = scrollRef.current;
+    if (!el) return;
+    el.addEventListener('scroll', checkScroll, { passive: true });
+    window.addEventListener('resize', checkScroll);
+    return () => {
+      el.removeEventListener('scroll', checkScroll);
+      window.removeEventListener('resize', checkScroll);
+    };
+  }, [areas, isRTL]);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (!scrollRef.current) return;
+    const amount = 260;
+    scrollRef.current.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' });
+  };
+
   const name = (r: (typeof areas)[number]) => tx(AREA_SHORT[r.ar]?.[0] ?? r.ar, AREA_SHORT[r.ar]?.[1] ?? r.en);
   const unitsLabel = (n: number) =>
     tx(n === 1 ? 'وحدة واحدة' : n === 2 ? 'وحدتين' : `${n} ${n > 10 ? 'وحدة' : 'وحدات'}`, `${n} ${n === 1 ? 'unit' : 'units'}`);
 
   return (
     <section className="page-wrap pt-10 sm:pt-12">
-      <h2 className="text-2xl sm:text-[2rem] font-bold text-brand">{tx('أقوى الـ Deals حسب المنطقة', 'Top deals by area')}</h2>
-      <p className="mt-1 text-muted">{tx('دوس على المنطقة وشوف وحداتها', 'Tap a region to see its units')}</p>
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <h2 className="text-2xl sm:text-[2rem] font-bold text-brand">{tx('فين الفرص دلوقتي؟', 'Where the deals are')}</h2>
+          <p className="mt-1 text-muted">{tx('دوس على المنطقة وشوف وحداتها', 'Tap a region to see its units')}</p>
+        </div>
+        <div className="hidden sm:flex items-center gap-2 pb-1">
+          <button
+            type="button"
+            onClick={() => scroll('right')}
+            disabled={!canScroll.right}
+            aria-label={tx('التمرير لليمين', 'Scroll right')}
+            className="w-9 h-9 rounded-full border border-line bg-surface flex items-center justify-center text-ink shadow-xs hover:bg-paper hover:border-brand-soft disabled:opacity-25 disabled:cursor-not-allowed transition cursor-pointer"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => scroll('left')}
+            disabled={!canScroll.left}
+            aria-label={tx('التمرير لليسار', 'Scroll left')}
+            className="w-9 h-9 rounded-full border border-line bg-surface flex items-center justify-center text-ink shadow-xs hover:bg-paper hover:border-brand-soft disabled:opacity-25 disabled:cursor-not-allowed transition cursor-pointer"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
 
-      <div className="mt-6 -mx-4 px-4 sm:mx-0 sm:px-0 flex lg:justify-between gap-5 sm:gap-7 overflow-x-auto no-scrollbar pb-1">
+      <div
+        ref={scrollRef}
+        className="mt-6 flex items-start gap-4 sm:gap-5 md:gap-6 xl:gap-7 overflow-x-auto no-scrollbar scroll-smooth pb-3 pt-1 px-1 -mx-1"
+      >
         {areas.map((r) => (
           <button
             key={r.id}
             onClick={() => onPick(r.id)}
             title={r.count ? undefined : tx('سيب رقمك ونبلّغك أول ما تنزل وحدة هنا', "Leave your number and we'll tell you when one is listed")}
-            className="group flex flex-col items-center shrink-0 text-center"
+            className="group flex flex-col items-center shrink-0 text-center min-w-[5.5rem] sm:min-w-[6.25rem] xl:min-w-[6.75rem]"
           >
             <span className="relative">
               <span
-                className={`block w-20 h-20 sm:w-28 sm:h-28 rounded-full overflow-hidden ring-2 ring-transparent ring-offset-2 ring-offset-paper group-hover:ring-brand transition ${r.count ? '' : 'opacity-70 group-hover:opacity-100'}`}
+                className={`block w-20 h-20 sm:w-24 sm:h-24 lg:w-[6.25rem] lg:h-[6.25rem] rounded-full overflow-hidden ring-2 ring-transparent ring-offset-2 ring-offset-paper group-hover:ring-brand group-hover:shadow-md transition-all duration-300 ${r.count ? '' : 'opacity-80 group-hover:opacity-100'}`}
                 style={{ backgroundColor: r.tint }}
               >
                 {r.photo ? (
-                  <img src={r.photo} alt="" loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  <img src={r.photo} alt={name(r)} loading="lazy" className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500" />
                 ) : (
                   <span className="grid h-full w-full place-items-center text-ink/25">
-                    <MapPin className="h-7 w-7 sm:h-9 sm:w-9" strokeWidth={1.5} />
+                    <MapPin className="h-7 w-7 sm:h-8 sm:w-8" strokeWidth={1.5} />
                   </span>
                 )}
               </span>
@@ -1042,21 +1121,21 @@ const RegionsRow: React.FC<{ units: RealEstateUnit[]; onPick: (regionId: number)
                 </span>
               )}
             </span>
-            <span className="mt-3 text-sm sm:text-base font-bold text-ink group-hover:text-brand">{name(r)}</span>
+            <span className="mt-3 text-sm sm:text-base font-bold text-ink group-hover:text-brand whitespace-nowrap">{name(r)}</span>
             {r.count > 0 ? (
               <>
-                <span className="mt-0.5 text-xs sm:text-sm text-muted">
+                <span className="mt-0.5 text-xs sm:text-sm text-muted whitespace-nowrap">
                   {tx('كاش من', 'Cash from')} <span className="num font-bold text-brand">{money(r.minCash, language)}</span>
                 </span>
                 {r.maxDiscount > 0 && (
-                  <span className="text-xs text-muted">
+                  <span className="text-xs text-muted whitespace-nowrap">
                     {tx('خصم لحد', 'Up to')} <span className="num font-bold text-accent">{money(r.maxDiscount, language)}</span>
                     {language === 'en' && ' off'}
                   </span>
                 )}
               </>
             ) : (
-              <span className="mt-0.5 text-xs sm:text-sm text-muted">{tx('قريباً', 'Soon')}</span>
+              <span className="mt-0.5 text-xs sm:text-sm text-muted whitespace-nowrap">{tx('قريباً', 'Soon')}</span>
             )}
           </button>
         ))}
