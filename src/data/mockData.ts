@@ -32,7 +32,7 @@ const BASE_UNITS: RealEstateUnit[] = [
     bathrooms: 3,
     floor: 'الدور الثالث (أسانسير)',
     floorEn: '3rd Floor (Elevator)',
-    finishing: 'نصف تشطيب',
+    finishing: 'نص تشطيب',
     finishingEn: 'Semi-Finished',
     maintenanceFee: 230000,
     transferFeePolicy: 'معفي من رسوم التنازل',
@@ -106,7 +106,7 @@ const BASE_UNITS: RealEstateUnit[] = [
     areaM2: 230,
     bedrooms: 4,
     bathrooms: 4,
-    finishing: 'نصف تشطيب',
+    finishing: 'نص تشطيب',
     finishingEn: 'Semi-Finished',
     maintenanceFee: 310000,
     transferFeePolicy: 'مناصفة',
@@ -172,7 +172,7 @@ const BASE_UNITS: RealEstateUnit[] = [
     bathrooms: 3,
     floor: 'الدور الثاني',
     floorEn: '2nd Floor',
-    finishing: 'تشطيب كامل سوبر لوكس',
+    finishing: 'كامل التشطيب',
     finishingEn: 'Fully Finished Super Lux',
     maintenanceFee: 290000,
     transferFeePolicy: 'على البائع',
@@ -230,7 +230,7 @@ const BASE_UNITS: RealEstateUnit[] = [
     areaM2: 140,
     bedrooms: 2,
     bathrooms: 2,
-    finishing: 'تشطيب كامل سوبر لوكس',
+    finishing: 'كامل التشطيب',
     finishingEn: 'Fully Finished Super Lux',
     maintenanceFee: 470000,
     transferFeePolicy: 'معفي من رسوم التنازل',
@@ -284,7 +284,7 @@ const BASE_UNITS: RealEstateUnit[] = [
     bathrooms: 1,
     floor: 'الدور الرابع',
     floorEn: '4th Floor',
-    finishing: 'تشطيب كامل سوبر لوكس',
+    finishing: 'كامل التشطيب',
     finishingEn: 'Fully Finished Super Lux',
     maintenanceFee: 155000,
     transferFeePolicy: 'على المشتري',
@@ -335,7 +335,7 @@ const BASE_UNITS: RealEstateUnit[] = [
     areaM2: 380,
     bedrooms: 5,
     bathrooms: 6,
-    finishing: 'نصف تشطيب',
+    finishing: 'نص تشطيب',
     finishingEn: 'Core & Shell',
     maintenanceFee: 640000,
     transferFeePolicy: 'مناصفة',
@@ -389,7 +389,7 @@ const BASE_UNITS: RealEstateUnit[] = [
     bathrooms: 1,
     floor: 'الدور الأرضي (واجهة خارجية)',
     floorEn: 'Ground Floor (Direct Street Facade)',
-    finishing: 'نصف تشطيب',
+    finishing: 'نص تشطيب',
     finishingEn: 'Semi-Finished',
     maintenanceFee: 260000,
     transferFeePolicy: 'معفي من رسوم التنازل',
@@ -440,7 +440,7 @@ const BASE_UNITS: RealEstateUnit[] = [
     areaM2: 265,
     bedrooms: 4,
     bathrooms: 4,
-    finishing: 'تشطيب كامل سوبر لوكس',
+    finishing: 'كامل التشطيب',
     finishingEn: 'Fully Finished Ultra Lux',
     maintenanceFee: 575000,
     transferFeePolicy: 'على البائع',
@@ -469,8 +469,8 @@ const BASE_UNITS: RealEstateUnit[] = [
 // pagination behave like a real marketplace. Deterministic (no Math.random).
 const DELIVERIES: RealEstateUnit['deliveryStatus'][] = ['استلام فوري', 'استلام 2026', 'استلام 2027', 'استلام 2028', 'استلام 2029+'];
 const DELIVERIES_EN = ['Ready to move', 'Delivery 2026', 'Delivery 2027', 'Delivery 2028', 'Delivery 2029+'];
-const FINISHINGS: RealEstateUnit['finishing'][] = ['بدون تشطيب', 'نصف تشطيب', 'تشطيب كامل سوبر لوكس', 'ألترا سوبر لوكس'];
-const FINISHINGS_EN = ['Core & Shell', 'Semi-Finished', 'Fully Finished', 'Ultra Super Lux'];
+const FINISHINGS: RealEstateUnit['finishing'][] = ['طوب أحمر', 'نص تشطيب', 'كامل التشطيب', 'متشطب بالعفش'];
+const FINISHINGS_EN = ['Red brick', 'Semi-finished', 'Fully finished', 'Finished and furnished'];
 const FREQUENCIES: RealEstateUnit['installmentFrequency'][] = ['شهري', 'ربع سنوي', 'نصف سنوي', 'سنوي'];
 const MONTHS: Record<string, number> = { 'شهري': 1, 'ربع سنوي': 3, 'نصف سنوي': 6, 'سنوي': 12 };
 const FEE_POLICIES: RealEstateUnit['transferFeePolicy'][] = ['معفي من رسوم التنازل', 'على المشتري', 'مناصفة', 'على البائع'];

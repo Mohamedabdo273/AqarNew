@@ -163,10 +163,20 @@ const RENAMED_TYPES: Record<string, RealEstateUnit['propertyType']> = {
   'مساحة في مول': 'محل/مقر',
 };
 
+/** أسامي التشطيب القديمة (قبل أكتوبر 2026) → الجديدة، لحد ما migration الـ API تتطبق على الداتابيز. */
+export const LEGACY_FINISHINGS: Record<string, { ar: RealEstateUnit['finishing']; en: string }> = {
+  'بدون تشطيب': { ar: 'طوب أحمر', en: 'Red brick (core & shell)' },
+  'نصف تشطيب': { ar: 'نص تشطيب', en: 'Semi-finished' },
+  'تشطيب كامل سوبر لوكس': { ar: 'كامل التشطيب', en: 'Fully finished' },
+  'ألترا سوبر لوكس': { ar: 'كامل التشطيب', en: 'Fully finished' },
+};
+
 function splitGreaterCairo(unit: UnitDto): UnitDto {
   const subArea = (unit.subArea && RENAMED_SUB_AREAS[unit.subArea]) || unit.subArea;
   const propertyType = RENAMED_TYPES[unit.propertyType] ?? unit.propertyType;
   if (propertyType !== unit.propertyType) unit = { ...unit, propertyType };
+  const finishing = LEGACY_FINISHINGS[unit.finishing as string];
+  if (finishing) unit = { ...unit, finishing: finishing.ar, finishingEn: finishing.en };
   if ((unit.region as string) !== LEGACY_GREATER_CAIRO) return subArea === unit.subArea ? unit : { ...unit, subArea };
   const isGiza = !!unit.subArea && GIZA_SUB_AREAS.has(unit.subArea);
   return { ...unit, subArea, region: isGiza ? 'جيزة' : 'قاهرة' };

@@ -173,11 +173,16 @@ export const DELIVERY_OPTIONS: { ar: RealEstateUnit['deliveryStatus']; en: strin
 ];
 
 export const FINISHING_OPTIONS: { ar: RealEstateUnit['finishing']; en: string }[] = [
-  { ar: 'بدون تشطيب', en: 'Core & shell' },
-  { ar: 'نصف تشطيب', en: 'Semi-finished' },
-  { ar: 'تشطيب كامل سوبر لوكس', en: 'Fully finished' },
-  { ar: 'ألترا سوبر لوكس', en: 'Ultra lux' },
+  { ar: 'طوب أحمر', en: 'Red brick (core & shell)' },
+  { ar: 'نص تشطيب', en: 'Semi-finished' },
+  { ar: 'تلت تربع تشطيب', en: 'Three-quarters finished' },
+  { ar: 'كامل التشطيب', en: 'Fully finished' },
+  { ar: 'متشطب بالعفش', en: 'Finished & furnished' },
 ];
+
+/** The developer's transfer fee is always on the buyer and differs by developer — shown wherever a listing's fee bearer used to be. */
+export const transferFeeText = (tx: (ar: string, en: string) => string) =>
+  tx('رسوم التنازل على المشتري — بتختلف حسب المطور', "Transfer fee is on the buyer — it varies by developer");
 
 export const FREQUENCY_OPTIONS: { ar: RealEstateUnit['installmentFrequency']; en: string }[] = [
   { ar: 'شهري', en: 'Monthly' },

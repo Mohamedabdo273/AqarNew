@@ -48,7 +48,7 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
 
   const golden: Rule[] = [
     { icon: Ban, t: tx('صفر أوفر برايس', 'Zero overprice'), d: tx('السعر هو اللي البايع دفعه. مش جنيه زيادة.', 'The price is what the seller paid. Not a pound more.') },
-    { icon: ShieldCheck, t: tx('تنازل رسمي موثّق', 'Official documented transfer'), d: tx('إجراءات موثقة تضمن حقوق الطرفين وسداد المبالغ بأمان.', 'Documented procedures protecting both parties and payment safety.') },
+    { icon: HandCoins, t: tx('التنازل في مقر المطور', 'Transfer at the developer'), d: tx('التنازل بيتم رسمي في مقر المطور، والفلوس بشيك مصرفي.', 'The transfer is signed at the developer, paid by bank cheque.') },
     { icon: FileCheck2, t: tx('كل حاجة مكتوبة', 'Everything in writing'), d: tx('المديونية والرسوم مكتوبة في الإعلان قبل ما تقرر.', 'Dues and fees are listed before you decide.') },
     { icon: BadgeCheck, t: tx('كل رقم معروف مصدره', 'Every number shows its source'), d: tx('اللي اتأكدنا منه بالمستندات مكتوب عليه "متأكد"، والتقديري مكتوب عليه "تقديري".', 'Figures checked against documents say "verified"; estimates say "estimate".') },
   ];
@@ -59,32 +59,33 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
     { icon: Wallet, t: tx('صفر عمولة عليك', 'Zero fee for you'), d: tx('مش هتدفع لينا ولا جنيه.', "You don't pay us anything.") },
     { icon: AlertTriangle, t: tx('قول على المديونية', 'Declare all dues'), d: tx('أي أقساط متأخرة أو غرامات لازم تتكتب. لو اتخبّت، الإعلان بيتشال.', 'Any overdue installments or fines must be listed. Hidden dues get the listing removed.') },
     { icon: FileSearch, t: tx('مراجعة قبل النشر', 'Reviewed before listing'), d: tx('بنراجع العقد وكشف الحساب مع المطور خلال 24 ساعة.', 'We check the contract and statement with the developer within 24h.') },
+    { icon: FileSignature, t: tx('وعد بيع مكتوب', 'A written promise of sale'), d: tx('لما تتفق مع المشتري بيتكتب بينكم وعد بيع فيه السعر وميعاد التنازل، قبل التنازل في مقر المطور.', 'Once you agree with a buyer, you both sign a promise of sale with the price and transfer date, before the transfer at the developer.') },
     { icon: Building2, t: tx('تقبض في مقر المطور', 'Paid at the developer'), d: tx('بشيك مصرفي، وشيكاتك القديمة بترجعلك في نفس اليوم.', 'By bank cheque, and your old cheques are returned the same day.') },
+    { icon: EyeOff, t: tx('تقدر تختار العرض الخاص', 'Private listing if you want'), d: tx('وحدتك ما تظهرش في الموقع خالص، وبنعرضها بس على مشترين متحقق منهم ومناسبين ليها.', "Your unit isn't shown on the site at all — only to vetted buyers who match it.") },
     { icon: MessageSquareHeart, t: tx('نصيحة بصراحة', 'Honest advice'), d: tx('بنعرض عليك كل الاختيارات، ولو الأحسن ليك إنك تكمّل تعاقدك هنقولك.', "We lay out every option — and if you're better off keeping your contract, we'll say so.") },
     { icon: Undo2, t: tx('تقدر تنسحب', 'You can withdraw'), d: tx('قبل التوقيع تشيل إعلانك في أي وقت ومن غير تكلفة.', 'Remove your listing any time before signing, free.') },
   ];
 
   const buyer: Rule[] = [
     { icon: Banknote, t: tx('تدفع اللي البايع دفعه بس', 'Pay only what the seller paid'), d: tx('والباقي أقساط للمطور بنفس نظامها القديم.', 'The rest continues as installments to the developer.') },
-    { icon: Percent, t: tx(`عمولتنا ${fee}% بس`, `Our fee is only ${fee}%`), d: tx('من سعر العقد، وبتتدفع بس لو التنازل تم. لو ما تمش لأي سبب، مفيش عمولة على حد.', "Of the contract price, and only if the transfer completes. If it doesn't, for any reason, nobody pays a fee.") },
-    { icon: Receipt, t: tx('رسوم التنازل واضحة', 'Transfer fee is clear'), d: tx('كل إعلان مكتوب فيه مين بيدفع رسوم المطور ونسبتها.', 'Every listing states who pays the developer fee and how much.') },
-    { icon: Eye, t: tx('الحجز ببلاش', 'Booking is free'), d: tx('احجز من صفحة الوحدة وفريقنا يكلّمك يكمّل معاك.', 'Book from the unit page and our team calls you to go ahead.') },
+    { icon: Percent, t: tx(`عمولتنا ${fee}% من سعر الوحدة`, `Our fee is ${fee}% of the unit price`), d: tx('وبتتدفع بس لو التنازل تم. لو ما تمش لأي سبب، مفيش عمولة على حد.', "Paid only if the transfer completes. If it doesn't, for any reason, nobody pays a fee.") },
+    { icon: Receipt, t: tx('الرسوم على المشتري', 'Fees are on the buyer'), d: tx('أي رسوم زي رسوم التنازل عند المطور بيدفعها المشتري، وقيمتها بتختلف حسب المطور.', "Any fees, such as the developer's transfer fee, are paid by the buyer; the amount differs by developer.") },
+    { icon: Eye, t: tx('إنك تقول مهتم ببلاش', 'Showing interest is free'), d: tx('دوس "مهتم بالشراء" من صفحة الوحدة وفريقنا يكلّمك يكمّل معاك.', 'Tap "Interested in buying" on the unit page and our team calls you to go ahead.') },
+    { icon: FileSignature, t: tx('وعد بيع مكتوب', 'A written promise of sale'), d: tx('لما تتفق مع البايع بيتكتب بينكم وعد بيع فيه السعر وميعاد التنازل، قبل التنازل في مقر المطور.', 'Once you agree with the seller, you both sign a promise of sale with the price and transfer date, before the transfer at the developer.') },
     { icon: AlertTriangle, t: tx('المتأخرات مش عليك', "Overdues aren't on you"), d: tx('بتتسدد للمطور يوم التنازل وتتخصم من البايع.', "They're settled on transfer day and deducted from the seller.") },
     { icon: FileSignature, t: tx('العقد بيبقى باسمك', 'The contract becomes yours'), d: tx('بعد التنازل العقد والشيكات الجديدة باسمك.', 'After transfer, the contract and new cheques are in your name.') },
-    { icon: Undo2, t: tx('تقدر تنسحب', 'You can withdraw'), d: tx('قبل التوقيع تنسحب من غير أي تكلفة.', 'Back out free before signing.') },
+    { icon: Undo2, t: tx('تقدر تنسحب', 'You can withdraw'), d: tx('تقدر تنسحب في أي وقت قبل توقيع عقد البيع.', 'You can back out any time before signing the sale contract.') },
   ];
 
   const forbidden =
     tab === 'seller'
       ? [
-          tx('تطلب أي مبلغ فوق اللي دفعته (ممنوع الأوفر برايس)', 'Asking for anything above what you paid (no overprice)'),
-          tx('إخفاء أي أقساط متأخرة أو غرامات على الوحدة', 'Hiding any overdue installments or fines on the unit'),
-          tx('تسلّم أصل العقد أو الشيكات لحد قبل التنازل الرسمي', 'Handing over the original contract or cheques before official transfer'),
+          tx('تطلب أي مبلغ فوق اللي دفعته', 'Asking for anything above what you paid'),
+          tx('تسلّم أصل العقد أو الشيكات لحد قبل التنازل', 'Handing over the original contract or cheques before transfer'),
         ]
       : [
-          tx('تحوّل فلوس على حسابات شخصية مجهولة دون إيصالات', 'Transferring money to unknown personal accounts without receipts'),
+          tx('تحوّل فلوس على حساب شخصي', 'Transferring money to a personal account'),
           tx(`تصدّق حد بيقول إنه من طرفنا من غير ما تتأكد على ${BRAND.hotline}`, `Trusting anyone claiming to be us without checking on ${BRAND.hotline}`),
-          tx('التنازل دون الرجوع لمقر المطور العقاري والتحقق من المديونية', 'Transferring without the developer office and verifying dues'),
         ];
 
   const dealDay = [

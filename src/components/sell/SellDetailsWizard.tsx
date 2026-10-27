@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { ArrowLeft, ArrowRight, Check, AlertTriangle, Lock, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
-import { DELIVERY_OPTIONS, FINISHING_OPTIONS, FREQUENCY_OPTIONS, fullMoney } from '../../lib/unitHelpers';
-import { DETAIL_SECTIONS, FeeBearer, MONTHS_PER_PAYMENT, SellForm, TaxBearer, TaxCategory, View, isResidential } from '../../lib/sellForm';
+import { DELIVERY_OPTIONS, FINISHING_OPTIONS, FREQUENCY_OPTIONS, fullMoney, transferFeeText } from '../../lib/unitHelpers';
+import { DETAIL_SECTIONS, MONTHS_PER_PAYMENT, SellForm, TaxBearer, TaxCategory, View, isResidential } from '../../lib/sellForm';
 import { DOC_TYPE, DocType, errorText } from '../../services/api';
-import { ChipSelect, CheckBox, Counter, Field, FilePick, Group, MoneyInput, MonthYearInput, NumberInput, Toggle } from './FormBits';
+import { CheckBox, Counter, Field, FilePick, Group, MoneyInput, MonthYearInput, NumberInput, Select, Toggle } from './FormBits';
 
 interface SellDetailsWizardProps {
   initial: SellForm;
@@ -160,11 +160,13 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
               </div>
             </Group>
             <Group title={tx('الحالة', 'Condition')}>
-              <Field label={tx('التشطيب', 'Finishing')} required>
-                <ChipSelect options={L(FINISHING_OPTIONS)} value={form.finishing} onChange={(v) => set('finishing', v)} />
+              <Field label={tx('التشطيب', 'Finishing')} required htmlFor="finishing">
+                <Select id="finishing" options={L(FINISHING_OPTIONS)} value={form.finishing} onChange={(v) => set('finishing', v)} placeholder={tx('اختار التشطيب', 'Choose finishing')} />
               </Field>
-              <Field label={tx('الاستلام', 'Delivery')} required>
-                <ChipSelect
+              <Field label={tx('الاستلام', 'Delivery')} required htmlFor="delivery">
+                <Select
+                  id="delivery"
+                  placeholder={tx('اختار موعد الاستلام', 'Choose delivery')}
                   options={DELIVERY_OPTIONS.map((d) => ({ value: d.ar, label: language === 'ar' ? d.short : d.en }))}
                   value={form.deliveryStatus}
                   onChange={(v) => {
@@ -173,8 +175,10 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
                   }}
                 />
               </Field>
-              <Field label={tx('الواجهة', 'Facing')}>
-                <ChipSelect<View>
+              <Field label={tx('الواجهة', 'Facing')} htmlFor="facing">
+                <Select<View>
+                  id="facing"
+                  placeholder={tx('اختار الواجهة', 'Choose facing')}
                   options={[
                     { value: 'بحري صريح', label: tx('بحري صريح', 'North') },
                     { value: 'بحري شرقي', label: tx('بحري شرقي', 'North-east') },
@@ -211,8 +215,8 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
                   <MonthYearInput id="next" value={form.nextInstallmentDate} onChange={(v) => set('nextInstallmentDate', v)} />
                 </Field>
               </div>
-              <Field label={tx('بتدفع كل', 'Paid every')} required>
-                <ChipSelect options={L(FREQUENCY_OPTIONS)} value={form.installmentFrequency} onChange={(v) => set('installmentFrequency', v)} />
+              <Field label={tx('بتدفع كل', 'Paid every')} required htmlFor="freq">
+                <Select id="freq" options={L(FREQUENCY_OPTIONS)} value={form.installmentFrequency} onChange={(v) => set('installmentFrequency', v)} placeholder={tx('اختار', 'Choose')} />
               </Field>
               <div className="sm:w-1/2">
                 <Field
@@ -269,28 +273,11 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
 
             <Group title={tx('الرسوم والضرايب', 'Fees & tax')}>
               <p className="-mt-2 text-sm text-muted">{tx('مش متأكد؟ سيبها على "مش عارف" والمستشار هيراجعها من العقد.', 'Not sure? Leave "Don\'t know" and your advisor will check the contract.')}</p>
-              <Field label={tx('رسوم التنازل عند المطور على مين؟', 'Developer transfer fee paid by')}>
-                <ChipSelect<FeeBearer>
-                  options={[
-                    { value: '', label: tx('مش عارف', "Don't know") },
-                    { value: 'مشتري', label: tx('المشتري', 'Buyer') },
-                    { value: 'بائع', label: tx('أنا', 'Me') },
-                    { value: 'مناصفة', label: tx('مناصفة', '50/50') },
-                    { value: 'معفي بالعقد', label: tx('معفي بالعقد', 'Exempt') },
-                  ]}
-                  value={form.transferFeeBearer}
-                  onChange={(v) => set('transferFeeBearer', v)}
-                />
-              </Field>
-              {form.transferFeeBearer !== '' && form.transferFeeBearer !== 'معفي بالعقد' && (
-                <div className="sm:w-1/2">
-                  <Field label={tx('نسبة الرسوم', 'Fee %')} htmlFor="feepct" hint={tx('غالباً من 2% لـ 10% من سعر العقد', 'Usually 2–10% of contract price')}>
-                    <NumberInput id="feepct" value={form.transferFeePercent} onChange={(n) => set('transferFeePercent', Math.min(100, n))} placeholder="5" suffix="%" />
-                  </Field>
-                </div>
-              )}
-              <Field label={tx('نوع الوحدة ضريبياً', 'Tax category')}>
-                <ChipSelect<TaxCategory>
+              {/* Not the seller's choice any more: the developer's transfer fee is always the buyer's. */}
+              <p className="rounded-xl bg-paper px-4 py-3 text-sm text-ink-soft">{transferFeeText(tx)}</p>
+              <Field label={tx('نوع الوحدة ضريبياً', 'Tax category')} htmlFor="taxcat">
+                <Select<TaxCategory>
+                  id="taxcat"
                   options={[
                     { value: '', label: tx('مش عارف', "Don't know") },
                     { value: 'residential_exempt', label: tx('سكني (معفي)', 'Residential (exempt)') },
@@ -301,8 +288,9 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
                   onChange={(v) => set('taxCategory', v)}
                 />
               </Field>
-              <Field label={tx('الضريبة على مين؟', 'Tax paid by')}>
-                <ChipSelect<TaxBearer>
+              <Field label={tx('الضريبة على مين؟', 'Tax paid by')} htmlFor="taxby">
+                <Select<TaxBearer>
+                  id="taxby"
                   options={[
                     { value: 'حسب القانون', label: tx('حسب القانون', 'By law') },
                     { value: 'بائع', label: tx('أنا', 'Me') },

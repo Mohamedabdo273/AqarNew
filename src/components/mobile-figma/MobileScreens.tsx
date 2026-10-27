@@ -74,7 +74,7 @@ export const MobileScreens: React.FC<MobileScreensProps> = ({
     bedrooms: 3,
     bathrooms: 3,
     floor: 'الدور الثالث (أسانسير)',
-    finishing: 'نصف تشطيب',
+    finishing: 'نص تشطيب',
     maintenanceFee: 230000,
     transferFeePolicy: 'معفي من رسوم التنازل',
     verifiedContract: true,

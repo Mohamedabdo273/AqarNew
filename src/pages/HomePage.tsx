@@ -10,7 +10,6 @@ import {
   ChevronDown,
   TrendingDown,
   Ban,
-  HandCoins,
   FileText,
   Wallet,
   Percent,
@@ -289,8 +288,8 @@ export const HomePage: React.FC<HomePageProps> = ({
       points: [
         tx('كل وحدة متراجعة على العقد وإيصالات الدفع قبل ما تتنشر', 'Every unit is checked against its contract and payment receipts before listing'),
         tx('بتشوف المطلوب كاش والقسط والمتبقي قبل ما تكلّم حد', 'See the cash needed, monthly and balance before talking to anyone'),
-        tx('احجز الوحدة من صفحتها، وإحنا نكمّل مع صاحبها', 'Book the unit from its page — we take it from there with the owner'),
-        tx('العمولة بتتدفع بس لما التنازل يتم في مقر المطور', 'The fee is paid only once the transfer completes at the developer'),
+        tx('دوس "مهتم بالشراء" من صفحة الوحدة، وإحنا نكمّل مع صاحبها', 'Tap "Interested in buying" on the unit page — we take it from there with the owner'),
+        tx(`العمولة ${BRAND.buyerFeePercent}% من سعر الوحدة، وبتتدفع بس لما التنازل يتم في مقر المطور`, `Our fee is ${BRAND.buyerFeePercent}% of the unit price, paid only once the transfer completes at the developer`),
       ],
       cards: [
         { icon: Wallet, t: tx('بسعر زمان', 'At the old price'), d: tx('أرخص من سعر المطور النهارده', 'Below the developer’s price today') },
@@ -698,7 +697,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           <div aria-hidden="true" className="absolute inset-0 ltr:bg-gradient-to-r rtl:bg-gradient-to-l from-brand-ink/95 via-brand-ink/80 to-brand-ink/50" />
           <div className="relative max-w-xl">
             <p className="font-display text-2xl sm:text-3xl font-bold">{tx('لقيت وحدة عاجباك؟', 'Found one you like?')}</p>
-            <p className="mt-2 text-white/80">{tx('احجزها من صفحتها، والورق متراجع قبل ما تدفع حاجة.', 'Book it from its page — the papers are checked before you pay anything.')}</p>
+            <p className="mt-2 text-white/80">{tx('قولنا إنك مهتم بالشراء من صفحتها، والورق متراجع قبل ما تدفع حاجة.', 'Tell us you want to buy from its page — the papers are checked before you pay anything.')}</p>
           </div>
           <button onClick={() => onBrowseWithBudget()} className="relative btn bg-white text-brand hover:bg-brand-soft min-h-13 px-6">
             <Search className="w-5 h-5" />
@@ -1013,7 +1012,7 @@ const RegionsRow: React.FC<{ units: RealEstateUnit[]; onPick: (regionId: number)
 
   return (
     <section className="page-wrap pt-10 sm:pt-12">
-      <h2 className="text-2xl sm:text-[2rem] font-bold text-brand">{tx('فين الفرص دلوقتي؟', 'Where the deals are')}</h2>
+      <h2 className="text-2xl sm:text-[2rem] font-bold text-brand">{tx('أقوى الـ Deals حسب المنطقة', 'Top deals by area')}</h2>
       <p className="mt-1 text-muted">{tx('دوس على المنطقة وشوف وحداتها', 'Tap a region to see its units')}</p>
 
       <div className="mt-6 -mx-4 px-4 sm:mx-0 sm:px-0 flex lg:justify-between gap-5 sm:gap-7 overflow-x-auto no-scrollbar pb-1">
@@ -1176,7 +1175,7 @@ const ThreeWays: React.FC<{ onSell: () => void }> = ({ onSell }) => {
     },
     {
       k: tx('فلوسك في أمان؟', 'Is the money safe?'),
-      v: [tx('—', '—'), tx('معاملات فردية وتداول يدوي', 'Individual unregulated deals'), tx('تنازل رسمي موثق في مقر المطور', 'Official documented transfer at the developer')],
+      v: [tx('—', '—'), tx('كاش في إيد من غير ورق', 'Cash in hand, no paperwork'), tx('تنازل رسمي في مقر المطور بشيك مصرفي', 'Official transfer at the developer, by bank cheque')],
       bad: [false, true],
     },
     {
@@ -1427,7 +1426,7 @@ const HowItWorks: React.FC<{ tab: HomeRole }> = ({ tab }) => {
       : tab === 'buy'
       ? [
           { illo: IlloForm, icon: Wallet, t: tx('حدد ميزانيتك', 'Set your budget'), d: tx('الكاش اللي معاك والقسط اللي يريحك', 'Your cash and a comfortable monthly') },
-          { illo: IlloPeople, icon: UserCheck, t: tx('احجز الوحدة', 'Book the unit'), d: tx('باسمك ورقمك، وإحنا نكلّمك', 'Name and mobile — we call you') },
+          { illo: IlloPeople, icon: UserCheck, t: tx('قول إنك مهتم بالشراء', 'Say you want to buy'), d: tx('باسمك ورقمك، وإحنا نكلّمك', 'Name and mobile — we call you') },
           { illo: IlloReview, icon: ShieldCheck, t: tx('اطمن على الورق', 'Check the papers'), d: tx('العقد والمديونية متراجعين', 'Contract & dues verified') },
           { illo: IlloKeys, icon: Handshake, t: tx('استلم باسمك', 'Take it over'), d: tx('تنازل رسمي وتكمّل الأقساط', 'Official transfer, continue the plan') },
         ]
@@ -1466,12 +1465,11 @@ const HowItWorks: React.FC<{ tab: HomeRole }> = ({ tab }) => {
 const RulesPreview: React.FC<{ onOpenRules: (tab: 'seller' | 'buyer') => void }> = ({ onOpenRules }) => {
   const { tx } = useLanguage();
   const rules = [
-    { icon: ShieldCheck, t: tx('تنازل رسمي موثّق', 'Official documented transfer'), d: tx('إجراءات رسمية تضمن حقوق الطرفين', 'Official procedures protecting both parties') },
     { icon: Landmark, t: tx('شيك مصرفي في مقر المطور', 'Bank cheque at the developer'), d: tx('الفلوس والتنازل في نفس المكان والوقت', 'Payment and transfer at the same time and place') },
     { icon: Ban, t: tx('صفر أوفر برايس', 'Zero overprice'), d: tx('السعر هو اللي البايع دفعه، مش جنيه زيادة', 'The price is what the seller paid') },
     { icon: FileText, t: tx('المديونية مكتوبة', 'Dues in writing'), d: tx('أي متأخرات بتظهر في الإعلان', 'Any overdues shown on the listing') },
     { icon: UserCheck, t: tx('ملّاك بس', 'Owners only'), d: tx('بنتعامل مع صاحب الوحدة، مش سماسرة', 'We deal with owners, not brokers') },
-    { icon: Percent, t: tx(`المشتري ${BRAND.buyerFeePercent}% عموله بس`, `Buyers pay ${BRAND.buyerFeePercent}% only`), d: tx('وبعد توقيع التنازل. البايع صفر.', 'After signing. Sellers pay nothing.') },
+    { icon: Percent, t: tx(`المشتري ${BRAND.buyerFeePercent}% من سعر الوحدة بس`, `Buyers pay ${BRAND.buyerFeePercent}% of the unit price only`), d: tx('وبعد توقيع التنازل. البايع صفر.', 'After signing. Sellers pay nothing.') },
   ];
   return (
     <section className="page-wrap py-14 sm:py-20">
@@ -1523,7 +1521,9 @@ const Faq: React.FC = () => {
     { q: tx('لو الأحسن إني أكمّل أقساطي، هتقولولي؟', "If I'm better off keeping my unit, will you say so?"), a: tx('أيوه. كشف الحساب بيقارن كل الاختيارات، ولو الاستمرار أحسن ليك هنقولك ده، ومن غير أي التزام.', 'Yes. The statement compares every option; if keeping it is better for you, we will tell you — no commitment.') },
     { q: tx('حد هيعرف إني ببيع وحدتي؟', 'Will people know I’m selling?'), a: tx('اسمك ورقمك مش بيظهروا في أي مكان. الإعلان فيه بيانات الوحدة بس، وأي مشتري بيكلمنا احنا الأول.', 'Your name and number never appear anywhere. The listing shows the unit only, and buyers contact us first.') },
     { q: tx('إزاي التبديل بيشتغل؟', 'How does a swap work?'), a: tx('بتختار أي وحدة على الموقع. إحنا بنبيع وحدتك باللي دفعته، وبنشتريلك الجديدة، ونرتّب التنازلين مع بعض. إنت بتدفع أو بتاخد الفرق بس.', "Pick any listed unit. We sell yours at what you paid, buy the new one for you, and arrange both transfers together. You just pay or receive the difference.") },
-    { q: tx('إيه اللي يضمن حقي؟', 'How am I protected?'), a: tx('التنازل بيتم رسمي في مقر المطور، والفلوس بشيك مصرفي، ومفيش أي فلوس بتتدفع قبلها.', 'Transfer is signed at the developer, paid by bank cheque, and no money changes hands before.') },
+    { q: tx('كام العمولة وعلى مين الرسوم؟', 'What is the fee, and who pays the fees?'), a: tx(`عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة، بيدفعها المشتري بعد توقيع التنازل بس، والبايع ما بيدفعش حاجة. أي رسوم زي رسوم التنازل عند المطور بيدفعها المشتري، وقيمتها بتختلف حسب المطور.`, `Our fee is ${BRAND.buyerFeePercent}% of the unit price, paid by the buyer only after the transfer is signed; sellers pay nothing. Any fees such as the developer's transfer fee are paid by the buyer, and the amount differs by developer.`) },
+    { q: tx('ينفع أنسحب بعد ما أقول إني مهتم؟', 'Can I back out after showing interest?'), a: tx('أيوه. المشتري يقدر ينسحب في أي وقت قبل توقيع عقد البيع، ومن غير ما يدفع لينا حاجة.', 'Yes. A buyer can withdraw any time before signing the sale contract, without paying us anything.') },
+    { q: tx('إيه اللي يضمن حقي؟', 'How am I protected?'), a: tx('لما البايع والمشتري يتفقوا بيتكتب بينهم وعد بيع فيه السعر وميعاد التنازل، وبعدها التنازل بيتم رسمي في مقر المطور، والفلوس بشيك مصرفي.', 'Once seller and buyer agree, they sign a promise of sale with the price and transfer date; then the transfer is signed officially at the developer and paid by bank cheque.') },
   ];
   return (
     <section className="max-w-3xl mx-auto px-4 sm:px-6 py-14 sm:py-20">

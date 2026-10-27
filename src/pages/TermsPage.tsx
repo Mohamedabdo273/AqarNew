@@ -16,7 +16,8 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
 
   const summary = [
     tx('احنا وسيط بنوصّل البايع بالمشتري، مش طرف في العقد', "We connect sellers and buyers; we're not a party to the contract"),
-    tx('البايع ما بيدفعش عمولة، والمشتري بيدفع ' + fee + '% بعد التوقيع', `Sellers pay no fee; buyers pay ${fee}% after signing`),
+    tx('البايع ما بيدفعش عمولة، والمشتري بيدفع ' + fee + '% من سعر الوحدة بعد التوقيع', `Sellers pay no fee; buyers pay ${fee}% of the unit price after signing`),
+    tx('المشتري يقدر ينسحب قبل توقيع عقد البيع، وأي رسوم زي رسوم التنازل عليه', 'Buyers can withdraw before signing the sale contract; any fees such as the transfer fee are theirs'),
     tx('مفيش أوفر برايس، والتنازل رسمي بمقر المطور', 'No overprice, and official transfer at the developer'),
     tx('أي بيانات غلط أو مديونية متخبية = الإعلان بيتشال', 'False data or hidden dues = listing removed'),
   ];
@@ -38,8 +39,8 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
       title: tx('الموافقة على الشروط', 'Accepting these terms'),
       body: [
         tx(
-          'لما تستخدم المنصة، أو تبعت طلب بيع، أو تحجز وحدة، ده معناه إنك قريت الشروط دي و"القواعد" ووافقت عليهم، ومعاهم سياسة الخصوصية. لو مش موافق، ما تستخدمش المنصة.',
-          'By using the platform, sending a sell request, or booking a viewing, you confirm you have read and accept these terms, the "Rules", and the privacy policy. If you disagree, please do not use the platform.'
+          'لما تستخدم المنصة، أو تبعت طلب بيع، أو تقولنا إنك مهتم بشراء وحدة، ده معناه إنك قريت الشروط دي و"القواعد" ووافقت عليهم، ومعاهم سياسة الخصوصية. لو مش موافق، ما تستخدمش المنصة.',
+          'By using the platform, sending a sell request, or registering interest in buying a unit, you confirm you have read and accept these terms, the "Rules", and the privacy policy. If you disagree, please do not use the platform.'
         ),
       ],
     },
@@ -47,7 +48,7 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
       id: 'role',
       title: tx('دورنا بالظبط', 'Our role'),
       body: [
-        tx('• احنا منصة وساطة: بنراجع البيانات، بنعرض الوحدات، وبنرتب التواصل والحجز وميعاد التنازل.', '• We are an intermediary: we review data, list units, and arrange contact, bookings and the transfer appointment.'),
+        tx('• احنا منصة وساطة: بنراجع البيانات، بنعرض الوحدات، وبنرتب التواصل بين البايع والمشتري وميعاد التنازل.', '• We are an intermediary: we review data, list units, and arrange contact between seller and buyer and the transfer appointment.'),
         tx('• احنا مش طرف في عقد البيع أو التنازل، ومش بنستلم ثمن الوحدة.', "• We are not a party to the sale or transfer contract and we don't hold the purchase money."),
         tx('• التنازل بيتم حسب إجراءات وشروط المطور، وموافقة المطور مش في إيدنا.', "• Transfers follow the developer's procedures; the developer's approval is not in our control."),
         tx('• اللي بنقدمه معلومات ومساعدة، مش استشارة قانونية أو مالية. ننصحك تراجع العقد مع محامي لو محتاج.', '• What we provide is information and help, not legal or financial advice. Consult a lawyer if needed.'),
@@ -77,9 +78,11 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
       id: 'buyer',
       title: tx('التزامات المشتري', "Buyer's obligations"),
       body: [
+        tx('• لما يتفق مع البايع، بيتكتب بينهم وعد بيع فيه السعر وميعاد التنازل.', '• Once buyer and seller agree, they sign a promise of sale stating the price and transfer date.'),
         tx('• يدفع للبايع المبلغ المتفق عليه بشيك مصرفي يوم التنازل في مقر المطور.', '• Pay the agreed amount to the seller by bank cheque on transfer day at the developer.'),
         tx('• يكمّل الأقساط الباقية للمطور بنفس نظام العقد، أو زي ما المطور يحدد.', "• Continue the remaining installments per the contract or as the developer sets."),
-        tx('• يتحمّل رسوم التنازل عند المطور لو الإعلان بيقول كده.', '• Pay the developer transfer fee when the listing says so.'),
+        tx('• يتحمّل أي رسوم زي رسوم التنازل عند المطور، وقيمتها بتختلف حسب المطور.', "• Pay any fees such as the developer's transfer fee; the amount differs by developer."),
+        tx('• يقدر ينسحب في أي وقت قبل توقيع عقد البيع.', '• May withdraw any time before signing the sale contract.'),
         tx('• عدم تحويل أموال على حسابات شخصية مجهولة دون إيصالات وتوثيق.', '• Do not transfer money to personal accounts without official documentation.'),
       ],
     },
@@ -88,9 +91,9 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
       title: tx('الرسوم', 'Fees'),
       body: [
         tx('• البايع: صفر عمولة.', '• Seller: zero fee.'),
-        tx(`• المشتري: ${fee}% من سعر الوحدة في العقد، بتستحق بعد توقيع التنازل بس.`, `• Buyer: ${fee}% of the contract price, due only after the transfer is signed.`),
+        tx(`• المشتري: ${fee}% من سعر الوحدة (سعرها في العقد)، بتستحق بعد توقيع التنازل بس.`, `• Buyer: ${fee}% of the unit price (its contract price), due only after the transfer is signed.`),
         tx('• لو الصفقة ما تمّتش، المشتري ما بيدفعش حاجة لينا.', "• If the deal doesn't complete, the buyer owes us nothing."),
-        tx('• رسوم المطور والضرايب منفصلة عن رسومنا، وبتتوضح في كل إعلان.', "• Developer fees and taxes are separate from ours and shown on each listing."),
+        tx('• رسوم المطور (زي رسوم التنازل) والضرايب منفصلة عن رسومنا وبيدفعها المشتري، وقيمتها بتختلف حسب المطور.', "• Developer fees (such as the transfer fee) and taxes are separate from ours and paid by the buyer; the amount differs by developer."),
       ],
     },
     {
@@ -98,8 +101,8 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
       title: tx('التعامل من ورا المنصة', 'Going around the platform'),
       body: [
         tx(
-          `لو المشتري اتعرّف على وحدة أو بايع عن طريقنا، وتمّت الصفقة بينهم مباشرة من غيرنا خلال 12 شهر، رسوم المشتري (${fee}%) بتفضل مستحقة.`,
-          `If a buyer was introduced to a unit or seller through us and they complete the deal directly within 12 months, the buyer fee (${fee}%) remains due.`
+          `لو المشتري اتعرّف على وحدة أو بايع عن طريقنا، وتمّت الصفقة بينهم مباشرة من غيرنا خلال 12 شهر، رسوم المشتري (${fee}% من سعر الوحدة) بتفضل مستحقة.`,
+          `If a buyer was introduced to a unit or seller through us and they complete the deal directly within 12 months, the buyer fee (${fee}% of the unit price) remains due.`
         ),
       ],
     },
@@ -118,7 +121,7 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
       title: tx('ممنوع', 'Prohibited'),
       body: [
         tx('• بيانات أو مستندات مزوّرة أو مش بتاعتك', "• Fake documents or data that isn't yours"),
-        tx('• عرض وحدة بأوفر برايس أو طلب فلوس برّه يوم التنازل', '• Overprice, or asking for money outside transfer day'),
+        tx('• عرض وحدة بأوفر برايس', '• Listing a unit with an overprice'),
         tx('• انتحال صفة المنصة أو موظفيها', '• Impersonating the platform or its staff'),
         tx('• نسخ محتوى الموقع أو بياناته بشكل آلي', "• Automated copying of the site's content or data"),
         tx('المخالفة ممكن تؤدي لشيل الإعلان ووقف الحساب، واتخاذ الإجراءات القانونية لو لزم.', 'Violations may lead to removal, suspension and legal action where needed.'),

@@ -72,16 +72,38 @@ export const NumberInput: React.FC<{ id: string; value: number; onChange: (n: nu
   );
 };
 
-// value can be '' — "nothing picked yet" is a real state for every chip group in the form.
-export function ChipSelect<T extends string>({ options, value, onChange }: { options: { value: T; label: string }[]; value: T | ''; onChange: (v: T) => void }) {
+/**
+ * A single choice as a native drop-down. value can be '' — "nothing picked yet" is a real state for every choice in the form;
+ * it shows the placeholder unless one of the options is itself '' (e.g. "Don't know").
+ */
+export function Select<T extends string>({
+  id,
+  options,
+  value,
+  onChange,
+  placeholder,
+}: {
+  id?: string;
+  options: { value: T; label: string }[];
+  value: T | '';
+  onChange: (v: T) => void;
+  placeholder?: string;
+}) {
+  const { tx } = useLanguage();
+  const hasEmpty = options.some((o) => o.value === '');
   return (
-    <div className="flex flex-wrap gap-2">
+    <select id={id} value={value} onChange={(e) => onChange(e.target.value as T)} className="field">
+      {!hasEmpty && (
+        <option value="" disabled>
+          {placeholder ?? tx('اختار', 'Choose')}
+        </option>
+      )}
       {options.map((o) => (
-        <button key={o.value} type="button" onClick={() => onChange(o.value)} aria-pressed={value === o.value} className={value === o.value ? 'chip-on' : 'chip-off'}>
+        <option key={o.value} value={o.value}>
           {o.label}
-        </button>
+        </option>
       ))}
-    </div>
+    </select>
   );
 }
 

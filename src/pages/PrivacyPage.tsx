@@ -34,7 +34,7 @@ export const PrivacyPage: React.FC = () => {
         tx('• بيانات الوحدة: المطور، الكمبوند، المساحة، سعر العقد، المدفوع، الأقساط، والمديونية', '• Unit details: developer, compound, size, contract price, amount paid, installments, dues'),
         tx('• المستندات اللي بترفعها: العقد، كشف الحساب أو الإيصالات، والبطاقة', '• Documents you upload: contract, statement or receipts, national ID'),
         tx('لو مشتري:', 'If you buy:'),
-        tx('• اسمك ورقم موبايلك لما تحجز وحدة', '• Your name and mobile when you book a unit'),
+        tx('• اسمك ورقم موبايلك لما تقولنا إنك مهتم بشراء وحدة', "• Your name and mobile when you tell us you're interested in buying a unit"),
         tx('• الميزانية والفلاتر اللي بتدوّر بيها (بتفضل على جهازك)', '• Budget and filters you search with (kept on your device)'),
         tx('من جهازك:', 'From your device:'),
         tx('• حاجات بسيطة بنحفظها على المتصفح عندك: اللغة، الوحدات المفضلة، طلباتك، والمسودات. دي مش بتتبعت لينا.', '• Small items stored in your browser: language, saved units, your requests and drafts. These are not sent to us.'),
@@ -46,7 +46,7 @@ export const PrivacyPage: React.FC = () => {
       body: [
         tx('• نتأكد إنك المالك وإن العقد والمدفوعات صحيحة مع المطور', '• Confirm you own the unit and that the contract and payments are correct with the developer'),
         tx('• ننشر الوحدة للمشترين بعد المراجعة', '• List the unit to buyers after review'),
-        tx('• نرتب الحجز ونتواصل معاك بالتليفون أو الواتساب', '• Arrange bookings and contact you by phone or WhatsApp'),
+        tx('• نتابع طلبات الشراء ونتواصل معاك بالتليفون أو الواتساب', '• Follow up purchase interest and contact you by phone or WhatsApp'),
         tx('• نجهّز إجراءات التنازل في مقر المطور', '• Prepare the transfer at the developer'),
         tx('• نلتزم بأي طلب من جهة رسمية حسب القانون', '• Comply with lawful requests from authorities'),
         tx('مش بنستخدم بياناتك في إعلانات ولا بنبعتلك رسايل تسويق من غير موافقتك.', "We don't use your data for ads or send marketing without your consent."),

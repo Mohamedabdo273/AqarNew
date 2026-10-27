@@ -23,6 +23,7 @@ import {
   ArrowDown,
   BadgeCheck,
   TrendingDown,
+  Undo2,
 } from 'lucide-react';
 import { PageId, RealEstateUnit } from '../types';
 import { BRAND, whatsappLink } from '../config/brand';
@@ -48,6 +49,7 @@ import {
   placeLabel,
   savingsAmount,
   savingsPercent,
+  transferFeeText,
   VIEW_OPTIONS,
 } from '../lib/unitHelpers';
 
@@ -138,7 +140,6 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
     { ok: unit.overpriceAmount === 0, l: tx('بدون أوفر برايس', 'Zero overprice') },
   ];
 
-  const FEE_EN: Record<string, string> = { 'على البائع': 'Seller', 'على المشتري': 'Buyer', 'مناصفة': '50/50', 'معفي من رسوم التنازل': 'Exempt' };
   const TAX: Record<string, [string, string]> = {
     residential_exempt: ['سكني معفي', 'Residential, exempt'],
     commercial_vat: ['تجاري (قيمة مضافة)', 'Commercial (VAT)'],
@@ -154,13 +155,8 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
           tone: 'bad',
         }
       : { k: tx('متأخرات وغرامات', 'Overdue & fines'), v: tx('مفيش', 'None'), tone: 'good' },
-    {
-      k: tx('رسوم التنازل', 'Transfer fee'),
-      v:
-        (language === 'ar' ? unit.transferFeePolicy : FEE_EN[unit.transferFeePolicy] ?? unit.transferFeePolicy) +
-        (unit.transferFeePercent ? ` · ${unit.transferFeePercent}%` : ''),
-      tone: unit.transferFeePolicy === 'معفي من رسوم التنازل' ? 'good' : undefined,
-    },
+    // The developer's transfer fee is always the buyer's; how much depends on the developer.
+    { k: tx('رسوم التنازل', 'Transfer fee'), v: transferFeeText(tx) },
     {
       k: tx('وديعة الصيانة', 'Maintenance deposit'),
       v: unit.hasMaintenanceDepositPaid ? tx('مدفوعة', 'Paid') : tx('لسه', 'Not yet paid'),
@@ -221,7 +217,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
         clientName: name.trim(),
         clientPhone: phone,
         inquiryType: 'booking',
-        notes: tx(`عايز أحجز الوحدة ${unit.compound} (${unit.verificationCode})`, `I'd like to book ${unit.compoundEn || unit.compound} (${unit.verificationCode})`),
+        notes: tx(`مهتم بشراء الوحدة ${unit.compound} (${unit.verificationCode})`, `Interested in buying ${unit.compoundEn || unit.compound} (${unit.verificationCode})`),
       });
       onBooked(unit);
     } catch (err) {
@@ -457,7 +453,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
               <div className="mt-6 grid gap-2">
                 <button onClick={() => requireAuth(() => setBooking(true))} className="btn bg-white text-ink hover:bg-brand-soft min-h-13 w-full">
                   <CalendarCheck className="w-5 h-5" />
-                  {tx('احجز الوحدة دي', 'Book this unit')}
+                  {tx('مهتم بالشراء', "I'm interested in buying")}
                 </button>
                 <a href={whatsappLink(waText)} target="_blank" rel="noreferrer" className="btn border border-white/20 text-white hover:bg-white/10 min-h-12 w-full">
                   <MessageCircle className="w-5 h-5" />
@@ -467,7 +463,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
             ) : (
               <form onSubmit={book} className="mt-6 grid gap-2.5">
                 <div className="flex items-center justify-between text-xs text-white/80 mb-0.5">
-                  <span className="font-semibold">{tx('بياناتك عشان نكمّل الحجز', 'Your details to go ahead')}</span>
+                  <span className="font-semibold">{tx('بياناتك عشان نكلمك بخصوص الشراء', 'Your details so we can call you about buying')}</span>
                   <button
                     type="button"
                     onClick={() => setBooking(false)}
@@ -509,7 +505,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
                   disabled={!name.trim() || !phoneValid || sending}
                   className="btn bg-accent text-white hover:bg-accent-hover active:scale-[0.98] min-h-13 w-full font-bold shadow-md disabled:bg-white/20 disabled:text-white/40 disabled:cursor-not-allowed"
                 >
-                  {sending ? tx('بنبعت...', 'Sending...') : tx('أكّد الحجز', 'Confirm booking')}
+                  {sending ? tx('بنبعت...', 'Sending...') : tx('ابعت إني مهتم', 'Send my interest')}
                 </button>
                 {sendError && <p role="alert" className="text-sm text-white bg-danger/80 rounded-lg px-3 py-2">{sendError}</p>}
                 <p className="text-center text-xs text-white/50">
@@ -528,8 +524,9 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
 
           <ul className="card p-4 grid gap-2.5 text-sm">
             {[
-              { icon: Percent, t: tx(`عمولتنا ${BRAND.buyerFeePercent}% بعد توقيع التنازل بس`, `Our ${BRAND.buyerFeePercent}% fee only after signing`) },
-              { icon: Eye, t: tx('بعد الحجز بنكلّمك خلال يوم عمل نكمّل الإجراءات', 'After booking we call within one business day to go ahead') },
+              { icon: Percent, t: tx(`عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة، بعد توقيع التنازل بس`, `Our fee is ${BRAND.buyerFeePercent}% of the unit price, only after signing`) },
+              { icon: Undo2, t: tx('تقدر تنسحب قبل توقيع عقد البيع', 'You can withdraw before signing the sale contract') },
+              { icon: Eye, t: tx('لما تبعت إنك مهتم بنكلّمك خلال يوم عمل نكمّل الإجراءات', 'Once you send your interest we call within one business day to go ahead') },
             ].map((r) => (
               <li key={r.t} className="flex items-center gap-2.5 text-ink-soft">
                 <r.icon className="w-4 h-4 text-ink shrink-0" />
@@ -586,7 +583,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
               {isDeal(unit)
                 ? tx(`التوفير شامل خصم صاحب الوحدة (${money(sellerDiscount(unit), language)}). `, `Includes the owner's ${money(sellerDiscount(unit), language)} discount. `)
                 : ''}
-              {tx(`وبعد خصم عمولتنا ${BRAND.buyerFeePercent}%. `, `Net of our ${BRAND.buyerFeePercent}% fee. `)}
+              {tx(`وبعد خصم عمولتنا (${BRAND.buyerFeePercent}% من سعر الوحدة). `, `Net of our fee (${BRAND.buyerFeePercent}% of the unit price). `)}
               {tx('سعر المطور النهارده تقديري وقت نشر الإعلان.', "Today's developer price is an estimate from when the listing went up.")}
             </p>
           </div>
@@ -636,6 +633,12 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
                 </div>
               ))}
             </dl>
+            <p className="mt-4 rounded-xl bg-paper px-4 py-3 text-sm text-ink-soft leading-relaxed">
+              {tx(
+                'تقدر تنسحب في أي وقت قبل توقيع عقد البيع. أي رسوم زي رسوم التنازل عند المطور بيدفعها المشتري، وقيمتها بتختلف من مطور للتاني.',
+                "You can withdraw any time before signing the sale contract. Any fees, such as the developer's transfer fee, are paid by the buyer, and the amount differs by developer.",
+              )}
+            </p>
             <button onClick={onOpenBuyerRules} className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-ink hover:underline">
               <ScrollText className="w-4 h-4" />
               {tx('قبل ما تدفع أي حاجة، اقرا قواعد المشتري', 'Before paying anything, read the buyer rules')}

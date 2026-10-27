@@ -134,16 +134,18 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onSent }) 
         <form onSubmit={submit} noValidate className="card p-5 sm:p-8">
           <p className="font-display text-2xl font-bold text-ink">{tx('ابعتلنا رسالة', 'Send us a message')}</p>
 
-          <fieldset className="mt-6">
-            <legend className="label">{tx('بخصوص إيه؟', "What's it about?")}</legend>
-            <div className="flex flex-wrap gap-2">
+          <div className="mt-6">
+            <label htmlFor="c-topic" className="label">
+              {tx('بخصوص إيه؟', "What's it about?")}
+            </label>
+            <select id="c-topic" value={topic} onChange={(e) => setTopic(e.target.value as typeof topic)} className="field">
               {topics.map((t) => (
-                <button key={t.id} type="button" onClick={() => setTopic(t.id)} aria-pressed={topic === t.id} className={topic === t.id ? 'chip-on' : 'chip-off'}>
+                <option key={t.id} value={t.id}>
                   {t.l}
-                </button>
+                </option>
               ))}
-            </div>
-          </fieldset>
+            </select>
+          </div>
 
           <div className="mt-5 grid sm:grid-cols-2 gap-4">
             <div>

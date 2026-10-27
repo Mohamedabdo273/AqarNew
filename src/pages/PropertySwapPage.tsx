@@ -112,7 +112,7 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
           {
             icon: Handshake,
             t: tx('تبدلوا في نفس اليوم', 'Swap on the same day'),
-            d: tx(`كل واحد يكمّل أقساط اللي خده، والفرق بيتسوّى بينكم. العمولة ${BRAND.buyerFeePercent}% على الوحدة اللي بتاخدها بعد التوقيع`, `Each carries on the other's plan; you settle the difference. ${BRAND.buyerFeePercent}% on the unit you take, after signing`),
+            d: tx(`كل واحد يكمّل أقساط اللي خده، والفرق بيتسوّى بينكم. العمولة ${BRAND.buyerFeePercent}% من سعر الوحدة اللي بتاخدها بعد التوقيع`, `Each carries on the other's plan; you settle the difference. ${BRAND.buyerFeePercent}% of the price of the unit you take, after signing`),
           },
         ].map((s, i) => (
           <li key={s.t} className="card p-4 flex items-start gap-3">
@@ -159,28 +159,28 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
             on={lowerOnly}
             onChange={setLowerOnly}
           />
-          <div className="flex flex-wrap gap-2">
-            <button onClick={() => setWantRegion(null)} className={wantRegion === null ? 'chip-on' : 'chip-off'}>
-              {tx('أي منطقة', 'Any area')}
-            </button>
-            {regions.map((r) => (
-              <button key={r.id} onClick={() => setWantRegion(r.id)} className={wantRegion === r.id ? 'chip-on' : 'chip-off'}>
-                {placeName(r, language)}
-              </button>
-            ))}
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <button onClick={() => setWantType('residential')} className={wantType === 'residential' ? 'chip-on' : 'chip-off'}>
-              {tx('أي سكني', 'Any home')}
-            </button>
-            <button onClick={() => setWantType('')} className={wantType === '' ? 'chip-on' : 'chip-off'}>
-              {tx('أي نوع', 'Any type')}
-            </button>
-            {PROPERTY_TYPES.map((p) => (
-              <button key={p.ar} onClick={() => setWantType(p.ar)} className={wantType === p.ar ? 'chip-on' : 'chip-off'}>
-                {language === 'ar' ? p.ar : p.en}
-              </button>
-            ))}
+          <div className="grid sm:grid-cols-2 gap-4">
+            <Field label={tx('المنطقة', 'Area')} htmlFor="sw-region">
+              <select id="sw-region" value={wantRegion ?? ''} onChange={(e) => setWantRegion(e.target.value ? Number(e.target.value) : null)} className="field">
+                <option value="">{tx('أي منطقة', 'Any area')}</option>
+                {regions.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {placeName(r, language)}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label={tx('نوع الوحدة', 'Unit type')} htmlFor="sw-type">
+              <select id="sw-type" value={wantType} onChange={(e) => setWantType(e.target.value)} className="field">
+                <option value="residential">{tx('أي سكني', 'Any home')}</option>
+                <option value="">{tx('أي نوع', 'Any type')}</option>
+                {PROPERTY_TYPES.map((p) => (
+                  <option key={p.ar} value={p.ar}>
+                    {language === 'ar' ? p.ar : p.en}
+                  </option>
+                ))}
+              </select>
+            </Field>
           </div>
         </div>
       </div>
@@ -364,8 +364,8 @@ const SwapRequestSheet: React.FC<{
               </div>
               <p className="text-xs text-muted leading-relaxed">
                 {tx(
-                  `محسوب بعد عمولة الوحدة الجديدة ${money(fee, language)} (${BRAND.buyerFeePercent}% من سعر عقدها)`,
-                  `Includes the new unit's fee of ${money(fee, language)} (${BRAND.buyerFeePercent}% of its contract)`,
+                  `محسوب بعد عمولة الوحدة الجديدة ${money(fee, language)} (${BRAND.buyerFeePercent}% من سعر الوحدة)`,
+                  `Includes the new unit's fee of ${money(fee, language)} (${BRAND.buyerFeePercent}% of the unit price)`,
                 )}
                 {myArrears > 0 && tx(` وبعد متأخراتك ${money(myArrears, language)}`, ` and your ${money(myArrears, language)} arrears`)}
               </p>

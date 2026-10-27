@@ -92,7 +92,7 @@ export const OfferThreadView: React.FC<{ thread: OfferThread; onChange: (t: Offe
         <span className="text-end font-semibold text-ink">{cashPlanLabel(t.cashPlan, tx)}</span>
         {t.role === 'buyer' && (
           <>
-            <span className="text-muted">{tx(`عمولتنا ${BRAND.buyerFeePercent}% على ${t.agreedPrice ? 'المتفق عليه' : 'آخر رقم'}`, `Our ${BRAND.buyerFeePercent}% fee on ${t.agreedPrice ? 'the agreed price' : 'the latest figure'}`)}</span>
+            <span className="text-muted">{tx(`عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة`, `Our fee: ${BRAND.buyerFeePercent}% of the unit price`)}</span>
             <span className="num text-end font-semibold text-ink">{money(t.buyerFee)}</span>
           </>
         )}
@@ -201,7 +201,8 @@ export const OfferThreadView: React.FC<{ thread: OfferThread; onChange: (t: Offe
           </div>
           {t.role === 'buyer' && (
             <p className="text-xs text-muted text-center">
-              {tx(`+ عمولتنا ${money(Math.round((amount * BRAND.buyerFeePercent) / 100))} بعد التوقيع`, `+ our ${money(Math.round((amount * BRAND.buyerFeePercent) / 100))} fee after signing`)}
+              {/* The fee is on the unit's contract price, so it doesn't move with the offer. */}
+              {tx(`+ عمولتنا ${money(t.buyerFee)} (${BRAND.buyerFeePercent}% من سعر الوحدة) بعد التوقيع`, `+ our ${money(t.buyerFee)} fee (${BRAND.buyerFeePercent}% of the unit price) after signing`)}
             </p>
           )}
           <div className="flex gap-2">

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, Copy, PhoneCall, ClipboardCheck, Users, Handshake, CalendarCheck, FileSearch, MessageCircle, ClipboardList, Search, Home } from 'lucide-react';
+import { Check, Copy, PhoneCall, ClipboardCheck, Users, Handshake, CalendarCheck, FileSearch, FileSignature, MessageCircle, ClipboardList, Search, Home } from 'lucide-react';
 import { PageId, RealEstateUnit } from '../types';
 import { BRAND, whatsappLink } from '../config/brand';
 import { useLanguage } from '../context/LanguageContext';
@@ -40,22 +40,23 @@ export const ThanksPage: React.FC<ThanksPageProps> = ({ kind, code, unit, sugges
   const content = {
     sell: {
       title: tx('وصلنا طلبك.', 'We got your request.'),
-      sub: tx('مستشارك هيكلمك خلال يوم عمل عشان يبدأ كشف الحساب المجاني.', 'Your advisor will call within one business day to start your free statement.'),
+      sub: tx('هنراجع بيانات وحدتك والمستندات، وهنكلمك لو في بيانات ناقصة.', "We'll review your unit's details and documents, and call you if anything is missing."),
       steps: [
-        { icon: PhoneCall, t: tx('مكالمة من مستشارك', 'A call from your advisor'), d: tx('خلال يوم عمل', 'Within one business day') },
-        { icon: ClipboardCheck, t: tx('كشف حساب وحدتك', 'Your unit statement'), d: tx('نراجع العقد والمديونية ونقولك موقفك بصراحة', 'We check contract and dues and tell you straight') },
+        { icon: ClipboardCheck, t: tx('نراجع طلبك', 'We review your request'), d: tx('العقد والمديونية والمستندات', 'Contract, dues and documents') },
+        { icon: PhoneCall, t: tx('هنكلمك لو في بيانات ناقصة', "We call you if anything's missing"), d: tx('غير كده إعلانك بينزل بعد المراجعة', 'Otherwise your listing goes live after review') },
         { icon: Users, t: tx('نوصلك بمشتري جاد', 'We find a serious buyer'), d: tx('لو قررت تبيع، واسمك ورقمك مش بيظهروا', 'If you decide to sell; your name and number stay hidden') },
         { icon: Handshake, t: tx('تتنازل وتقبض', 'Transfer & get paid'), d: tx('في مقر المطور بشيك مصرفي', 'At the developer, by bank cheque') },
       ],
     },
     viewing: {
-      title: tx('طلب الحجز وصل.', 'Booking request received.'),
-      sub: tx('هنكلمك خلال يوم عمل نأكد معاك الحجز ونكمّل الإجراءات.', "We'll call within one business day to confirm and go ahead."),
+      title: tx('وصلنا إنك مهتم بالشراء.', "We got your interest in buying."),
+      sub: tx('هنكلمك خلال يوم عمل نجاوب على أسئلتك ونكمّل الإجراءات.', "We'll call within one business day to answer your questions and go ahead."),
       steps: [
-        { icon: PhoneCall, t: tx('نكلمك نأكد الحجز', 'We call to confirm'), d: tx('خلال يوم عمل', 'Within one business day') },
-        { icon: CalendarCheck, t: tx('نحجزهالك', 'We hold it for you'), d: tx('مع صاحبها', 'With the owner') },
+        { icon: PhoneCall, t: tx('نكلمك', 'We call you'), d: tx('خلال يوم عمل', 'Within one business day') },
+        { icon: CalendarCheck, t: tx('نرتب مع صاحبها', 'We arrange it with the owner'), d: tx('ونقولك الخطوات', 'And walk you through the steps') },
         { icon: FileSearch, t: tx('تطمن على الورق', 'Check the papers'), d: tx('العقد والمديونية متراجعين قبلها', 'Contract and dues already verified') },
-        { icon: Handshake, t: tx('تنازل رسمي', 'Official transfer'), d: tx(`ومفيش ولا جنيه قبله. عمولتنا ${BRAND.buyerFeePercent}% بعد التوقيع`, `No money before it. Our ${BRAND.buyerFeePercent}% is after signing`) },
+        { icon: FileSignature, t: tx('وعد بيع', 'Promise of sale'), d: tx('بيتكتب بينك وبين صاحبها، فيه السعر وميعاد التنازل', 'Signed by you and the owner, with the price and transfer date') },
+        { icon: Handshake, t: tx('تنازل رسمي', 'Official transfer'), d: tx(`في مقر المطور. عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة بعد التوقيع`, `At the developer. Our ${BRAND.buyerFeePercent}% of the unit price is after signing`) },
       ],
     },
     statement: {
@@ -132,7 +133,7 @@ export const ThanksPage: React.FC<ThanksPageProps> = ({ kind, code, unit, sugges
             <dl className="p-4 sm:p-5 grid gap-2.5 text-[15px]">
               {[
                 { k: tx('المطلوب كاش دلوقتي', 'Cash now'), v: fullMoney(cashPrice(unit), language) },
-                { k: tx(`عمولتنا ${BRAND.buyerFeePercent}% (بعد التوقيع)`, `Our ${BRAND.buyerFeePercent}% fee (after signing)`), v: fullMoney(buyerFee(unit), language) },
+                { k: tx(`عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة (بعد التوقيع)`, `Our ${BRAND.buyerFeePercent}% of the unit price (after signing)`), v: fullMoney(buyerFee(unit), language) },
                 // The real instalment as the contract has it (not the per-month figure the cards compare on).
                 {
                   k: tx('القسط', 'Instalment'),

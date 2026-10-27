@@ -4,6 +4,7 @@ import { useAuth } from './AuthContext';
 import {
   DOC_TYPE,
   DocType,
+  LEGACY_FINISHINGS,
   SellRequestDocument,
   SellRequestDto,
   createSellRequest,
@@ -99,9 +100,12 @@ const namesOf = (docs: SellRequestDocument[], type: DocType) => docs.filter((d) 
 /** API request → the front end's shape. File-name fields are rebuilt from the uploaded documents. */
 const fromDto = (dto: SellRequestDto): SellRequest => {
   const docs = dto.documents ?? [];
+  const sent = dto.form as Partial<SellForm>;
   const form: SellForm = {
     ...EMPTY_SELL_FORM,
-    ...(dto.form as Partial<SellForm>),
+    ...sent,
+    finishing: (sent.finishing && LEGACY_FINISHINGS[sent.finishing]?.ar) || sent.finishing || '',
+    locationUrl: sent.locationUrl ?? '',
     contractPages: namesOf(docs, DOC_TYPE.contract).slice(0, 4),
     paymentScheduleFile: namesOf(docs, DOC_TYPE.schedule)[0] ?? '',
     unitPlanFile: namesOf(docs, DOC_TYPE.plan)[0] ?? '',

@@ -182,8 +182,8 @@ export const OfferPanel: React.FC<{ unitId: string }> = ({ unitId }) => {
             </ol>
             <p className="text-xs text-muted leading-relaxed">
               {tx(
-                'كل طرف عنده 48 ساعة يرد. لو صاحب الوحدة رفض، مش هتقدر تعرض تاني على نفس الوحدة.',
-                'Each side has 48 hours to answer. If the owner says no, you can’t offer on this unit again.',
+                `كل طرف عنده 48 ساعة يرد. لو صاحب الوحدة رفض، مش هتقدر تعرض تاني على نفس الوحدة. عمولتنا ${state.buyerFeePercent}% من سعر الوحدة، بعد التوقيع بس.`,
+                `Each side has 48 hours to answer. If the owner says no, you can’t offer on this unit again. Our fee is ${state.buyerFeePercent}% of the unit price, only after signing.`,
               )}
             </p>
 

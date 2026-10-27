@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { AlertTriangle, ShieldCheck, TrendingDown, Clock, ScrollText, Send, Check, MessageCircle, ArrowLeft, ArrowRight, Coins, EyeOff, Calendar, CheckCircle2, X } from 'lucide-react';
+import { AlertTriangle, ShieldCheck, TrendingDown, Clock, ScrollText, Send, Check, Repeat, MessageCircle, ArrowLeft, ArrowRight, Coins, EyeOff, Calendar, CheckCircle2, X } from 'lucide-react';
 import { PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { SellDraft, useRequests } from '../context/RequestsContext';
 import { useUnits } from '../context/UnitsContext';
 import { useAuth } from '../context/AuthContext';
 import { errorText } from '../services/api';
-import { PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, CANCELLATION_PENALTY_MIN_RATE, CANCELLATION_PENALTY_RATE, cancellationLoss, currency, money } from '../lib/unitHelpers';
+import { PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, CANCELLATION_PENALTY_MIN_RATE, CANCELLATION_PENALTY_RATE, VIEW_OPTIONS, cancellationLoss, currency, money } from '../lib/unitHelpers';
 import { DeliveryStatus } from '../types';
-import { EMPTY_SELL_FORM, SellForm, fitPlace, isValidPhone, netToSeller } from '../lib/sellForm';
-import { ChipSelect, CheckBox, Field, FilePick, FilePickMany, MoneyInput, PhotoPick, SearchSelect, Toggle } from '../components/sell/FormBits';
-import { KNOWN_DEVELOPERS } from '../lib/developers';
+import { EMPTY_SELL_FORM, SellForm, fitPlace, isMapsUrl, isValidPhone, netToSeller } from '../lib/sellForm';
+import { CheckBox, Field, FilePick, FilePickMany, MoneyInput, MultiSelect, PhotoPick, SearchSelect, Toggle } from '../components/sell/FormBits';
+import { DeveloperSelect } from '../components/sell/DeveloperSelect';
 import { placeName, useDistricts, useRegions, useSubAreas } from '../lib/places';
 import { whatsappLink } from '../config/brand';
 
@@ -24,9 +24,26 @@ const DRAFT_KEY = 'wahdety_sell_quick_draft_v1';
 /** The draft saved on the server (code + token), so a reload carries on from where the seller was. */
 const SERVER_DRAFT_KEY = 'deal_sell_server_draft_v1';
 
-// From this year, 12 years ahead.
+const DELIVERY_MONTHS = [
+  { m: 1, ar: 'يناير', en: 'January' },
+  { m: 2, ar: 'فبراير', en: 'February' },
+  { m: 3, ar: 'مارس', en: 'March' },
+  { m: 4, ar: 'أبريل', en: 'April' },
+  { m: 5, ar: 'مايو', en: 'May' },
+  { m: 6, ar: 'يونيو', en: 'June' },
+  { m: 7, ar: 'يوليو', en: 'July' },
+  { m: 8, ar: 'أغسطس', en: 'August' },
+  { m: 9, ar: 'سبتمبر', en: 'September' },
+  { m: 10, ar: 'أكتوبر', en: 'October' },
+  { m: 11, ar: 'نوفمبر', en: 'November' },
+  { m: 12, ar: 'ديسمبر', en: 'December' },
+];
+
+// From this year, 12 years ahead. A delivery date can't be in the past (an already-delivered unit has its own button).
 const THIS_YEAR = new Date().getFullYear();
+const THIS_MONTH = new Date().getMonth() + 1;
 const DELIVERY_YEARS = Array.from({ length: 12 }, (_, i) => THIS_YEAR + i);
+const isPastMonth = (year: number, month: number) => year < THIS_YEAR || (year === THIS_YEAR && month < THIS_MONTH);
 
 /**
  * Phase 1 of listing: only what we need to call the seller back.
@@ -77,9 +94,18 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [deliveryModalOpen, setDeliveryModalOpen] = useState(false);
   const [pickerYear, setPickerYear] = useState<number>(() => {
-    const num = Number(form.deliveryDate?.replace(/\D/g, '') || form.deliveryStatus?.replace(/\D/g, ''));
+    const num = Number(form.deliveryStatus?.replace(/\D/g, ''));
     return DELIVERY_YEARS.includes(num) ? num : THIS_YEAR + 1;
   });
+  const [pickerMonth, setPickerMonth] = useState<number>(() => {
+    const matched = DELIVERY_MONTHS.find((m) => form.deliveryDate?.includes(m.ar) || form.deliveryDate?.includes(m.en));
+    return matched ? matched.m : 6;
+  });
+  // Moving to this year with a month that's already gone jumps to the current month.
+  const pickYear = (yr: number) => {
+    setPickerYear(yr);
+    if (isPastMonth(yr, pickerMonth)) setPickerMonth(THIS_MONTH);
+  };
 
   useEffect(() => {
     if (!deliveryModalOpen) return;
@@ -92,8 +118,14 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
 
   useEffect(() => {
     if (deliveryModalOpen) {
-      const num = Number(form.deliveryDate?.replace(/\D/g, '') || form.deliveryStatus?.replace(/\D/g, ''));
-      if (DELIVERY_YEARS.includes(num)) setPickerYear(num);
+      if (form.deliveryStatus) {
+        const num = Number(form.deliveryStatus.replace(/\D/g, ''));
+        if (DELIVERY_YEARS.includes(num)) setPickerYear(num);
+      }
+      if (form.deliveryDate) {
+        const matched = DELIVERY_MONTHS.find((m) => form.deliveryDate.includes(m.ar) || form.deliveryDate.includes(m.en));
+        if (matched) setPickerMonth(matched.m);
+      }
     }
   }, [deliveryModalOpen, form.deliveryDate, form.deliveryStatus]);
 
@@ -136,7 +168,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
       if (form.propertyCategory && !form.propertyType) e.push(tx('نوع الوحدة', 'Unit type'));
       if (form.alreadyDelivered === null) e.push(tx('موقف الاستلام (تم الاستلام بالفعل؟)', 'Delivery status (Already received?)'));
       if (form.alreadyDelivered === false && !form.deliveryDate && !form.deliveryStatus) {
-        e.push(tx('تحديد سنة الاستلام المتوقعة', 'Select expected delivery year'));
+        e.push(tx('تحديد تاريخ الاستلام المتوقع', 'Select expected delivery date'));
         setDeliveryModalOpen(true);
       }
     }
@@ -147,11 +179,12 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
       if (form.willingToDiscount && !form.discountAmount) e.push(tx('قيمة الخصم', 'Discount amount'));
       if (form.willingToDiscount && form.discountAmount >= form.paidAmount && form.paidAmount) e.push(tx('الخصم أكبر من المدفوع', 'Discount is more than what you paid'));
     }
-    // الصور اختيارية، بس المستندات التلاتة لازم تترفع، ولازم يوافق على القواعد
+    // الصور اختيارية، بس المستندات التلاتة ولينك اللوكيشن لازم، ولازم يوافق على القواعد
     if (target === 4) {
       if (!contractPageFiles.length) e.push(tx('صور العقد', 'Contract pages'));
       if (!scheduleFile) e.push(tx('جدول سداد الأقساط', 'Payment schedule'));
       if (!planFile) e.push(tx('بلان الوحدة', 'Unit plan'));
+      if (!isMapsUrl(form.locationUrl)) e.push(tx('لينك لوكيشن الوحدة من جوجل ماب', 'Google Maps link to the unit'));
       if (!form.ackOwner || !form.ackNoOverprice || !form.ackDeclareDues) e.push(tx('الموافقة على القواعد التلاتة', 'Agree to the three rules'));
     }
     return e;
@@ -230,132 +263,6 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
   };
   const L = <T extends string>(list: { ar: T; en: string }[]) => list.map((o) => ({ value: o.ar, label: language === 'ar' ? o.ar : o.en }));
 
-  // المطور والكمبوند — دمج المطورين المعروفين مع أي مطورين في الوحدات
-  const allDevelopers = React.useMemo(() => {
-    const list = [...KNOWN_DEVELOPERS];
-    units.forEach((u) => {
-      if (u.developer && !list.some((d) => d.nameAr === u.developer || d.nameEn === u.developer)) {
-        list.push({
-          id: `dyn-${u.developer}`,
-          nameAr: u.developer,
-          nameEn: u.developerEn || u.developer,
-          tier: 'Tier 1',
-          popular: false,
-          compounds: u.compound ? [{ ar: u.compound, en: u.compoundEn || u.compound }] : [],
-        });
-      }
-    });
-    return list;
-  }, [units]);
-
-  const [isCustomDev, setIsCustomDev] = useState(() => {
-    if (!form.developer) return false;
-    return !KNOWN_DEVELOPERS.some(
-      (d) => d.nameAr === form.developer || d.nameEn === form.developer || d.nameAr.includes(form.developer)
-    );
-  });
-
-  const [isCustomCmp, setIsCustomCmp] = useState(() => {
-    if (!form.compound) return false;
-    return !KNOWN_DEVELOPERS.some((d) =>
-      d.compounds.some((c) => c.ar === form.compound || c.en === form.compound)
-    );
-  });
-
-  // خيارات قائمة المطورين (Drop list options)
-  const developerOptions = React.useMemo(() => {
-    return allDevelopers.map((d) => {
-      const label = language === 'ar' ? d.nameAr : (d.nameEn || d.nameAr);
-      return {
-        value: label,
-        label,
-        search: language === 'ar' ? d.nameEn : d.nameAr,
-      };
-    });
-  }, [allDevelopers, language]);
-
-  // المطور المختار حالياً
-  const currentDevObj = React.useMemo(() => {
-    if (!form.developer) return null;
-    return (
-      allDevelopers.find(
-        (d) =>
-          d.nameAr === form.developer ||
-          d.nameEn === form.developer ||
-          (d.nameAr && form.developer.includes(d.nameAr.split('(')[0].trim())) ||
-          (d.nameEn && form.developer.includes(d.nameEn.split('(')[0].trim()))
-      ) || null
-    );
-  }, [form.developer, allDevelopers]);
-
-  // خيارات قائمة الكمبوندات بناءً على المطور المختار
-  const compoundOptions = React.useMemo(() => {
-    if (currentDevObj && currentDevObj.compounds.length > 0) {
-      return currentDevObj.compounds.map((c) => {
-        const label = language === 'ar' ? c.ar : (c.en || c.ar);
-        return {
-          value: label,
-          label,
-          search: language === 'ar' ? c.en : c.ar,
-        };
-      });
-    }
-    // إذا لم يتم اختيار مطور بعد، نجمع أشهر الكمبوندات المسجلة
-    if (!form.developer) {
-      const allC: { ar: string; en: string }[] = [];
-      allDevelopers.forEach((d) => {
-        d.compounds.forEach((c) => {
-          if (!allC.some((x) => x.ar === c.ar)) allC.push(c);
-        });
-      });
-      return allC.slice(0, 30).map((c) => {
-        const label = language === 'ar' ? c.ar : (c.en || c.ar);
-        return {
-          value: label,
-          label,
-          search: language === 'ar' ? c.en : c.ar,
-        };
-      });
-    }
-    return [];
-  }, [currentDevObj, form.developer, allDevelopers, language]);
-
-  const handleDeveloperSelect = (dev: string) => {
-    if (dev === '__OTHER__') {
-      setIsCustomDev(true);
-      set('developer', '');
-      return;
-    }
-    setIsCustomDev(false);
-    set('developer', dev);
-
-    // إذا تم تغيير المطور والكمبوند القديم لا ينتمي لهذا المطور الجديد، نقوم بتفريغ الكمبوند
-    const devObj = allDevelopers.find(
-      (d) =>
-        d.nameAr === dev ||
-        d.nameEn === dev ||
-        (d.nameAr && dev.includes(d.nameAr.split('(')[0].trim()))
-    );
-    if (
-      devObj &&
-      form.compound &&
-      !devObj.compounds.some((c) => c.ar === form.compound || c.en === form.compound)
-    ) {
-      set('compound', '');
-      setIsCustomCmp(false);
-    }
-  };
-
-  const handleCompoundSelect = (cmp: string) => {
-    if (cmp === '__OTHER__') {
-      setIsCustomCmp(true);
-      set('compound', '');
-      return;
-    }
-    setIsCustomCmp(false);
-    set('compound', cmp);
-  };
-
   const submit = async () => {
     if (sending) return;
     // لو فيه نقص في خطوة سابقة، نوديه لها بدل ما نقوله "ناقص" على شاشة مش شايفها
@@ -404,7 +311,9 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
   // Under 1% of the price paid is almost always a typo (a missing zero or two).
   const paidLooksLow = form.contractPrice > 0 && form.paidAmount > 0 && form.paidAmount < form.contractPrice * 0.01;
 
-  const confirmDeliveryYear = (year: number) => {
+  const confirmDeliveryDate = (year: number, monthNum: number) => {
+    const monthObj = DELIVERY_MONTHS.find((m) => m.m === monthNum) || DELIVERY_MONTHS[5];
+    const dateStr = language === 'ar' ? `${monthObj.ar} ${year}` : `${monthObj.en} ${year}`;
     const statusStr: DeliveryStatus =
       year === 2026
         ? 'استلام 2026'
@@ -414,7 +323,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
         ? 'استلام 2028'
         : 'استلام 2029+';
     set('alreadyDelivered', false);
-    set('deliveryDate', `${year}`);
+    set('deliveryDate', dateStr);
     set('deliveryStatus', statusStr);
     setDeliveryModalOpen(false);
   };
@@ -587,75 +496,28 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
             )}
           </div>
 
-          {/* 2. المطور والكمبوند — قوايم منسدلة (Drop Lists) */}
-          <div className="grid sm:grid-cols-2 gap-4">
-            <Field label={tx('المطور العقاري', 'Developer')} required htmlFor="dev">
-              <SearchSelect
-                id="dev"
-                value={isCustomDev ? '__OTHER__' : form.developer}
-                onChange={handleDeveloperSelect}
-                placeholder={tx('اختار المطور العقاري', 'Choose developer')}
-                clearLabel={tx('مسح الاختيار', 'Clear selection')}
-                options={developerOptions}
-                searchable
-                allowCustom
-                customLabel={tx('✏️ مطور آخر (كتابة يدوية)', '✏️ Other developer (manual entry)')}
-              />
-              {isCustomDev && (
-                <div className="mt-2 space-y-1">
-                  <input
-                    type="text"
-                    value={form.developer}
-                    onChange={(e) => set('developer', e.target.value)}
-                    placeholder={tx('اكتب اسم شركة التطوير العقاري يدويًا', 'Type developer company name')}
-                    className="field text-sm"
-                    autoFocus
-                  />
-                  <p className="text-[11px] text-muted">
-                    {tx('اكتب اسم الشركة لو مش موجودة بالقائمة', 'Type company name if not listed')}
-                  </p>
-                </div>
-              )}
-            </Field>
+          {/* 2. المطور والكمبوند */}
+          <div className="space-y-4">
+            <DeveloperSelect
+              value={form.developer}
+              compoundValue={form.compound}
+              units={units}
+              onChange={(dev) => set('developer', dev)}
+              onCompoundChange={(cmp) => set('compound', cmp)}
+            />
 
             <Field label={tx('الكمبوند / المشروع', 'Compound / Project')} required htmlFor="cmp">
-              <SearchSelect
+              <input
                 id="cmp"
-                value={isCustomCmp ? '__OTHER__' : form.compound}
-                onChange={handleCompoundSelect}
-                placeholder={
-                  !form.developer
-                    ? tx('اختار المطور الأول', 'Choose developer first')
-                    : compoundOptions.length === 0
-                    ? tx('اكتب اسم المشروع يدويًا', 'Type project name manually')
-                    : tx('اختار الكمبوند أو المشروع', 'Choose compound / project')
-                }
-                clearLabel={tx('مسح الاختيار', 'Clear selection')}
-                disabled={!form.developer && !isCustomDev}
-                options={compoundOptions}
-                searchable
-                allowCustom
-                customLabel={tx('✏️ مشروع / كمبوند آخر (كتابة يدوية)', '✏️ Other compound (manual entry)')}
+                value={form.compound}
+                onChange={(e) => set('compound', e.target.value)}
+                placeholder={tx('مثلاً: بالم هيلز نيو كايرو (أو اختر من الكمبوندات المقترحة أعلاه)', 'e.g. Palm Hills New Cairo')}
+                className="field"
               />
-              {isCustomCmp && (
-                <div className="mt-2 space-y-1">
-                  <input
-                    type="text"
-                    value={form.compound}
-                    onChange={(e) => set('compound', e.target.value)}
-                    placeholder={tx('اكتب اسم الكمبوند أو المشروع يدويًا', 'Type compound or project name')}
-                    className="field text-sm"
-                    autoFocus
-                  />
-                  <p className="text-[11px] text-muted">
-                    {tx('اكتب اسم المشروع لو مش موجود بالقائمة', 'Type project name if not listed')}
-                  </p>
-                </div>
-              )}
             </Field>
           </div>
 
-          {/* 3. النشاط ونوع الوحدة — قوايم منسدلة */}
+          {/* 3. النشاط ونوع الوحدة والفيو — قوايم منسدلة */}
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label={tx('النشاط', 'Activity')} required htmlFor="category">
               <select
@@ -692,6 +554,17 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               </select>
             </Field>
           </div>
+
+          {/* الفيو — الوحدة ممكن تطل على أكتر من حاجة، فبنعلّم على كل اللي ينطبق */}
+          <Field label={tx('الفيو', 'View')} htmlFor="views" hint={tx('ممكن تختار أكتر من واحد', 'You can pick more than one')}>
+            <MultiSelect
+              id="views"
+              options={VIEW_OPTIONS.map((o) => ({ value: o.key, label: language === 'ar' ? o.ar : o.en }))}
+              value={form.views}
+              onChange={(v) => set('views', v)}
+              placeholder={tx('اختار الفيو', 'Choose the view')}
+            />
+          </Field>
 
           {/* 4. تم الاستلام بالفعل (نعم / لا) */}
           <div className="rounded-xl border border-line bg-surface p-5 space-y-4">
@@ -754,7 +627,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
                     <div className="flex items-center gap-2.5">
                       <Calendar className="w-5 h-5 text-brand shrink-0" />
                       <div>
-                        <span className="text-xs font-semibold block text-muted">{tx('سنة الاستلام المتوقعة المحددة:', 'Selected expected delivery year:')}</span>
+                        <span className="text-xs font-semibold block text-muted">{tx('تاريخ الاستلام المتوقع المحدد:', 'Selected expected delivery:')}</span>
                         <span className="text-base font-bold text-ink">{form.deliveryDate} ({form.deliveryStatus})</span>
                       </div>
                     </div>
@@ -763,7 +636,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
                       onClick={() => setDeliveryModalOpen(true)}
                       className="px-3 py-1.5 rounded-lg bg-surface border border-line text-xs sm:text-sm font-semibold text-brand hover:border-brand transition-colors whitespace-nowrap cursor-pointer"
                     >
-                      {tx('تغيير السنة', 'Change year')}
+                      {tx('تغيير التاريخ', 'Change date')}
                     </button>
                   </div>
                 ) : (
@@ -773,7 +646,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
                     className="w-full flex items-center justify-center gap-2 p-3.5 rounded-xl bg-accent-soft border border-accent/30 text-accent font-bold text-sm hover:bg-accent/15 transition-colors cursor-pointer"
                   >
                     <Calendar className="w-4 h-4" />
-                    <span>{tx('اضغط هنا لتحديد سنة الاستلام المتوقعة', 'Click here to choose expected delivery year')}</span>
+                    <span>{tx('اضغط هنا لتحديد تاريخ الاستلام المتوقع', 'Click here to choose expected delivery date')}</span>
                   </button>
                 )}
               </div>
@@ -838,7 +711,13 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               on={form.negotiable}
               onChange={(v) => set('negotiable', v)}
             />
-            {/* خيار جوه الفورم — البايع يقول إنه يقبل التبديل ويكمّل */}
+            <Toggle
+              label={tx('عرض خاص — ما تظهرش في الموقع', "Private listing — not shown on the site")}
+              hint={tx('بنعرضها بس على مشترين متحقق منهم ومناسبين ليها', 'We offer it only to vetted buyers who match it')}
+              on={form.privateListing}
+              onChange={(v) => set('privateListing', v)}
+            />
+            {/* خيار جوه الفورم مش لينك بيخرّجه منه — البايع يقول إنه يقبل التبديل ويكمّل. */}
             <Toggle
               label={tx('أقبل أبدّلها بوحدة تانية', 'Open to swapping it')}
               hint={tx('تتبادل مع مالك تاني عايز وحدتك — واللي وحدته أغلى ياخد الفرق', 'Trade with another owner who wants yours — the pricier side gets the difference')}
@@ -859,6 +738,15 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
                 />
               </Field>
             </Toggle>
+            <button
+              type="button"
+              onClick={() => onNavigate('swap')}
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand hover:underline min-h-11"
+            >
+              <Repeat className="w-4 h-4" />
+              {tx('شوف التبديل شغال إزاي', 'See how swapping works')}
+              <Arrow className="w-4 h-4" />
+            </button>
           </div>
 
           </div>
@@ -871,23 +759,12 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               <PhotoPick files={photoFiles} onChange={setPhotoFiles} max={10} />
             </div>
 
-            <div className="flex items-start sm:items-center gap-3.5 sm:gap-4 rounded-2xl bg-emerald-50 border-2 border-emerald-500/30 p-4 sm:p-5 shadow-sm text-emerald-950">
-              <span className="grid place-items-center w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-emerald-600 text-white shrink-0 shadow-xs">
-                <ShieldCheck className="w-6 h-6 sm:w-7 sm:h-7" />
-              </span>
-              <div className="space-y-1">
-                <p className="text-base sm:text-lg font-bold text-ink leading-relaxed">
-                  {tx(
-                    'المستندات دي لازم عشان نراجع وحدتك، و رقمك و اسمك مش بيظهر لأي مشتري ولا بتتنشر.',
-                    'These documents are required so we can review your unit. Your name and phone number are never shown to buyers or published.',
-                  )}
-                </p>
-                <p className="text-xs sm:text-sm text-emerald-800 font-medium flex items-center gap-1.5">
-                  <EyeOff className="w-4 h-4 shrink-0 text-emerald-600" />
-                  <span>{tx('بياناتك ومستنداتك مشفرة ومحمية وفي سرية تامة 100%', 'Your details and documents are completely confidential and protected')}</span>
-                </p>
-              </div>
-            </div>
+            <p className="rounded-xl bg-brand-soft px-4 py-3 text-[15px] leading-relaxed text-brand-ink">
+              {tx(
+                'المستندات دي لازم عشان نراجع وحدتك، ومش بتظهر لأي مشتري ولا بتتنشر.',
+                'We need these to review your unit. They are never shown to buyers or published.',
+              )}
+            </p>
 
             <FilePickMany
               label={tx('أول 4 صور في العقد', 'First 4 pages of the contract')}
@@ -915,6 +792,30 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               onFile={setPlanFile}
               required
             />
+            <Field
+              label={tx('لوكيشن الوحدة', 'Unit location')}
+              required
+              htmlFor="locurl"
+              hint={
+                form.locationUrl.trim() && !isMapsUrl(form.locationUrl)
+                  ? tx('ده مش لينك جوجل ماب — انسخه زي ما هو من التطبيق', "That isn't a Google Maps link — copy it as is from the app")
+                  : tx(
+                      'افتح جوجل ماب، دوس مطوّل على مكان الوحدة، وبعدين "مشاركة" ← "نسخ الرابط"، والزقه هنا. اللينك ده للفريق بس ومش بيظهر في الموقع.',
+                      'Open Google Maps, long-press the unit’s spot, tap "Share" → "Copy link", and paste it here. Only our team sees it; it is not shown on the site.',
+                    )
+              }
+            >
+              <input
+                id="locurl"
+                type="url"
+                inputMode="url"
+                dir="ltr"
+                value={form.locationUrl}
+                onChange={(e) => set('locationUrl', e.target.value)}
+                placeholder="https://maps.app.goo.gl/..."
+                className={`field ${isRTL ? 'text-right' : 'text-left'}`}
+              />
+            </Field>
           {/* The three seller rules that matter most, agreed to right where they apply. */}
           <div className="rounded-xl bg-paper p-5 space-y-4">
             <div className="flex items-center justify-between gap-3">
@@ -928,7 +829,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               <b>{tx('أنا المالك ومش سمسار ولا وسيط', "I'm the owner, not a broker or middleman")}</b> — {tx('العقد باسمي أو معايا توكيل رسمي. لو اتضح إني وسيط، الوحدة بتتشال نهائياً.', "the contract is in my name or I hold a formal POA. If I turn out to be a middleman, the unit is removed for good.")}
             </CheckBox>
             <CheckBox checked={form.ackNoOverprice} onChange={(v) => set('ackNoOverprice', v)}>
-              <b>{tx('مفيش أوفر برايس', 'No overprice')}</b> — {tx('هاخد اللي دفعته بس (سعر العقد الأصلي)', "I'll take only what I paid (original contract price)")}
+              <b>{tx('مفيش أوفر برايس', 'No overprice')}</b> — {tx('هاخد اللي دفعته بس، مش جنيه زيادة', "I'll take only what I paid, not a pound more")}
             </CheckBox>
             <CheckBox checked={form.ackDeclareDues} onChange={(v) => set('ackDeclareDues', v)}>
               <b>{tx('هقول على المديونية', "I'll declare dues")}</b> — {tx('أي أقساط متأخرة أو غرامات', 'any overdue installments or fines')}
@@ -1041,7 +942,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               <ShieldCheck className="w-5 h-5 shrink-0" />
               {tx('إيه اللي هيحصل بعد كده؟', 'What happens next?')}
             </p>
-            <p>{tx('هنكلمك خلال يوم عمل، وتقدر تكمّل باقي البيانات من "حسابي" أو مع المستشار في التليفون.', "We'll call within one business day. Finish the details from \"My account\" or with your advisor on the phone.")}</p>
+            <p>{tx('بنراجع طلبك والمستندات، وهنكلمك لو في بيانات ناقصة. وتقدر تتابع طلبك من "حسابي".', "We review your request and documents, and call you if anything is missing. Follow it from \"My account\".")}</p>
           </div>
         </aside>
       </div>
@@ -1067,10 +968,10 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
                 </span>
                 <div>
                   <h3 id="delivery-modal-title" className="text-xl font-bold text-ink">
-                    {tx('سنة الاستلام المتوقعة', 'Expected Delivery Year')}
+                    {tx('تاريخ الاستلام المتوقع', 'Expected Delivery Date')}
                   </h3>
                   <p className="text-xs sm:text-sm text-ink-soft mt-0.5">
-                    {tx('حدد السنة المتوقع استلام وحدتك فيها من المطور', 'Select the year you expect handover from the developer')}
+                    {tx('حدد الشهر والسنة المتوقع استلام وحدتك فيهما من المطور', 'Select the month and year you expect handover')}
                   </p>
                 </div>
               </div>
@@ -1084,25 +985,79 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               </button>
             </div>
 
-            <div className="py-5 space-y-5">
+            <div className="py-5 space-y-6">
               {/* Year Selector */}
               <div>
                 <label className="block text-sm font-bold text-ink mb-2.5">
                   {tx('سنة الاستلام', 'Delivery Year')}
                 </label>
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
                   {DELIVERY_YEARS.map((yr) => (
                     <button
                       key={yr}
                       type="button"
-                      onClick={() => setPickerYear(yr)}
-                      className={`num px-3 py-3 rounded-xl text-sm sm:text-base font-bold transition-all cursor-pointer ${
+                      onClick={() => pickYear(yr)}
+                      className={`num px-2 py-2 rounded-xl text-sm font-bold transition-all cursor-pointer ${
                         pickerYear === yr
-                          ? 'bg-brand text-white shadow-md ring-2 ring-brand/30 scale-[1.02]'
-                          : 'bg-paper text-ink border border-line hover:border-brand-soft hover:bg-surface'
+                          ? 'bg-brand text-white shadow-sm ring-2 ring-brand/20'
+                          : 'bg-paper text-ink border border-line hover:border-brand-soft'
                       }`}
                     >
                       {yr}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Month Selector */}
+              <div>
+                <label className="block text-sm font-bold text-ink mb-2.5">
+                  {tx('شهر الاستلام', 'Delivery Month')}
+                </label>
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                  {DELIVERY_MONTHS.map((m) => (
+                    <button
+                      key={m.m}
+                      type="button"
+                      disabled={isPastMonth(pickerYear, m.m)}
+                      onClick={() => setPickerMonth(m.m)}
+                      className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-center transition-all cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed disabled:line-through ${
+                        pickerMonth === m.m
+                          ? 'bg-brand text-white border-brand shadow-sm'
+                          : 'bg-paper text-ink border-line hover:border-brand-soft hover:bg-surface'
+                      }`}
+                    >
+                      <span className="text-xs opacity-75">{m.m}</span>
+                      <span className="text-xs sm:text-sm font-bold mt-0.5">
+                        {language === 'ar' ? m.ar : m.en}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Quick Quarters */}
+              <div>
+                <span className="text-xs text-muted block mb-2">{tx('اختصارات ربع سنوية سريعة:', 'Quick quarterly shortcuts:')}</span>
+                <div className="grid grid-cols-4 gap-1.5 text-xs">
+                  {[
+                    { label: tx('الربع 1 (مارس)', 'Q1 (Mar)'), m: 3 },
+                    { label: tx('الربع 2 (يونيو)', 'Q2 (Jun)'), m: 6 },
+                    { label: tx('الربع 3 (سبتمبر)', 'Q3 (Sep)'), m: 9 },
+                    { label: tx('الربع 4 (ديسمبر)', 'Q4 (Dec)'), m: 12 },
+                  ].map((q) => (
+                    <button
+                      key={q.m}
+                      type="button"
+                      disabled={isPastMonth(pickerYear, q.m)}
+                      onClick={() => setPickerMonth(q.m)}
+                      className={`py-1.5 px-2 rounded-lg border text-center font-semibold transition-colors cursor-pointer disabled:opacity-35 disabled:cursor-not-allowed ${
+                        pickerMonth === q.m
+                          ? 'bg-brand-soft border-brand/40 text-brand-ink'
+                          : 'bg-paper border-line text-ink-soft hover:bg-surface'
+                      }`}
+                    >
+                      {q.label}
                     </button>
                   ))}
                 </div>
@@ -1114,10 +1069,12 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
                   <Calendar className="w-5 h-5 text-brand shrink-0" />
                   <div>
                     <span className="text-xs font-semibold text-muted block">
-                      {tx('السنة المحددة:', 'Selected year:')}
+                      {tx('التاريخ المحدد:', 'Selected date:')}
                     </span>
                     <span className="text-base font-bold text-ink">
-                      {pickerYear}
+                      {language === 'ar'
+                        ? `${DELIVERY_MONTHS.find((m) => m.m === pickerMonth)?.ar || ''} ${pickerYear}`
+                        : `${DELIVERY_MONTHS.find((m) => m.m === pickerMonth)?.en || ''} ${pickerYear}`}
                     </span>
                   </div>
                 </div>
@@ -1144,11 +1101,12 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               </button>
               <button
                 type="button"
-                onClick={() => confirmDeliveryYear(pickerYear)}
-                className="btn-primary flex-1 min-h-12 text-sm cursor-pointer"
+                disabled={isPastMonth(pickerYear, pickerMonth)}
+                onClick={() => confirmDeliveryDate(pickerYear, pickerMonth)}
+                className="btn-primary flex-1 min-h-12 text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Check className="w-4 h-4" />
-                {tx('تأكيد سنة الاستلام', 'Confirm Year')}
+                {tx('تأكيد تاريخ الاستلام', 'Confirm Date')}
               </button>
             </div>
           </div>

@@ -75,7 +75,7 @@ export type InstallmentFrequency = 'شهري' | 'ربع سنوي' | 'نصف سن
 
 export type DeliveryStatus = 'استلام فوري' | 'استلام 2026' | 'استلام 2027' | 'استلام 2028' | 'استلام 2029+';
 
-export type FinishingType = 'بدون تشطيب' | 'نصف تشطيب' | 'تشطيب كامل سوبر لوكس' | 'ألترا سوبر لوكس';
+export type FinishingType = 'طوب أحمر' | 'نص تشطيب' | 'تلت تربع تشطيب' | 'كامل التشطيب' | 'متشطب بالعفش';
 
 export type PageId = 
   | 'home' 
