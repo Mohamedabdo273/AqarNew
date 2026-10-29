@@ -5,6 +5,7 @@ import { BRAND, whatsappLink } from '../config/brand';
 import { useLanguage } from '../context/LanguageContext';
 import { PageId } from '../types';
 import { errorText, sendContact } from '../services/api';
+import { FieldError, FormError } from '../components/FormError';
 
 interface ContactPageProps {
   onNavigate: (page: PageId) => void;
@@ -26,7 +27,12 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onSent }) 
   const [sendError, setSendError] = useState('');
 
   const phoneValid = /^01\d{9}$/.test(phone.replace(/\s/g, ''));
-  const valid = name.trim().length > 1 && phoneValid && message.trim().length > 3;
+  const nameBad = name.trim().length < 2;
+  const msgBad = message.trim().length <= 3;
+  const valid = !nameBad && phoneValid && !msgBad;
+  const missing = tried
+    ? [nameBad && tx('اكتب اسمك', 'Enter your name'), !phoneValid && tx('رقم موبايل مصري صحيح، 11 رقم', 'A valid 11-digit Egyptian mobile'), msgBad && tx('اكتب رسالتك', 'Write your message')]
+    : [];
 
   const topics: { id: Topic; l: string }[] = [
     { id: 'sell', l: tx('عندي وحدة', 'I have a unit') },
@@ -152,8 +158,8 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onSent }) 
               <label htmlFor="c-name" className="label">
                 {tx('اسمك', 'Your name')}
               </label>
-              <input id="c-name" value={name} onChange={(e) => setName(e.target.value)} className="field" autoComplete="name" />
-              {tried && name.trim().length < 2 && <p className="mt-1.5 text-sm text-danger">{tx('اكتب اسمك', 'Enter your name')}</p>}
+              <input id="c-name" value={name} onChange={(e) => setName(e.target.value)} className="field" autoComplete="name" aria-invalid={tried && nameBad} />
+              <FieldError show={tried && nameBad}>{tx('اكتب اسمك', 'Enter your name')}</FieldError>
             </div>
             <div>
               <label htmlFor="c-phone" className="label">
@@ -167,9 +173,10 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onSent }) 
                 dir="ltr"
                 placeholder="01xxxxxxxxx"
                 autoComplete="tel"
+                aria-invalid={tried && !phoneValid}
                 className={`field ${isRTL ? 'text-right' : 'text-left'}`}
               />
-              {tried && !phoneValid && <p className="mt-1.5 text-sm text-danger">{tx('رقم موبايل مصري صحيح، 11 رقم', 'A valid 11-digit Egyptian mobile')}</p>}
+              <FieldError show={tried && !phoneValid}>{tx('رقم موبايل مصري صحيح، 11 رقم', 'A valid 11-digit Egyptian mobile')}</FieldError>
             </div>
           </div>
 
@@ -182,17 +189,20 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onSent }) 
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={5}
+              aria-invalid={tried && msgBad}
               className="field h-auto py-3 resize-y"
               placeholder={tx('مثلاً: عندي شقة في التجمع ودفعت مليون ونص، ينفع أبيعها؟', "e.g. I've paid 1.5M on a flat in New Cairo — can I sell it?")}
             />
-            {tried && message.trim().length <= 3 && <p className="mt-1.5 text-sm text-danger">{tx('اكتب رسالتك', 'Write your message')}</p>}
+            <FieldError show={tried && msgBad}>{tx('اكتب رسالتك', 'Write your message')}</FieldError>
           </div>
+
+          <FormError className="mt-6" title={tx('كمّل البيانات دي الأول:', 'Please fix:')} messages={missing} />
 
           <button type="submit" disabled={sending} className="btn-primary w-full mt-6 min-h-13">
             <Send className="w-5 h-5" />
             {sending ? tx('بنبعت...', 'Sending...') : tx('ابعت', 'Send')}
           </button>
-          {sendError && <p role="alert" className="mt-3 text-sm text-danger">{sendError}</p>}
+          <FormError className="mt-4" messages={sendError} />
           <p className="mt-3 text-center text-xs text-muted">
             {tx('بالإرسال إنت موافق على ', 'By sending you agree to the ')}
             <button type="button" onClick={() => onNavigate('privacy')} className="font-semibold text-ink hover:underline">

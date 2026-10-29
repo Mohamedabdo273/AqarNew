@@ -56,7 +56,7 @@ export const ThanksPage: React.FC<ThanksPageProps> = ({ kind, code, unit, sugges
         { icon: CalendarCheck, t: tx('نرتب مع صاحبها', 'We arrange it with the owner'), d: tx('ونقولك الخطوات', 'And walk you through the steps') },
         { icon: FileSearch, t: tx('تطمن على الورق', 'Check the papers'), d: tx('العقد والمديونية متراجعين قبلها', 'Contract and dues already verified') },
         { icon: FileSignature, t: tx('وعد بيع', 'Promise of sale'), d: tx('بيتكتب بينك وبين صاحبها، فيه السعر وميعاد التنازل', 'Signed by you and the owner, with the price and transfer date') },
-        { icon: Handshake, t: tx('تنازل رسمي', 'Official transfer'), d: tx(`في مقر المطور. عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة بعد التوقيع`, `At the developer. Our ${BRAND.buyerFeePercent}% of the unit price is after signing`) },
+        { icon: Handshake, t: tx('تنازل رسمي', 'Official transfer'), d: tx(`في مقر المطور. عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة، بشيك مصرفي بعد التنازل`, `At the developer. Our ${BRAND.buyerFeePercent}% of the unit price, by bank cheque after the transfer`) },
       ],
     },
     statement: {
@@ -76,7 +76,7 @@ export const ThanksPage: React.FC<ThanksPageProps> = ({ kind, code, unit, sugges
         { icon: PhoneCall, t: tx('مكالمة من مستشارك', 'A call from your advisor'), d: tx('خلال يوم عمل', 'Within one business day') },
         { icon: FileSearch, t: tx('نراجع العقدين', 'We check both contracts'), d: tx('عقد وحدتك وعقد الوحدة الجديدة، والفرق الفعلي', 'Yours and the new one, and the real difference') },
         { icon: Users, t: tx('نلاقي مشتري لوحدتك', 'We find a buyer for yours'), d: tx('باللي دفعته، واسمك ورقمك مش بيظهروا', 'At what you paid; your name and number stay hidden') },
-        { icon: Handshake, t: tx('تنازلين مترتبين مع بعض', 'Two transfers, arranged together'), d: tx('تدفع أو تاخد الفرق بس', 'You just settle the difference') },
+        { icon: Handshake, t: tx('تنازلين مترتبين مع بعض', 'Two transfers, arranged together'), d: tx(`تدفع أو تاخد الفرق بس. عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة على كل طرف، بشيك مصرفي بعد التنازل`, `You just settle the difference. Our fee is ${BRAND.buyerFeePercent}% of the unit price from each side, by bank cheque after the transfer`) },
       ],
     },
     alert: {
@@ -133,7 +133,7 @@ export const ThanksPage: React.FC<ThanksPageProps> = ({ kind, code, unit, sugges
             <dl className="p-4 sm:p-5 grid gap-2.5 text-[15px]">
               {[
                 { k: tx('المطلوب كاش دلوقتي', 'Cash now'), v: fullMoney(cashPrice(unit), language) },
-                { k: tx(`عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة (بعد التوقيع)`, `Our ${BRAND.buyerFeePercent}% of the unit price (after signing)`), v: fullMoney(buyerFee(unit), language) },
+                { k: tx(`عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة (بشيك مصرفي بعد التنازل)`, `Our ${BRAND.buyerFeePercent}% of the unit price (bank cheque, after the transfer)`), v: fullMoney(buyerFee(unit), language) },
                 // The real instalment as the contract has it (not the per-month figure the cards compare on).
                 {
                   k: tx('القسط', 'Instalment'),

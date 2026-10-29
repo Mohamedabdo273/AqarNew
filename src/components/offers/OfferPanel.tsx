@@ -2,11 +2,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { HandCoins, Inbox } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
-import { CASH_PLAN, CashPlan, createOffer, errorText, fetchUnitOfferState, OfferThread, UnitOfferState } from '../../services/api';
+import { CASH_PLAN, createOffer, errorText, fetchUnitOfferState, OfferThread, UnitOfferState } from '../../services/api';
 import { fullMoney } from '../../lib/unitHelpers';
-import { cashPlanLabel, isOpenOffer, offerLadder } from '../../lib/offers';
+import { isOpenOffer, offerLadder } from '../../lib/offers';
 import { OfferThreadView } from './OfferThreadView';
-import { AmountPicker, CashPlanPicker } from './OfferPickers';
+import { AmountPicker } from './OfferPickers';
+import { FormError } from '../FormError';
 
 /**
  * "فاوض على السعر" on a negotiable unit: a price from 75% of the asking cash up to asking − 10,000 plus how the cash
@@ -20,7 +21,6 @@ export const OfferPanel: React.FC<{ unitId: string }> = ({ unitId }) => {
   const [open, setOpen] = useState(false);
   // null = the top of the range: the buyer starts near the asking price, not anchored on the lowest figure.
   const [picked, setPicked] = useState<number | null>(null);
-  const [plan, setPlan] = useState<CashPlan>(CASH_PLAN.full);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
 
@@ -35,12 +35,7 @@ export const OfferPanel: React.FC<{ unitId: string }> = ({ unitId }) => {
     };
   }, [unitId, user?.id]);
 
-  // Paying the cash in instalments can keep the full asking price — the ask is about how to pay, not how much.
-  const ladder = useMemo(() => {
-    if (!state) return [];
-    const base = offerLadder(state.floorPrice, state.maxOffer, state.step, true);
-    return plan === CASH_PLAN.installments && !base.includes(state.askingPrice) ? [...base, state.askingPrice] : base;
-  }, [state, plan]);
+  const ladder = useMemo(() => (state ? offerLadder(state.floorPrice, state.maxOffer, state.step, true) : []), [state]);
   if (!state || !state.negotiable) return null;
 
   const money = (v: number) => fullMoney(v, language);
@@ -67,7 +62,7 @@ export const OfferPanel: React.FC<{ unitId: string }> = ({ unitId }) => {
     setSending(true);
     setError('');
     try {
-      setThread(await createOffer(Number(unitId), amount, plan));
+      setThread(await createOffer(Number(unitId), amount, CASH_PLAN.full));
       setOpen(false);
     } catch (e) {
       setError(errorText(e));
@@ -96,7 +91,7 @@ export const OfferPanel: React.FC<{ unitId: string }> = ({ unitId }) => {
 
   const steps = [
     tx('اختار السعر اللي يناسبك وابعته', 'Pick the price that suits you and send it'),
-    tx('صاحب الوحدة يوافق، أو يرد عليك بسعر أو طريقة دفع تانية', 'The owner accepts, or answers with another price or payment'),
+    tx('صاحب الوحدة يوافق، أو يرد عليك بسعر تاني', 'The owner accepts, or answers with another price'),
     tx('لو اتفقتوا، الوحدة بتتحجز لك وإحنا نكلمك', "If you agree, the unit is reserved for you and we call you"),
   ];
 
@@ -134,13 +129,6 @@ export const OfferPanel: React.FC<{ unitId: string }> = ({ unitId }) => {
               </p>
               <AmountPicker values={ladder} value={amount} onChange={setPicked} reference={state.askingPrice} />
             </div>
-            <div className="grid gap-3">
-              <p className="flex items-center gap-2 text-lg font-extrabold text-ink">
-                <span className="num grid place-items-center w-7 h-7 rounded-full bg-brand text-white text-sm font-bold shrink-0">2</span>
-                {tx('هتدفع الكاش إزاي؟', 'How will you pay the cash?')}
-              </p>
-              <CashPlanPicker value={plan} onChange={setPlan} />
-            </div>
           </div>
 
           <div className="grid gap-4 content-start">
@@ -155,21 +143,10 @@ export const OfferPanel: React.FC<{ unitId: string }> = ({ unitId }) => {
                 <span className="text-sm font-bold text-ink">{tx('عرضك', 'Your offer')}</span>
                 <span className="num font-display text-2xl font-extrabold text-brand-ink">{money(amount)}</span>
               </div>
-              <div className="flex items-center justify-between gap-3 px-4 py-3">
-                <span className="text-sm text-muted">{tx('طريقة الدفع', 'Payment')}</span>
-                <span className="text-sm font-bold text-ink text-end">{cashPlanLabel(plan, tx)}</span>
+              <div className="flex items-center justify-between gap-3 px-4 py-3 bg-emerald-50">
+                <span className="text-sm font-bold text-emerald-800">{tx('هتوفّر لو وافق', 'You save if accepted')}</span>
+                <span className="num text-lg font-extrabold text-emerald-700">{money(state.askingPrice - amount)}</span>
               </div>
-              {amount < state.askingPrice ? (
-                <div className="flex items-center justify-between gap-3 px-4 py-3 bg-emerald-50">
-                  <span className="text-sm font-bold text-emerald-800">{tx('هتوفّر لو وافق', 'You save if accepted')}</span>
-                  <span className="num text-lg font-extrabold text-emerald-700">{money(state.askingPrice - amount)}</span>
-                </div>
-              ) : (
-                // Full price, cash in instalments: the ask is only about how to pay.
-                <p className="px-4 py-3 bg-brand-soft text-sm font-semibold text-brand-ink">
-                  {tx('بالسعر المطلوب — بتطلب بس تقسّط الكاش', 'At the asking price — you only ask to pay the cash in instalments')}
-                </p>
-              )}
             </div>
 
             <ol className="grid gap-2">
@@ -182,8 +159,8 @@ export const OfferPanel: React.FC<{ unitId: string }> = ({ unitId }) => {
             </ol>
             <p className="text-xs text-muted leading-relaxed">
               {tx(
-                `كل طرف عنده 48 ساعة يرد. لو صاحب الوحدة رفض، مش هتقدر تعرض تاني على نفس الوحدة. عمولتنا ${state.buyerFeePercent}% من سعر الوحدة، بعد التوقيع بس.`,
-                `Each side has 48 hours to answer. If the owner says no, you can’t offer on this unit again. Our fee is ${state.buyerFeePercent}% of the unit price, only after signing.`,
+                `كل طرف عنده 48 ساعة يرد. لو صاحب الوحدة رفض، مش هتقدر تعرض تاني على نفس الوحدة. عمولتنا ${state.buyerFeePercent}% من سعر الوحدة، بشيك مصرفي بعد التنازل بس.`,
+                `Each side has 48 hours to answer. If the owner says no, you can’t offer on this unit again. Our fee is ${state.buyerFeePercent}% of the unit price, by bank cheque, only after the transfer.`,
               )}
             </p>
 
@@ -195,11 +172,7 @@ export const OfferPanel: React.FC<{ unitId: string }> = ({ unitId }) => {
               {tx('إلغاء', 'Cancel')}
             </button>
           </div>
-          {error && (
-            <p role="alert" className="text-sm text-danger bg-danger-soft rounded-lg px-3 py-2">
-              {error}
-            </p>
-          )}
+          <FormError messages={error} />
           </div>
         </div>
       )}

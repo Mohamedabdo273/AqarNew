@@ -335,7 +335,7 @@ export const sendInquiry = (body: {
 export const sendContact = (body: { topic: string; name: string; phone: string; message: string }) =>
   request<InquiryCreated>('/inquiries/contact', json('POST', body));
 
-export const sendSwap = (body: { targetUnitId: number; name: string; phone: string; myPaid?: number; myMonthly?: number; notes?: string }) =>
+export const sendSwap = (body: { targetUnitId: number; name: string; phone: string; myPaid?: number; myMonthly?: number; notes?: string; myContractPrice?: number }) =>
   request<InquiryCreated>('/inquiries/swap', json('POST', body));
 
 export const sendSearchAlert = (body: { phone: string; name?: string; summary?: string; filters?: unknown }) =>

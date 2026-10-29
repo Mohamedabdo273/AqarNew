@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { AlertTriangle, ShieldCheck, TrendingDown, Clock, ScrollText, Send, Check, MessageCircle, ArrowLeft, ArrowRight, Coins, EyeOff } from 'lucide-react';
+import { ShieldCheck, TrendingDown, Clock, ScrollText, Send, Check, MessageCircle, ArrowLeft, ArrowRight, Coins, EyeOff } from 'lucide-react';
 import { PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { SellDraft, useRequests } from '../context/RequestsContext';
 import { useUnits } from '../context/UnitsContext';
 import { useAuth } from '../context/AuthContext';
 import { errorText } from '../services/api';
+import { FormError } from '../components/FormError';
 import { PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, CANCELLATION_PENALTY_MIN_RATE, CANCELLATION_PENALTY_RATE, DELIVERY_OPTIONS, cancellationLoss, currency, money } from '../lib/unitHelpers';
 import { KNOWN_DEVELOPERS } from '../lib/developers';
 import { EMPTY_SELL_FORM, SellForm, fitPlace, isValidPhone, netToSeller } from '../lib/sellForm';
 import { CheckBox, Field, FilePick, FilePickMany, MoneyInput, PhotoPick, SearchSelect, Toggle } from '../components/sell/FormBits';
-import { placeName, useDistricts, useRegions, useSubAreas } from '../lib/places';
+import { placeName, useRegions, useSubAreas } from '../lib/places';
 import { whatsappLink } from '../config/brand';
 
 interface SellUnitPageProps {
@@ -106,7 +107,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
       if (!contractPageFiles.length) e.push(tx('صور العقد', 'Contract pages'));
       if (!scheduleFile) e.push(tx('جدول سداد الأقساط', 'Payment schedule'));
       if (!planFile) e.push(tx('بلان الوحدة', 'Unit plan'));
-      if (!locationFile) e.push(tx('صورة لوكيشن الوحدة', 'Unit location image'));
+      if (!locationFile) e.push(tx('تحديد موقع الوحدة في المشروع', 'Unit location in the project'));
       if (!form.ackOwner || !form.ackNoOverprice || !form.ackDeclareDues) e.push(tx('الموافقة على القواعد التلاتة', 'Agree to the three rules'));
     }
     return e;
@@ -167,10 +168,10 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
   }, [form]);
 
   const set = <K extends keyof SellForm>(key: K, value: SellForm[K]) => setForm((f) => ({ ...f, [key]: value }));
-  // المنطقة ← الموقع ← التفصيلية من الـ API؛ الفورم بيخزّن الـ id والاسم مع بعض، واختيار مستوى بيمسح اللي تحته.
+  // المنطقة ← الموقع من الـ API؛ الفورم بيخزّن الـ id والاسم مع بعض، واختيار مستوى بيمسح اللي تحته.
+  // (البايع مش بيختار المنطقة التفصيلية — فريقنا يحددها وقت المراجعة لو محتاجين.)
   const regions = useRegions();
   const subAreas = useSubAreas(form.regionId ? [form.regionId] : []);
-  const districts = useDistricts(form.subAreaId ? [form.subAreaId] : []);
   const pickRegion = (id: number) => {
     const r = regions.find((x) => x.id === id);
     setForm((f) => ({ ...f, regionId: r?.id ?? null, region: r?.ar ?? '', subAreaId: null, subArea: '', districtId: null, district: '' }));
@@ -178,10 +179,6 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
   const pickSubArea = (id: number) => {
     const a = subAreas.find((x) => x.id === id);
     setForm((f) => ({ ...f, subAreaId: a?.id ?? null, subArea: a?.ar ?? '', districtId: null, district: '' }));
-  };
-  const pickDistrict = (id: number) => {
-    const d = districts.find((x) => x.id === id);
-    setForm((f) => ({ ...f, districtId: d?.id ?? null, district: d?.ar ?? '' }));
   };
   // المطورين المعروفين + أي مطور على الموقع؛ والكمبوندات بتاعة المطور المختار.
   const developerOptions = (() => {
@@ -299,15 +296,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
 
       <div className="mt-6 grid lg:grid-cols-[1fr_20rem] gap-6 items-start">
         <div className="card p-5 sm:p-8 space-y-7">
-          {errors.length > 0 && (
-            <div role="alert" className="rounded-xl bg-danger-soft p-4 flex gap-3">
-              <AlertTriangle className="w-5 h-5 text-danger shrink-0 mt-0.5" />
-              <p className="text-sm text-ink-soft">
-                <span className="font-semibold text-danger">{tx('ناقص: ', 'Missing: ')}</span>
-                {errors.join('، ')}
-              </p>
-            </div>
-          )}
+          <FormError title={tx('ناقص:', 'Missing:')} messages={errors} />
 
           {/* شريط الخطوات — تقدر ترجع لأي خطوة عدّيتها، مش للي قدامك */}
           <ol className="flex items-center gap-2">
@@ -366,7 +355,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
 
           {step === 2 && (
           <div className="space-y-7">
-          {/* 1. المنطقة والموقع جنب بعض، وتحتهم المنطقة التفصيلية (اختيارية) لو الموقع ليه قايمة */}
+          {/* 1. المنطقة والموقع جنب بعض */}
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label={tx('المنطقة', 'Area')} required htmlFor="region">
               <select
@@ -399,20 +388,6 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
                 ))}
               </select>
             </Field>
-            {districts.length > 0 && (
-              <div className="sm:col-span-2">
-                <Field label={tx('المنطقة التفصيلية (اختياري)', 'Neighbourhood (optional)')} htmlFor="district">
-                  <SearchSelect
-                    id="district"
-                    value={form.districtId ? String(form.districtId) : ''}
-                    onChange={(v) => pickDistrict(Number(v))}
-                    placeholder={tx('اختار لو تعرفها', 'Pick one if you know it')}
-                    clearLabel={tx('من غير تحديد', 'Not specified')}
-                    options={districts.map((d) => ({ value: String(d.id), label: placeName(d, language), search: language === 'ar' ? d.en : d.ar }))}
-                  />
-                </Field>
-              </div>
-            )}
           </div>
 
           {/* 2. المطور والكمبوند — قوايم بحث؛ لو مش موجود يكتبه ويختار "استخدام ..." */}
@@ -625,8 +600,8 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               required
             />
             <FilePick
-              label={tx('صورة لوكيشن الوحدة', 'Unit location')}
-              hint={tx('سكرين شوت من جوجل ماب لمكان الوحدة — للفريق بس', 'A Google Maps screenshot of the unit’s spot — for our team only')}
+              label={tx('تحديد موقع الوحدة في المشروع', 'Unit location in the project')}
+              hint={tx('الملحق بالعقد', 'The contract annex')}
               value={form.unitLocationFile}
               onChange={(v) => set('unitLocationFile', v)}
               onFile={setLocationFile}
@@ -673,11 +648,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               </button>
             )}
           </div>
-          {sendError && (
-            <p role="alert" className="-mt-3 rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger">
-              {sendError}
-            </p>
-          )}
+          <FormError className="-mt-3" messages={sendError} />
 
           {step === 4 && (
           <p className="-mt-3 text-center text-sm text-muted">

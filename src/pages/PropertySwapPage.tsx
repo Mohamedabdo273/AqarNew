@@ -7,10 +7,11 @@ import { UnitCard } from '../components/UnitCard';
 import { Pagination } from '../components/Pagination';
 import { Field, MoneyInput, Toggle } from '../components/sell/FormBits';
 import { BRAND, whatsappLink } from '../config/brand';
-import { PROPERTY_TYPES, buyerFee, cashPrice, currency, money, monthlyInstallment, pick } from '../lib/unitHelpers';
+import { PROPERTY_TYPES, buyerFee, cashPrice, feeOn, currency, money, monthlyInstallment, pick } from '../lib/unitHelpers';
 import { placeName, useRegions } from '../lib/places';
 import { isResidential, isValidPhone } from '../lib/sellForm';
 import { errorText, sendSwap } from '../services/api';
+import { FieldError, FormError } from '../components/FormError';
 
 interface PropertySwapPageProps {
   units: RealEstateUnit[];
@@ -31,6 +32,7 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
   const { requireAuth } = useAuth();
   const [myPaid, setMyPaid] = useState(0);
   const [myMonthly, setMyMonthly] = useState(0);
+  const [myPrice, setMyPrice] = useState(0);
   const [hasArrears, setHasArrears] = useState(false);
   const [arrearsAmount, setArrearsAmount] = useState(0);
   const regions = useRegions();
@@ -45,8 +47,10 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
   const myArrears = hasArrears ? arrearsAmount : 0;
   // What actually comes out of selling theirs: what they paid, less the arrears settled at transfer.
   const myNet = Math.max(0, myPaid - myArrears);
-  // What the new unit really costs: its cash plus our fee on it.
-  const swapDiff = (u: RealEstateUnit) => cashPrice(u) + buyerFee(u) - myNet;
+  // Both owners pay our fee in a swap, each on their own unit — so what comes out of this visitor's pocket is the
+  // difference between the two units plus their fee on the unit they hand over (0 until they tell us its price).
+  const myFee = feeOn(myPrice);
+  const swapDiff = (u: RealEstateUnit) => cashPrice(u) - myNet + myFee;
 
   // "Lower monthly" only means something once we know their current monthly.
   const filterLower = lowerOnly && myMonthly > 0;
@@ -65,7 +69,7 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
               ? Math.abs(swapDiff(a)) - Math.abs(swapDiff(b))
               : 0,
         ),
-    [units, wantRegion, wantType, filterLower, myMonthly, myPaid, myNet],
+    [units, wantRegion, wantType, filterLower, myMonthly, myPaid, myNet, myFee],
   );
 
   useEffect(() => setPage(1), [wantRegion, wantType, filterLower, myMonthly, myPaid, myArrears]);
@@ -112,7 +116,10 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
           {
             icon: Handshake,
             t: tx('تبدلوا في نفس اليوم', 'Swap on the same day'),
-            d: tx(`كل واحد يكمّل أقساط اللي خده، والفرق بيتسوّى بينكم. العمولة ${BRAND.buyerFeePercent}% من سعر الوحدة اللي بتاخدها بعد التوقيع`, `Each carries on the other's plan; you settle the difference. ${BRAND.buyerFeePercent}% of the price of the unit you take, after signing`),
+            d: tx(
+              `كل واحد يكمّل أقساط اللي خده، والفرق بيتسوّى بينكم. عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة على كل طرف، بشيك مصرفي بعد التنازل`,
+              `Each carries on the other's plan; you settle the difference. Our fee is ${BRAND.buyerFeePercent}% of the unit price from each side, by bank cheque after the transfer`,
+            ),
           },
         ].map((s, i) => (
           <li key={s.t} className="card p-4 flex items-start gap-3">
@@ -133,6 +140,17 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
           </Field>
           <Field label={tx('قسطك الشهري دلوقتي كام؟', 'Your monthly instalment now')} htmlFor="sw-monthly" hint={tx('لو بتدفع كل 3 شهور، اقسم على 3', 'If you pay quarterly, divide by 3')}>
             <MoneyInput id="sw-monthly" value={myMonthly} onChange={setMyMonthly} placeholder="55,000" />
+          </Field>
+          <Field
+            label={tx('سعر العقد بتاع وحدتك', "Your unit's contract price")}
+            htmlFor="sw-price"
+            hint={
+              myFee
+                ? tx(`عمولتنا عليك ${money(myFee, language)} (${BRAND.buyerFeePercent}% من سعر وحدتك)، بشيك مصرفي بعد التنازل`, `Your fee: ${money(myFee, language)} (${BRAND.buyerFeePercent}% of your unit's price), by bank cheque after the transfer`)
+                : tx(`عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة على كل طرف`, `Our fee is ${BRAND.buyerFeePercent}% of the unit price from each side`)
+            }
+          >
+            <MoneyInput id="sw-price" value={myPrice} onChange={setMyPrice} placeholder="4,000,000" />
           </Field>
           <Toggle
             tone="danger"
@@ -266,6 +284,7 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
           target={target}
           myPaid={myPaid}
           myArrears={myArrears}
+          myPrice={myPrice}
           diff={myPaid ? swapDiff(target) : null}
           myMonthly={myMonthly}
           onClose={() => setTarget(null)}
@@ -285,12 +304,14 @@ const SwapRequestSheet: React.FC<{
   target: RealEstateUnit;
   myPaid: number;
   myArrears: number;
-  /** New unit's cash + our fee, minus what theirs nets. null until they enter what they paid. */
+  /** Contract price of the visitor's own unit — their side of our fee. 0 = not given. */
+  myPrice: number;
+  /** New unit's cash, minus what theirs nets, plus their own fee. null until they enter what they paid. */
   diff: number | null;
   myMonthly: number;
   onClose: () => void;
   onSent: () => void;
-}> = ({ target, myPaid, myArrears, diff, myMonthly, onClose, onSent }) => {
+}> = ({ target, myPaid, myArrears, myPrice, diff, myMonthly, onClose, onSent }) => {
   const { language, tx, isRTL } = useLanguage();
   const { user } = useAuth();
   const [name, setName] = useState(user?.fullName ?? '');
@@ -298,7 +319,11 @@ const SwapRequestSheet: React.FC<{
   const [tried, setTried] = useState(false);
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState('');
-  const fee = buyerFee(target);
+  // Each owner pays our fee on the unit they hand over.
+  const myFee = feeOn(myPrice);
+  const theirFee = buyerFee(target);
+  const nameBad = name.trim().length < 2;
+  const phoneBad = !isValidPhone(phone);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
@@ -313,7 +338,7 @@ const SwapRequestSheet: React.FC<{
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTried(true);
-    if (name.trim().length < 2 || !isValidPhone(phone) || sending) return;
+    if (nameBad || phoneBad || sending) return;
     setSending(true);
     setSendError('');
     try {
@@ -323,6 +348,7 @@ const SwapRequestSheet: React.FC<{
         phone: phone.replace(/\s/g, ''),
         myPaid: myPaid || undefined,
         myMonthly: myMonthly || undefined,
+        myContractPrice: myPrice || undefined,
         // The API has no field for arrears yet, so they ride along in the notes for the advisor.
         notes: myArrears > 0 ? `متأخرات على وحدته: ${myArrears.toLocaleString('en-US')} ج.م` : undefined,
       });
@@ -363,10 +389,9 @@ const SwapRequestSheet: React.FC<{
                 </dd>
               </div>
               <p className="text-xs text-muted leading-relaxed">
-                {tx(
-                  `محسوب بعد عمولة الوحدة الجديدة ${money(fee, language)} (${BRAND.buyerFeePercent}% من سعر الوحدة)`,
-                  `Includes the new unit's fee of ${money(fee, language)} (${BRAND.buyerFeePercent}% of the unit price)`,
-                )}
+                {myFee
+                  ? tx(`محسوب بعد عمولتنا عليك ${money(myFee, language)} (${BRAND.buyerFeePercent}% من سعر وحدتك)`, `Includes your fee of ${money(myFee, language)} (${BRAND.buyerFeePercent}% of your unit's price)`)
+                  : tx('من غير عمولتنا — اكتب سعر عقد وحدتك عشان نحسبها', 'Before our fee — enter your contract price to include it')}
                 {myArrears > 0 && tx(` وبعد متأخراتك ${money(myArrears, language)}`, ` and your ${money(myArrears, language)} arrears`)}
               </p>
             </>
@@ -380,13 +405,24 @@ const SwapRequestSheet: React.FC<{
           </div>
         </dl>
 
+        {/* Both owners pay us — say so before they send, not after. */}
+        <div className="mt-3 rounded-xl border border-brand/25 bg-brand-soft px-4 py-3 text-sm text-brand-ink leading-relaxed">
+          <p className="font-bold">{tx(`عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة على كل طرف`, `Our fee: ${BRAND.buyerFeePercent}% of the unit price from each side`)}</p>
+          <p className="mt-1">
+            {tx('عليك', 'You')}: <span className="num font-semibold">{myFee ? `${money(myFee, language)} ${currency(language)}` : tx(`${BRAND.buyerFeePercent}% من سعر وحدتك`, `${BRAND.buyerFeePercent}% of your unit's price`)}</span>
+            {' · '}
+            {tx('على صاحب الوحدة', 'The other owner')}: <span className="num font-semibold">{money(theirFee, language)} {currency(language)}</span>
+          </p>
+          <p className="mt-1 text-xs">{tx('بتتدفع بشيك مصرفي بعد التنازل', 'Paid by bank cheque after the transfer')}</p>
+        </div>
+
         <div className="mt-5 space-y-4">
           <div>
             <label htmlFor="sw-name" className="label">
               {tx('اسمك', 'Your name')}
             </label>
-            <input id="sw-name" value={name} onChange={(e) => setName(e.target.value)} className="field" autoComplete="name" autoFocus />
-            {tried && name.trim().length < 2 && <p className="mt-1.5 text-sm text-danger">{tx('اكتب اسمك', 'Enter your name')}</p>}
+            <input id="sw-name" value={name} onChange={(e) => setName(e.target.value)} className="field" autoComplete="name" autoFocus aria-invalid={tried && nameBad} />
+            <FieldError show={tried && nameBad}>{tx('اكتب اسمك', 'Enter your name')}</FieldError>
           </div>
           <div>
             <label htmlFor="sw-phone" className="label">
@@ -400,9 +436,10 @@ const SwapRequestSheet: React.FC<{
               dir="ltr"
               placeholder="01xxxxxxxxx"
               autoComplete="tel"
+              aria-invalid={tried && phoneBad}
               className={`field ${isRTL ? 'text-right' : 'text-left'}`}
             />
-            {tried && !isValidPhone(phone) && <p className="mt-1.5 text-sm text-danger">{tx('رقم موبايل مصري صحيح، 11 رقم', 'A valid 11-digit Egyptian mobile')}</p>}
+            <FieldError show={tried && phoneBad}>{tx('رقم موبايل مصري صحيح، 11 رقم', 'A valid 11-digit Egyptian mobile')}</FieldError>
           </div>
         </div>
 
@@ -410,7 +447,7 @@ const SwapRequestSheet: React.FC<{
           <Repeat className="w-5 h-5" />
           {sending ? tx('بنبعت...', 'Sending...') : tx('ابعت طلب التبديل', 'Send swap request')}
         </button>
-        {sendError && <p role="alert" className="mt-3 text-sm text-danger">{sendError}</p>}
+        <FormError className="mt-4" messages={sendError} />
         <p className="mt-3 text-center text-xs text-muted">{tx('الأرقام تقديرية لحد ما نراجع العقدين. مفيش أي التزام دلوقتي.', 'Figures are estimates until both contracts are reviewed. No commitment now.')}</p>
       </form>
     </div>

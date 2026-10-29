@@ -73,7 +73,8 @@ export type PropertyCategory = 'سكني' | 'تجاري' | 'إداري' | 'فن�
 
 export type InstallmentFrequency = 'شهري' | 'ربع سنوي' | 'نصف سنوي' | 'سنوي';
 
-export type DeliveryStatus = 'استلام فوري' | 'استلام 2026' | 'استلام 2027' | 'استلام 2028' | 'استلام 2029+';
+/** 'استلام 2029+' is the old open-ended value, still on units listed before the yearly options went to 2035. */
+export type DeliveryStatus = 'استلام فوري' | `استلام ${number}` | 'استلام 2036+' | 'استلام 2029+';
 
 export type FinishingType = 'طوب أحمر' | 'نص تشطيب' | 'تلت تربع تشطيب' | 'كامل التشطيب' | 'متشطب بالعفش';
 

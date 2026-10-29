@@ -12,6 +12,33 @@ const MONTHS_PER_PAYMENT: Record<string, number> = {
 export const monthlyInstallment = (unit: RealEstateUnit): number =>
   Math.round(unit.installmentValue / (MONTHS_PER_PAYMENT[unit.installmentFrequency] ?? 3));
 
+/** Instalments left to the developer: the stored count, else worked out from what's left ÷ the instalment. */
+export const installmentsLeft = (unit: RealEstateUnit): number =>
+  unit.installmentsRemainingCount && unit.installmentsRemainingCount > 0
+    ? unit.installmentsRemainingCount
+    : unit.installmentValue > 0
+      ? Math.round(unit.remainingAmount / unit.installmentValue) // round, not ceil: instalments are rounded so a few pounds over isn't another instalment
+      : 0;
+
+/** Months of instalments left: count × months per payment, else the stored period in years. */
+export const monthsLeft = (unit: RealEstateUnit): number => {
+  const count = installmentsLeft(unit);
+  if (count > 0) return count * (MONTHS_PER_PAYMENT[unit.installmentFrequency] ?? 3);
+  return Math.round((unit.installmentPeriodYears || 0) * 12);
+};
+
+/** "3 سنين و 6 شهور" / "3 yrs 6 mo". */
+export const durationLabel = (months: number, lang: Language): string => {
+  const y = Math.floor(months / 12);
+  const m = months % 12;
+  if (lang === 'ar') {
+    const ys = y === 0 ? '' : y === 1 ? 'سنة' : y === 2 ? 'سنتين' : y <= 10 ? `${y} سنين` : `${y} سنة`;
+    const ms = m === 0 ? '' : m === 1 ? 'شهر' : m === 2 ? 'شهرين' : m <= 10 ? `${m} شهور` : `${m} شهر`;
+    return [ys, ms].filter(Boolean).join(' و ') || '—';
+  }
+  return [y ? `${y} yr${y > 1 ? 's' : ''}` : '', m ? `${m} mo` : ''].filter(Boolean).join(' ') || '—';
+};
+
 /** Amount the seller agreed to knock off what they paid, to sell faster. */
 export const sellerDiscount = (unit: RealEstateUnit): number => Math.max(0, unit.sellerWillingDiscountAmount ?? 0);
 
@@ -25,7 +52,10 @@ export const isNegotiable = (unit: RealEstateUnit): boolean => !!unit.negotiable
 export const cashPrice = (unit: RealEstateUnit): number => Math.max(0, unit.paidCashAmount - sellerDiscount(unit));
 
 /** Our fee, paid by the buyer after signing: a % of the contract price. */
-export const buyerFee = (unit: RealEstateUnit): number => Math.round((unit.originalContractPrice * BRAND.buyerFeePercent) / 100);
+export const buyerFee = (unit: RealEstateUnit): number => feeOn(unit.originalContractPrice);
+
+/** Our fee on any contract price — e.g. a swapping owner's own unit, which isn't listed. */
+export const feeOn = (contractPrice: number): number => Math.round((Math.max(0, contractPrice) * BRAND.buyerFeePercent) / 100);
 
 /**
  * Buyer's real saving vs buying the same unit from the developer today:
@@ -164,12 +194,14 @@ export const categoryOfType = (type: string): RealEstateUnit['propertyCategory']
 export const categoryOf = (unit: Pick<RealEstateUnit, 'propertyType' | 'propertyCategory'>) =>
   unit.propertyCategory || categoryOfType(unit.propertyType);
 
+/** Ready, then every year to 2035, then 2036 and later. Matches Catalog.DeliveryStatuses on the API. */
 export const DELIVERY_OPTIONS: { ar: RealEstateUnit['deliveryStatus']; en: string; short: string }[] = [
   { ar: 'استلام فوري', en: 'Ready', short: 'فوري' },
-  { ar: 'استلام 2026', en: '2026', short: '2026' },
-  { ar: 'استلام 2027', en: '2027', short: '2027' },
-  { ar: 'استلام 2028', en: '2028', short: '2028' },
-  { ar: 'استلام 2029+', en: '2029+', short: 'بعد 2028' },
+  ...Array.from({ length: 10 }, (_, i) => {
+    const y = 2026 + i;
+    return { ar: `استلام ${y}` as RealEstateUnit['deliveryStatus'], en: String(y), short: String(y) };
+  }),
+  { ar: 'استلام 2036+', en: '2036+', short: '2036 وبعدها' },
 ];
 
 export const FINISHING_OPTIONS: { ar: RealEstateUnit['finishing']; en: string }[] = [

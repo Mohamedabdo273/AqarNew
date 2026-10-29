@@ -86,7 +86,7 @@ export interface SellForm {
   paymentScheduleFile: string;
   /** بلان الوحدة الملحق بالعقد. */
   unitPlanFile: string;
-  /** صورة لوكيشن الوحدة على الخريطة — للفريق بس، مش بتظهر في الموقع. */
+  /** تحديد موقع الوحدة في المشروع (ملحق بالعقد) — للفريق بس، مش بتظهر في الموقع. */
   unitLocationFile: string;
   contractFile: string;
   receiptFile: string;

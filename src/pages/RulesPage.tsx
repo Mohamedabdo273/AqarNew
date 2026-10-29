@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Repeat,
   UserCheck,
   Ban,
   Wallet,
@@ -64,11 +65,13 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
     { icon: EyeOff, t: tx('تقدر تختار العرض الخاص', 'Private listing if you want'), d: tx('وحدتك ما تظهرش في الموقع خالص، وبنعرضها بس على مشترين متحقق منهم ومناسبين ليها.', "Your unit isn't shown on the site at all — only to vetted buyers who match it.") },
     { icon: MessageSquareHeart, t: tx('نصيحة بصراحة', 'Honest advice'), d: tx('بنعرض عليك كل الاختيارات، ولو الأحسن ليك إنك تكمّل تعاقدك هنقولك.', "We lay out every option — and if you're better off keeping your contract, we'll say so.") },
     { icon: Undo2, t: tx('تقدر تنسحب', 'You can withdraw'), d: tx('قبل التوقيع تشيل إعلانك في أي وقت ومن غير تكلفة.', 'Remove your listing any time before signing, free.') },
+    { icon: Repeat, t: tx('في التبديل العمولة على الطرفين', 'In a swap, both sides pay the fee'), d: tx(`كل مالك بيدفع ${fee}% من سعر وحدته، بشيك مصرفي بعد التنازل.`, `Each owner pays ${fee}% of their own unit's price, by bank cheque after the transfer.`) },
   ];
 
   const buyer: Rule[] = [
     { icon: Banknote, t: tx('تدفع اللي البايع دفعه بس', 'Pay only what the seller paid'), d: tx('والباقي أقساط للمطور بنفس نظامها القديم.', 'The rest continues as installments to the developer.') },
-    { icon: Percent, t: tx(`عمولتنا ${fee}% من سعر الوحدة`, `Our fee is ${fee}% of the unit price`), d: tx('وبتتدفع بس لو التنازل تم. لو ما تمش لأي سبب، مفيش عمولة على حد.', "Paid only if the transfer completes. If it doesn't, for any reason, nobody pays a fee.") },
+    { icon: Percent, t: tx(`عمولتنا ${fee}% من سعر الوحدة`, `Our fee is ${fee}% of the unit price`), d: tx('بشيك مصرفي، وبتتدفع بس لو التنازل تم. لو ما تمش لأي سبب، مفيش عمولة على حد.', "By bank cheque, and only if the transfer completes. If it doesn't, for any reason, nobody pays a fee.") },
+    { icon: Repeat, t: tx('في التبديل العمولة على الطرفين', 'In a swap, both sides pay the fee'), d: tx(`كل مالك بيدفع ${fee}% من سعر وحدته، بشيك مصرفي بعد التنازل.`, `Each owner pays ${fee}% of their own unit's price, by bank cheque after the transfer.`) },
     { icon: Receipt, t: tx('الرسوم على المشتري', 'Fees are on the buyer'), d: tx('أي رسوم زي رسوم التنازل عند المطور بيدفعها المشتري، وقيمتها بتختلف حسب المطور.', "Any fees, such as the developer's transfer fee, are paid by the buyer; the amount differs by developer.") },
     { icon: Eye, t: tx('إنك تقول مهتم ببلاش', 'Showing interest is free'), d: tx('دوس "مهتم بالشراء" من صفحة الوحدة وفريقنا يكلّمك يكمّل معاك.', 'Tap "Interested in buying" on the unit page and our team calls you to go ahead.') },
     { icon: FileSignature, t: tx('وعد بيع مكتوب', 'A written promise of sale'), d: tx('لما تتفق مع البايع بيتكتب بينكم وعد بيع فيه السعر وميعاد التنازل، قبل التنازل في مقر المطور.', 'Once you agree with the seller, you both sign a promise of sale with the price and transfer date, before the transfer at the developer.') },

@@ -31,6 +31,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useUnits } from '../context/UnitsContext';
 import { errorText } from '../services/api';
+import { FormError } from '../components/FormError';
 import { UnitCard } from '../components/UnitCard';
 import { SourceTag } from '../components/SourceTag';
 import { AqarExitComparison } from '../components/AqarExitComparison';
@@ -45,6 +46,9 @@ import {
   fullMoney,
   money,
   monthlyInstallment,
+  installmentsLeft,
+  monthsLeft,
+  durationLabel,
   pick,
   placeLabel,
   savingsAmount,
@@ -87,6 +91,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
   const [phone, setPhone] = useState(user?.phone ?? '');
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState('');
+  const [bookTried, setBookTried] = useState(false);
   // Signed in from the "book a viewing" button: fill in what the account already knows.
   useEffect(() => {
     if (!user) return;
@@ -115,11 +120,14 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
   const phoneValid = /^01\d{9}$/.test(phone.replace(/\s/g, ''));
 
   // The money a buyer weighs, in one row.
+  const left = installmentsLeft(unit);
   const keyNumbers = [
+    { l: tx('سعر العقد', 'Contract price'), v: fullMoney(unit.originalContractPrice, language) },
     { l: tx('صاحبها دفع', 'Owner paid'), v: fullMoney(unit.paidCashAmount, language) },
     { l: tx('باقي للمطور', 'Left to developer'), v: fullMoney(unit.remainingAmount, language) },
-    { l: tx('سعر العقد', 'Contract price'), v: fullMoney(unit.originalContractPrice, language) },
     { l: tx('القسط في الشهر تقريباً', 'Monthly, roughly'), v: fullMoney(monthlyInstallment(unit), language) },
+    ...(left > 0 ? [{ l: tx('عدد الأقساط المتبقية', 'Instalments left'), v: tx(`${left} قسط`, `${left}`) }] : []),
+    ...(monthsLeft(unit) > 0 ? [{ l: tx('المدة المتبقية', 'Time left'), v: durationLabel(monthsLeft(unit), language) }] : []),
   ];
 
   // What the unit is, at a glance, under the title.
@@ -208,7 +216,8 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
 
   const book = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !phoneValid || sending) return;
+    setBookTried(true);
+    if (name.trim().length < 2 || !phoneValid || sending) return;
     setSending(true);
     setSendError('');
     try {
@@ -451,7 +460,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
 
             {!booking ? (
               <div className="mt-6 grid gap-2">
-                <button onClick={() => requireAuth(() => setBooking(true))} className="btn bg-white text-ink hover:bg-brand-soft min-h-13 w-full">
+                <button onClick={() => requireAuth(() => setBooking(true))} className="btn-accent min-h-13 w-full">
                   <CalendarCheck className="w-5 h-5" />
                   {tx('مهتم بالشراء', "I'm interested in buying")}
                 </button>
@@ -480,6 +489,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder={tx('اسمك بالكامل', 'Your full name')}
+                  aria-invalid={bookTried && name.trim().length < 2}
                   className="w-full rounded-xl border border-white/30 bg-white px-4 h-13 text-[15px] font-semibold text-ink placeholder:text-muted/70 hover:border-white focus:outline-none focus:ring-4 focus:ring-accent/30 focus:border-accent focus:bg-white focus:text-ink transition shadow-xs"
                   autoFocus
                 />
@@ -493,21 +503,23 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
                   placeholder={tx('رقم الموبايل (مثال: 01012345678)', 'Mobile (e.g. 01012345678)')}
                   inputMode="tel"
                   dir="ltr"
+                  aria-invalid={(bookTried || phone.length >= 11) && !phoneValid}
                   className={`w-full rounded-xl border border-white/30 bg-white px-4 h-13 text-[15px] font-semibold text-ink placeholder:text-muted/70 hover:border-white focus:outline-none focus:ring-4 focus:ring-accent/30 focus:border-accent focus:bg-white focus:text-ink transition shadow-xs ${language === 'ar' ? 'text-right' : 'text-left'}`}
                 />
-                {phone.length > 0 && !phoneValid && (
-                  <p className="text-xs text-amber-200">
-                    {tx('رقم الموبايل لازم يبدأ بـ 01 ويتكون من 11 رقم', 'Phone must start with 01 and be 11 digits')}
-                  </p>
-                )}
+                <FormError
+                  messages={[
+                    bookTried && name.trim().length < 2 && tx('اكتب اسمك', 'Enter your name'),
+                    (bookTried || phone.length >= 11) && !phoneValid && tx('رقم الموبايل لازم يبدأ بـ 01 ويتكون من 11 رقم', 'Phone must start with 01 and be 11 digits'),
+                  ]}
+                />
                 <button
                   type="submit"
-                  disabled={!name.trim() || !phoneValid || sending}
+                  disabled={sending}
                   className="btn bg-accent text-white hover:bg-accent-hover active:scale-[0.98] min-h-13 w-full font-bold shadow-md disabled:bg-white/20 disabled:text-white/40 disabled:cursor-not-allowed"
                 >
                   {sending ? tx('بنبعت...', 'Sending...') : tx('ابعت إني مهتم', 'Send my interest')}
                 </button>
-                {sendError && <p role="alert" className="text-sm text-white bg-danger/80 rounded-lg px-3 py-2">{sendError}</p>}
+                <FormError messages={sendError} />
                 <p className="text-center text-xs text-white/50">
                   {tx('بالتأكيد إنت موافق على ', 'By confirming you agree to the ')}
                   <button type="button" onClick={() => onNavigate('terms')} className="underline hover:text-white">
@@ -524,7 +536,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
 
           <ul className="card p-4 grid gap-2.5 text-sm">
             {[
-              { icon: Percent, t: tx(`عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة، بعد توقيع التنازل بس`, `Our fee is ${BRAND.buyerFeePercent}% of the unit price, only after signing`) },
+              { icon: Percent, t: tx(`عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة، بشيك مصرفي بعد التنازل بس`, `Our fee is ${BRAND.buyerFeePercent}% of the unit price, by bank cheque, only after the transfer`) },
               { icon: Undo2, t: tx('تقدر تنسحب قبل توقيع عقد البيع', 'You can withdraw before signing the sale contract') },
               { icon: Eye, t: tx('لما تبعت إنك مهتم بنكلّمك خلال يوم عمل نكمّل الإجراءات', 'Once you send your interest we call within one business day to go ahead') },
             ].map((r) => (
@@ -543,7 +555,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
           {/* The numbers */}
           <section className="card p-5 sm:p-6">
             <h2 className="text-lg font-bold text-ink">{tx('الأرقام', 'The numbers')}</h2>
-            <dl className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <dl className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3">
               {keyNumbers.map((k) => (
                 <div key={k.l} className="rounded-xl bg-paper px-4 py-3">
                   <dt className="text-xs text-muted">{k.l}</dt>

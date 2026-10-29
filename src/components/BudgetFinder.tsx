@@ -25,7 +25,7 @@ interface SliderProps {
   dark?: boolean;
 }
 
-const BudgetSlider: React.FC<SliderProps> = ({ icon: Icon, label, value, range, onChange, dark }) => {
+export const BudgetSlider: React.FC<SliderProps> = ({ icon: Icon, label, value, range, onChange, dark }) => {
   const { language, isRTL } = useLanguage();
   const pct = ((value - range.min) / (range.max - range.min)) * 100;
   return (

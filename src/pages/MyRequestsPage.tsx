@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { PageId } from '../types';
 import { IlloEmpty } from '../components/Illustrations';
+import { FormError } from '../components/FormError';
 import { useLanguage } from '../context/LanguageContext';
 import { REQUEST_STAGES, SellRequest, useRequests } from '../context/RequestsContext';
 import { useAuth } from '../context/AuthContext';
@@ -204,8 +205,7 @@ export const MyRequestsPage: React.FC<MyRequestsPageProps> = ({ code, onOpenRequ
           {searching ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
         </button>
       </form>
-      {notFound && <p className="mt-2 text-sm text-danger">{tx('مش لاقيين الرقم ده. كلمنا واتساب ونساعدك.', "Couldn't find that. WhatsApp us and we'll help.")}</p>}
-      {lookupError && <p className="mt-2 text-sm text-danger">{lookupError}</p>}
+      <FormError className="mt-3" messages={[notFound && tx('مش لاقيين الرقم ده. كلمنا واتساب ونساعدك.', "Couldn't find that. WhatsApp us and we'll help."), lookupError]} />
       {tracked && (
         <div className="mt-4 card p-5">
           <div className="flex items-center gap-2 flex-wrap">
@@ -584,7 +584,7 @@ const PhotosCard: React.FC<{ req: SellRequest }> = ({ req }) => {
         </div>
       )}
       {req.canEdit && <p className="mt-3 text-xs text-muted">{tx(`لحد ${MAX_PHOTOS} صورة — JPG أو PNG أو WEBP`, `Up to ${MAX_PHOTOS} photos — JPG, PNG or WEBP`)}</p>}
-      {error && <p role="alert" className="mt-2 text-sm text-danger">{error}</p>}
+      <FormError className="mt-3" messages={error} />
     </div>
   );
 };

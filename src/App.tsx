@@ -148,8 +148,10 @@ export default function App() {
   const searchFromHome = (s: HomeSearch) => {
     handleNavigate('opportunities');
     setListPreset(s);
-    if (s.monthly) {
-      setBudget({ cash: CASH_RANGE.max, monthly: Math.min(Math.max(s.monthly, MONTHLY_RANGE.min), MONTHLY_RANGE.max) });
+    // Cash and/or monthly from the hero turn the budget filter on; the one left empty is open (the slider's max).
+    if (s.monthly || s.cash) {
+      const clamp = (n: number, r: { min: number; max: number }) => Math.min(Math.max(n, r.min), r.max);
+      setBudget({ cash: s.cash ? clamp(s.cash, CASH_RANGE) : CASH_RANGE.max, monthly: s.monthly ? clamp(s.monthly, MONTHLY_RANGE) : MONTHLY_RANGE.max });
       setBudgetOn(true);
     }
   };

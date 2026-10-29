@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useUnits } from '../context/UnitsContext';
 import { ApiError, errorText } from '../services/api';
+import { FormError } from './FormError';
 import { isValidPhone } from '../lib/sellForm';
 
 const RESEND_SECONDS = 60;
@@ -30,6 +31,9 @@ export const SignInSheet: React.FC = () => {
   const [showPw, setShowPw] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  // The input the current error is about, so it gets the red ring too.
+  const [badField, setBadField] = useState('');
+  const bad = (id: string) => (error && badField === id ? true : undefined);
   const [wait, setWait] = useState(0);
 
   const cleanPhone = phone.replace(/\s/g, '');
@@ -91,28 +95,31 @@ export const SignInSheet: React.FC = () => {
     if (busy) return;
     const phoneOk = isValidPhone(cleanPhone);
     const pwOk = password.length >= MIN_PASSWORD;
-    const fail = (m: string) => setError(m);
+    const fail = (m: string, field = '') => {
+      setError(m);
+      setBadField(field);
+    };
 
     if (mode === 'login') {
-      if (!phoneOk) return fail(tx('اكتب رقم موبايل مصري صحيح، 11 رقم', 'Enter a valid 11-digit Egyptian mobile'));
-      if (!password) return fail(tx('اكتب كلمة السر', 'Enter your password'));
+      if (!phoneOk) return fail(tx('اكتب رقم موبايل مصري صحيح، 11 رقم', 'Enter a valid 11-digit Egyptian mobile'), 'signin-phone');
+      if (!password) return fail(tx('اكتب كلمة السر', 'Enter your password'), 'signin-pw');
       return run(async () => {
         await login(cleanPhone, password);
         done(tx('أهلاً بيك 👋', 'Welcome back 👋'));
       });
     }
     if (mode === 'register' || mode === 'forgot-code') {
-      if (mode === 'register' && name.trim().length < 2) return fail(tx('اكتب اسمك', 'Enter your name'));
-      if (mode === 'register' && !phoneOk) return fail(tx('اكتب رقم موبايل مصري صحيح، 11 رقم', 'Enter a valid 11-digit Egyptian mobile'));
-      if (!pwOk) return fail(tx(`كلمة السر لازم تكون ${MIN_PASSWORD} حروف على الأقل`, `Password must be at least ${MIN_PASSWORD} characters`));
-      if (password !== confirm) return fail(tx('كلمة السر وتأكيدها مش زي بعض', "Passwords don't match"));
+      if (mode === 'register' && name.trim().length < 2) return fail(tx('اكتب اسمك', 'Enter your name'), 'signin-name');
+      if (mode === 'register' && !phoneOk) return fail(tx('اكتب رقم موبايل مصري صحيح، 11 رقم', 'Enter a valid 11-digit Egyptian mobile'), 'signin-phone');
+      if (!pwOk) return fail(tx(`كلمة السر لازم تكون ${MIN_PASSWORD} حروف على الأقل`, `Password must be at least ${MIN_PASSWORD} characters`), 'signin-pw');
+      if (password !== confirm) return fail(tx('كلمة السر وتأكيدها مش زي بعض', "Passwords don't match"), 'signin-pw2');
     }
     if (mode === 'register') return sendCode(() => startSignUp(name.trim(), cleanPhone, password), 'register-code');
     if (mode === 'forgot') {
-      if (!phoneOk) return fail(tx('اكتب رقم موبايل مصري صحيح، 11 رقم', 'Enter a valid 11-digit Egyptian mobile'));
+      if (!phoneOk) return fail(tx('اكتب رقم موبايل مصري صحيح، 11 رقم', 'Enter a valid 11-digit Egyptian mobile'), 'signin-phone');
       return sendCode(() => sendResetCode(cleanPhone), 'forgot-code');
     }
-    if (!/^\d{4,8}$/.test(code.trim())) return fail(tx('اكتب الكود اللي وصلك', 'Enter the code you received'));
+    if (!/^\d{4,8}$/.test(code.trim())) return fail(tx('اكتب الكود اللي وصلك', 'Enter the code you received'), 'signin-code');
     if (mode === 'register-code')
       return run(async () => {
         await finishSignUp(name.trim(), cleanPhone, password, code.trim());
@@ -154,6 +161,7 @@ export const SignInSheet: React.FC = () => {
             setError('');
           }}
           autoComplete={autoComplete}
+          aria-invalid={bad(id)}
           dir="ltr"
           className={`field ${isRTL ? 'text-right pl-11' : 'text-left pr-11'}`}
         />
@@ -185,6 +193,7 @@ export const SignInSheet: React.FC = () => {
         dir="ltr"
         placeholder="01xxxxxxxxx"
         autoComplete="tel"
+        aria-invalid={bad('signin-phone')}
         className={`field ${isRTL ? 'text-right' : 'text-left'}`}
       />
     </div>
@@ -234,7 +243,7 @@ export const SignInSheet: React.FC = () => {
                 <label htmlFor="signin-name" className="label">
                   {tx('الاسم', 'Name')}
                 </label>
-                <input id="signin-name" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" className="field" />
+                <input id="signin-name" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" aria-invalid={bad('signin-name')} className="field" />
               </div>
               {phoneInput}
               {pwInput('signin-pw', password, setPassword, tx('كلمة السر', 'Password'), 'new-password')}
@@ -274,6 +283,7 @@ export const SignInSheet: React.FC = () => {
                   dir="ltr"
                   placeholder="••••"
                   autoFocus
+                  aria-invalid={bad('signin-code')}
                   className="field num text-center text-2xl tracking-[0.4em]"
                 />
               </div>
@@ -299,11 +309,7 @@ export const SignInSheet: React.FC = () => {
           )}
         </div>
 
-        {error && (
-          <p role="alert" className="mt-3 text-sm text-danger">
-            {error}
-          </p>
-        )}
+        <FormError className="mt-4" messages={error} />
 
         <button type="submit" disabled={busy} className="btn-primary w-full mt-6 min-h-13">
           {busy ? <Loader2 className="w-5 h-5 animate-spin" /> : buttons[mode]}

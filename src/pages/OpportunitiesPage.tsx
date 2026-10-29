@@ -19,6 +19,7 @@ import {
   pick,
   typesFor,
 } from '../lib/unitHelpers';
+import { FormError } from '../components/FormError';
 import { errorText, sendSearchAlert } from '../services/api';
 import { useDistricts, useRegions, useSubAreas } from '../lib/places';
 
@@ -518,6 +519,7 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
                 inputMode="tel"
                 dir="ltr"
                 placeholder="01xxxxxxxxx"
+                aria-invalid={alertTried && !/^01\d{9}$/.test(alertPhone.replace(/\s/g, ''))}
                 className={`field flex-1 ${isRTL ? 'text-right' : 'text-left'}`}
               />
               <button type="submit" disabled={alertSending} className="btn-primary min-h-13 whitespace-nowrap">
@@ -525,10 +527,13 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
                 {alertSending ? tx('بنبعت...', 'Sending...') : tx('نبّهني', 'Alert me')}
               </button>
             </form>
-            {alertError && <p role="alert" className="mt-2 text-sm text-danger">{alertError}</p>}
-            {alertTried && !/^01\d{9}$/.test(alertPhone.replace(/\s/g, '')) && (
-              <p className="mt-2 text-sm text-danger">{tx('رقم موبايل مصري صحيح، 11 رقم', 'A valid 11-digit Egyptian mobile')}</p>
-            )}
+            <FormError
+              className="mt-3 max-w-xl"
+              messages={[
+                alertError,
+                alertTried && !/^01\d{9}$/.test(alertPhone.replace(/\s/g, '')) && tx('رقم موبايل مصري صحيح، 11 رقم', 'A valid 11-digit Egyptian mobile'),
+              ]}
+            />
             <button onClick={clearAll} className="mt-5 text-sm font-semibold text-ink-soft hover:text-ink underline min-h-11">
               {tx('أو امسح الفلاتر وشوف كل الوحدات', 'Or clear filters and see everything')}
             </button>

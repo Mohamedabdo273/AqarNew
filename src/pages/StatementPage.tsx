@@ -4,7 +4,6 @@ import {
   Send,
   Lock,
   TrendingDown,
-  AlertTriangle,
   MessageCircle,
   Sparkles,
   ShieldCheck,
@@ -23,6 +22,7 @@ import { errorText, sendStatement } from '../services/api';
 import { CANCELLATION_PENALTY_MIN_RATE, cancellationLoss, currency, money } from '../lib/unitHelpers';
 import { isValidPhone } from '../lib/sellForm';
 import { Field, FilePick, MoneyInput, Toggle } from '../components/sell/FormBits';
+import { FormError } from '../components/FormError';
 
 interface StatementPageProps {
   onNavigate: (page: PageId) => void;
@@ -219,15 +219,7 @@ export const StatementPage: React.FC<StatementPageProps> = ({ onNavigate, onSent
       {/* Main Grid: Form + Sidebar */}
       <div className="grid lg:grid-cols-[1fr_21rem] gap-8 items-start">
         <form onSubmit={submit} noValidate className="card p-6 sm:p-8 space-y-6 shadow-sm border border-line bg-surface">
-          {errors.length > 0 && (
-            <div role="alert" className="rounded-2xl bg-danger-soft p-4 flex gap-3 border border-danger/20">
-              <AlertTriangle className="w-5 h-5 text-danger shrink-0 mt-0.5" />
-              <div className="text-sm text-ink-soft">
-                <span className="font-bold text-danger">{tx('برجاء استكمال البيانات الآتية: ', 'Please complete: ')}</span>
-                <span className="font-medium">{errors.join('، ')}</span>
-              </div>
-            </div>
-          )}
+          <FormError title={tx('برجاء استكمال البيانات الآتية:', 'Please complete:')} messages={errors} />
 
           {/* Section 1: Property Details */}
           <div>
@@ -365,7 +357,7 @@ export const StatementPage: React.FC<StatementPageProps> = ({ onNavigate, onSent
               <Send className="w-5 h-5" />
               <span>{sending ? tx('بنبعت...', 'Sending...') : tx('ابعتلي كشف الحساب مجاناً', 'Send me my free statement')}</span>
             </button>
-            {sendError && <p role="alert" className="mt-3 text-sm text-danger">{sendError}</p>}
+            <FormError className="mt-4" messages={sendError} />
             <p className="mt-3 text-center text-xs text-muted">
               {tx('بالإرسال إنت موافق على ', 'By submitting you agree to the ')}
               <button

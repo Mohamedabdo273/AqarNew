@@ -114,6 +114,12 @@
 @utility field {
   @apply w-full rounded-xl border border-field-border bg-field px-4 h-13 text-[15px] text-ink placeholder:text-ink/40 hover:border-brand/60 focus:outline-none focus:border-brand focus:bg-surface focus:ring-4 focus:ring-brand/15 transition;
 }
+/* Any input, select or picker button flagged aria-invalid gets a strong red ring, so the box that needs fixing is obvious. */
+[aria-invalid='true'] {
+  border-color: var(--color-danger) !important;
+  border-width: 2px;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-danger) 18%, transparent);
+}
 @utility label {
   @apply block text-sm font-medium text-ink-soft mb-2;
 }

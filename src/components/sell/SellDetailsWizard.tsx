@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, ArrowRight, Check, AlertTriangle, Lock, CheckCircle2 } from 'lucide-react';
+import { FormError } from '../FormError';
 import { useLanguage } from '../../context/LanguageContext';
 import { DELIVERY_OPTIONS, FINISHING_OPTIONS, FREQUENCY_OPTIONS, fullMoney, transferFeeText } from '../../lib/unitHelpers';
 import { DETAIL_SECTIONS, MONTHS_PER_PAYMENT, SellForm, TaxBearer, TaxCategory, View, isResidential } from '../../lib/sellForm';
@@ -118,15 +119,7 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
         ))}
       </ol>
 
-      {errors.length > 0 && (
-        <div role="alert" className="mt-6 rounded-xl bg-danger-soft p-4 flex gap-3">
-          <AlertTriangle className="w-5 h-5 text-danger shrink-0 mt-0.5" />
-          <p className="text-sm text-ink-soft">
-            <span className="font-semibold text-danger">{tx('ناقص: ', 'Missing: ')}</span>
-            {errors.join('، ')}
-          </p>
-        </div>
-      )}
+      <FormError className="mt-6" title={tx('ناقص:', 'Missing:')} messages={errors} />
 
       <div className="mt-8">
         {DETAIL_SECTIONS[step] === 'specs' && (
@@ -397,11 +390,7 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
         )}
       </div>
 
-      {saveError && (
-        <p role="alert" className="mt-6 rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger">
-          {saveError}
-        </p>
-      )}
+      <FormError className="mt-6" messages={saveError} />
 
       <div className="mt-10 flex gap-3">
         {step > 0 && (
