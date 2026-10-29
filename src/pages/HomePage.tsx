@@ -294,7 +294,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       points: [
         tx('كل وحدة متراجعة على العقد وإيصالات الدفع قبل ما تتنشر', 'Every unit is checked against its contract and payment receipts before listing'),
         tx('بتشوف المطلوب كاش والقسط والمتبقي قبل ما تكلّم حد', 'See the cash needed, monthly and balance before talking to anyone'),
-        tx('لو عجبتك وحدة قولنا إنك مهتم، وإحنا نتفاوض ونكمّل مع صاحبها', "Like a unit? Tell us you're interested — we negotiate and take it from there with the owner"),
+        tx('لو عجبتك وحدة قولنا إنك مهتم، وإحنا هنكلم صاحبها', "Like a unit? Tell us you're interested — and we'll reach out to the owner"),
         tx(`عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة، بشيك مصرفي بعد التنازل في مقر المطور`, `Our fee is ${BRAND.buyerFeePercent}% of the unit price, by bank cheque after the transfer at the developer`),
       ],
       cards: [
