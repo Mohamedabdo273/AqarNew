@@ -503,13 +503,6 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               <MoneyInput id="fines" value={form.latePenaltiesAmount} onChange={(n) => set('latePenaltiesAmount', n)} placeholder="80,000" />
             </Field>
           </Toggle>
-          <Field
-            label={tx('سعر نفس الوحدة من المطور النهارده (اختياري)', "Developer's price for the same unit today (optional)")}
-            htmlFor="market"
-            hint={tx('ده اللي بيبيّن للمشتري هيوفّر قد إيه. مش عارفه؟ سيبه، واحنا هنجيبه.', "It shows buyers how much they save. Don't know it? Leave it — we'll find out.")}
-          >
-            <MoneyInput id="market" value={form.currentMarketPrice} onChange={(n) => set('currentMarketPrice', n)} placeholder="9,000,000" />
-          </Field>
 
           {/* Our own levers, shown before sending — not buried in the details later. */}
           <div className="space-y-3">
