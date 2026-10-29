@@ -669,7 +669,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
             className="flex items-center justify-center gap-2 rounded-xl border border-line py-3 text-sm font-semibold text-ink-soft hover:text-ink hover:border-ink-soft transition-colors"
           >
             <MessageCircle className="w-4 h-4" />
-            {tx('مش حابب تملا فورم؟ ابعتلنا على واتساب', "Rather not fill a form? Message us on WhatsApp")}
+            {tx('لأي استفسار ابعتلنا على الواتساب', 'For any inquiries, message us on WhatsApp')}
           </a>
         </div>
 

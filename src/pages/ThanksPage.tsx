@@ -55,7 +55,7 @@ export const ThanksPage: React.FC<ThanksPageProps> = ({ kind, code, unit, sugges
         { icon: PhoneCall, t: tx('نكلمك', 'We call you'), d: tx('خلال يوم عمل', 'Within one business day') },
         { icon: CalendarCheck, t: tx('نرتب مع صاحبها', 'We arrange it with the owner'), d: tx('ونقولك الخطوات', 'And walk you through the steps') },
         { icon: FileSearch, t: tx('تطمن على الورق', 'Check the papers'), d: tx('العقد والمديونية متراجعين قبلها', 'Contract and dues already verified') },
-        { icon: FileSignature, t: tx('وعد بيع', 'Promise of sale'), d: tx('بيتكتب بينك وبين صاحبها، فيه السعر وميعاد التنازل', 'Signed by you and the owner, with the price and transfer date') },
+        { icon: FileSignature, t: tx('وعد بيع', 'Promise of sale'), d: tx('بيتكتب بينك وبين صاحبها، فيه كل البنود الخاصة بالوحدة والسعر', 'Signed by you and the owner, with all unit terms and the price') },
         { icon: Handshake, t: tx('تنازل رسمي', 'Official transfer'), d: tx(`في مقر المطور. عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة، بشيك مصرفي بعد التنازل`, `At the developer. Our ${BRAND.buyerFeePercent}% of the unit price, by bank cheque after the transfer`) },
       ],
     },

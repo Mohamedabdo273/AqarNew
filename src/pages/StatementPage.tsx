@@ -399,7 +399,7 @@ export const StatementPage: React.FC<StatementPageProps> = ({ onNavigate, onSent
                     {money(cancelBackMin, language)} – {money(cancelBack, language)}
                   </dd>
                   <p className="text-[11px] text-muted mt-1 leading-snug">
-                    {tx('المطور بيخصم من 10% لـ 15% من سعر الوحدة، وغالباً الاسترداد بيقعد لسنين', 'The developer deducts 10–15% of the unit price, and refunds often take years')}
+                    {tx('المطور بيخصم من 10% لـ 15% من سعر الوحدة، والاسترداد بنفس طريقة ومدة السداد', 'The developer deducts 10–15% of the unit price, and refunds using the same payment schedule and period')}
                   </p>
                 </div>
 

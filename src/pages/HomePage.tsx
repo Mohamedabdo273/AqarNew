@@ -46,7 +46,7 @@ import { useAnimatedNumber } from '../lib/useAnimatedNumber';
 import { BRAND, whatsappLink } from '../config/brand';
 import { Budget, BudgetFinder, BudgetSlider, CASH_RANGE, DEFAULT_BUDGET, MONTHLY_RANGE, fitsBudget } from '../components/BudgetFinder';
 import { PROPERTY_TYPES, PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, categoryOf, CANCELLATION_PENALTY_MIN_RATE, cancellationLoss, cashPrice, currency, isDeal, money, sellerDiscount } from '../lib/unitHelpers';
-import { placeName, useDistricts, useRegions, useSubAreas } from '../lib/places';
+import { placeName, useRegions, useSubAreas } from '../lib/places';
 
 interface HomePageProps {
   units: RealEstateUnit[];
@@ -629,8 +629,8 @@ export const HomePage: React.FC<HomePageProps> = ({
               kicker={tx('لو بتفكر تلغي', 'Thinking of cancelling?')}
               title={tx('احسب هتخسر كام لو لغيت', 'See what cancelling would cost you')}
               sub={tx(
-                'المطور بيخصم 10–15% من سعر العقد كله لو لغيت، وبيرجعلك الباقي على أقساط. حط أرقامك وشوف الفرق.',
-                'Developers deduct 10–15% of the whole contract on cancellation and refund the rest in instalments. Try your numbers.',
+                'المطور بيخصم 10–15% من سعر العقد كله لو لغيت، وبيرجعلك الباقي بنفس طريقة ومدة السداد. حط أرقامك وشوف الفرق.',
+                'Developers deduct 10–15% of the whole contract on cancellation and refund the rest using the same payment schedule and period. Try your numbers.',
               )}
             />
             <button onClick={() => onNavigate('sell')} className="btn-accent rounded-full mt-6">
@@ -758,7 +758,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 };
 
 /** Hero search row by how many of area / location / unit type have opened their second list (literal classes for Tailwind). */
-const HERO_COLS = ['lg:grid-cols-2', 'lg:grid-cols-3', 'lg:grid-cols-4', 'lg:grid-cols-5'];
+const HERO_COLS = ['lg:grid-cols-2', 'lg:grid-cols-3', 'lg:grid-cols-4'];
 
 /* Buy · sell · swap in one card that sits over the bottom of the hero band. */
 const HeroSearch: React.FC<{ mode: HomeRole; onSearch: (s: HomeSearch) => void; onNavigate: (page: PageId) => void }> = ({ mode, onSearch, onNavigate }) => {
@@ -766,17 +766,15 @@ const HeroSearch: React.FC<{ mode: HomeRole; onSearch: (s: HomeSearch) => void; 
   const [query, setQuery] = useState('');
   const [region, setRegion] = useState('');
   const [subArea, setSubArea] = useState('');
-  const [district, setDistrict] = useState('');
   const [category, setCategory] = useState('');
   const [type, setType] = useState('');
   // The budget sliders start at the usual budget but only filter once moved — a plain search shouldn't be capped.
   const [cash, setCash] = useState<number | null>(null);
   const [monthly, setMonthly] = useState<number | null>(null);
 
-  // region / subArea / district hold ids (as select values); each list loads once the one above it is picked.
+  // region / subArea hold ids (as select values); each list loads once the one above it is picked.
   const regions = useRegions();
   const locations = useSubAreas(region ? [Number(region)] : []);
-  const districts = useDistricts(subArea ? [Number(subArea)] : []);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -784,7 +782,6 @@ const HeroSearch: React.FC<{ mode: HomeRole; onSearch: (s: HomeSearch) => void; 
     if (query.trim()) filters.query = query.trim();
     if (region) filters.regionIds = [Number(region)];
     if (subArea) filters.subAreaIds = [Number(subArea)];
-    if (district) filters.districtIds = [Number(district)];
     if (category) filters.categories = [category];
     if (type) filters.types = [type];
     onSearch({ filters, cash: cash ?? undefined, monthly: monthly ?? undefined });
@@ -812,14 +809,13 @@ const HeroSearch: React.FC<{ mode: HomeRole; onSearch: (s: HomeSearch) => void; 
                   className="field h-14 ps-12 text-base"
                 />
               </label>
-              {/* Area opens its locations (and a location its districts), unit type opens its types — so the row has 4 to 7 cells. */}
-              <div className={`grid grid-cols-2 gap-3 ${HERO_COLS[[region, districts.length > 0, category].filter(Boolean).length]}`}>
+              {/* Area opens its locations, unit type opens its types — so the row has 2 to 4 cells. */}
+              <div className={`grid grid-cols-2 gap-3 ${HERO_COLS[[region, category].filter(Boolean).length]}`}>
                 <select
                   value={region}
                   onChange={(e) => {
                     setRegion(e.target.value);
                     setSubArea(''); // المنطقة اتغيرت، فاللي كان متختار جواها مابقاش صالح
-                    setDistrict('');
                   }}
                   aria-label={tx('المنطقة', 'Area')}
                   className="field h-14"
@@ -834,10 +830,7 @@ const HeroSearch: React.FC<{ mode: HomeRole; onSearch: (s: HomeSearch) => void; 
                 {region && (
                   <select
                     value={subArea}
-                    onChange={(e) => {
-                      setSubArea(e.target.value);
-                      setDistrict('');
-                    }}
+                    onChange={(e) => setSubArea(e.target.value)}
                     aria-label={tx('الموقع', 'Location')}
                     className="field h-14"
                   >
@@ -845,16 +838,6 @@ const HeroSearch: React.FC<{ mode: HomeRole; onSearch: (s: HomeSearch) => void; 
                     {locations.map((a) => (
                       <option key={a.id} value={a.id}>
                         {placeName(a, language)}
-                      </option>
-                    ))}
-                  </select>
-                )}
-                {districts.length > 0 && (
-                  <select value={district} onChange={(e) => setDistrict(e.target.value)} aria-label={tx('المنطقة التفصيلية', 'Neighbourhood')} className="field h-14">
-                    <option value="">{tx('كل ', 'All of ') + placeName(locations.find((l) => l.id === Number(subArea)) ?? { id: 0, ar: '', en: '' }, language)}</option>
-                    {districts.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {placeName(d, language)}
                       </option>
                     ))}
                   </select>
@@ -1173,8 +1156,8 @@ const HeroCalculator: React.FC = () => {
   const share = async () => {
     const url = `${window.location.origin}${window.location.pathname}`;
     const text = tx(
-      `وحدتي بـ ${money(contract, language)} ودفعت ${money(safePaid, language)}.\nلو لغيت مع المطور: ترجعلي من ${money(cancelBackMin, language)} لـ ${money(cancelBack, language)} على أقساط — يعني هخسر من ${money(lossMin, language)} لـ ${money(loss, language)}.\nلو بعتها عن طريق DEAL: هقبض ${money(safePaid, language)} كاش.\nإيه رأيك؟`,
-      `My unit is ${money(contract, language)} and I've paid ${money(safePaid, language)}.\nCancelling returns ${money(cancelBackMin, language)}–${money(cancelBack, language)} over years — I'd lose ${money(lossMin, language)}–${money(loss, language)}.\nSelling through DEAL: ${money(safePaid, language)} cash.\nWhat do you think?`,
+      `وحدتي بـ ${money(contract, language)} ودفعت ${money(safePaid, language)}.\nلو لغيت مع المطور: ترجعلي من ${money(cancelBackMin, language)} لـ ${money(cancelBack, language)} بنفس طريقة ومدة السداد — يعني هخسر من ${money(lossMin, language)} لـ ${money(loss, language)}.\nلو بعتها عن طريق DEAL: هقبض ${money(safePaid, language)} كاش.\nإيه رأيك؟`,
+      `My unit is ${money(contract, language)} and I've paid ${money(safePaid, language)}.\nCancelling returns ${money(cancelBackMin, language)}–${money(cancelBack, language)} over the same schedule and period — I'd lose ${money(lossMin, language)}–${money(loss, language)}.\nSelling through DEAL: ${money(safePaid, language)} cash.\nWhat do you think?`,
     );
     if (navigator.share) {
       try {
@@ -1246,7 +1229,7 @@ const ThreeWays: React.FC<{ onSell: () => void }> = ({ onSell }) => {
     },
     {
       k: tx('امتى؟', 'When'),
-      v: [tx('على أقساط، ممكن تاخد سنين', 'In instalments, possibly years'), tx('لما يلاقي مشتري', 'Whenever he finds a buyer'), tx('كاش يوم التنازل، بشيك مصرفي', 'Cash on transfer day, by bank cheque')],
+      v: [tx('بنفس طريقة ومدة السداد، ممكن تاخد سنين', 'Per the same schedule and period, possibly years'), tx('لما يلاقي مشتري', 'Whenever he finds a buyer'), tx('كاش يوم التنازل، بشيك مصرفي', 'Cash on transfer day, by bank cheque')],
       bad: [true, false],
     },
     {
@@ -1640,7 +1623,7 @@ const Faq: React.FC = () => {
     { q: tx('إزاي التبديل بيشتغل؟', 'How does a swap work?'), a: tx('بتختار أي وحدة على الموقع. إحنا بنبيع وحدتك باللي دفعته، وبنشتريلك الجديدة، ونرتّب التنازلين مع بعض. إنت بتدفع أو بتاخد الفرق بس، وعمولتنا ' + BRAND.buyerFeePercent + '% من سعر الوحدة على كل طرف، بشيك مصرفي بعد التنازل.', "Pick any listed unit. We sell yours at what you paid, buy the new one for you, and arrange both transfers together. You just pay or receive the difference; our fee is " + BRAND.buyerFeePercent + '% of the unit price from each side, by bank cheque after the transfer.') },
     { q: tx('كام العمولة وعلى مين الرسوم؟', 'What is the fee, and who pays the fees?'), a: tx(`عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة، بيدفعها المشتري بشيك مصرفي بعد التنازل بس، والبايع ما بيدفعش حاجة. في التبديل كل طرف بيدفع ${BRAND.buyerFeePercent}% من سعر وحدته. رسوم التنازل عند المطور بيدفعها المشتري، وقيمتها بتختلف حسب المطور.`, `Our fee is ${BRAND.buyerFeePercent}% of the unit price, paid by the buyer by bank cheque, only after the transfer; sellers pay nothing. In a swap each owner pays ${BRAND.buyerFeePercent}% of their own unit's price. The developer's transfer fee is paid by the buyer, and the amount differs by developer.`) },
     { q: tx('ينفع أنسحب بعد ما أقول إني مهتم؟', 'Can I back out after showing interest?'), a: tx('أيوه. المشتري يقدر ينسحب في أي وقت قبل توقيع عقد البيع، ومن غير ما يدفع لينا حاجة.', 'Yes. A buyer can withdraw any time before signing the sale contract, without paying us anything.') },
-    { q: tx('إيه اللي يضمن حقي؟', 'How am I protected?'), a: tx('لما البايع والمشتري يتفقوا بيتكتب بينهم وعد بيع فيه السعر وميعاد التنازل، وبعدها التنازل بيتم رسمي في مقر المطور، والفلوس بشيك مصرفي.', 'Once seller and buyer agree, they sign a promise of sale with the price and transfer date; then the transfer is signed officially at the developer and paid by bank cheque.') },
+    { q: tx('إيه اللي يضمن حقي؟', 'How am I protected?'), a: tx('لما البايع والمشتري يتفقوا بيتكتب بينهم وعد بيع فيه كل البنود الخاصة بالوحدة والسعر، وبعدها التنازل بيتم رسمي في مقر المطور، والفلوس بشيك مصرفي.', 'Once seller and buyer agree, they sign a promise of sale with all unit terms and the price; then the transfer is signed officially at the developer and paid by bank cheque.') },
   ];
   return (
     <section className="max-w-3xl mx-auto px-4 sm:px-6 py-14 sm:py-20">

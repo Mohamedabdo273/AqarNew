@@ -70,7 +70,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onSent }) 
     <div className="page-wrap py-8 sm:py-14">
       <div className="max-w-2xl">
         <h1 className="text-4xl sm:text-5xl font-bold leading-tight text-ink">{tx('كلمنا', 'Talk to us')}</h1>
-        <p className="mt-3 text-lg text-ink-soft">{tx('بني آدم هيرد عليك، مش رد آلي.', "A real person will answer — not a bot.")}</p>
+        <p className="mt-3 text-lg text-ink-soft">{tx('ابعتلنا رسالة، إيميل أو واتساب وحد متخصص هيرد عليك.', 'Send us a message, email or WhatsApp and a specialist will get back to you.')}</p>
       </div>
 
       <div className="mt-8 sm:mt-10 grid lg:grid-cols-[1fr_1.2fr] gap-6 lg:gap-10 items-start">
@@ -100,7 +100,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onSent }) 
               <div className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-ink shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm text-muted">{tx('المكتب', 'Office')}</p>
+                  <p className="text-sm text-muted">{tx('مقر الشركة', 'Company Headquarters')}</p>
                   <p className="font-semibold text-ink">{address}</p>
                 </div>
               </div>
@@ -139,6 +139,7 @@ export const ContactPage: React.FC<ContactPageProps> = ({ onNavigate, onSent }) 
         {/* Message form */}
         <form onSubmit={submit} noValidate className="card p-5 sm:p-8">
           <p className="font-display text-2xl font-bold text-ink">{tx('ابعتلنا رسالة', 'Send us a message')}</p>
+          <p className="mt-1 text-sm text-ink-soft">{tx('حد متخصص هيرد عليك في أقرب وقت.', 'A specialist will get back to you shortly.')}</p>
 
           <div className="mt-6">
             <label htmlFor="c-topic" className="label">

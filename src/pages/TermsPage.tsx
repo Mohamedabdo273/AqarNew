@@ -78,7 +78,7 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
       id: 'buyer',
       title: tx('التزامات المشتري', "Buyer's obligations"),
       body: [
-        tx('• لما يتفق مع البايع، بيتكتب بينهم وعد بيع فيه السعر وميعاد التنازل.', '• Once buyer and seller agree, they sign a promise of sale stating the price and transfer date.'),
+        tx('• لما يتفق مع البايع، بيتكتب بينهم وعد بيع فيه كل البنود الخاصة بالوحدة والسعر.', '• Once buyer and seller agree, they sign a promise of sale with all unit terms and the price.'),
         tx('• يدفع للبايع المبلغ المتفق عليه بشيك مصرفي يوم التنازل في مقر المطور.', '• Pay the agreed amount to the seller by bank cheque on transfer day at the developer.'),
         tx('• يكمّل الأقساط الباقية للمطور بنفس نظام العقد، أو زي ما المطور يحدد.', "• Continue the remaining installments per the contract or as the developer sets."),
         tx('• يتحمّل رسوم التنازل عند المطور، وقيمتها بتختلف حسب المطور.', "• Pay the developer's transfer fee; the amount differs by developer."),
