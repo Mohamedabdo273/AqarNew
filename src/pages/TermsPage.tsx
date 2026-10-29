@@ -17,7 +17,7 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
   const summary = [
     tx('احنا وسيط بنوصّل البايع بالمشتري، مش طرف في العقد', "We connect sellers and buyers; we're not a party to the contract"),
     tx('البايع ما بيدفعش عمولة، والمشتري بيدفع ' + fee + '% من سعر الوحدة بعد التوقيع', `Sellers pay no fee; buyers pay ${fee}% of the unit price after signing`),
-    tx('المشتري يقدر ينسحب قبل توقيع عقد البيع، وأي رسوم زي رسوم التنازل عليه', 'Buyers can withdraw before signing the sale contract; any fees such as the transfer fee are theirs'),
+    tx('المشتري يقدر ينسحب قبل توقيع عقد البيع، ورسوم التنازل عند المطور عليه', 'Buyers can withdraw before signing the sale contract; the developer transfer fee is on them'),
     tx('مفيش أوفر برايس، والتنازل رسمي بمقر المطور', 'No overprice, and official transfer at the developer'),
     tx('أي بيانات غلط أو مديونية متخبية = الإعلان بيتشال', 'False data or hidden dues = listing removed'),
   ];
@@ -81,7 +81,7 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
         tx('• لما يتفق مع البايع، بيتكتب بينهم وعد بيع فيه السعر وميعاد التنازل.', '• Once buyer and seller agree, they sign a promise of sale stating the price and transfer date.'),
         tx('• يدفع للبايع المبلغ المتفق عليه بشيك مصرفي يوم التنازل في مقر المطور.', '• Pay the agreed amount to the seller by bank cheque on transfer day at the developer.'),
         tx('• يكمّل الأقساط الباقية للمطور بنفس نظام العقد، أو زي ما المطور يحدد.', "• Continue the remaining installments per the contract or as the developer sets."),
-        tx('• يتحمّل أي رسوم زي رسوم التنازل عند المطور، وقيمتها بتختلف حسب المطور.', "• Pay any fees such as the developer's transfer fee; the amount differs by developer."),
+        tx('• يتحمّل رسوم التنازل عند المطور، وقيمتها بتختلف حسب المطور.', "• Pay the developer's transfer fee; the amount differs by developer."),
         tx('• يقدر ينسحب في أي وقت قبل توقيع عقد البيع.', '• May withdraw any time before signing the sale contract.'),
         tx('• عدم تحويل أموال على حسابات شخصية مجهولة دون إيصالات وتوثيق.', '• Do not transfer money to personal accounts without official documentation.'),
       ],

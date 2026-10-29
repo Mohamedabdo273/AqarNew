@@ -619,10 +619,10 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
                 {[
                   [tx('القسط', 'Installment'), fullMoney(unit.installmentValue, language)],
                   [
-                    tx('كل', 'Every'),
-                    pick(language, unit.installmentFrequency, { 'شهري': 'month', 'ربع سنوي': '3 months', 'نصف سنوي': '6 months', 'سنوي': 'year' }[unit.installmentFrequency]),
+                    tx('الجدولة', 'Schedule'),
+                    pick(language, unit.installmentFrequency, { 'شهري': 'شهرياً', 'ربع سنوي': 'ربع سنوي', 'نصف سنوي': 'نصف سنوي', 'سنوي': 'سنوي' }[unit.installmentFrequency] || unit.installmentFrequency),
                   ],
-                  [tx('لمدة', 'For'), tx(`${unit.installmentPeriodYears} سنين`, `${unit.installmentPeriodYears} years`)],
+                  [tx('إجمالي خطة السداد', 'Total payment plan'), tx(`${unit.installmentPeriodYears} سنين`, `${unit.installmentPeriodYears} years`)],
                   [tx('القسط الجاي', 'Next due'), unit.nextInstallmentDate],
                 ].map(([k, v]) => (
                   <div key={k} className="flex justify-between gap-3">
@@ -647,8 +647,8 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
             </dl>
             <p className="mt-4 rounded-xl bg-paper px-4 py-3 text-sm text-ink-soft leading-relaxed">
               {tx(
-                'تقدر تنسحب في أي وقت قبل توقيع عقد البيع. أي رسوم زي رسوم التنازل عند المطور بيدفعها المشتري، وقيمتها بتختلف من مطور للتاني.',
-                "You can withdraw any time before signing the sale contract. Any fees, such as the developer's transfer fee, are paid by the buyer, and the amount differs by developer.",
+                'تقدر تنسحب في أي وقت قبل توقيع عقد البيع. رسوم التنازل عند المطور بيدفعها المشتري، وقيمتها بتختلف من مطور للتاني.',
+                "You can withdraw any time before signing the sale contract. The developer's transfer fee is paid by the buyer, and the amount differs by developer.",
               )}
             </p>
             <button onClick={onOpenBuyerRules} className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-ink hover:underline">

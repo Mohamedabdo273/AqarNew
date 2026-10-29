@@ -406,20 +406,6 @@ export const HomePage: React.FC<HomePageProps> = ({
                 </li>
               ))}
             </ul>
-
-            <div style={{ animationDelay: '220ms' }} className="hero-in mt-6 sm:mt-8 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 w-full">
-              {hero.cards.map((c) => (
-                <div key={c.t} className="flex items-center gap-3 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/20 backdrop-blur-md p-4 sm:p-5 transition shadow-sm">
-                  <div className="w-14 h-14 rounded-xl bg-accent-light/20 border border-accent-light/30 flex items-center justify-center shrink-0 text-accent-light">
-                    <c.icon className="w-7 h-7" />
-                  </div>
-                  <div>
-                    <span className="block text-lg sm:text-xl font-extrabold text-white leading-tight">{c.t}</span>
-                    <span className="block text-[15px] sm:text-[17px] text-white/90 font-medium leading-snug mt-1">{c.d}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </section>
@@ -1652,7 +1638,7 @@ const Faq: React.FC = () => {
     { q: tx('لو الأحسن إني أكمّل أقساطي، هتقولولي؟', "If I'm better off keeping my unit, will you say so?"), a: tx('أيوه. كشف الحساب بيقارن كل الاختيارات، ولو الاستمرار أحسن ليك هنقولك ده، ومن غير أي التزام.', 'Yes. The statement compares every option; if keeping it is better for you, we will tell you — no commitment.') },
     { q: tx('حد هيعرف إني ببيع وحدتي؟', 'Will people know I’m selling?'), a: tx('اسمك ورقمك مش بيظهروا في أي مكان. الإعلان فيه بيانات الوحدة بس، وأي مشتري بيكلمنا احنا الأول.', 'Your name and number never appear anywhere. The listing shows the unit only, and buyers contact us first.') },
     { q: tx('إزاي التبديل بيشتغل؟', 'How does a swap work?'), a: tx('بتختار أي وحدة على الموقع. إحنا بنبيع وحدتك باللي دفعته، وبنشتريلك الجديدة، ونرتّب التنازلين مع بعض. إنت بتدفع أو بتاخد الفرق بس، وعمولتنا ' + BRAND.buyerFeePercent + '% من سعر الوحدة على كل طرف، بشيك مصرفي بعد التنازل.', "Pick any listed unit. We sell yours at what you paid, buy the new one for you, and arrange both transfers together. You just pay or receive the difference; our fee is " + BRAND.buyerFeePercent + '% of the unit price from each side, by bank cheque after the transfer.') },
-    { q: tx('كام العمولة وعلى مين الرسوم؟', 'What is the fee, and who pays the fees?'), a: tx(`عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة، بيدفعها المشتري بشيك مصرفي بعد التنازل بس، والبايع ما بيدفعش حاجة. في التبديل كل طرف بيدفع ${BRAND.buyerFeePercent}% من سعر وحدته. أي رسوم زي رسوم التنازل عند المطور بيدفعها المشتري، وقيمتها بتختلف حسب المطور.`, `Our fee is ${BRAND.buyerFeePercent}% of the unit price, paid by the buyer by bank cheque, only after the transfer; sellers pay nothing. In a swap each owner pays ${BRAND.buyerFeePercent}% of their own unit's price. Any fees such as the developer's transfer fee are paid by the buyer, and the amount differs by developer.`) },
+    { q: tx('كام العمولة وعلى مين الرسوم؟', 'What is the fee, and who pays the fees?'), a: tx(`عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة، بيدفعها المشتري بشيك مصرفي بعد التنازل بس، والبايع ما بيدفعش حاجة. في التبديل كل طرف بيدفع ${BRAND.buyerFeePercent}% من سعر وحدته. رسوم التنازل عند المطور بيدفعها المشتري، وقيمتها بتختلف حسب المطور.`, `Our fee is ${BRAND.buyerFeePercent}% of the unit price, paid by the buyer by bank cheque, only after the transfer; sellers pay nothing. In a swap each owner pays ${BRAND.buyerFeePercent}% of their own unit's price. The developer's transfer fee is paid by the buyer, and the amount differs by developer.`) },
     { q: tx('ينفع أنسحب بعد ما أقول إني مهتم؟', 'Can I back out after showing interest?'), a: tx('أيوه. المشتري يقدر ينسحب في أي وقت قبل توقيع عقد البيع، ومن غير ما يدفع لينا حاجة.', 'Yes. A buyer can withdraw any time before signing the sale contract, without paying us anything.') },
     { q: tx('إيه اللي يضمن حقي؟', 'How am I protected?'), a: tx('لما البايع والمشتري يتفقوا بيتكتب بينهم وعد بيع فيه السعر وميعاد التنازل، وبعدها التنازل بيتم رسمي في مقر المطور، والفلوس بشيك مصرفي.', 'Once seller and buyer agree, they sign a promise of sale with the price and transfer date; then the transfer is signed officially at the developer and paid by bank cheque.') },
   ];
