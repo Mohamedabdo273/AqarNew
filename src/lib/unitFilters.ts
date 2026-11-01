@@ -4,10 +4,9 @@ import { cashPrice, categoryOf, isDeal, isNegotiable, monthlyInstallment, saving
 
 export interface Filters {
   query: string;
-  /** Place filters by id (GET /api/locations/…): regions, their sub-areas, those sub-areas' districts. */
+  /** Place filters by id (GET /api/locations/…): regions and their sub-areas. */
   regionIds: number[];
   subAreaIds: number[];
-  districtIds: number[];
   categories: string[];
   types: string[];
   developers: string[];
@@ -34,7 +33,6 @@ export const EMPTY_FILTERS: Filters = {
   query: '',
   regionIds: [],
   subAreaIds: [],
-  districtIds: [],
   categories: [],
   types: [],
   developers: [],
@@ -81,7 +79,6 @@ export const applyFilters = (
     if (budget && !fitsBudget(u, budget)) return false;
     if (f.regionIds.length && !f.regionIds.includes(u.regionId ?? 0)) return false;
     if (f.subAreaIds.length && !f.subAreaIds.includes(u.subAreaId ?? 0)) return false;
-    if (f.districtIds.length && !f.districtIds.includes(u.districtId ?? 0)) return false;
     if (f.categories.length && !f.categories.includes(categoryOf(u))) return false;
     if (f.types.length && !f.types.includes(u.propertyType)) return false;
     if (f.developers.length && !f.developers.includes(u.developer)) return false;

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, ChevronDown, ImagePlus, Minus, Plus, Upload, X } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
+import { foldArabic } from '../../lib/developers';
 import { currency } from '../../lib/unitHelpers';
 
 /* Shared form building blocks for the sell flow. */
@@ -462,8 +463,8 @@ export function SearchSelect({
     };
   }, [open]);
   const shown = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return q ? options.filter((o) => `${o.label} ${o.search ?? ''}`.toLowerCase().includes(q)) : options;
+    const q = foldArabic(query.trim());
+    return q ? options.filter((o) => foldArabic(`${o.label} ${o.search ?? ''}`).includes(q)) : options;
   }, [options, query]);
   const picked = options.find((o) => o.value === value || o.label === value);
   const pick = (v: string) => {
@@ -512,20 +513,6 @@ export function SearchSelect({
               </li>
             )}
 
-            {/* Custom search query quick-pick if not found in list */}
-            {allowCustom && query.trim() && !options.some((o) => o.label.toLowerCase() === query.trim().toLowerCase() || o.value.toLowerCase() === query.trim().toLowerCase()) && (
-              <li role="option" className="mb-1">
-                <button
-                  type="button"
-                  onClick={() => pick(query.trim())}
-                  className="w-full flex items-center gap-2 rounded-lg px-3 py-2 text-start text-xs font-bold text-brand bg-brand-soft/20 hover:bg-brand-soft/40 transition-colors cursor-pointer"
-                >
-                  <Plus className="w-3.5 h-3.5 shrink-0" />
-                  <span>{tx(`استخدام "${query.trim()}"`, `Use "${query.trim()}"`)}</span>
-                </button>
-              </li>
-            )}
-
             {shown.map((o) => {
               const isSelected = o.value === value || o.label === value;
               return (
@@ -543,6 +530,20 @@ export function SearchSelect({
                 </li>
               );
             })}
+
+            {/* Custom search query quick-pick if not found in list — under the matches, so a real match gets picked first */}
+            {allowCustom && query.trim() && !options.some((o) => o.label.toLowerCase() === query.trim().toLowerCase() || o.value.toLowerCase() === query.trim().toLowerCase()) && (
+              <li role="option" className="mt-1">
+                <button
+                  type="button"
+                  onClick={() => pick(query.trim())}
+                  className="w-full flex items-center gap-2 rounded-lg px-3 py-2 text-start text-xs font-bold text-brand bg-brand-soft/20 hover:bg-brand-soft/40 transition-colors cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5 shrink-0" />
+                  <span>{tx(`استخدام "${query.trim()}"`, `Use "${query.trim()}"`)}</span>
+                </button>
+              </li>
+            )}
 
             {!shown.length && !allowCustom && <li className="px-3 py-2.5 text-sm text-muted">{tx('مفيش نتايج', 'No matches')}</li>}
 

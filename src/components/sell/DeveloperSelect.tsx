@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { Search, Check, Building2, ChevronDown, Sparkles, X, Plus, RotateCcw } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
-import { KNOWN_DEVELOPERS, KnownDeveloper } from '../../lib/developers';
+import { KnownDeveloper, useDeveloperCatalog } from '../../lib/developers';
 import { RealEstateUnit } from '../../types';
 
 interface DeveloperSelectProps {
@@ -41,22 +41,22 @@ export const DeveloperSelect: React.FC<DeveloperSelectProps> = ({
   }, []);
 
   // Merge known developers with dynamic developers in units list
+  const catalog = useDeveloperCatalog();
   const allDevelopers = useMemo(() => {
-    const list = [...KNOWN_DEVELOPERS];
+    const list = [...catalog];
     units.forEach((u) => {
       if (u.developer && !list.some((d) => d.nameAr === u.developer || d.nameEn === u.developer)) {
         list.push({
           id: `dyn-${u.developer}`,
           nameAr: u.developer,
           nameEn: u.developerEn || u.developer,
-          tier: 'Tier 1',
           popular: false,
           compounds: u.compound ? [{ ar: u.compound, en: u.compoundEn || u.compound }] : [],
         });
       }
     });
     return list;
-  }, [units]);
+  }, [catalog, units]);
 
   // Find currently selected developer object
   const currentDevObj = useMemo(() => {
@@ -298,15 +298,6 @@ export const DeveloperSelect: React.FC<DeveloperSelectProps> = ({
                         </div>
                       </div>
 
-                      {d.tier === 'Tier 1' && (
-                        <span
-                          className={`num text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
-                            isSelected ? 'bg-white/20 text-white' : 'bg-brand-soft text-brand'
-                          }`}
-                        >
-                          {tx('معتمد', 'Tier 1')}
-                        </span>
-                      )}
                     </button>
                   );
                 })

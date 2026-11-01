@@ -201,7 +201,6 @@ function cachedPlaces<T>(path: string): Promise<T> {
 }
 export const fetchRegions = () => cachedPlaces<PlaceOption[]>('/locations/regions');
 export const fetchSubAreas = (regionId: number) => cachedPlaces<SubAreaOption[]>(`/locations/regions/${regionId}/sub-areas`);
-export const fetchDistricts = (subAreaId: number) => cachedPlaces<PlaceOption[]>(`/locations/sub-areas/${subAreaId}/districts`);
 
 /** Every published unit, all pages. The listing filters and sorts on the client. */
 export async function fetchAllUnits(): Promise<RealEstateUnit[]> {

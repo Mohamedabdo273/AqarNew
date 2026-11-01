@@ -235,7 +235,7 @@ export const HomePage: React.FC<HomePageProps> = ({
   const regions = useRegions();
   const regionsShown = useMemo(() => tally(featured, (u) => u.region, regions), [featured, regions]);
   const cardRegionId = regions.find((r) => r.ar === cardRegion)?.id;
-  const cardRegionSubAreas = useSubAreas(cardRegionId ? [cardRegionId] : []);
+  const cardSubAreas = useSubAreas(cardRegionId ? [cardRegionId] : regions.map((r) => r.id));
 
   const afterRegion = useMemo(
     () => (cardRegion ? featured.filter((u) => u.region === cardRegion) : featured),
@@ -244,9 +244,9 @@ export const HomePage: React.FC<HomePageProps> = ({
   // من غير اختيار إقليم بنعرض المناطق الموجودة في المعروض كله — لما كل الوحدات
   // في إقليم واحد، الفلتر المفيد هو التفصيلي مش الإقليم.
   const subAreasShown = useMemo(() => {
-    const listed = Array.from(new Map<string, Opt>(afterRegion.filter((u) => u.subArea).map((u) => [u.subArea!, { ar: u.subArea!, en: u.subAreaEn ?? u.subArea! }])).values());
-    return tally(afterRegion, (u) => u.subArea, cardRegion ? cardRegionSubAreas : listed);
-  }, [afterRegion, cardRegion, cardRegionSubAreas]);
+    const listed = cardSubAreas.filter((s) => afterRegion.some((u) => u.subAreaId === s.id));
+    return tally(afterRegion, (u) => u.subArea, cardRegion ? cardSubAreas : listed);
+  }, [afterRegion, cardRegion, cardSubAreas]);
 
   const afterSubArea = useMemo(
     () => (cardSubArea ? afterRegion.filter((u) => u.subArea === cardSubArea) : afterRegion),

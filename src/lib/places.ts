@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Language } from '../types';
-import { PlaceOption, SubAreaOption, fetchDistricts, fetchRegions, fetchSubAreas } from '../services/api';
+import { PlaceOption, SubAreaOption, fetchRegions, fetchSubAreas } from '../services/api';
 
-/* المنطقة ← الموقع ← المنطقة التفصيلية: القوايم جاية من الـ API (GET /api/locations/…)، والوحدات والفلاتر بتشاور عليها بالـ id. */
+/* المنطقة ← الموقع: القوايم جاية من الـ API (GET /api/locations/…)، والوحدات والفلاتر بتشاور عليها بالـ id. */
 
 export type { PlaceOption, SubAreaOption } from '../services/api';
 
@@ -30,14 +30,7 @@ export const useSubAreas = (regionIds: number[]) =>
     Promise.all(regionIds.map((id) => fetchSubAreas(id).then((list) => list.map((s) => ({ ...s, regionId: id }))))).then((l) => l.flat()),
   );
 
-/** The districts of every sub-area given, each tagged with its sub-area. */
-export const useDistricts = (subAreaIds: number[]) =>
-  useList<DistrictWithSubArea>(`districts:${subAreaIds.join(',')}`, () =>
-    Promise.all(subAreaIds.map((id) => fetchDistricts(id).then((list) => list.map((d) => ({ ...d, subAreaId: id }))))).then((l) => l.flat()),
-  );
-
 export const placeName = (p: PlaceOption, language: Language) => (language === 'ar' ? p.ar : p.en);
 
 export type RegionOption = PlaceOption;
 export type SubAreaWithRegion = SubAreaOption & { regionId: number };
-export type DistrictWithSubArea = PlaceOption & { subAreaId: number };

@@ -5,7 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { Budget, BudgetFinder } from './BudgetFinder';
 import { Filters } from '../lib/unitFilters';
 import { DELIVERY_OPTIONS, FINISHING_OPTIONS, VIEW_OPTIONS, FREQUENCY_OPTIONS, PROPERTY_CATEGORIES, typesFor, pick } from '../lib/unitHelpers';
-import { useDistricts, useRegions, useSubAreas } from '../lib/places';
+import { useRegions, useSubAreas } from '../lib/places';
 
 interface FilterPanelProps {
   units: RealEstateUnit[];
@@ -160,28 +160,22 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
     return [...map.values()].sort((a, b) => b.count - a.count);
   }, [units, language]);
 
-  // المنطقة ← الموقع ← التفصيلية: كل قايمة جاية من الـ API حسب اللي اتختار في اللي قبلها، والفلتر بيخزّن الـ ids.
+  // المنطقة ← الموقع: القايمتين جايين من الـ API، والفلتر بيخزّن الـ ids.
   const regions = useRegions();
   const subAreas = useSubAreas(f.regionIds);
-  const districts = useDistricts(f.subAreaIds);
-  const placeCounts = useMemo(() => {
-    const subAreaCounts = new Map<string, number>();
-    const districtCounts = new Map<string, number>();
+  const subAreaCounts = useMemo(() => {
+    const counts = new Map<string, number>();
     units.forEach((u) => {
-      if (u.subAreaId) subAreaCounts.set(String(u.subAreaId), (subAreaCounts.get(String(u.subAreaId)) ?? 0) + 1);
-      if (u.districtId) districtCounts.set(String(u.districtId), (districtCounts.get(String(u.districtId)) ?? 0) + 1);
+      if (u.subAreaId) counts.set(String(u.subAreaId), (counts.get(String(u.subAreaId)) ?? 0) + 1);
     });
-    return { subAreas: subAreaCounts, districts: districtCounts };
+    return counts;
   }, [units]);
   const P = (o: { id: number; ar: string; en: string }) => ({ value: String(o.id), label: tx(o.ar, o.en), search: tx(o.en, o.ar) });
   const ids = (list: number[]) => list.map(String);
   const toggleId = (list: number[], v: string) => toggle(ids(list), v).map(Number);
-  /** نشيل أي موقع (ومنطقته التفصيلية) بقى تابع لمنطقة أو موقع مش مختار. */
-  const pickPlaces = (regionIds: number[], subAreaIds: number[]) => {
-    const keptSubAreas = subAreaIds.filter((id) => subAreas.some((s) => s.id === id && regionIds.includes(s.regionId)));
-    const keptDistricts = f.districtIds.filter((id) => districts.some((d) => d.id === id && keptSubAreas.includes(d.subAreaId)));
-    onChange({ regionIds, subAreaIds: keptSubAreas, districtIds: keptDistricts });
-  };
+  /** نشيل أي موقع بقى تابع لمنطقة مش مختارة. */
+  const pickPlaces = (regionIds: number[], subAreaIds: number[]) =>
+    onChange({ regionIds, subAreaIds: subAreaIds.filter((id) => subAreas.some((s) => s.id === id && regionIds.includes(s.regionId))) });
 
   const shownDevs = developers.filter((d) => d.label.toLowerCase().includes(devQuery.trim().toLowerCase()));
 
@@ -219,20 +213,9 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
         <Section title={tx('الموقع', 'Location')} active={f.subAreaIds.length} defaultOpen>
           <PlaceChips
             options={subAreas.map(P)}
-            counts={placeCounts.subAreas}
+            counts={subAreaCounts}
             selected={ids(f.subAreaIds)}
             onToggle={(v) => pickPlaces(f.regionIds, toggleId(f.subAreaIds, v))}
-          />
-        </Section>
-      )}
-
-      {districts.length > 0 && (
-        <Section title={tx('المنطقة التفصيلية', 'Neighbourhood')} active={f.districtIds.length} defaultOpen>
-          <PlaceChips
-            options={districts.map(P)}
-            counts={placeCounts.districts}
-            selected={ids(f.districtIds)}
-            onToggle={(v) => onChange({ districtIds: toggleId(f.districtIds, v) })}
           />
         </Section>
       )}

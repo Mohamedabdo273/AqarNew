@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ShieldCheck, TrendingDown, Clock, ScrollText, Send, Check, MessageCircle, ArrowLeft, ArrowRight, Coins, EyeOff } from 'lucide-react';
 import { PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
@@ -8,7 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { errorText } from '../services/api';
 import { FormError } from '../components/FormError';
 import { PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, CANCELLATION_PENALTY_MIN_RATE, CANCELLATION_PENALTY_RATE, DELIVERY_OPTIONS, cancellationLoss, currency, money } from '../lib/unitHelpers';
-import { KNOWN_DEVELOPERS } from '../lib/developers';
+import { baseName, compoundRank, useDeveloperCatalog } from '../lib/developers';
 import { EMPTY_SELL_FORM, SellForm, fitPlace, isValidPhone, netToSeller } from '../lib/sellForm';
 import { CheckBox, Field, FilePick, FilePickMany, MoneyInput, PhotoPick, SearchSelect, Toggle } from '../components/sell/FormBits';
 import { placeName, useRegions, useSubAreas } from '../lib/places';
@@ -173,6 +173,12 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
   // (البايع مش بيختار المنطقة التفصيلية — فريقنا يحددها وقت المراجعة لو محتاجين.)
   const regions = useRegions();
   const subAreas = useSubAreas(form.regionId ? [form.regionId] : []);
+  // مسودة قديمة على موقع اتشال من القايمة: البائع يختار من اللي موجود.
+  useEffect(() => {
+    if (subAreas.length && form.subAreaId && !subAreas.some((s) => s.id === form.subAreaId)) {
+      setForm((f) => ({ ...f, subAreaId: null, subArea: '', districtId: null, district: '' }));
+    }
+  }, [subAreas, form.subAreaId]);
   const pickRegion = (id: number) => {
     const r = regions.find((x) => x.id === id);
     setForm((f) => ({ ...f, regionId: r?.id ?? null, region: r?.ar ?? '', subAreaId: null, subArea: '', districtId: null, district: '' }));
@@ -181,21 +187,36 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
     const a = subAreas.find((x) => x.id === id);
     setForm((f) => ({ ...f, subAreaId: a?.id ?? null, subArea: a?.ar ?? '', districtId: null, district: '' }));
   };
-  // المطورين المعروفين + أي مطور على الموقع؛ والكمبوندات بتاعة المطور المختار.
-  const developerOptions = (() => {
+  // الكتالوج + أي مطور على الموقع؛ والكمبوندات بتاعة المطور المختار. البحث في المطور بيدوّر في كمبونداته كمان،
+  // فاللي عارف اسم الكمبوند بس يكتبه ويلاقي مطوره. (الوحدات بتتخزن بالاسم كنص، فالأسماء القديمة فاضلة شغالة.)
+  const catalog = useDeveloperCatalog();
+  const developerOptions = useMemo(() => {
     const map = new Map<string, { value: string; label: string; search: string }>();
-    for (const d of KNOWN_DEVELOPERS) map.set(d.nameAr, { value: d.nameAr, label: language === 'ar' ? d.nameAr : d.nameEn || d.nameAr, search: `${d.nameAr} ${d.nameEn}` });
-    for (const u of units) if (u.developer && !map.has(u.developer)) map.set(u.developer, { value: u.developer, label: language === 'ar' ? u.developer : u.developerEn || u.developer, search: u.developerEn ?? '' });
+    const known = [...catalog].sort((a, b) => {
+      const last = Number(a.id === 'inshaa-other') - Number(b.id === 'inshaa-other');
+      return last || Number(!!b.popular) - Number(!!a.popular) || (b.popular ? 0 : a.nameAr.localeCompare(b.nameAr, 'ar'));
+    });
+    for (const d of known) {
+      map.set(baseName(d.nameAr), { value: d.nameAr, label: language === 'ar' ? d.nameAr : d.nameEn || d.nameAr, search: `${d.nameAr} ${d.nameEn} ${d.compounds.map((c) => `${c.ar} ${c.en}`).join(' ')}` });
+    }
+    for (const u of units) {
+      if (u.developer && !map.has(baseName(u.developer))) map.set(baseName(u.developer), { value: u.developer, label: language === 'ar' ? u.developer : u.developerEn || u.developer, search: u.developerEn ?? '' });
+    }
     return [...map.values()];
-  })();
-  const compoundOptions = (() => {
+  }, [catalog, units, language]);
+  const compoundOptions = useMemo(() => {
     if (!form.developer) return [];
     const map = new Map<string, { value: string; label: string; search: string }>();
-    const known = KNOWN_DEVELOPERS.find((d) => d.nameAr === form.developer || d.nameEn === form.developer);
-    for (const c of known?.compounds ?? []) map.set(c.ar, { value: c.ar, label: language === 'ar' ? c.ar : c.en || c.ar, search: `${c.ar} ${c.en}` });
-    for (const u of units) if (u.developer === form.developer && u.compound && !map.has(u.compound)) map.set(u.compound, { value: u.compound, label: language === 'ar' ? u.compound : u.compoundEn || u.compound, search: u.compoundEn ?? '' });
+    const devKey = baseName(form.developer);
+    const known = catalog.find((d) => baseName(d.nameAr) === devKey || d.nameEn === form.developer);
+    const regionAreas = subAreas.map((s) => s.ar);
+    const ranked = [...(known?.compounds ?? [])].sort((a, b) => compoundRank(a, form.subArea, form.region, regionAreas) - compoundRank(b, form.subArea, form.region, regionAreas));
+    for (const c of ranked) map.set(baseName(c.ar), { value: c.ar, label: language === 'ar' ? c.ar : c.en || c.ar, search: `${c.ar} ${c.en}` });
+    for (const u of units) {
+      if (baseName(u.developer) === devKey && u.compound && !map.has(baseName(u.compound))) map.set(baseName(u.compound), { value: u.compound, label: language === 'ar' ? u.compound : u.compoundEn || u.compound, search: u.compoundEn ?? '' });
+    }
     return [...map.values()];
-  })();
+  }, [catalog, units, language, form.developer, form.subArea, form.region, subAreas]);
 
   const submit = async () => {
     if (sending) return;

@@ -31,7 +31,7 @@ import {
   SlidersHorizontal,
   ChevronDown,
 } from 'lucide-react';
-import { KNOWN_DEVELOPERS, KnownDeveloper } from '../../lib/developers';
+import { FEATURED_DEVELOPERS } from '../../lib/developers';
 import { RealEstateUnit } from '../../types';
 
 export type ScreenId = 'home' | 'listings' | 'detail' | 'sell' | 'swap' | 'account';
@@ -194,7 +194,7 @@ export const MobileScreens: React.FC<MobileScreensProps> = ({
             </button>
           </div>
           <div className="flex gap-2 px-4 overflow-x-auto no-scrollbar pb-1">
-            {KNOWN_DEVELOPERS.slice(0, 6).map((dev) => (
+            {FEATURED_DEVELOPERS.map((dev) => (
               <button
                 key={dev.id}
                 onClick={() => onNavigateScreen('listings')}

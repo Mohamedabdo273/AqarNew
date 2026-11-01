@@ -21,7 +21,7 @@ import {
 } from '../lib/unitHelpers';
 import { FormError } from '../components/FormError';
 import { errorText, sendSearchAlert } from '../services/api';
-import { useDistricts, useRegions, useSubAreas } from '../lib/places';
+import { useRegions, useSubAreas } from '../lib/places';
 
 interface OpportunitiesPageProps {
   units: RealEstateUnit[];
@@ -111,7 +111,6 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   const patch = (p: Partial<Filters>) => setFilters((f) => ({ ...f, ...p }));
   const regions = useRegions();
   const subAreas = useSubAreas(filters.regionIds);
-  const districts = useDistricts(filters.subAreaIds);
 
   // With "below what was paid" on and no other sort picked, biggest discount comes first.
   const effectiveSort: SortKey = filters.discounted && sort === 'newest' ? 'deals' : sort;
@@ -149,11 +148,10 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
     const o = list.find((x) => x.id === id);
     return o ? (language === 'ar' ? o.ar : o.en) : '…';
   };
-  /** Keeps only the sub-areas / districts that still sit under what's picked above them. */
+  /** Keeps only the sub-areas that still sit under a picked region. */
   const pickPlaces = (regionIds: number[], subAreaIds: number[]) => {
     const keptSubAreas = subAreaIds.filter((id) => subAreas.some((s) => s.id === id && regionIds.includes(s.regionId)));
-    const keptDistricts = filters.districtIds.filter((id) => districts.some((d) => d.id === id && keptSubAreas.includes(d.subAreaId)));
-    patch({ regionIds, subAreaIds: keptSubAreas, districtIds: keptDistricts });
+    patch({ regionIds, subAreaIds: keptSubAreas });
   };
 
   // Every active filter as a removable pill above the results.
@@ -163,7 +161,6 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
       : []),
     ...filters.regionIds.map((v) => ({ key: `r-${v}`, label: placeLabelOf(regions, v), remove: () => pickPlaces(withoutId(filters.regionIds, v), filters.subAreaIds) })),
     ...filters.subAreaIds.map((v) => ({ key: `s-${v}`, label: placeLabelOf(subAreas, v), remove: () => pickPlaces(filters.regionIds, withoutId(filters.subAreaIds, v)) })),
-    ...filters.districtIds.map((v) => ({ key: `ds-${v}`, label: placeLabelOf(districts, v), remove: () => patch({ districtIds: withoutId(filters.districtIds, v) }) })),
     ...filters.types.map((v) => ({ key: `t-${v}`, label: labelOf(PROPERTY_TYPES, v), remove: () => patch({ types: without(filters.types, v) }) })),
     ...filters.developers.map((v) => {
       const u = units.find((x) => x.developer === v);
@@ -217,7 +214,7 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   const from = results.length ? (current - 1) * PAGE_SIZE + 1 : 0;
   const to = Math.min(current * PAGE_SIZE, results.length);
 
-  const regionCount = filters.regionIds.length + filters.subAreaIds.length + filters.districtIds.length;
+  const regionCount = filters.regionIds.length + filters.subAreaIds.length;
   const typeCount = filters.categories.length + filters.types.length;
   const toggleIn = (list: string[], v: string) => (list.includes(v) ? without(list, v) : [...list, v]);
   const bedsLabel = (n: number) => (n === 5 ? '5+' : String(n));
