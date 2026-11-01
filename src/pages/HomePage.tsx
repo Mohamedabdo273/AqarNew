@@ -55,7 +55,7 @@ interface HomePageProps {
   onBrowseWithBudget: () => void;
   onNavigate: (page: PageId) => void;
   onSelectUnit: (unit: RealEstateUnit) => void;
-  onOpenRules: (tab: 'seller' | 'buyer') => void;
+  onOpenRules: (tab: 'seller' | 'buyer' | 'swap') => void;
   /** Opens the listings filtered to deals only. */
   onOpenDeals: () => void;
   /** Opens the listings with these filters (hero search, quick chips, areas). */
@@ -1224,7 +1224,7 @@ const ThreeWays: React.FC<{ onSell: () => void }> = ({ onSell }) => {
   const rows: { k: string; v: [string, string, string]; bad?: [boolean, boolean] }[] = [
     {
       k: tx('هتقبض كام؟', 'What you get'),
-      v: [tx('اللي دفعته ناقص 10–15% من سعر العقد كله', 'What you paid, minus 10–15% of the whole contract'), tx('اللي دفعته ناقص عمولة السمسار', "What you paid, minus the broker's fee"), tx('اللي دفعته كامل — صفر عمولة', 'Everything you paid — zero fee')],
+      v: [tx('اللي دفعته ناقص 10–15% من سعر العقد كله', 'What you paid, minus 10–15% of the whole contract'), tx('اللي دفعته ناقص عمولة السمسار', "What you paid, minus the broker's fee"), tx(`اللي دفعته ناقص ضريبة التصرفات (${BRAND.disposalTaxPercent}% من سعر الوحدة) — صفر عمولة`, `What you paid, minus the disposal tax (${BRAND.disposalTaxPercent}% of the unit price) — zero fee`)],
       bad: [true, true],
     },
     {
@@ -1532,7 +1532,7 @@ const HowItWorks: React.FC<{ tab: HomeRole }> = ({ tab }) => {
 };
 
 /* The rules, framed around what each side actually worries about — the buyer's, the seller's or the swapper's. */
-const RulesPreview: React.FC<{ role: HomeRole; onOpenRules: (tab: 'seller' | 'buyer') => void }> = ({ role, onOpenRules }) => {
+const RulesPreview: React.FC<{ role: HomeRole; onOpenRules: (tab: 'seller' | 'buyer' | 'swap') => void }> = ({ role, onOpenRules }) => {
   const { tx } = useLanguage();
   const RULES: Record<HomeRole, { icon: React.ElementType; t: string; d: string }[]> = {
     buy: [
@@ -1541,10 +1541,10 @@ const RulesPreview: React.FC<{ role: HomeRole; onOpenRules: (tab: 'seller' | 'bu
       { icon: FileText, t: tx('مستندات مُراجَعة', 'Papers checked'), d: tx('العقد والإيصالات والمديونية قبل الدفع', 'Contract, receipts and dues before you pay') },
       { icon: UserCheck, t: tx('من المالك مباشرةً', 'Straight from the owner'), d: tx('بدون وسطاء أو سماسرة', 'No brokers in between') },
       { icon: Percent, t: tx(`عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة`, `Our fee: ${BRAND.buyerFeePercent}% of the unit price`), d: tx('بشيك مصرفي، بعد إتمام التنازل فقط', 'By bank cheque, only after the transfer') },
-      { icon: Undo2, t: tx('حرية الانسحاب', 'You can withdraw'), d: tx('قبل توقيع عقد البيع، وتتحمّل رسوم التنازل التي تختلف حسب المطوّر', 'Before the sale contract is signed. Transfer fees are yours and vary by developer') },
+      { icon: Undo2, t: tx('حرية الانسحاب', 'You can withdraw'), d: tx('قبل توقيع عقد وعد البيع فى مقر المطور، وتتحمّل رسوم التنازل التي تختلف حسب المطوّر', 'Before the promise of sale is signed. Transfer fees are yours and vary by developer') },
     ],
     sell: [
-      { icon: Wallet, t: tx('بدون عمولة', 'Zero fee for you'), d: tx('تسترد كل ما دفعته كاملًا', 'You get back everything you paid') },
+      { icon: Wallet, t: tx('بدون عمولة', 'Zero fee for you'), d: tx(`تسترد ما دفعته، مخصومًا منه ضريبة التصرفات العقارية (${BRAND.disposalTaxPercent}% من سعر الوحدة)`, `You get back what you paid, minus the disposal tax (${BRAND.disposalTaxPercent}% of the unit price)`) },
       { icon: Landmark, t: tx('استلام بشيك مصرفي', 'Paid by bank cheque'), d: tx('في مقر المطوّر يوم التنازل', 'At the developer on transfer day') },
       { icon: Receipt, t: tx('المتأخرات ليست عائقًا', 'Arrears are no obstacle'), d: tx('تُخصم يوم التنازل دون الحاجة لسدادها مسبقًا', 'Deducted on transfer day — no need to clear them first') },
       { icon: EyeOff, t: tx('سرية بياناتك', 'Your name and number stay hidden'), d: tx('المشتري يتواصل معنا وليس معك', 'Buyers talk to us') },
@@ -1582,11 +1582,11 @@ const RulesPreview: React.FC<{ role: HomeRole; onOpenRules: (tab: 'seller' | 'bu
           </div>
         ))}
       </div>
-      {/* One link to the general rules, opened on the side this page is about. */}
+      {/* One link to the full rules, opened on the side this page is about. */}
       <div className="mt-6 sm:mt-8 flex justify-center">
-        <button onClick={() => onOpenRules(role === 'sell' ? 'seller' : 'buyer')} className="btn-accent px-4 text-sm sm:text-[15px]">
+        <button onClick={() => onOpenRules(role === 'sell' ? 'seller' : role === 'swap' ? 'swap' : 'buyer')} className="btn-accent px-4 text-sm sm:text-[15px]">
           <ScrollText className="w-5 h-5" />
-          {tx('القواعد العامة للبائع والمشتري', 'General rules for sellers and buyers')}
+          {role === 'sell' ? tx('كل قواعد البيع', 'All selling rules') : role === 'swap' ? tx('كل قواعد البدل', 'All swap rules') : tx('كل قواعد الشراء', 'All buying rules')}
         </button>
       </div>
       <a href="#verify" className="mt-6 mx-auto flex max-w-xl items-center gap-3 rounded-xl border border-line bg-surface p-4 hover:border-brand transition-colors">
@@ -1609,12 +1609,12 @@ const Faq: React.FC = () => {
   const items = [
     { q: tx('يعني إيه أشتري بسعر العقد القديم؟', 'What does buying at the old contract price mean?'), a: tx('بتدفع للبايع اللي هو دفعه للمطور بالظبط، وتكمّل باقي الأقساط بنفس جدول العقد. من غير أي أوفر.', 'You pay the seller exactly what they paid the developer and continue the remaining instalments on the original schedule. No overprice.') },
     { q: tx('عليا أقساط متأخرة وغرامات، ينفع أبيع؟', "I'm behind and have fines — can I still sell?"), a: tx('أيوه. بنكتب المتأخرات في الإعلان بصراحة، وبتتخصم من فلوسك يوم التنازل والمشتري يسددها للمطور. مش محتاج تدفع حاجة قبلها.', 'Yes. We list the arrears openly; they come out of your payout on transfer day and the buyer settles them with the developer. Nothing to pay before.') },
-    { q: tx('هسترد فلوسي كلها فعلاً؟', 'Do I really get all my money back?'), a: tx('أيوه. المشتري بيدفعلك كل اللي دفعته للمطور، من غير خصم ومن غير عمولة عليك.', 'Yes. The buyer pays you everything you paid the developer — no deductions, no fee for you.') },
+    { q: tx('هسترد فلوسي كلها فعلاً؟', 'Do I really get all my money back?'), a: tx(`بتسترد كل اللي دفعته للمطور ناقص ضريبة التصرفات العقارية (${BRAND.disposalTaxPercent}% من سعر الوحدة)، ومن غير عمولة عليك. الضريبة بتتخصم من شيكك، والمشتري هو اللي بيدفعها للمطور.`, `You get back everything you paid the developer minus the disposal tax (${BRAND.disposalTaxPercent}% of the unit price), with no fee for you. The tax comes out of your cheque, and the buyer pays it to the developer.`) },
     { q: tx('لو الأحسن إني أكمّل أقساطي، هتقولولي؟', "If I'm better off keeping my unit, will you say so?"), a: tx('أيوه. كشف الحساب بيقارن كل الاختيارات، ولو الاستمرار أحسن ليك هنقولك ده، ومن غير أي التزام.', 'Yes. The statement compares every option; if keeping it is better for you, we will tell you — no commitment.') },
     { q: tx('حد هيعرف إني ببيع وحدتي؟', 'Will people know I’m selling?'), a: tx('اسمك ورقمك مش بيظهروا في أي مكان. الإعلان فيه بيانات الوحدة بس، وأي مشتري بيكلمنا احنا الأول.', 'Your name and number never appear anywhere. The listing shows the unit only, and buyers contact us first.') },
     { q: tx('إزاي التبديل بيشتغل؟', 'How does a swap work?'), a: tx('بتختار أي وحدة على الموقع. إحنا بنبيع وحدتك باللي دفعته، وبنشتريلك الجديدة، ونرتّب التنازلين مع بعض. إنت بتدفع أو بتاخد الفرق بس، وعمولتنا ' + BRAND.buyerFeePercent + '% من سعر الوحدة على كل طرف، بشيك مصرفي بعد التنازل.', "Pick any listed unit. We sell yours at what you paid, buy the new one for you, and arrange both transfers together. You just pay or receive the difference; our fee is " + BRAND.buyerFeePercent + '% of the unit price from each side, by bank cheque after the transfer.') },
-    { q: tx('كام العمولة وعلى مين الرسوم؟', 'What is the fee, and who pays the fees?'), a: tx(`عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة، بيدفعها المشتري بشيك مصرفي بعد التنازل بس، والبايع ما بيدفعش حاجة. في التبديل كل طرف بيدفع ${BRAND.buyerFeePercent}% من سعر وحدته. رسوم التنازل عند المطور بيدفعها المشتري، وقيمتها بتختلف حسب المطور.`, `Our fee is ${BRAND.buyerFeePercent}% of the unit price, paid by the buyer by bank cheque, only after the transfer; sellers pay nothing. In a swap each owner pays ${BRAND.buyerFeePercent}% of their own unit's price. The developer's transfer fee is paid by the buyer, and the amount differs by developer.`) },
-    { q: tx('ينفع أنسحب بعد ما أقول إني مهتم؟', 'Can I back out after showing interest?'), a: tx('أيوه. المشتري يقدر ينسحب في أي وقت قبل توقيع عقد البيع، ومن غير ما يدفع لينا حاجة.', 'Yes. A buyer can withdraw any time before signing the sale contract, without paying us anything.') },
+    { q: tx('كام العمولة وعلى مين الرسوم؟', 'What is the fee, and who pays the fees?'), a: tx(`عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة، بيدفعها المشتري بشيك مصرفي بعد التنازل بس، والبايع ما عليهوش عمولة. في التبديل كل طرف بيدفع ${BRAND.buyerFeePercent}% من سعر وحدته. رسوم التنازل عند المطور بيدفعها المشتري، وقيمتها بتختلف حسب المطور. وضريبة التصرفات العقارية (${BRAND.disposalTaxPercent}% من سعر الوحدة) بتتخصم من شيك البايع، والمشتري بيدفعها للمطور.`, `Our fee is ${BRAND.buyerFeePercent}% of the unit price, paid by the buyer by bank cheque, only after the transfer; sellers pay no fee. In a swap each owner pays ${BRAND.buyerFeePercent}% of their own unit's price. The developer's transfer fee is paid by the buyer, and the amount differs by developer. The disposal tax (${BRAND.disposalTaxPercent}% of the unit price) comes out of the seller's cheque, and the buyer pays it to the developer.`) },
+    { q: tx('ينفع أنسحب بعد ما أقول إني مهتم؟', 'Can I back out after showing interest?'), a: tx('أيوه. المشتري يقدر ينسحب في أي وقت قبل توقيع عقد وعد البيع، ومن غير ما يدفع لينا حاجة.', 'Yes. A buyer can withdraw any time before signing the promise of sale, without paying us anything.') },
     { q: tx('إيه اللي يضمن حقي؟', 'How am I protected?'), a: tx('لما البايع والمشتري يتفقوا بيتكتب بينهم وعد بيع فيه كل البنود الخاصة بالوحدة والسعر، وبعدها التنازل بيتم رسمي في مقر المطور، والفلوس بشيك مصرفي.', 'Once seller and buyer agree, they sign a promise of sale with all unit terms and the price; then the transfer is signed officially at the developer and paid by bank cheque.') },
   ];
   return (

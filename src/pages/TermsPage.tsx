@@ -17,7 +17,7 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
   const summary = [
     tx('احنا وسيط بنوصّل البايع بالمشتري، مش طرف في العقد', "We connect sellers and buyers; we're not a party to the contract"),
     tx('البايع ما بيدفعش عمولة، والمشتري بيدفع ' + fee + '% من سعر الوحدة بعد التوقيع', `Sellers pay no fee; buyers pay ${fee}% of the unit price after signing`),
-    tx('المشتري يقدر ينسحب قبل توقيع عقد البيع، ورسوم التنازل عند المطور عليه', 'Buyers can withdraw before signing the sale contract; the developer transfer fee is on them'),
+    tx('المشتري يقدر ينسحب قبل توقيع عقد وعد البيع، ورسوم التنازل عند المطور عليه', 'Buyers can withdraw before signing the promise of sale; the developer transfer fee is on them'),
     tx('مفيش أوفر برايس، والتنازل رسمي بمقر المطور', 'No overprice, and official transfer at the developer'),
     tx('أي بيانات غلط أو مديونية متخبية = الإعلان بيتشال', 'False data or hidden dues = listing removed'),
   ];
@@ -82,7 +82,7 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
         tx('• يدفع للبايع المبلغ المتفق عليه بشيك مصرفي يوم التنازل في مقر المطور.', '• Pay the agreed amount to the seller by bank cheque on transfer day at the developer.'),
         tx('• يكمّل الأقساط الباقية للمطور بنفس نظام العقد، أو زي ما المطور يحدد.', "• Continue the remaining installments per the contract or as the developer sets."),
         tx('• يتحمّل رسوم التنازل عند المطور، وقيمتها بتختلف حسب المطور.', "• Pay the developer's transfer fee; the amount differs by developer."),
-        tx('• يقدر ينسحب في أي وقت قبل توقيع عقد البيع.', '• May withdraw any time before signing the sale contract.'),
+        tx('• يقدر ينسحب في أي وقت قبل توقيع عقد وعد البيع.', '• May withdraw any time before signing the promise of sale.'),
         tx('• عدم تحويل أموال على حسابات شخصية مجهولة دون إيصالات وتوثيق.', '• Do not transfer money to personal accounts without official documentation.'),
       ],
     },
@@ -93,7 +93,8 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
         tx('• البايع: صفر عمولة.', '• Seller: zero fee.'),
         tx(`• المشتري: ${fee}% من سعر الوحدة (سعرها في العقد)، بتستحق بعد توقيع التنازل بس.`, `• Buyer: ${fee}% of the unit price (its contract price), due only after the transfer is signed.`),
         tx('• لو الصفقة ما تمّتش، المشتري ما بيدفعش حاجة لينا.', "• If the deal doesn't complete, the buyer owes us nothing."),
-        tx('• رسوم المطور (زي رسوم التنازل) والضرايب منفصلة عن رسومنا وبيدفعها المشتري، وقيمتها بتختلف حسب المطور.', "• Developer fees (such as the transfer fee) and taxes are separate from ours and paid by the buyer; the amount differs by developer."),
+        tx('• رسوم المطور (زي رسوم التنازل) منفصلة عن رسومنا وبيدفعها المشتري، وقيمتها بتختلف حسب المطور.', "• Developer fees (such as the transfer fee) are separate from ours and paid by the buyer; the amount differs by developer."),
+        tx(`• ضريبة التصرفات العقارية (${BRAND.disposalTaxPercent}% من سعر الوحدة) على البايع: بتتخصم من الشيك اللي بيستلمه، والمشتري بيدفعها للمطور.`, `• The real-estate disposal tax (${BRAND.disposalTaxPercent}% of the unit price) is on the seller: it comes out of the cheque they receive, and the buyer pays it to the developer.`),
       ],
     },
     {

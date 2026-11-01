@@ -543,7 +543,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
           <ul className="card p-4 grid gap-2.5 text-sm">
             {[
               { icon: Percent, t: tx(`عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة، بشيك مصرفي بعد التنازل بس`, `Our fee is ${BRAND.buyerFeePercent}% of the unit price, by bank cheque, only after the transfer`) },
-              { icon: Undo2, t: tx('تقدر تنسحب قبل توقيع عقد البيع', 'You can withdraw before signing the sale contract') },
+              { icon: Undo2, t: tx('تقدر تنسحب قبل توقيع عقد وعد البيع', 'You can withdraw before signing the promise of sale') },
               { icon: Eye, t: tx('لما تبعت إنك مهتم بنكلّمك خلال يوم عمل نكمّل الإجراءات', 'Once you send your interest we call within one business day to go ahead') },
             ].map((r) => (
               <li key={r.t} className="flex items-center gap-2.5 text-ink-soft">
@@ -653,8 +653,8 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
             </dl>
             <p className="mt-4 rounded-xl bg-paper px-4 py-3 text-sm text-ink-soft leading-relaxed">
               {tx(
-                'تقدر تنسحب في أي وقت قبل توقيع عقد البيع. رسوم التنازل عند المطور بيدفعها المشتري، وقيمتها بتختلف من مطور للتاني.',
-                "You can withdraw any time before signing the sale contract. The developer's transfer fee is paid by the buyer, and the amount differs by developer.",
+                'تقدر تنسحب في أي وقت قبل توقيع عقد وعد البيع. رسوم التنازل عند المطور بيدفعها المشتري، وقيمتها بتختلف من مطور للتاني.',
+                "You can withdraw any time before signing the promise of sale. The developer's transfer fee is paid by the buyer, and the amount differs by developer.",
               )}
             </p>
             <button onClick={onOpenBuyerRules} className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-ink hover:underline">

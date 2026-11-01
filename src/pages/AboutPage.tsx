@@ -37,7 +37,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
   ];
 
   const what = [
-    { icon: Tag, t: tx('للبايع', 'For sellers'), d: tx('مش قادر تكمّل؟ تخرج من وحدتك وتاخد اللي دفعته — حتى لو عليك متأخرات — من غير عمولة.', "Can't keep up? Exit with what you paid — even with arrears — no fee."), page: 'sell' as PageId },
+    { icon: Tag, t: tx('للبايع', 'For sellers'), d: tx(`مش قادر تكمّل؟ تخرج من وحدتك وتاخد اللي دفعته ناقص ضريبة التصرفات (${BRAND.disposalTaxPercent}% من سعر الوحدة) — حتى لو عليك متأخرات — من غير عمولة.`, `Can't keep up? Exit with what you paid, minus the disposal tax (${BRAND.disposalTaxPercent}% of the unit price) — even with arrears — no fee.`), page: 'sell' as PageId },
     { icon: Search, t: tx('للمشتري', 'For buyers'), d: tx('تشتري بسعر العقد القديم وتكمّل الأقساط.', 'Buy at the old contract price and continue the plan.'), page: 'opportunities' as PageId },
     { icon: Repeat, t: tx('للي عاوز يغيّر', 'For switchers'), d: tx('تبدّل وحدتك بوحدة قسطها يريحك، وتدفع أو تاخد الفرق.', 'Swap for a unit with a monthly you can manage, and settle the difference.'), page: 'swap' as PageId },
   ];
@@ -53,7 +53,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
     { icon: Eye, t: tx('وضوح', 'Clarity'), d: tx('كل رقم قدامك: المدفوع، الباقي، المديونية، والرسوم.', 'Every number upfront: paid, remaining, dues, fees.') },
     { icon: Lock, t: tx('أمان', 'Safety'), d: tx('إجراءات موثقة تضمن حقوق الطرفين وتنازل رسمي معتمد.', 'Documented procedures protecting both parties and official transfer.') },
     { icon: Zap, t: tx('سرعة', 'Speed'), d: tx('مراجعة خلال 24 ساعة، ومتابعة لحد ما تقبض.', 'Review within 24h, and support until you’re paid.') },
-    { icon: Wallet, t: tx('عدل', 'Fairness'), d: tx(`البايع ما بيدفعش حاجة، والمشتري ${BRAND.buyerFeePercent}% من سعر الوحدة بس.`, `Sellers pay nothing; buyers only ${BRAND.buyerFeePercent}% of the unit price.`) },
+    { icon: Wallet, t: tx('عدل', 'Fairness'), d: tx(`البايع ما عليهوش عمولة، والمشتري ${BRAND.buyerFeePercent}% من سعر الوحدة بس.`, `Sellers pay no fee; buyers only ${BRAND.buyerFeePercent}% of the unit price.`) },
   ];
 
   return (

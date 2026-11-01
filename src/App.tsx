@@ -9,6 +9,7 @@ import { OpportunitiesPage } from './pages/OpportunitiesPage';
 import { PropertySwapPage } from './pages/PropertySwapPage';
 import { AboutPage } from './pages/AboutPage';
 import { RulesPage, RulesTab } from './pages/RulesPage';
+import { PromisePage } from './pages/PromisePage';
 import { MyRequestsPage } from './pages/MyRequestsPage';
 import { OffersPage } from './pages/OffersPage';
 import { SavedPage } from './pages/SavedPage';
@@ -40,7 +41,7 @@ import { useHomeRole } from './components/RoleSwitch';
 import { fetchUnit } from './services/api';
 
 /** Pages reachable by a bare hash (#sell, #contact, …). */
-const PAGES: PageId[] = ['home', 'opportunities', 'sell', 'statement', 'compare', 'market-comparisons', 'verify', 'swap', 'contact', 'about', 'rules', 'saved', 'requests', 'offers', 'privacy', 'terms', 'admin', 'mobile-design'];
+const PAGES: PageId[] = ['home', 'opportunities', 'sell', 'statement', 'compare', 'market-comparisons', 'verify', 'swap', 'contact', 'about', 'rules', 'promise', 'saved', 'requests', 'offers', 'privacy', 'terms', 'admin', 'mobile-design'];
 const THANKS: ThanksKind[] = ['sell', 'statement', 'viewing', 'swap', 'contact', 'alert'];
 
 /*
@@ -306,6 +307,7 @@ export default function App() {
         {activePage === 'contact' && <ContactPage onNavigate={handleNavigate} onSent={() => go('thanks/contact')} />}
         {activePage === 'about' && <AboutPage onNavigate={handleNavigate} />}
         {activePage === 'rules' && <RulesPage tab={rulesTab} onTabChange={setRulesTab} onNavigate={handleNavigate} />}
+        {activePage === 'promise' && <PromisePage tab={rulesTab} onTabChange={setRulesTab} onNavigate={handleNavigate} />}
         {activePage === 'privacy' && <PrivacyPage />}
         {activePage === 'terms' && <TermsPage onNavigate={handleNavigate} />}
         {activePage === 'notfound' && <NotFoundPage variant="page" suggestions={units.slice(0, 3)} onNavigate={handleNavigate} onSelectUnit={openUnit} />}

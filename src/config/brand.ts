@@ -9,6 +9,8 @@ export const BRAND = {
   whatsapp: '201000000000',
   /** Platform fee charged to the buyer only, as % of the contract price, paid after the transfer is signed. */
   buyerFeePercent: 1.25,
+  /** Real-estate disposal tax: comes out of the seller's cheque, and the buyer pays it to the developer. */
+  disposalTaxPercent: 2.5,
   /** Prefix for listing / request codes shown to users. */
   codePrefix: 'WHD',
   /** Home hero background. Placeholder stock photo — swap for a real photo of a compound or one of our units. */

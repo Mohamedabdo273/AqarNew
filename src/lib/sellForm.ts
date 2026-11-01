@@ -1,5 +1,6 @@
 import type { UnitView } from '../types';
 import { categoryOfType } from './unitHelpers';
+import { BRAND } from '../config/brand';
 import { DeliveryStatus, FinishingType, InstallmentFrequency, PropertyCategory, PropertyType, RealEstateUnit } from '../types';
 
 export type View = 'بحري صريح' | 'بحري شرقي' | 'قبلي' | 'شرقي' | 'غربي';
@@ -172,11 +173,12 @@ export const isValidPhone = (phone: string) => /^01\d{9}$/.test(phone.replace(/\
 /** سكني = أي نوع تحت نشاط "سكني". لسه ماختارش نوع → بنعامله سكني (أغلب الوحدات). */
 export const isResidential = (type: PropertyType | '') => !type || categoryOfType(type) === 'سكني';
 
-/** What the seller actually walks away with after deducted dues and any discount they offered. */
+/** What the seller actually walks away with after the disposal tax (on the unit price), deducted dues and any discount they offered. */
 export const netToSeller = (f: SellForm) => {
   const fines = f.hasLatePenalties && f.deductPenaltiesFromPrice ? f.latePenaltiesAmount : 0;
   const discount = f.willingToDiscount ? f.discountAmount : 0;
-  return { fines, discount, net: Math.max(0, f.paidAmount - fines - discount) };
+  const tax = Math.round((Math.max(0, f.contractPrice) * BRAND.disposalTaxPercent) / 100);
+  return { tax, fines, discount, net: Math.max(0, f.paidAmount - tax - fines - discount) };
 };
 
 /** Phase-2 sections. Index = wizard step. "faster" is optional and never blocks review. */

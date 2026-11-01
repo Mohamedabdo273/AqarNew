@@ -47,7 +47,7 @@ export const useHomeRole = (onHome: boolean) => {
 };
 
 /* "I want to: buy · sell · swap" — pills on the navy bar under the header on the home page. */
-export const RoleSwitch: React.FC<{ role: HomeRole; onChange: (r: HomeRole) => void }> = ({ role, onChange }) => {
+export const RoleSwitch: React.FC<{ role: HomeRole; onChange: (r: HomeRole) => void; labels?: Record<HomeRole, string> }> = ({ role, onChange, labels }) => {
   const { tx } = useLanguage();
   const options: [HomeRole, string, React.ElementType][] = [
     ['buy', tx('أشتري', 'Buy'), Search],
@@ -71,7 +71,7 @@ export const RoleSwitch: React.FC<{ role: HomeRole; onChange: (r: HomeRole) => v
           }`}
         >
           <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
-          {label}
+          {labels?.[k] ?? label}
         </button>
       ))}
     </div>

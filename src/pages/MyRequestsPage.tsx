@@ -37,7 +37,7 @@ import { useCompare } from '../context/CompareContext';
 import { DETAIL_SECTIONS, DetailSection, completeness, netToSeller, sectionDone } from '../lib/sellForm';
 import { fullMoney, money, currency } from '../lib/unitHelpers';
 import { SellDetailsWizard } from '../components/sell/SellDetailsWizard';
-import { ADMIN_URL, whatsappLink } from '../config/brand';
+import { ADMIN_URL, BRAND, whatsappLink } from '../config/brand';
 import { ApiError, SellRequestTracker, USER_ROLE, errorText, mediaUrl, trackSellRequest } from '../services/api';
 
 interface MyRequestsPageProps {
@@ -292,7 +292,7 @@ const RequestDetail: React.FC<{ req: SellRequest; onBack: () => void }> = ({ req
   const f = req.form;
   const pct = completeness(f);
   const st = displayStage(req);
-  const { net, fines, discount } = netToSeller(f);
+  const { net, tax, fines, discount } = netToSeller(f);
 
   const stages = [
     { icon: Inbox, t: tx('استلمنا طلبك', 'Request received'), d: formatDate(req.createdAt, language) },
@@ -451,6 +451,10 @@ const RequestDetail: React.FC<{ req: SellRequest; onBack: () => void }> = ({ req
             <div className="flex justify-between">
               <dt className="text-muted">{tx('المدفوع', 'Paid')}</dt>
               <dd className="num font-semibold text-ink">{fullMoney(f.paidAmount, language)}</dd>
+            </div>
+            <div className="flex justify-between">
+              <dt className="text-muted">{tx(`ضريبة التصرفات (${BRAND.disposalTaxPercent}% من سعر الوحدة)`, `Disposal tax (${BRAND.disposalTaxPercent}% of the unit price)`)}</dt>
+              <dd className="num font-semibold text-danger">−{fullMoney(tax, language)}</dd>
             </div>
             {fines > 0 && (
               <div className="flex justify-between text-danger">

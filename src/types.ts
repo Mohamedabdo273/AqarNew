@@ -82,6 +82,7 @@ export type PageId =
   | 'home' 
   | 'about'
   | 'rules'
+  | 'promise'
   | 'saved'
   | 'requests'
   | 'offers'
