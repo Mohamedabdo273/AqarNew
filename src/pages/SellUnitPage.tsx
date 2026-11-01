@@ -85,6 +85,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
     if (target === 1) {
       if (!form.ownerName.trim()) e.push(tx('اسمك', 'Your name'));
       if (!isValidPhone(form.ownerPhone)) e.push(tx('موبايل صحيح (01xxxxxxxxx)', 'Valid mobile (01xxxxxxxxx)'));
+      if (form.ownerAltPhone.trim() && !isValidPhone(form.ownerAltPhone)) e.push(tx('رقم تاني صحيح (01xxxxxxxxx)', 'Valid second number (01xxxxxxxxx)'));
     }
     if (target === 2) {
       if (!form.regionId) e.push(tx('المنطقة', 'Area'));
@@ -342,6 +343,17 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
                 id="ophone"
                 value={form.ownerPhone}
                 onChange={(e) => set('ownerPhone', e.target.value)}
+                inputMode="tel"
+                dir="ltr"
+                placeholder="01xxxxxxxxx"
+                className={`field ${isRTL ? 'text-right' : 'text-left'}`}
+              />
+            </Field>
+            <Field label={tx('رقم تاني (اختياري)', 'Second number (optional)')} htmlFor="oaltphone">
+              <input
+                id="oaltphone"
+                value={form.ownerAltPhone}
+                onChange={(e) => set('ownerAltPhone', e.target.value)}
                 inputMode="tel"
                 dir="ltr"
                 placeholder="01xxxxxxxxx"

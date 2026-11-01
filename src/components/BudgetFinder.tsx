@@ -9,8 +9,8 @@ export interface Budget {
   monthly: number;
 }
 
-export const CASH_RANGE = { min: 250_000, max: 6_000_000, step: 50_000 };
-export const MONTHLY_RANGE = { min: 5_000, max: 150_000, step: 1_000 };
+export const CASH_RANGE = { min: 250_000, max: 20_000_000, step: 50_000 };
+export const MONTHLY_RANGE = { min: 5_000, max: 500_000, step: 5_000 };
 export const DEFAULT_BUDGET: Budget = { cash: 2_500_000, monthly: 55_000 };
 
 export const fitsBudget = (unit: RealEstateUnit, budget: Budget) =>

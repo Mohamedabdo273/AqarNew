@@ -22,7 +22,6 @@ import {
   KeyRound,
   FileCheck2,
   MessageSquareHeart,
-  BadgeCheck,
 } from 'lucide-react';
 import { PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
@@ -50,7 +49,6 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
     { icon: Ban, t: tx('صفر أوفر برايس', 'Zero overprice'), d: tx('السعر هو اللي البايع دفعه. مش جنيه زيادة.', 'The price is what the seller paid. Not a pound more.') },
     { icon: HandCoins, t: tx('التنازل في مقر المطور', 'Transfer at the developer'), d: tx('التنازل بيتم رسمي في مقر المطور، والفلوس بشيك مصرفي.', 'The transfer is signed at the developer, paid by bank cheque.') },
     { icon: FileCheck2, t: tx('كل حاجة مكتوبة', 'Everything in writing'), d: tx('المديونية والرسوم مكتوبة في الإعلان قبل ما تقرر.', 'Dues and fees are listed before you decide.') },
-    { icon: BadgeCheck, t: tx('كل رقم معروف مصدره', 'Every number shows its source'), d: tx('اللي اتأكدنا منه بالمستندات مكتوب عليه "متأكد"، والتقديري مكتوب عليه "تقديري".', 'Figures checked against documents say "verified"; estimates say "estimate".') },
   ];
 
   const seller: Rule[] = [
@@ -93,6 +91,11 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
     { icon: Building2, t: tx('الطرفين في مقر المطور', 'Both parties at the developer'), d: tx('ومعاهم مستشار من عندنا', 'With one of our advisors') },
     { icon: Banknote, t: tx('المشتري يسلّم شيك مصرفي', 'Buyer hands over a bank cheque'), d: tx('بالمبلغ اللي البايع دفعه', 'For the amount the seller paid') },
     { icon: FileSignature, t: tx('المطور ينقل العقد', 'Developer transfers the contract'), d: tx('ويرجّع للبايع شيكاته القديمة', 'And returns the seller’s old cheques') },
+    {
+      icon: Percent,
+      t: tx('عمولتنا بشيك مصرفي', 'Our fee by bank cheque'),
+      d: tx(`المشتري يسلّمنا ${BRAND.buyerFeePercent}% من سعر الوحدة بعد التنازل`, `The buyer hands us ${BRAND.buyerFeePercent}% of the unit price after the transfer`),
+    },
     { icon: KeyRound, t: tx('المشتري يكمّل الأقساط', 'Buyer continues the plan'), d: tx('بشيكات جديدة باسمه', 'With new cheques in their name') },
   ];
 
@@ -110,7 +113,7 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
       </p>
 
       {/* Golden rules — apply to everyone */}
-      <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="mt-8 grid sm:grid-cols-3 gap-4">
         {golden.map((g) => (
           <div key={g.t} className="rounded-card bg-brand-ink text-white p-6">
             <g.icon className="w-7 h-7 text-accent-light" />
@@ -173,7 +176,7 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
       {/* Transfer day */}
       <section className="mt-14">
         <h2 className="text-2xl font-bold text-ink">{tx('يوم التنازل بيحصل إيه؟', 'What happens on transfer day?')}</h2>
-        <ol className="mt-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <ol className="mt-6 grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
           {dealDay.map((s, i) => (
             <li key={s.t} className="relative card p-5">
               <span className="absolute top-4 end-5 num text-4xl font-bold text-line-strong">{i + 1}</span>

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Search, SlidersHorizontal, X, BellRing, Flame, ArrowUpDown, ChevronDown, MapPin, Building2, Wallet, BedDouble, TrendingDown } from 'lucide-react';
+import { Search, SlidersHorizontal, X, BellRing, Flame, ArrowUpDown, ChevronDown, MapPin, Building2, Wallet, BedDouble } from 'lucide-react';
 import { RealEstateUnit } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
@@ -182,7 +182,6 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
     ...filters.finishing.map((v) => ({ key: `f-${v}`, label: labelOf(FINISHING_OPTIONS, v), remove: () => patch({ finishing: without(filters.finishing, v) }) })),
     ...filters.frequency.map((v) => ({ key: `q-${v}`, label: labelOf(FREQUENCY_OPTIONS, v), remove: () => patch({ frequency: without(filters.frequency, v) }) })),
     ...(filters.discounted ? [{ key: 'disc', label: tx('أقل من المدفوع', 'Below what was paid'), remove: () => patch({ discounted: false }) }] : []),
-    ...(filters.negotiable ? [{ key: 'neg', label: tx('قابل للتفاوض', 'Negotiable'), remove: () => patch({ negotiable: false }) }] : []),
     ...(filters.swappable ? [{ key: 'swap', label: tx('تقبل مبادلة', 'Swap'), remove: () => patch({ swappable: false }) }] : []),
     ...(filters.noTransferFee ? [{ key: 'fee', label: tx('بدون رسوم تنازل', 'No transfer fee'), remove: () => patch({ noTransferFee: false }) }] : []),
     ...(filters.noPenalties ? [{ key: 'pen', label: tx('بدون غرامات', 'No penalties'), remove: () => patch({ noPenalties: false }) }] : []),
@@ -389,16 +388,6 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
               <span className="num text-xs opacity-80">{dealsCount}</span>
             </button>
           )}
-          <button
-            onClick={() => patch({ negotiable: !filters.negotiable })}
-            aria-pressed={filters.negotiable}
-            className={`inline-flex items-center gap-1.5 h-11 rounded-xl border-2 px-4 text-[15px] font-bold transition-colors ${
-              filters.negotiable ? 'bg-emerald-600 border-emerald-600 text-white' : 'bg-emerald-50 border-emerald-300 text-emerald-700 hover:border-emerald-600'
-            }`}
-          >
-            <TrendingDown className="w-4 h-4" />
-            {tx('قابل للتفاوض', 'Negotiable')}
-          </button>
         </div>
       </div>
 

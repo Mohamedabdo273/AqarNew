@@ -17,9 +17,9 @@ export const BRAND = {
   keysImage: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=70',
   heroImage: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=2400&q=80',
   /** Contact page details. Placeholders until the real ones are set — an empty value hides that line. */
-  email: 'hello@wahdety.com',
-  addressAr: 'القاهرة الجديدة، التجمع الخامس',
-  addressEn: 'Fifth Settlement, New Cairo',
+  email: 'devops@korashigroup.com',
+  addressAr: '6 أكتوبر، الجيزة',
+  addressEn: '6th of October, Giza',
   /** Google Maps link for the office. Empty hides the "open in maps" button. */
   mapUrl: '',
   hoursAr: 'كل يوم من 10 الصبح لـ 10 بالليل',

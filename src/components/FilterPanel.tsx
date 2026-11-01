@@ -189,7 +189,6 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
 
   const extras: { key: 'discounted' | 'negotiable' | 'swappable' | 'noTransferFee' | 'noPenalties'; label: string }[] = [
     { key: 'discounted', label: tx('أقل من المدفوع بس (صاحبها عامل خصم)', 'Below what was paid only (owner discount)') },
-    { key: 'negotiable', label: tx('قابل للتفاوض', 'Negotiable') },
     { key: 'swappable', label: tx('تقبل مبادلة', 'Open to swap') },
     { key: 'noTransferFee', label: tx('معفاة من رسوم التنازل', 'No transfer fee') },
     { key: 'noPenalties', label: tx('بدون غرامات تأخير', 'No late penalties') },

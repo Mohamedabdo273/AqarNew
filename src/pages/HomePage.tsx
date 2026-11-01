@@ -292,7 +292,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         'Buy at the original contract price — below market — and continue the same instalments. Every number is checked against the contract and receipts, and we walk you through the transfer step by step.',
       ),
       points: [
-        tx('كل وحدة متراجعة على العقد وإيصالات الدفع قبل ما تتنشر', 'Every unit is checked against its contract and payment receipts before listing'),
+        tx('كل وحدة متراجعة على العقد وإيصالات الدفع قبل النشر', 'Every unit is checked against its contract and payment receipts before listing'),
         tx('بتشوف المطلوب كاش والقسط والمتبقي قبل ما تكلّم حد', 'See the cash needed, monthly and balance before talking to anyone'),
         tx('لو عجبتك وحدة قولنا إنك مهتم، وإحنا هنكلم صاحبها', "Like a unit? Tell us you're interested — and we'll reach out to the owner"),
         tx(`عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة، بشيك مصرفي بعد التنازل في مقر المطور`, `Our fee is ${BRAND.buyerFeePercent}% of the unit price, by bank cheque after the transfer at the developer`),
@@ -465,7 +465,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               <button
                 type="button"
                 onClick={() => onNavigate('sell')}
-                className="btn-accent min-h-11 px-5 text-sm font-bold shadow-xs"
+                className="btn-primary min-h-11 px-5 text-sm font-bold shadow-xs"
               >
                 <Tag className="w-4 h-4" />
                 <span>{tx('اعرض وحدتك', 'List your unit')}</span>
@@ -473,9 +473,9 @@ export const HomePage: React.FC<HomePageProps> = ({
               <button
                 type="button"
                 onClick={() => onNavigate('statement')}
-                className="btn-ghost min-h-11 px-4 text-sm font-bold border border-line hover:border-brand"
+                className="btn-accent min-h-11 px-4 text-sm font-bold shadow-xs"
               >
-                <ClipboardCheck className="w-4 h-4 text-brand" />
+                <ClipboardCheck className="w-4 h-4" />
                 <span>{tx('كشف حساب مجاني', 'Free statement')}</span>
               </button>
             </div>
@@ -974,11 +974,11 @@ const AREA_PHOTOS: Record<string, string> = {
   'إسكندرية': areaPhoto('1633624646814-3a61ed3e2847'), // قلعة قايتباي
   'دلتا': areaPhoto('1500382017468-9049fed747ef'), // أرض زراعية
   'الصعيد': areaPhoto('1738829235767-83963c09647c'), // بالونات الأقصر فوق الصحرا
-  'مدن القناة': areaPhoto('1587634552378-199c247a85c5'), // كوبري على القناة
+  'مدن القناة': areaPhoto('1635851801927-44c4d1c555af'), // سفينة حاويات — موانئ القناة
   'الساحل الشمالي': areaPhoto('1507525428034-b723cf961d3e'), // رمل أبيض وبحر
   'العين السخنة': areaPhoto('1519046904884-53103b34b206'), // نخل وشاطئ
-  'البحر الأحمر': areaPhoto('1544551763-46a013bb70d5'), // مياه وشواطئ البحر الأحمر والجونة
-  'جنوب سيناء': areaPhoto('1569949381669-ecf31ae8e613'), // دهاب وشرم الشيخ وجبال سيناء
+  'البحر الأحمر': areaPhoto('1722264219947-725d4e20ef23'), // مرسى ومياه فيروزي من فوق — الغردقة والجونة
+  'جنوب سيناء': areaPhoto('1661270288617-f3168c7a18be'), // جبال سيناء
 };
 
 /*
@@ -1536,39 +1536,39 @@ const RulesPreview: React.FC<{ role: HomeRole; onOpenRules: (tab: 'seller' | 'bu
   const { tx } = useLanguage();
   const RULES: Record<HomeRole, { icon: React.ElementType; t: string; d: string }[]> = {
     buy: [
-      { icon: Landmark, t: tx('الفلوس في مقر المطور', 'Money at the developer'), d: tx('بتدفع بشيك مصرفي وقت التنازل بالظبط', 'You pay by bank cheque at the moment of transfer') },
-      { icon: Ban, t: tx('صفر أوفر برايس', 'Zero overprice'), d: tx('بتدفع اللي صاحبها دفعه، مش جنيه زيادة', 'You pay what the owner paid, not a pound more') },
-      { icon: FileText, t: tx('الورق متراجع', 'Papers checked'), d: tx('العقد والإيصالات والمديونية قبل ما تدفع', 'Contract, receipts and dues before you pay') },
-      { icon: UserCheck, t: tx('من المالك على طول', 'Straight from the owner'), d: tx('مفيش سماسرة في النص', 'No brokers in between') },
-      { icon: Percent, t: tx(`عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة`, `Our fee: ${BRAND.buyerFeePercent}% of the unit price`), d: tx('بشيك مصرفي، بعد التنازل بس', 'By bank cheque, only after the transfer') },
-      { icon: Undo2, t: tx('تقدر تنسحب', 'You can withdraw'), d: tx('قبل توقيع عقد البيع. رسوم التنازل عليك وبتختلف حسب المطور', 'Before the sale contract is signed. Transfer fees are yours and vary by developer') },
+      { icon: Landmark, t: tx('الدفع في مقر المطوّر', 'Money at the developer'), d: tx('تدفع بشيك مصرفي لحظة التنازل', 'You pay by bank cheque at the moment of transfer') },
+      { icon: Ban, t: tx('صفر أوفر برايس', 'Zero overprice'), d: tx('تدفع ما دفعه المالك فقط، دون أي زيادة', 'You pay what the owner paid, not a pound more') },
+      { icon: FileText, t: tx('مستندات مُراجَعة', 'Papers checked'), d: tx('العقد والإيصالات والمديونية قبل الدفع', 'Contract, receipts and dues before you pay') },
+      { icon: UserCheck, t: tx('من المالك مباشرةً', 'Straight from the owner'), d: tx('بدون وسطاء أو سماسرة', 'No brokers in between') },
+      { icon: Percent, t: tx(`عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة`, `Our fee: ${BRAND.buyerFeePercent}% of the unit price`), d: tx('بشيك مصرفي، بعد إتمام التنازل فقط', 'By bank cheque, only after the transfer') },
+      { icon: Undo2, t: tx('حرية الانسحاب', 'You can withdraw'), d: tx('قبل توقيع عقد البيع، وتتحمّل رسوم التنازل التي تختلف حسب المطوّر', 'Before the sale contract is signed. Transfer fees are yours and vary by developer') },
     ],
     sell: [
-      { icon: Wallet, t: tx('صفر عمولة عليك', 'Zero fee for you'), d: tx('بتاخد اللي دفعته كامل', 'You get back everything you paid') },
-      { icon: Landmark, t: tx('بتقبض بشيك مصرفي', 'Paid by bank cheque'), d: tx('في مقر المطور يوم التنازل', 'At the developer on transfer day') },
-      { icon: Receipt, t: tx('متأخراتك مش عائق', 'Arrears are no obstacle'), d: tx('بتتخصم يوم التنازل، مش لازم تسددها الأول', 'Deducted on transfer day — no need to clear them first') },
-      { icon: EyeOff, t: tx('اسمك ورقمك مستخبيين', 'Your name and number stay hidden'), d: tx('المشتري بيكلّمنا إحنا', 'Buyers talk to us') },
-      { icon: UserCheck, t: tx('مشترين جادين بس', 'Serious buyers only'), d: tx('متسجلين بموبايلهم قبل ما يتواصلوا', 'Signed up with their mobile before they get in touch') },
-      { icon: Undo2, t: tx('تقدر تنسحب', 'You can withdraw'), d: tx('قبل التوقيع، ومن غير أي تكلفة', 'Before signing, at no cost') },
+      { icon: Wallet, t: tx('بدون عمولة', 'Zero fee for you'), d: tx('تسترد كل ما دفعته كاملًا', 'You get back everything you paid') },
+      { icon: Landmark, t: tx('استلام بشيك مصرفي', 'Paid by bank cheque'), d: tx('في مقر المطوّر يوم التنازل', 'At the developer on transfer day') },
+      { icon: Receipt, t: tx('المتأخرات ليست عائقًا', 'Arrears are no obstacle'), d: tx('تُخصم يوم التنازل دون الحاجة لسدادها مسبقًا', 'Deducted on transfer day — no need to clear them first') },
+      { icon: EyeOff, t: tx('سرية بياناتك', 'Your name and number stay hidden'), d: tx('المشتري يتواصل معنا وليس معك', 'Buyers talk to us') },
+      { icon: UserCheck, t: tx('مشترون جادّون فقط', 'Serious buyers only'), d: tx('مسجّلون برقم هاتف موثّق قبل التواصل', 'Signed up with their mobile before they get in touch') },
+      { icon: Undo2, t: tx('حرية الانسحاب', 'You can withdraw'), d: tx('قبل التوقيع، ودون أي تكلفة', 'Before signing, at no cost') },
     ],
     swap: [
-      { icon: Handshake, t: tx('موافقة الطرفين', 'Both owners agree'), d: tx('مفيش بدل من غير موافقة المالكين الاتنين', 'No swap without both owners saying yes') },
-      { icon: FileText, t: tx('العقدين متراجعين', 'Both contracts checked'), d: tx('ومديونية الوحدتين مكتوبة قبل ما تقرر', 'And both units’ dues in writing before you decide') },
-      { icon: Landmark, t: tx('الفرق بشيك مصرفي', 'The difference by bank cheque'), d: tx('اللي وحدته أغلى ياخده في مقر المطور', 'The pricier side receives it at the developer') },
-      { icon: ArrowLeftRight, t: tx('في نفس اليوم', 'On the same day'), d: tx('التنازلين بيتموا مع بعض', 'Both transfers are signed together') },
-      { icon: Percent, t: tx(`عمولتنا ${BRAND.buyerFeePercent}% على كل طرف`, `Our ${BRAND.buyerFeePercent}% from each side`), d: tx('من سعر وحدته، بشيك مصرفي بعد التنازل', 'Of their own unit’s price, by bank cheque after the transfer') },
-      { icon: EyeOff, t: tx('بياناتك مستخبية', 'Your details stay hidden'), d: tx('محدش بيشوف اسمك ولا رقمك', 'Nobody sees your name or number') },
+      { icon: Handshake, t: tx('موافقة الطرفين', 'Both owners agree'), d: tx('لا يتم البدل إلا بموافقة المالكين معًا', 'No swap without both owners saying yes') },
+      { icon: FileText, t: tx('مراجعة العقدين', 'Both contracts checked'), d: tx('مع توضيح مديونية الوحدتين كتابيًا قبل القرار', 'And both units’ dues in writing before you decide') },
+      { icon: Landmark, t: tx('فرق السعر بشيك مصرفي', 'The difference by bank cheque'), d: tx('يستلمه صاحب الوحدة الأعلى سعرًا في مقر المطوّر', 'The pricier side receives it at the developer') },
+      { icon: ArrowLeftRight, t: tx('في نفس اليوم', 'On the same day'), d: tx('يتم التنازلان في وقت واحد', 'Both transfers are signed together') },
+      { icon: Percent, t: tx(`عمولتنا ${BRAND.buyerFeePercent}% على كل طرف`, `Our ${BRAND.buyerFeePercent}% from each side`), d: tx('من سعر وحدته، بشيك مصرفي بعد إتمام التنازل', 'Of their own unit’s price, by bank cheque after the transfer') },
+      { icon: EyeOff, t: tx('سرية بياناتك', 'Your details stay hidden'), d: tx('لا يظهر اسمك أو رقمك لأي طرف', 'Nobody sees your name or number') },
     ],
   };
   const SUB: Record<HomeRole, string> = {
-    buy: tx('قواعد ثابتة على كل وحدة بتشتريها', 'Fixed rules on every unit you buy'),
-    sell: tx('قواعد ثابتة على كل وحدة بتبيعها', 'Fixed rules on every unit you sell'),
-    swap: tx('قواعد ثابتة على كل بدل', 'Fixed rules on every swap'),
+    buy: tx('قواعد ثابتة تُطبَّق على كل وحدة تشتريها', 'Fixed rules on every unit you buy'),
+    sell: tx('قواعد ثابتة تُطبَّق على كل وحدة تبيعها', 'Fixed rules on every unit you sell'),
+    swap: tx('قواعد ثابتة تُطبَّق على كل عملية بدل', 'Fixed rules on every swap'),
   };
   const rules = RULES[role];
   return (
     <section className="page-wrap py-14 sm:py-20">
-      <SectionTitle center title={tx('فلوسك في أمان', 'Your money stays safe')} sub={SUB[role]} />
+      <SectionTitle center title={tx('أموالك في أمان', 'Your money stays safe')} sub={SUB[role]} />
       <div className="mt-8 sm:mt-10 grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
         {rules.map((r) => (
           <div key={r.t} className="card p-4 sm:p-5 flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
@@ -1582,20 +1582,12 @@ const RulesPreview: React.FC<{ role: HomeRole; onOpenRules: (tab: 'seller' | 'bu
           </div>
         ))}
       </div>
-      {/* Each page links to its own side's rules (a swap is both). */}
-      <div className="mt-6 sm:mt-8 flex flex-wrap justify-center gap-2 sm:gap-3">
-        {role !== 'buy' && (
-          <button onClick={() => onOpenRules('seller')} className="btn-ghost px-3 text-sm sm:text-[15px]">
-            <ScrollText className="w-5 h-5 text-brand" />
-            {tx('قواعد البايع', 'Seller rules')}
-          </button>
-        )}
-        {role !== 'sell' && (
-          <button onClick={() => onOpenRules('buyer')} className="btn-ghost px-3 text-sm sm:text-[15px]">
-            <ScrollText className="w-5 h-5 text-brand" />
-            {tx('قواعد المشتري', 'Buyer rules')}
-          </button>
-        )}
+      {/* One link to the general rules, opened on the side this page is about. */}
+      <div className="mt-6 sm:mt-8 flex justify-center">
+        <button onClick={() => onOpenRules(role === 'sell' ? 'seller' : 'buyer')} className="btn-accent px-4 text-sm sm:text-[15px]">
+          <ScrollText className="w-5 h-5" />
+          {tx('القواعد العامة للبائع والمشتري', 'General rules for sellers and buyers')}
+        </button>
       </div>
       <a href="#verify" className="mt-6 mx-auto flex max-w-xl items-center gap-3 rounded-xl border border-line bg-surface p-4 hover:border-brand transition-colors">
         <span className="grid place-items-center w-11 h-11 rounded-xl bg-brand text-white shrink-0">

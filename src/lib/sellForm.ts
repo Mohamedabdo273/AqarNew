@@ -26,6 +26,8 @@ export interface SellForm {
   paidAmount: number;
   ownerName: string;
   ownerPhone: string;
+  /** رقم تاني اختياري نوصل بيه للبايع. */
+  ownerAltPhone: string;
   ackOwner: boolean;
   ackNoOverprice: boolean;
   ackDeclareDues: boolean;
@@ -108,6 +110,7 @@ export const EMPTY_SELL_FORM: SellForm = {
   paidAmount: 0,
   ownerName: '',
   ownerPhone: '',
+  ownerAltPhone: '',
   ackOwner: false,
   ackNoOverprice: false,
   ackDeclareDues: false,

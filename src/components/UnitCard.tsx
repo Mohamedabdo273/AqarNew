@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, BadgeCheck, BedDouble, Bath, Maximize2, KeyRound, TrendingDown, Flame } from 'lucide-react';
+import { Heart, BadgeCheck, BedDouble, Bath, Maximize2, KeyRound, Flame } from 'lucide-react';
 import { RealEstateUnit } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useUnits } from '../context/UnitsContext';
@@ -8,7 +8,6 @@ import {
   currency,
   deliveryLabel,
   isDeal,
-  isNegotiable,
   money,
   monthlyInstallment,
   pick,
@@ -38,7 +37,6 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
   const { isUnitSaved, toggleSaveUnit } = useUnits();
   const saved = isUnitSaved(unit.id);
   const deal = isDeal(unit);
-  const negotiable = isNegotiable(unit);
   const cur = currency(language);
   const cash = cashPrice(unit);
   const savings = savingsAmount(unit);
@@ -70,12 +68,6 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
             <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-2 text-base font-extrabold text-white shadow-md">
               <Flame className="w-5 h-5 fill-current" />
               {tx(`خصم ${dealPct}%`, `Deal · ${dealPct}% off`)}
-            </span>
-          )}
-          {negotiable && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-4 py-2 text-base font-extrabold text-white shadow-md">
-              <TrendingDown className="w-5 h-5" />
-              {tx('قابل للتفاوض', 'Negotiable')}
             </span>
           )}
         </div>
@@ -119,6 +111,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
         {/* The numbers a buyer decides on, and when they get the keys */}
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
+            <span className="block text-sm font-semibold text-ink-soft">{tx('كاش دلوقتي', 'Cash now')}</span>
             <span className="num block font-black text-[28px] text-brand-ink leading-tight whitespace-nowrap">
               {full(cash)} <span className="text-base font-bold text-muted">{cur}</span>
             </span>
@@ -134,7 +127,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
           </span>
         </div>
         <p className="mt-1.5 text-base text-ink-soft">
-          {tx('كاش دلوقتي', 'cash now')} · <span className="num font-bold text-ink">{money(monthlyInstallment(unit), language)}</span>{' '}
+<span className="num font-bold text-ink">{money(monthlyInstallment(unit), language)}</span>{' '}
           {tx('قسط/شهر', '/month')}
         </p>
 
@@ -142,6 +135,12 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
         <p className="mt-1 text-base text-muted line-clamp-1">
           {pick(language, unit.propertyType, unit.propertyTypeEn)} · {pick(language, unit.location, unit.locationEn)}
         </p>
+        {unit.verificationCode && (
+          <p className="mt-2 inline-flex self-start items-center gap-1.5 rounded-lg bg-brand-soft px-2.5 py-1 text-sm">
+            <span className="text-ink-soft">{tx('كود الوحدة', 'Unit code')}</span>
+            <span className="num font-extrabold text-brand-ink" dir="ltr">{unit.verificationCode}</span>
+          </p>
+        )}
 
         <ul className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-base text-ink-soft">
           {specs.map((s) => (

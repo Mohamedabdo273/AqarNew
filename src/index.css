@@ -114,6 +114,19 @@
 @utility field {
   @apply w-full rounded-xl border border-field-border bg-field px-4 h-13 text-[15px] text-ink placeholder:text-ink/40 hover:border-brand/60 focus:outline-none focus:border-brand focus:bg-surface focus:ring-4 focus:ring-brand/15 transition;
 }
+/* Drop-down lists: the browser's arrow is tiny and hugs the edge, so draw a bolder chevron set in from the end side. */
+select:not([multiple]):not(.appearance-none) {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231e3a5f' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: 18px;
+  background-position: right 14px center;
+  padding-inline-end: 42px;
+  cursor: pointer;
+}
+[dir='rtl'] select:not([multiple]):not(.appearance-none) {
+  background-position: left 14px center;
+}
 /* Any input, select or picker button flagged aria-invalid gets a strong red ring, so the box that needs fixing is obvious. */
 [aria-invalid='true'] {
   border-color: var(--color-danger) !important;

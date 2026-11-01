@@ -22,8 +22,10 @@ import {
   Flame,
   ArrowDown,
   BadgeCheck,
-  TrendingDown,
   Undo2,
+  Copy,
+  Check,
+  Hash,
 } from 'lucide-react';
 import { PageId, RealEstateUnit } from '../types';
 import { BRAND, whatsappLink } from '../config/brand';
@@ -35,13 +37,11 @@ import { FormError } from '../components/FormError';
 import { UnitCard } from '../components/UnitCard';
 import { SourceTag } from '../components/SourceTag';
 import { AqarExitComparison } from '../components/AqarExitComparison';
-import { OfferPanel } from '../components/offers/OfferPanel';
 import {
   cashPrice,
   currency,
   deliveryLabel,
   isDeal,
-  isNegotiable,
   sellerDiscount,
   fullMoney,
   money,
@@ -87,6 +87,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
   const { user, requireAuth } = useAuth();
   const [imgIdx, setImgIdx] = useState(0);
   const [booking, setBooking] = useState(false);
+  const [codeCopied, setCodeCopied] = useState(false);
   const [name, setName] = useState(user?.fullName ?? '');
   const [phone, setPhone] = useState(user?.phone ?? '');
   const [sending, setSending] = useState(false);
@@ -267,12 +268,6 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
                 {tx(`خصم ${money(sellerDiscount(unit), language)} من اللي صاحبها دفعه`, `${money(sellerDiscount(unit), language)} below what the owner paid`)}
               </span>
             )}
-            {isNegotiable(unit) && (
-              <span className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-2 text-base font-extrabold text-white shadow-md">
-                <TrendingDown className="w-5 h-5" />
-                {tx('قابل للتفاوض', 'Negotiable')}
-              </span>
-            )}
             {unit.verifiedContract && (
               <span className="inline-flex items-center gap-2 rounded-full bg-brand-soft px-4 py-2 text-base font-bold text-brand">
                 <BadgeCheck className="w-4 h-4" />
@@ -290,13 +285,40 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
               <Building2 className="w-4 h-4 text-muted" />
               <bdi>{pick(language, unit.developer, unit.developerEn)}</bdi>
             </span>
-            <span className="inline-flex items-center gap-1.5 text-sm text-muted">
-              <span className="num" dir="ltr">{unit.verificationCode}</span>
-              <a href={`#verify/${encodeURIComponent(unit.verificationCode)}`} className="font-semibold text-brand underline">
-                {tx('اتأكد منها', 'Verify')}
-              </a>
-            </span>
           </p>
+          {/* كود الوحدة في خانة لوحده، باسمه — عشان يتقري في التليفون أو يتنسخ ويتبعت */}
+          <div className="mt-3 inline-flex flex-wrap items-center gap-2 rounded-xl border border-brand/20 bg-brand-soft ps-3 pe-1.5 py-1.5">
+            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-soft">
+              <Hash className="w-4 h-4 text-brand" />
+              {tx('كود الوحدة', 'Unit code')}
+            </span>
+            <span className="num text-lg font-extrabold tracking-wide text-brand-ink" dir="ltr">
+              {unit.verificationCode}
+            </span>
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(unit.verificationCode);
+                  setCodeCopied(true);
+                  setTimeout(() => setCodeCopied(false), 2000);
+                } catch {
+                  /* النسخ مش متاح — الكود ظاهر قدامه يكتبه */
+                }
+              }}
+              aria-label={tx('انسخ كود الوحدة', 'Copy unit code')}
+              className="inline-flex items-center gap-1 rounded-lg bg-surface px-2.5 py-1.5 text-sm font-semibold text-brand hover:bg-white"
+            >
+              {codeCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              {codeCopied ? tx('اتنسخ', 'Copied') : tx('انسخ', 'Copy')}
+            </button>
+            <a
+              href={`#verify/${encodeURIComponent(unit.verificationCode)}`}
+              className="rounded-lg px-2.5 py-1.5 text-sm font-semibold text-brand underline hover:bg-surface"
+            >
+              {tx('اتأكد منها', 'Verify')}
+            </a>
+          </div>
         </div>
         <div className="relative flex items-center gap-2">
           <button onClick={share} className="btn-ghost min-h-11 px-4 text-sm">
@@ -323,15 +345,9 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
       >
         <div className="relative rounded-card overflow-hidden bg-line">
           <img src={unit.images[imgIdx]} alt={compound} className="w-full aspect-[4/3] sm:aspect-[16/9] lg:aspect-auto lg:h-[480px] object-cover" />
-          {isNegotiable(unit) && (
-            <span className="absolute top-4 start-4 inline-flex items-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 text-lg sm:text-xl font-extrabold text-white shadow-lift">
-              <TrendingDown className="w-6 h-6" />
-              {tx('قابل للتفاوض', 'Negotiable')}
-            </span>
-          )}
           {isDeal(unit) && (
             <span
-              className={`absolute ${isNegotiable(unit) ? 'top-20 sm:top-[5.5rem]' : 'top-4'} start-4 inline-flex items-center gap-2 rounded-2xl bg-accent px-5 py-3 text-lg sm:text-xl font-extrabold text-white shadow-lift`}
+              className={`absolute top-4 start-4 inline-flex items-center gap-2 rounded-2xl bg-accent px-5 py-3 text-lg sm:text-xl font-extrabold text-white shadow-lift`}
             >
               <Flame className="w-6 h-6 fill-current" />
               {tx(`خصم ${money(sellerDiscount(unit), language)}`, `${money(sellerDiscount(unit), language)} off`)}
@@ -369,13 +385,6 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
               <img src={src} alt="" className="w-full h-full object-cover" />
             </button>
           ))}
-        </div>
-      )}
-
-      {/* Negotiable units: suggesting a price gets its own strip, right under the photos */}
-      {isNegotiable(unit) && (
-        <div className="mt-5">
-          <OfferPanel unitId={unit.id} />
         </div>
       )}
 
@@ -440,17 +449,6 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
                 {tx('بدل', 'instead of')} <span className="line-through decoration-accent decoration-2">{money(unit.paidCashAmount, language)}</span> {tx('— اللي صاحبها دفعه', '— what the owner paid')}
               </p>
             )}
-            {isNegotiable(unit) && (
-              <div className="mt-3.5 flex items-center justify-between rounded-xl bg-emerald-500/25 border border-emerald-400/50 px-3.5 py-2.5 text-white font-bold text-sm shadow-xs">
-                <span className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-300 animate-pulse shrink-0" />
-                  <span>{tx('السعر قابل للتفاوض مع المالك', 'Price is negotiable with owner')}</span>
-                </span>
-                <span className="text-xs bg-white/20 px-2 py-0.5 rounded font-extrabold">
-                  {tx('يرحب بالعروض', 'Open to offers')}
-                </span>
-              </div>
-            )}
             <div className="mt-4 pt-4 border-t border-white/10 flex items-baseline justify-between gap-3">
               <span className="flex items-center gap-2 text-white/60">{tx('وقسط شهري تقريباً', 'Monthly, roughly')} <SourceTag light verified={false} /></span>
               <span className="num font-display text-xl font-bold">
@@ -464,7 +462,15 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
                   <CalendarCheck className="w-5 h-5" />
                   {tx('مهتم بالشراء', "I'm interested in buying")}
                 </button>
-                <a href={whatsappLink(waText)} target="_blank" rel="noreferrer" className="btn border border-white/20 text-white hover:bg-white/10 min-h-12 w-full">
+                {/* واتساب للمسجلين بس — اللي مش داخل بيتفتحله تسجيل الدخول الأول، وبعدها يضغط تاني. */}
+                <a
+                  href={whatsappLink(waText)}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={(e) => {
+                    if (!requireAuth()) e.preventDefault();
+                  }}
+                  className="btn border border-white/20 text-white hover:bg-white/10 min-h-12 w-full">
                   <MessageCircle className="w-5 h-5" />
                   {tx('اسأل على واتساب', 'Ask on WhatsApp')}
                 </a>
