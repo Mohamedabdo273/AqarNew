@@ -1,4 +1,5 @@
 import type { KnownCompound, KnownDeveloper } from '../lib/developers';
+import { IMPORTED_COMPOUNDS, IMPORTED_DEVELOPERS, ImportedGroup } from './developerCatalogImported';
 
 /*
  * كتالوج المطورين والكمبوندات — ملف واحد بيتحمّل لما حد يفتح فورم البيع بس (lazy).
@@ -9,6 +10,8 @@ import type { KnownCompound, KnownDeveloper } from '../lib/developers';
  *
  * الاسم اللي بيتخزن في Unit.Compound = 'عربي (English)' عشان البحث بالإنجليزي يلاقيه. لو العربي فيه حروف لاتيني بيتخزن زي ما هو.
  * متغيرش nameAr لمطور موجود من غير سبب: الوحدات القديمة والفلتر بيتعاملوا معاه كـ نص.
+ *
+ * فيه كمان developerCatalogImported.ts: الأسماء المتجمعة من Property Finder وAqarmap، وبتتضاف هنا تحت.
  */
 
 const CAPITAL = 'العاصمة الإدارية الجديدة';
@@ -50,11 +53,11 @@ const SOUTH_SINAI = 'جنوب سيناء';
 
 const hasLatin = (s: string) => /[a-z]/i.test(s);
 
-/** 'عربي|English' → the compound, all at one place (null = place unknown). */
+/** 'عربي|English' → the compound, all at one place (null = place unknown). A name with no second spelling stays as it is. */
 const at = (area: string | null, ...names: string[]): KnownCompound[] =>
   names.map((n) => {
-    const [ar, en] = n.split('|');
-    return { ar: hasLatin(ar) ? ar : `${ar} (${en})`, en, ...(area ? { area } : {}) };
+    const [ar, en = ar] = n.split('|');
+    return { ar: hasLatin(ar) || en === ar ? ar : `${ar} (${en})`, en, ...(area ? { area } : {}) };
   });
 
 const dev = (id: string, nameAr: string, nameEn: string, popular: boolean, ...groups: KnownCompound[][]): KnownDeveloper => ({
@@ -66,7 +69,7 @@ const dev = (id: string, nameAr: string, nameEn: string, popular: boolean, ...gr
 });
 
 /** Same order as the drop-down: the big names first; the rest are sorted by name where the list is built. */
-export const DEVELOPER_CATALOG: KnownDeveloper[] = [
+const HAND_WRITTEN: KnownDeveloper[] = [
   dev('palm-hills', 'بالم هيلز للتعمير (Palm Hills)', 'Palm Hills Developments', true,
     at(NEW_CAIRO, 'كمبوند بالم هيلز نيو كايرو|Palm Hills New Cairo', 'بالم هيلز القطامية|Palm Hills Katameya', 'امتداد بالم هيلز القطامية|Palm Hills Katameya Extension', 'فيلدج جاردنز القطامية|Village Gardens Katameya', 'بالم هيلز فيلدج جيت|Palm Hills Village Gate', 'بالم هيلز فيلدج أفينيو|Palm Hills Village Avenue', 'هيل تاون|Hale Town'),
     at(MOSTAKBAL, 'كابيتال جاردنز|Capital Gardens'),
@@ -391,3 +394,13 @@ export const DEVELOPER_CATALOG: KnownDeveloper[] = [
     at(MARSA_ALAM, 'بورت غالب|Port Ghalib'),
   ),
 ];
+
+const imported = (groups: ImportedGroup[]) => groups.flatMap(([area, ...names]) => at(area, ...names));
+
+/** The hand-written list with the imported names added. "Other" stays last. */
+export const DEVELOPER_CATALOG: KnownDeveloper[] = (() => {
+  const withExtra = HAND_WRITTEN.map((d) => ({ ...d, compounds: [...d.compounds, ...imported(IMPORTED_COMPOUNDS[d.id] ?? [])] }));
+  const other = withExtra.pop() as KnownDeveloper;
+  const added = IMPORTED_DEVELOPERS.map(([id, nameAr, nameEn, groups]) => dev(id, nameAr, nameEn, false, imported(groups)));
+  return [...withExtra, ...added, other];
+})();

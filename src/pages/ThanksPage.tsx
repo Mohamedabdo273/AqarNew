@@ -55,7 +55,7 @@ export const ThanksPage: React.FC<ThanksPageProps> = ({ kind, code, unit, sugges
         { icon: PhoneCall, t: tx('نكلمك', 'We call you'), d: tx('خلال يوم عمل', 'Within one business day') },
         { icon: CalendarCheck, t: tx('نرتب مع صاحبها', 'We arrange it with the owner'), d: tx('ونقولك الخطوات', 'And walk you through the steps') },
         { icon: FileSearch, t: tx('تطمن على الورق', 'Check the papers'), d: tx('العقد والمديونية متراجعين قبلها', 'Contract and dues already verified') },
-        { icon: FileSignature, t: tx('وعد بيع', 'Promise of sale'), d: tx('بيتكتب بينك وبين صاحبها، فيه كل البنود الخاصة بالوحدة والسعر', 'Signed by you and the owner, with all unit terms and the price') },
+        { icon: FileSignature, t: tx('وعد بيع', 'Promise of sale'), d: tx('بيتكتب بينك وبين صاحبها في مقر شركتنا، فيه كل البنود الخاصة بالوحدة والسعر', 'Signed by you and the owner at our office, with all unit terms and the price') },
         { icon: Handshake, t: tx('تنازل رسمي', 'Official transfer'), d: tx(`في مقر المطور. عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة، بشيك مصرفي بعد التنازل`, `At the developer. Our ${BRAND.buyerFeePercent}% of the unit price, by bank cheque after the transfer`) },
       ],
     },
@@ -75,8 +75,8 @@ export const ThanksPage: React.FC<ThanksPageProps> = ({ kind, code, unit, sugges
       steps: [
         { icon: PhoneCall, t: tx('مكالمة من مستشارك', 'A call from your advisor'), d: tx('خلال يوم عمل', 'Within one business day') },
         { icon: FileSearch, t: tx('نراجع العقدين', 'We check both contracts'), d: tx('عقد وحدتك وعقد الوحدة الجديدة، والفرق الفعلي', 'Yours and the new one, and the real difference') },
-        { icon: Users, t: tx('نلاقي مشتري لوحدتك', 'We find a buyer for yours'), d: tx('باللي دفعته، واسمك ورقمك مش بيظهروا', 'At what you paid; your name and number stay hidden') },
-        { icon: Handshake, t: tx('تنازلين مترتبين مع بعض', 'Two transfers, arranged together'), d: tx(`تدفع أو تاخد الفرق بس. عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة على كل طرف، بشيك مصرفي بعد التنازل`, `You just settle the difference. Our fee is ${BRAND.buyerFeePercent}% of the unit price from each side, by bank cheque after the transfer`) },
+        { icon: Users, t: tx('ناخد موافقة الطرف التاني', "We get the other owner's OK"), d: tx('بنعرض عليه وحدتك، واسمك ورقمك مش بيظهروا', 'We show them your unit; your name and number stay hidden') },
+        { icon: Handshake, t: tx('تنازلين مترتبين مع بعض', 'Two transfers, arranged together'), d: tx(`تدفع أو تاخد الفرق بس. عمولتنا ${BRAND.buyerFeePercent}% على كل طرف من سعر الوحدة اللي بياخدها، بشيك مصرفي بعد التنازل`, `You just settle the difference. Our fee is ${BRAND.buyerFeePercent}% from each side, on the price of the unit they take, by bank cheque after the transfer`) },
       ],
     },
     alert: {

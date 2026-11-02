@@ -278,7 +278,7 @@ export const ComparePage: React.FC<ComparePageProps> = ({ units, onSelectUnit, o
           <button
             type="button"
             onClick={() => onNavigate('market-comparisons')}
-            className="btn-ghost w-full sm:w-auto min-h-12 px-6 border border-line hover:border-brand"
+            className="btn-ghost w-full sm:w-auto min-h-12 px-6"
           >
             <Sparkles className="w-4 h-4 text-brand" />
             <span>{tx('استكشف مقارنات السوق الجاهزة', 'Explore Market Comparisons')}</span>
@@ -330,7 +330,7 @@ export const ComparePage: React.FC<ComparePageProps> = ({ units, onSelectUnit, o
           <button
             type="button"
             onClick={clearCompare}
-            className="btn-ghost min-h-10 text-xs sm:text-sm px-3 hover:text-danger"
+            className="btn-ghost min-h-10 text-xs sm:text-sm px-3"
           >
             {tx('امسح الكل', 'Clear all')}
           </button>
@@ -431,7 +431,7 @@ export const ComparePage: React.FC<ComparePageProps> = ({ units, onSelectUnit, o
                         <button
                           type="button"
                           onClick={() => onSelectUnit(u)}
-                          className="btn-ghost min-h-8 text-xs px-2.5 w-full justify-center text-brand font-bold hover:bg-brand-soft"
+                          className="btn-ghost min-h-8 text-xs px-2.5 w-full justify-center font-bold"
                         >
                           <Eye className="w-3.5 h-3.5" />
                           <span>{tx('عرض التفاصيل', 'View Unit')}</span>
@@ -538,7 +538,7 @@ export const ComparePage: React.FC<ComparePageProps> = ({ units, onSelectUnit, o
         <button
           type="button"
           onClick={() => onNavigate('market-comparisons')}
-          className="btn-ghost min-h-10 text-xs sm:text-sm px-4 border border-line hover:border-brand shrink-0"
+          className="btn-ghost min-h-10 text-xs sm:text-sm px-4 shrink-0"
         >
           <span>{tx('صفحة مقارنات السوق الجاهزة', 'Market Comparisons Page')}</span>
           <ArrowRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />

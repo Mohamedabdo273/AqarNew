@@ -367,7 +367,7 @@ export const MarketComparisonsPage: React.FC<MarketComparisonsPageProps> = ({
         <button
           type="button"
           onClick={handleImportToMyCompare}
-          className="btn-ghost min-h-9 text-xs font-bold px-3.5 border border-line hover:border-brand shrink-0 self-start sm:self-auto"
+          className="btn-ghost min-h-9 text-xs font-bold px-3.5 shrink-0 self-start sm:self-auto"
         >
           <span>{tx('تعديل وإضافة وحدات على هذه المقارنة', 'Customize this comparison')}</span>
         </button>
@@ -416,7 +416,7 @@ export const MarketComparisonsPage: React.FC<MarketComparisonsPageProps> = ({
                         <button
                           type="button"
                           onClick={() => onSelectUnit(u)}
-                          className="btn-ghost min-h-8 text-xs px-2.5 w-full justify-center text-brand font-bold hover:bg-brand-soft"
+                          className="btn-ghost min-h-8 text-xs px-2.5 w-full justify-center font-bold"
                         >
                           <Eye className="w-3.5 h-3.5" />
                           <span>{tx('عرض تفاصيل الوحدة', 'View Unit')}</span>

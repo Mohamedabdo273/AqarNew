@@ -37,7 +37,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
   ];
 
   const what = [
-    { icon: Tag, t: tx('للبايع', 'For sellers'), d: tx(`مش قادر تكمّل؟ تخرج من وحدتك وتاخد اللي دفعته ناقص ضريبة التصرفات (${BRAND.disposalTaxPercent}% من سعر الوحدة) — حتى لو عليك متأخرات — من غير عمولة.`, `Can't keep up? Exit with what you paid, minus the disposal tax (${BRAND.disposalTaxPercent}% of the unit price) — even with arrears — no fee.`), page: 'sell' as PageId },
+    { icon: Tag, t: tx('للبايع', 'For sellers'), d: tx('مش قادر تكمّل؟ تخرج من وحدتك وتاخد اللي دفعته ناقص ضريبة التصرفات — حتى لو عليك متأخرات — من غير عمولة.', "Can't keep up? Exit with what you paid, minus the disposal tax — even with arrears — no fee."), page: 'sell' as PageId },
     { icon: Search, t: tx('للمشتري', 'For buyers'), d: tx('تشتري بسعر العقد القديم وتكمّل الأقساط.', 'Buy at the old contract price and continue the plan.'), page: 'opportunities' as PageId },
     { icon: Repeat, t: tx('للي عاوز يغيّر', 'For switchers'), d: tx('تبدّل وحدتك بوحدة قسطها يريحك، وتدفع أو تاخد الفرق.', 'Swap for a unit with a monthly you can manage, and settle the difference.'), page: 'swap' as PageId },
   ];
@@ -151,7 +151,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate }) => {
             <p className="mt-2 text-white/70">{tx('فريقنا بيرد كل يوم', 'Our team replies every day')}</p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-            <a href={whatsappLink(tx('مرحباً، عندي سؤال', 'Hi, I have a question'))} target="_blank" rel="noreferrer" className="btn bg-white text-brand-ink hover:bg-brand-soft min-h-13">
+            <a href={whatsappLink(tx('مرحباً، عندي سؤال', 'Hi, I have a question'))} target="_blank" rel="noreferrer" className="btn-accent min-h-13">
               <MessageCircle className="w-5 h-5" />
               {tx('واتساب', 'WhatsApp')}
             </a>

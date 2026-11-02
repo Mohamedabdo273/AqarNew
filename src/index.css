@@ -97,7 +97,7 @@
   @apply btn bg-accent text-white hover:bg-accent-ink;
 }
 @utility btn-ghost {
-  @apply btn bg-surface text-ink border border-line-strong hover:border-ink-soft;
+  @apply btn bg-accent text-white hover:bg-accent-ink [&_svg]:text-white;
 }
 @utility card {
   @apply bg-surface rounded-card border border-line shadow-soft;

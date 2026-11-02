@@ -410,7 +410,7 @@ export const MobileScreens: React.FC<MobileScreensProps> = ({
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    window.open('https://wa.me/201000000000', '_blank');
+                    window.open('https://wa.me/201019330286', '_blank');
                   }}
                   className="flex-1 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold flex items-center justify-center gap-1"
                 >
@@ -616,7 +616,7 @@ export const MobileScreens: React.FC<MobileScreensProps> = ({
             <Phone className="w-4 h-4" />
           </button>
           <button
-            onClick={() => window.open('https://wa.me/201000000000', '_blank')}
+            onClick={() => window.open('https://wa.me/201019330286', '_blank')}
             className="flex-1 min-h-11 rounded-xl bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lift"
           >
             <MessageCircle className="w-4 h-4" />

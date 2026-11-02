@@ -5,12 +5,12 @@ export const BRAND = {
   taglineAr: 'مش قادر تكمّل الأقساط؟ بيع وحدتك واسترد فلوسك — حتى لو عليك متأخرات.',
   taglineEn: "Can't keep up with the instalments? Sell your unit and get your money back — even with arrears.",
   hotline: '17143',
-  /** International format without "+" — used for wa.me links. Placeholder until the real number is set. */
-  whatsapp: '201000000000',
+  /** International format without "+" — used for wa.me links. */
+  whatsapp: '201019330286',
   /** Platform fee charged to the buyer only, as % of the contract price, paid after the transfer is signed. */
   buyerFeePercent: 1.25,
-  /** Real-estate disposal tax: comes out of the seller's cheque, and the buyer pays it to the developer. */
-  disposalTaxPercent: 2.5,
+  /** Deposit on the unit price: the buyer pays it to the seller on the day of the promise of sale. */
+  depositPercent: 2.5,
   /** Prefix for listing / request codes shown to users. */
   codePrefix: 'WHD',
   /** Home hero background. Placeholder stock photo — swap for a real photo of a compound or one of our units. */
@@ -19,7 +19,7 @@ export const BRAND = {
   keysImage: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=70',
   heroImage: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=2400&q=80',
   /** Contact page details. Placeholders until the real ones are set — an empty value hides that line. */
-  email: 'devops@korashigroup.com',
+  email: 'deal202627@gmail.com',
   addressAr: '6 أكتوبر، الجيزة',
   addressEn: '6th of October, Giza',
   /** Google Maps link for the office. Empty hides the "open in maps" button. */
@@ -29,7 +29,7 @@ export const BRAND = {
 };
 
 /** Shown on the privacy policy and terms pages. Update whenever either text changes. */
-export const LEGAL_UPDATED = '2026-09-24';
+export const LEGAL_UPDATED = '2026-11-02';
 
 /** The team's dashboard (AqarAdmin). Set VITE_ADMIN_URL in production; in development it runs on 5174. Empty = no link. */
 export const ADMIN_URL: string = import.meta.env.VITE_ADMIN_URL || (import.meta.env.DEV ? 'http://localhost:5174' : '');

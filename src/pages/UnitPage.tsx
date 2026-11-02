@@ -326,7 +326,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
             {tx('شارك', 'Share')}
           </button>
           <button onClick={() => toggleSaveUnit(unit.id)} aria-pressed={saved} className="btn-ghost min-h-11 px-4 text-sm">
-            <Heart key={String(saved)} className={`w-4 h-4 ${saved ? 'fill-danger text-danger heart-pop' : ''}`} />
+            <Heart key={String(saved)} className={`w-4 h-4 ${saved ? 'fill-white heart-pop' : ''}`} />
             {saved ? tx('محفوظة', 'Saved') : tx('احفظ', 'Save')}
           </button>
           {copied && (

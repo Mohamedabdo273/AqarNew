@@ -34,7 +34,7 @@ export const Pagination: React.FC<PaginationProps> = ({ page, totalPages, onChan
         onClick={() => onChange(page - 1)}
         disabled={page === 1}
         aria-label={tx('السابق', 'Previous')}
-        className={`${btn} bg-surface border border-line text-ink-soft hover:border-line-strong disabled:opacity-40 disabled:cursor-not-allowed`}
+        className={`${btn} bg-accent text-white enabled:hover:bg-accent-ink disabled:opacity-40 disabled:cursor-not-allowed`}
       >
         <Prev className="w-5 h-5" />
       </button>
@@ -58,7 +58,7 @@ export const Pagination: React.FC<PaginationProps> = ({ page, totalPages, onChan
         onClick={() => onChange(page + 1)}
         disabled={page === totalPages}
         aria-label={tx('التالي', 'Next')}
-        className={`${btn} bg-surface border border-line text-ink-soft hover:border-line-strong disabled:opacity-40 disabled:cursor-not-allowed`}
+        className={`${btn} bg-accent text-white enabled:hover:bg-accent-ink disabled:opacity-40 disabled:cursor-not-allowed`}
       >
         <Next className="w-5 h-5" />
       </button>

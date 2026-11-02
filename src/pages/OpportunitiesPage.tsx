@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Search, SlidersHorizontal, X, BellRing, Flame, ArrowUpDown, ChevronDown, MapPin, Building2, Wallet, BedDouble } from 'lucide-react';
+import { Search, SlidersHorizontal, X, BellRing, Flame, ArrowUpDown, ChevronDown, Wallet, CalendarClock, KeyRound } from 'lucide-react';
 import { RealEstateUnit } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { UnitCard } from '../components/UnitCard';
-import { Budget, BudgetFinder } from '../components/BudgetFinder';
+import { UnitSearchInput } from '../components/UnitSearchInput';
+import { Budget, BudgetSlider, CASH_RANGE, MONTHLY_RANGE } from '../components/BudgetFinder';
 import { FilterPanel } from '../components/FilterPanel';
 import { Pagination } from '../components/Pagination';
 import { EMPTY_FILTERS, Filters, SortKey, applyFilters } from '../lib/unitFilters';
@@ -40,14 +41,22 @@ interface OpportunitiesPageProps {
 
 const PAGE_SIZE = 12;
 
-/** A filter-bar button that opens a small panel under it. Closes on an outside click or Escape. */
-const QuickFilter: React.FC<{
-  label: string;
-  icon: React.ElementType;
-  count: number;
-  wide?: boolean;
-  children: (close: () => void) => React.ReactNode;
-}> = ({ label, icon: Icon, count, wide, children }) => {
+const READY_NOW = 'استلام فوري';
+const SELECT_CLASS = 'w-full min-w-0 appearance-none bg-transparent pe-5 text-sm font-semibold text-ink outline-none cursor-pointer truncate';
+
+/** One cell of the search bar: a small label over its control. */
+const BarCell: React.FC<{ label: string; className?: string; children: React.ReactNode }> = ({ label, className = '', children }) => (
+  <label className={`relative block min-w-0 flex-1 rounded-xl px-4 py-2 cursor-pointer transition-colors hover:bg-paper focus-within:bg-paper ${className}`}>
+    <span className="block text-[11px] font-semibold text-muted">{label}</span>
+    {children}
+  </label>
+);
+
+const BarSelectArrow = () => <ChevronDown className="absolute end-3 bottom-3 w-4 h-4 text-muted pointer-events-none" />;
+const BarDivider = () => <span className="hidden md:block w-px my-2.5 bg-line shrink-0" aria-hidden="true" />;
+
+/** The budget cell: opens the two sliders under it. Closes on an outside click or Escape. */
+const BudgetCell: React.FC<{ label: string; value: string; children: React.ReactNode }> = ({ label, value, children }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -62,24 +71,18 @@ const QuickFilter: React.FC<{
     };
   }, [open]);
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative min-w-0 flex-1">
       <button
+        type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className={`inline-flex items-center gap-2 h-11 rounded-xl border-2 px-4 text-[15px] font-bold transition-colors ${
-          count > 0 ? 'bg-brand-soft border-brand text-brand-ink' : 'bg-surface border-line-strong text-ink hover:border-brand'
-        }`}
+        className="relative block w-full h-full rounded-xl px-4 py-2 text-start transition-colors hover:bg-paper"
       >
-        <Icon className="w-4.5 h-4.5 text-brand" />
-        {label}
-        {count > 0 && <span className="num grid place-items-center min-w-5 h-5 px-1 rounded-full bg-brand text-white text-[11px]">{count}</span>}
-        <ChevronDown className={`w-4 h-4 text-muted transition-transform ${open ? 'rotate-180' : ''}`} />
+        <span className="block text-[11px] font-semibold text-muted">{label}</span>
+        <span className="block pe-5 text-sm font-semibold text-ink truncate">{value}</span>
+        <ChevronDown className={`absolute end-3 bottom-3 w-4 h-4 text-muted transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
-      {open && (
-        <div className={`absolute top-full mt-2 start-0 z-30 card p-4 shadow-lift ${wide ? 'w-[24rem]' : 'w-[20rem]'}`}>
-          {children(() => setOpen(false))}
-        </div>
-      )}
+      {open && <div className="absolute top-full mt-3 end-0 z-30 w-[24rem] card p-4 shadow-lift grid gap-4">{children}</div>}
     </div>
   );
 };
@@ -214,10 +217,20 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   const from = results.length ? (current - 1) * PAGE_SIZE + 1 : 0;
   const to = Math.min(current * PAGE_SIZE, results.length);
 
-  const regionCount = filters.regionIds.length + filters.subAreaIds.length;
-  const typeCount = filters.categories.length + filters.types.length;
-  const toggleIn = (list: string[], v: string) => (list.includes(v) ? without(list, v) : [...list, v]);
-  const bedsLabel = (n: number) => (n === 5 ? '5+' : String(n));
+  // The bar's fields pick one place or type; several picked from the full filter show as a count instead.
+  const oneRegion = filters.regionIds.length === 1 ? filters.regionIds[0] : null;
+  const oneCategory = filters.categories.length === 1 ? filters.categories[0] : null;
+  const setCash = (cash: number) => {
+    onBudgetChange({ ...budget, cash });
+    onBudgetOnChange(true);
+  };
+  const setMonthly = (monthly: number) => {
+    onBudgetChange({ ...budget, monthly });
+    onBudgetOnChange(true);
+  };
+  const readyNow = filters.delivery.includes(READY_NOW);
+  const chipClass = (on: boolean) =>
+    `chip font-semibold transition-colors ${on ? 'bg-accent border-accent text-white' : 'bg-surface border-line text-ink-soft hover:border-accent hover:text-accent'}`;
 
   return (
     <div className="page-wrap py-6 sm:py-8">
@@ -234,158 +247,156 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
         </a>
       </div>
 
-      {/* Filter bar: search, the four questions every buyer asks, two quick toggles, and "all filters" for the rest. */}
-      <div className="sticky top-24 sm:top-28 z-20 mt-5 rounded-2xl border border-line bg-surface/95 backdrop-blur-md p-3 sm:p-4 shadow-[0_8px_24px_-12px_rgba(18,18,16,0.18)]">
-        <div className="flex gap-2">
-          <div className="relative flex-1 min-w-0">
-            <Search className="absolute top-1/2 -translate-y-1/2 start-3.5 w-4 h-4 text-muted" />
-            <input
+      {/* One compact search bar that stays while scrolling, so the units stay the content. On phones the fields live behind "Filter". */}
+      <div className="sticky top-24 sm:top-28 z-20 mt-5 flex items-stretch gap-1 rounded-2xl border border-line bg-surface p-1.5 shadow-[0_8px_24px_-12px_rgba(18,18,16,0.18)]">
+        <BarCell label={tx('ابحث', 'Search')} className="md:flex-[1.6]">
+          <div className="flex items-center gap-2">
+            <Search className="w-4 h-4 text-muted shrink-0" />
+            <UnitSearchInput
+              units={units}
               value={filters.query}
-              onChange={(e) => patch({ query: e.target.value })}
-              placeholder={tx('ابحث بكمبوند، مطور، منطقة أو كود', 'Compound, developer, area or code')}
-              className="field h-12 ps-10 text-sm"
+              onChange={(query) => patch({ query })}
+              placeholder={tx('كمبوند، مطور، منطقة أو كود', 'Compound, developer, area or code')}
+              className="w-full min-w-0 bg-transparent text-sm font-semibold text-ink placeholder:font-normal placeholder:text-muted outline-none"
             />
           </div>
-          <button onClick={() => setSheetOpen(true)} className="btn-primary shrink-0 h-12 px-4 sm:px-5 text-[15px]" aria-label={tx('فلتر', 'Filter')}>
-            <SlidersHorizontal className="w-5 h-5" />
-            <span>{tx('فلتر', 'Filter')}</span>
-            {pills.length > 0 && <span className="num grid place-items-center min-w-5 h-5 px-1 rounded-full bg-white text-brand text-xs font-bold">{pills.length}</span>}
-          </button>
-        </div>
+        </BarCell>
 
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <div className="hidden md:contents">
-            <QuickFilter label={tx('المنطقة', 'Area')} icon={MapPin} count={regionCount}>
-              {() => (
-                <div className="flex flex-wrap gap-2">
-                  {regions.map((r) => (
-                    <button
-                      key={r.id}
-                      onClick={() =>
-                        pickPlaces(filters.regionIds.includes(r.id) ? withoutId(filters.regionIds, r.id) : [...filters.regionIds, r.id], filters.subAreaIds)
-                      }
-                      aria-pressed={filters.regionIds.includes(r.id)}
-                      className={filters.regionIds.includes(r.id) ? 'chip-on' : 'chip-off'}
-                    >
-                      {language === 'ar' ? r.ar : r.en}
-                    </button>
+        <div className="hidden md:contents">
+          <BarDivider />
+          <BarCell label={tx('المنطقة', 'Area')}>
+            <select
+              value={oneRegion ?? (filters.regionIds.length > 1 ? 'many' : '')}
+              onChange={(e) => patch({ regionIds: e.target.value ? [Number(e.target.value)] : [], subAreaIds: [] })}
+              className={SELECT_CLASS}
+            >
+              <option value="">{tx('كل المناطق', 'All areas')}</option>
+              {filters.regionIds.length > 1 && (
+                <option value="many" disabled>
+                  {tx(`${filters.regionIds.length} مناطق`, `${filters.regionIds.length} areas`)}
+                </option>
+              )}
+              {regions.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {language === 'ar' ? r.ar : r.en}
+                </option>
+              ))}
+            </select>
+            <BarSelectArrow />
+          </BarCell>
+          {oneRegion !== null && (
+            <>
+              <BarDivider />
+              <BarCell label={tx('الموقع', 'Location')}>
+                <select
+                  value={filters.subAreaIds.length === 1 ? filters.subAreaIds[0] : filters.subAreaIds.length > 1 ? 'many' : ''}
+                  onChange={(e) => patch({ subAreaIds: e.target.value ? [Number(e.target.value)] : [] })}
+                  className={SELECT_CLASS}
+                >
+                  <option value="">{tx('كل مناطق ', 'All of ') + placeLabelOf(regions, oneRegion)}</option>
+                  {filters.subAreaIds.length > 1 && (
+                    <option value="many" disabled>
+                      {tx(`${filters.subAreaIds.length} مواقع`, `${filters.subAreaIds.length} locations`)}
+                    </option>
+                  )}
+                  {subAreas.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {language === 'ar' ? a.ar : a.en}
+                    </option>
                   ))}
-                </div>
-              )}
-            </QuickFilter>
-
-            <QuickFilter label={tx('نوع الوحدة', 'Type')} icon={Building2} count={typeCount}>
-              {() => (
-                <div className="grid gap-3">
-                  <div className="flex flex-wrap gap-2">
-                    {PROPERTY_CATEGORIES.map((c) => (
-                      <button
-                        key={c.ar}
-                        onClick={() => {
-                          const categories = toggleIn(filters.categories, c.ar);
-                          const allowed = new Set<string>(typesFor(categories).map((t) => t.ar));
-                          patch({ categories, types: filters.types.filter((t) => allowed.has(t)) });
-                        }}
-                        aria-pressed={filters.categories.includes(c.ar)}
-                        className={filters.categories.includes(c.ar) ? 'chip-on' : 'chip-off'}
-                      >
-                        {language === 'ar' ? c.ar : c.en}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="flex flex-wrap gap-2 pt-3 border-t border-line">
-                    {typesFor(filters.categories).map((t) => (
-                      <button
-                        key={t.ar}
-                        onClick={() => patch({ types: toggleIn(filters.types, t.ar) })}
-                        aria-pressed={filters.types.includes(t.ar)}
-                        className={filters.types.includes(t.ar) ? 'chip-on' : 'chip-off'}
-                      >
-                        {language === 'ar' ? t.ar : t.en}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </QuickFilter>
-
-            <QuickFilter
-              label={budgetOn ? tx(`كاش لحد ${money(budget.cash, language)}`, `Cash up to ${money(budget.cash, language)}`) : tx('الميزانية', 'Budget')}
-              icon={Wallet}
-              count={budgetOn ? 1 : 0}
-              wide
-            >
-              {(close) => (
-                <div className="grid gap-4">
-                  <BudgetFinder budget={budget} onChange={onBudgetChange} />
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => {
-                        onBudgetOnChange(true);
-                        close();
-                      }}
-                      className="btn-primary flex-1 min-h-11"
-                    >
-                      {tx('وريني اللي على قدي', 'Show what I can afford')}
-                    </button>
-                    {budgetOn && (
-                      <button
-                        onClick={() => {
-                          onBudgetOnChange(false);
-                          close();
-                        }}
-                        className="btn-ghost min-h-11 px-4"
-                      >
-                        {tx('شيل', 'Clear')}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
-            </QuickFilter>
-
-            <QuickFilter
-              label={filters.bedrooms !== null ? tx(`${bedsLabel(filters.bedrooms)} غرف`, `${bedsLabel(filters.bedrooms)} beds`) : tx('الغرف', 'Beds')}
-              icon={BedDouble}
-              count={filters.bedrooms !== null ? 1 : 0}
-            >
-              {(close) => (
-                <div className="grid grid-cols-6 gap-1.5">
-                  {[null, 1, 2, 3, 4, 5].map((n) => (
-                    <button
-                      key={String(n)}
-                      onClick={() => {
-                        patch({ bedrooms: n });
-                        close();
-                      }}
-                      aria-pressed={filters.bedrooms === n}
-                      className={`h-10 rounded-lg text-sm font-semibold border ${
-                        filters.bedrooms === n ? 'bg-brand text-white border-brand' : 'bg-surface border-line text-ink-soft hover:border-line-strong'
-                      }`}
-                    >
-                      {n === null ? tx('الكل', 'Any') : bedsLabel(n)}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </QuickFilter>
-            <span className="w-px h-6 bg-line mx-1" aria-hidden="true" />
-          </div>
-
-          {dealsCount > 0 && (
-            <button
-              onClick={() => patch({ discounted: !filters.discounted })}
-              aria-pressed={filters.discounted}
-              className={`inline-flex items-center gap-1.5 h-11 rounded-xl border-2 px-4 text-[15px] font-bold transition-colors ${
-                filters.discounted ? 'bg-accent border-accent text-white' : 'bg-accent-soft border-accent/40 text-accent hover:border-accent'
-              }`}
-            >
-              <Flame className="w-4 h-4" />
-              {tx('لقطات', 'Deals')}
-              <span className="num text-xs opacity-80">{dealsCount}</span>
-            </button>
+                </select>
+                <BarSelectArrow />
+              </BarCell>
+            </>
           )}
+          <BarDivider />
+          <BarCell label={tx('النشاط', 'Activity')}>
+            <select
+              value={oneCategory ?? (filters.categories.length > 1 ? 'many' : '')}
+              onChange={(e) => patch({ categories: e.target.value ? [e.target.value] : [], types: [] })}
+              className={SELECT_CLASS}
+            >
+              <option value="">{tx('كل الأنشطة', 'All activities')}</option>
+              {filters.categories.length > 1 && (
+                <option value="many" disabled>
+                  {tx(`${filters.categories.length} أنشطة`, `${filters.categories.length} activities`)}
+                </option>
+              )}
+              {PROPERTY_CATEGORIES.map((c) => (
+                <option key={c.ar} value={c.ar}>
+                  {language === 'ar' ? c.ar : c.en}
+                </option>
+              ))}
+            </select>
+            <BarSelectArrow />
+          </BarCell>
+          {oneCategory !== null && (
+            <>
+              <BarDivider />
+              <BarCell label={tx('نوع الوحدة', 'Unit type')}>
+                <select
+                  value={filters.types.length === 1 ? filters.types[0] : filters.types.length > 1 ? 'many' : ''}
+                  onChange={(e) => patch({ types: e.target.value ? [e.target.value] : [] })}
+                  className={SELECT_CLASS}
+                >
+                  <option value="">{tx('كل الأنواع', 'All types')}</option>
+                  {filters.types.length > 1 && (
+                    <option value="many" disabled>
+                      {tx(`${filters.types.length} أنواع`, `${filters.types.length} types`)}
+                    </option>
+                  )}
+                  {typesFor(filters.categories).map((t) => (
+                    <option key={t.ar} value={t.ar}>
+                      {language === 'ar' ? t.ar : t.en}
+                    </option>
+                  ))}
+                </select>
+                <BarSelectArrow />
+              </BarCell>
+            </>
+          )}
+          <BarDivider />
+          <BudgetCell
+            label={tx('الميزانية', 'Budget')}
+            value={budgetOn ? tx(`كاش لحد ${money(budget.cash, language)}`, `Cash up to ${money(budget.cash, language)}`) : tx('أي ميزانية', 'Any budget')}
+          >
+            <BudgetSlider icon={Wallet} label={tx('معاك كاش قد إيه؟', 'Cash you have')} value={budget.cash} range={CASH_RANGE} onChange={setCash} />
+            <BudgetSlider icon={CalendarClock} label={tx('تقدر تدفع كام في الشهر؟', 'Monthly you can pay')} value={budget.monthly} range={MONTHLY_RANGE} onChange={setMonthly} />
+            {budgetOn && (
+              <button type="button" onClick={() => onBudgetOnChange(false)} className="btn-ghost min-h-11">
+                {tx('شيل الميزانية', 'Clear budget')}
+              </button>
+            )}
+          </BudgetCell>
         </div>
+
+        <button onClick={() => setSheetOpen(true)} className="btn-primary shrink-0 self-stretch rounded-xl px-4 md:px-5 text-[15px]" aria-label={tx('كل الفلاتر', 'All filters')}>
+          <SlidersHorizontal className="w-5 h-5" />
+          <span>{tx('فلتر', 'Filter')}</span>
+          {pills.length > 0 && <span className="num grid place-items-center min-w-5 h-5 px-1 rounded-full bg-white text-brand text-xs font-bold">{pills.length}</span>}
+        </button>
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        {dealsCount > 0 && (
+          <button onClick={() => patch({ discounted: !filters.discounted })} aria-pressed={filters.discounted} className={chipClass(filters.discounted)}>
+            <Flame className="w-4 h-4" />
+            {tx('فرص مميزة', 'Top deals')}
+            <span className="num text-xs opacity-70">{dealsCount}</span>
+          </button>
+        )}
+        <button
+          onClick={() => patch({ delivery: readyNow ? filters.delivery.filter((d) => d !== READY_NOW) : [...filters.delivery, READY_NOW] })}
+          aria-pressed={readyNow}
+          className={chipClass(readyNow)}
+        >
+          <KeyRound className="w-4 h-4" />
+          {tx('استلام فوري', 'Ready now')}
+        </button>
+        <button onClick={() => setSort(sort === 'monthly' ? 'newest' : 'monthly')} aria-pressed={sort === 'monthly'} className={chipClass(sort === 'monthly')}>
+          <Wallet className="w-4 h-4" />
+          {tx('أقل قسط', 'Low monthly')}
+        </button>
       </div>
 
       <div ref={resultsTop} className="scroll-mt-48 mt-3">

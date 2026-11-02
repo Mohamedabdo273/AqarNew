@@ -15,7 +15,7 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
   const fee = BRAND.buyerFeePercent;
 
   const summary = [
-    tx('احنا وسيط بنوصّل البايع بالمشتري، مش طرف في العقد', "We connect sellers and buyers; we're not a party to the contract"),
+    tx('احنا وسيط بنوصّل البايع بالمشتري، وطرف تالت في عقد وعد البيع كوسيط بس', 'We connect sellers and buyers, and sign the promise of sale as a third party, only as intermediary'),
     tx('البايع ما بيدفعش عمولة، والمشتري بيدفع ' + fee + '% من سعر الوحدة بعد التوقيع', `Sellers pay no fee; buyers pay ${fee}% of the unit price after signing`),
     tx('المشتري يقدر ينسحب قبل توقيع عقد وعد البيع، ورسوم التنازل عند المطور عليه', 'Buyers can withdraw before signing the promise of sale; the developer transfer fee is on them'),
     tx('مفيش أوفر برايس، والتنازل رسمي بمقر المطور', 'No overprice, and official transfer at the developer'),
@@ -49,7 +49,7 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
       title: tx('دورنا بالظبط', 'Our role'),
       body: [
         tx('• احنا منصة وساطة: بنراجع البيانات، بنعرض الوحدات، وبنرتب التواصل بين البايع والمشتري وميعاد التنازل.', '• We are an intermediary: we review data, list units, and arrange contact between seller and buyer and the transfer appointment.'),
-        tx('• احنا مش طرف في عقد البيع أو التنازل، ومش بنستلم ثمن الوحدة.', "• We are not a party to the sale or transfer contract and we don't hold the purchase money."),
+        tx('• احنا طرف تالت في عقد وعد البيع كوسيط بس: مش بايع ولا مشتري ولا ضامن للمطور أو للوحدة. ومش طرف في عقد التنازل، ومش بنستلم ثمن الوحدة.', "• We sign the promise of sale as a third party, only as intermediary: not as seller, buyer or guarantor of the developer or the unit. We are not a party to the transfer contract and we don't hold the purchase money."),
         tx('• التنازل بيتم حسب إجراءات وشروط المطور، وموافقة المطور مش في إيدنا.', "• Transfers follow the developer's procedures; the developer's approval is not in our control."),
         tx('• اللي بنقدمه معلومات ومساعدة، مش استشارة قانونية أو مالية. ننصحك تراجع العقد مع محامي لو محتاج.', '• What we provide is information and help, not legal or financial advice. Consult a lawyer if needed.'),
       ],
@@ -78,8 +78,8 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
       id: 'buyer',
       title: tx('التزامات المشتري', "Buyer's obligations"),
       body: [
-        tx('• لما يتفق مع البايع، بيتكتب بينهم وعد بيع فيه كل البنود الخاصة بالوحدة والسعر.', '• Once buyer and seller agree, they sign a promise of sale with all unit terms and the price.'),
-        tx('• يدفع للبايع المبلغ المتفق عليه بشيك مصرفي يوم التنازل في مقر المطور.', '• Pay the agreed amount to the seller by bank cheque on transfer day at the developer.'),
+        tx('• لما يتفق مع البايع، بيتكتب بينهم وعد بيع في مقر شركتنا، فيه كل البنود الخاصة بالوحدة والسعر.', '• Once buyer and seller agree, they sign a promise of sale at our office, with all unit terms and the price.'),
+        tx(`• يدفع للبايع عربون ${BRAND.depositPercent}% من سعر الوحدة يوم وعد البيع، وشيك مصرفي بالمقدم ناقص العربون يوم التنازل في مقر المطور.`, `• Pay the seller a deposit of ${BRAND.depositPercent}% of the unit price on the day of the promise of sale, and a bank cheque for the down payment minus the deposit on transfer day at the developer.`),
         tx('• يكمّل الأقساط الباقية للمطور بنفس نظام العقد، أو زي ما المطور يحدد.', "• Continue the remaining installments per the contract or as the developer sets."),
         tx('• يتحمّل رسوم التنازل عند المطور، وقيمتها بتختلف حسب المطور.', "• Pay the developer's transfer fee; the amount differs by developer."),
         tx('• يقدر ينسحب في أي وقت قبل توقيع عقد وعد البيع.', '• May withdraw any time before signing the promise of sale.'),
@@ -94,7 +94,7 @@ export const TermsPage: React.FC<TermsPageProps> = ({ onNavigate }) => {
         tx(`• المشتري: ${fee}% من سعر الوحدة (سعرها في العقد)، بتستحق بعد توقيع التنازل بس.`, `• Buyer: ${fee}% of the unit price (its contract price), due only after the transfer is signed.`),
         tx('• لو الصفقة ما تمّتش، المشتري ما بيدفعش حاجة لينا.', "• If the deal doesn't complete, the buyer owes us nothing."),
         tx('• رسوم المطور (زي رسوم التنازل) منفصلة عن رسومنا وبيدفعها المشتري، وقيمتها بتختلف حسب المطور.', "• Developer fees (such as the transfer fee) are separate from ours and paid by the buyer; the amount differs by developer."),
-        tx(`• ضريبة التصرفات العقارية (${BRAND.disposalTaxPercent}% من سعر الوحدة) على البايع: بتتخصم من الشيك اللي بيستلمه، والمشتري بيدفعها للمطور.`, `• The real-estate disposal tax (${BRAND.disposalTaxPercent}% of the unit price) is on the seller: it comes out of the cheque they receive, and the buyer pays it to the developer.`),
+        tx('• ضريبة التصرفات العقارية على البايع، وهو اللي بيدفعها للمطور.', '• The real-estate disposal tax is on the seller, who pays it to the developer.'),
       ],
     },
     {

@@ -1,5 +1,6 @@
 import { RealEstateUnit } from '../types';
 import { Budget, fitsBudget } from '../components/BudgetFinder';
+import { foldArabic } from './developers';
 import { cashPrice, categoryOf, isDeal, isNegotiable, monthlyInstallment, savingsPercent, sellerDiscount } from './unitHelpers';
 
 export interface Filters {
@@ -74,7 +75,7 @@ export const applyFilters = (
   budget: Budget | null,
   sort: SortKey
 ): RealEstateUnit[] => {
-  const q = f.query.trim().toLowerCase();
+  const q = foldArabic(f.query.trim());
   const list = units.filter((u) => {
     if (budget && !fitsBudget(u, budget)) return false;
     if (f.regionIds.length && !f.regionIds.includes(u.regionId ?? 0)) return false;
@@ -97,9 +98,7 @@ export const applyFilters = (
     if (f.noTransferFee && u.transferFeePolicy !== 'معفي من رسوم التنازل') return false;
     if (f.noPenalties && u.hasLatePenalties) return false;
     if (q) {
-      const hay = [u.compound, u.compoundEn, u.developer, u.developerEn, u.location, u.locationEn, u.subArea, u.subAreaEn, u.district, u.districtEn, u.verificationCode]
-        .join(' ')
-        .toLowerCase();
+      const hay = foldArabic([u.compound, u.compoundEn, u.developer, u.developerEn, u.location, u.locationEn, u.subArea, u.subAreaEn, u.district, u.districtEn, u.verificationCode].join(' '));
       if (!hay.includes(q)) return false;
     }
     return true;

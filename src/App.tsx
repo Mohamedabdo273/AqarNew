@@ -356,7 +356,7 @@ export default function App() {
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         aria-label={tx('ارجع لفوق', 'Back to top')}
         tabIndex={topVisible ? 0 : -1}
-        className={`fixed bottom-36 md:bottom-24 start-4 md:start-6 z-30 grid place-items-center w-11 h-11 md:w-12 md:h-12 rounded-full bg-surface text-brand border border-line shadow-lift hover:bg-brand-soft transition-all duration-300 ${
+        className={`fixed bottom-36 md:bottom-24 start-4 md:start-6 z-30 grid place-items-center w-11 h-11 md:w-12 md:h-12 rounded-full bg-accent text-white shadow-lift hover:bg-accent-ink transition-all duration-300 ${
           topVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
         }`}
       >

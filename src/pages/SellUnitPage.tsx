@@ -257,7 +257,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
   };
 
   const validMoney = form.paidAmount > 0 && form.paidAmount <= form.contractPrice;
-  const { net, tax, discount, fines } = netToSeller(form);
+  const { net, discount, fines } = netToSeller(form);
   // The penalty is 10–15% of the whole contract, but nobody can lose more than they paid — so it's capped there.
   const penaltyMin = Math.round(form.contractPrice * CANCELLATION_PENALTY_MIN_RATE);
   const penaltyMax = Math.round(form.contractPrice * CANCELLATION_PENALTY_RATE);
@@ -707,7 +707,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
                 <p className="num font-display mt-3 text-4xl font-bold text-ink">{money(net, language)}</p>
                 <p className="text-sm text-muted">
                   {currency(language)} · {tx('من غير عمولة', 'no fee')}
-                  {tx(` · بعد ضريبة التصرفات ${money(tax, language)}`, ` · after ${money(tax, language)} disposal tax`)}
+                  {tx(' · قبل ضريبة التصرفات', ' · before disposal tax')}
                   {discount > 0 && tx(` · بعد خصمك ${money(discount, language)}`, ` · after your ${money(discount, language)} discount`)}
                   {fines > 0 && tx(` · بعد المتأخرات ${money(fines, language)}`, ` · after ${money(fines, language)} arrears`)}
                 </p>

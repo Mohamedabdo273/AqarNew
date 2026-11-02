@@ -54,7 +54,7 @@ export const cashPrice = (unit: RealEstateUnit): number => Math.max(0, unit.paid
 /** Our fee, paid by the buyer after signing: a % of the contract price. */
 export const buyerFee = (unit: RealEstateUnit): number => feeOn(unit.originalContractPrice);
 
-/** Our fee on any contract price — e.g. a swapping owner's own unit, which isn't listed. */
+/** Our fee on any contract price — e.g. a swapper's own unit, which isn't listed: the other owner pays on it when they take it. */
 export const feeOn = (contractPrice: number): number => Math.round((Math.max(0, contractPrice) * BRAND.buyerFeePercent) / 100);
 
 /**

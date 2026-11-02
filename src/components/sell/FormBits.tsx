@@ -421,6 +421,8 @@ export function MultiSelect<T extends string>({
   );
 }
 
+const LEGACY_OTHER = '__OTHER__';
+
 /** A single-choice drop-down with a search box — for long lists (some locations have 50+ districts, developers, compounds). */
 export function SearchSelect({
   id,
@@ -450,6 +452,8 @@ export function SearchSelect({
   const { tx } = useLanguage();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
+  // The name isn't in the list: the field turns into a plain text box.
+  const [manual, setManual] = useState(false);
   const box = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!open) return;
@@ -474,6 +478,41 @@ export function SearchSelect({
   };
 
   const showSearchInput = searchable ?? options.length > 8;
+
+  // Drafts saved before typing a name existed can still hold this placeholder.
+  useEffect(() => {
+    if (value === LEGACY_OTHER) {
+      setManual(true);
+      onChange('');
+    }
+  }, [value, onChange]);
+
+  if (manual) {
+    return (
+      <div className="relative">
+        <input
+          id={id}
+          autoFocus
+          value={value === LEGACY_OTHER ? '' : value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={tx('اكتب الاسم زي ما هو في العقد', 'Type the name as it is on the contract')}
+          className="field pe-11"
+        />
+        <button
+          type="button"
+          onClick={() => {
+            setManual(false);
+            onChange('');
+          }}
+          aria-label={tx('ارجع للقايمة', 'Back to the list')}
+          title={tx('ارجع للقايمة', 'Back to the list')}
+          className="absolute end-2 top-1/2 -translate-y-1/2 grid place-items-center w-8 h-8 rounded-lg text-muted hover:bg-paper hover:text-ink cursor-pointer"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div ref={box} className="relative">
@@ -551,11 +590,14 @@ export function SearchSelect({
               <li role="option" className="border-t border-line mt-1 pt-1">
                 <button
                   type="button"
-                  onClick={() => pick('__OTHER__')}
+                  onClick={() => {
+                    setManual(true);
+                    pick(query.trim());
+                  }}
                   className="w-full flex items-center gap-2 rounded-lg px-3 py-2 text-start text-xs font-bold text-brand hover:bg-brand-soft/20 transition-colors cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5 shrink-0" />
-                  <span>{customLabel ?? tx('اختيار آخر (كتابة يدوية)', 'Other (manual entry)')}</span>
+                  <span>{customLabel ?? tx('مش موجود؟ اكتب الاسم', "Not listed? Type the name")}</span>
                 </button>
               </li>
             )}
