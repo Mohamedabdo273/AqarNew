@@ -60,15 +60,10 @@ const TAB_OF_ROLE: Record<HomeRole, RulesTab> = { sell: 'seller', buy: 'buyer', 
 
 /* Same bar as the home page: stays while scrolling and the whole page follows it. */
 export const RulesTabBar: React.FC<{ tab: RulesTab; onTabChange: (tab: RulesTab) => void }> = ({ tab, onTabChange }) => {
-  const { tx } = useLanguage();
   return (
     <div className="sticky top-24 sm:top-28 z-30 bg-brand-ink shadow-md">
       <div className="page-wrap py-2 flex justify-center">
-        <RoleSwitch
-          role={ROLE_OF_TAB[tab]}
-          onChange={(r) => onTabChange(TAB_OF_ROLE[r])}
-          labels={{ buy: tx('لو هتشتري', 'If you buy'), sell: tx('لو هتبيع', 'If you sell'), swap: tx('لو هتبدّل', 'If you swap') }}
-        />
+        <RoleSwitch role={ROLE_OF_TAB[tab]} onChange={(r) => onTabChange(TAB_OF_ROLE[r])} />
       </div>
     </div>
   );
@@ -77,7 +72,6 @@ export const RulesTabBar: React.FC<{ tab: RulesTab; onTabChange: (tab: RulesTab)
 export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNavigate }) => {
   const { tx } = useLanguage();
   const fee = BRAND.buyerFeePercent;
-  const dep = BRAND.depositPercent;
 
   const content: Record<RulesTab, TabContent> = {
     seller: {
@@ -94,7 +88,7 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
         { icon: AlertTriangle, t: tx('قول على المديونية', 'Declare all dues'), d: tx('أي أقساط متأخرة أو غرامات لازم تتكتب. لو اتخبّت، الإعلان بيتشال.', 'Any overdue installments or fines must be listed. Hidden dues get the listing removed.') },
         { icon: FileSearch, t: tx('مراجعة قبل النشر', 'Reviewed before listing'), d: tx('بنراجع العقد وكشف الحساب مع المطور خلال 24 ساعة.', 'We check the contract and statement with the developer within 24h.') },
         { icon: FileSignature, t: tx('وعد بيع مكتوب', 'A written promise of sale'), d: tx('لما تتفق مع المشتري بيتكتب بينكم وعد بيع في مقر شركتنا، فيه كل البنود الخاصة بالوحدة والسعر.', 'Once you agree with a buyer, you both sign a promise of sale at our office, with all unit terms and the price.') },
-        { icon: HandCoins, t: tx(`العربون ${dep}%`, `Deposit: ${dep}%`), d: tx(`${dep}% من سعر الوحدة، بتستلمها من المشتري يوم وعد البيع. بعدها تحجز ميعاد التنازل مع المطور وتبلّغنا بيه.`, `${dep}% of the unit price, received from the buyer on the day of the promise of sale. You then book the transfer with the developer and tell us the date.`) },
+        { icon: HandCoins, t: tx('التصرفات العقارية', 'Disposal tax'), d: tx('بتستلم قيمة الضريبة من المشتري وقت توقيع عقد وعد البيع، نقدًا أو بشيك مصرفي. بعدها تحجز ميعاد التنازل مع المطور وتبلّغنا بيه.', 'You receive the tax value from the buyer when the promise of sale is signed, in cash or by bank cheque. You then book the transfer with the developer and tell us the date.') },
         { icon: Building2, t: tx('تقبض في مقر المطور', 'Paid at the developer'), d: tx('بشيك مصرفي، وشيكاتك القديمة بترجعلك في نفس اليوم.', 'By bank cheque, and your old cheques are returned the same day.') },
         { icon: MessageSquareHeart, t: tx('نصيحة بصراحة', 'Honest advice'), d: tx('بنعرض عليك كل الاختيارات، ولو الأحسن ليك إنك تكمّل تعاقدك هنقولك.', "We lay out every option — and if you're better off keeping your contract, we'll say so.") },
         { icon: Undo2, t: tx('تقدر تنسحب', 'You can withdraw'), d: tx('قبل التوقيع تشيل إعلانك في أي وقت ومن غير تكلفة.', 'Remove your listing any time before signing, free.') },
@@ -106,7 +100,7 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
       dayTitle: tx('يوم التنازل بيحصل إيه؟', 'What happens on transfer day?'),
       day: [
         { icon: Building2, t: tx('انت والمشتري في مقر المطور', 'You and the buyer at the developer'), d: tx('ومعاكم مستشار من عندنا', 'With one of our advisors') },
-        { icon: Banknote, t: tx('تستلم شيك مصرفي', 'You receive a bank cheque'), d: tx('بالمقدم ناقص العربون اللي استلمته', 'For the down payment minus the deposit you received') },
+        { icon: Banknote, t: tx('تستلم شيك مصرفي', 'You receive a bank cheque'), d: tx('بإجمالي اللي سددته من تمن الوحدة طبقًا للعقد، مخصوم منه قيمة ضريبة التصرفات العقارية اللي استلمتها', 'For the total you paid towards the unit price per the contract, minus the disposal tax value you received') },
         { icon: FileSignature, t: tx('توقيع الطرفين على عقد التنازل', 'Both parties sign the transfer contract'), d: tx('عند المطور', 'At the developer') },
         { icon: Undo2, t: tx('شيكاتك القديمة بترجعلك', 'Your old cheques come back'), d: tx('في نفس اليوم', 'The same day') },
       ],
@@ -122,11 +116,12 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
       ],
       rules: [
         { icon: Banknote, t: tx('تدفع اللي البايع دفعه بس', 'Pay only what the seller paid'), d: tx('والباقي أقساط للمطور بنفس نظامها القديم.', 'The rest continues as installments to the developer.') },
-        { icon: HandCoins, t: tx(`العربون ${dep}%`, `Deposit: ${dep}%`), d: tx(`${dep}% من سعر الوحدة، بتدفعها للبايع يوم وعد البيع، وبتتخصم من شيك المقدم.`, `${dep}% of the unit price, paid to the seller on the day of the promise of sale, and taken off the down-payment cheque.`) },
-        { icon: Percent, t: tx(`عمولتنا ${fee}% من سعر الوحدة`, `Our fee is ${fee}% of the unit price`), d: tx('بشيك مصرفي، وبتتدفع بس لو التنازل تم. لو ما تمش لأي سبب، مفيش عمولة على حد.', "By bank cheque, and only if the transfer completes. If it doesn't, for any reason, nobody pays a fee.") },
+        { icon: HandCoins, t: tx('التصرفات العقارية', 'Disposal tax'), d: tx('بتدفع قيمة الضريبة للبايع وقت توقيع عقد وعد البيع، نقدًا أو بشيك مصرفي، وبتتخصم من الشيك المصرفي وقت التنازل.', 'You pay the tax value to the seller when the promise of sale is signed, in cash or by bank cheque, and it comes off the bank cheque at the transfer.') },
+        { icon: Percent, t: tx(`عمولتنا ${fee}% من إجمالي قيمة الوحدة طبقًا للعقد`, `Our fee is ${fee}% of the total unit value per the contract`), d: tx('بشيك مصرفي في جلسة إتمام التنازل عند المطور. لو التنازل ما تمش لأي سبب، مفيش عمولة على حد.', "By bank cheque at the transfer session at the developer. If the transfer doesn't complete, for any reason, nobody pays a fee.") },
         { icon: Receipt, t: tx('رسوم التنازل على المشتري', 'Transfer fee is on the buyer'), d: tx('رسوم التنازل عند المطور بيدفعها المشتري، وقيمتها بتختلف حسب المطور.', "The developer's transfer fee is paid by the buyer; the amount differs by developer.") },
         { icon: Eye, t: tx('إنك تقول مهتم ببلاش', 'Showing interest is free'), d: tx('اضغط "مهتم بالشراء" من صفحة الوحدة وفريقنا يكلّمك يكمّل معاك.', 'Tap "Interested in buying" on the unit page and our team calls you to go ahead.') },
         { icon: FileSignature, t: tx('وعد بيع مكتوب', 'A written promise of sale'), d: tx('لما تتفق مع البايع بيتكتب بينكم وعد بيع في مقر شركتنا، فيه كل البنود الخاصة بالوحدة والسعر.', 'Once you agree with the seller, you both sign a promise of sale at our office, with all unit terms and the price.') },
+        { icon: FileCheck2, t: tx('صور الشيكات للمراجعة', 'Cheque copies for review'), d: tx('بعد توقيع عقد وعد البيع بتبعت للشركة صورة الشيك المصرفي الخاص بمستحقات البايع وصورة شيك العمولة للمراجعة.', "After signing the promise of sale, you send the company a copy of the bank cheque for the seller's dues and a copy of the fee cheque for review.") },
         { icon: AlertTriangle, t: tx('المتأخرات مش عليك', "Overdues aren't on you"), d: tx('بتتسدد للمطور يوم التنازل وتتخصم من البايع.', "They're settled on transfer day and deducted from the seller.") },
         { icon: FileSignature, t: tx('العقد بيبقى باسمك', 'The contract becomes yours'), d: tx('بعد التنازل العقد والشيكات الجديدة باسمك.', 'After transfer, the contract and new cheques are in your name.') },
         { icon: Undo2, t: tx('تقدر تنسحب', 'You can withdraw'), d: tx('تقدر تنسحب في أي وقت قبل توقيع عقد وعد البيع.', 'You can back out any time before signing the promise of sale.') },
@@ -138,11 +133,11 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
       dayTitle: tx('يوم التنازل بيحصل إيه؟', 'What happens on transfer day?'),
       day: [
         { icon: Building2, t: tx('انت والبايع في مقر المطور', 'You and the seller at the developer'), d: tx('ومعاكم مستشار من عندنا', 'With one of our advisors') },
-        { icon: Banknote, t: tx('تسلّم البايع شيك مصرفي', 'You hand the seller a bank cheque'), d: tx('بالمقدم ناقص العربون اللي دفعته', 'For the down payment minus the deposit you paid') },
+        { icon: Banknote, t: tx('تسلّم البايع شيك مصرفي', 'You hand the seller a bank cheque'), d: tx('بإجمالي اللي البايع سدده من تمن الوحدة طبقًا للعقد، مخصوم منه قيمة ضريبة التصرفات العقارية اللي دفعتها', 'For the total the seller paid towards the unit price per the contract, minus the disposal tax value you paid') },
         { icon: Receipt, t: tx('مصاريف التنازل', 'Transfer fees'), d: tx('بتدفعها عند المطور', 'You pay them at the developer') },
         { icon: FileSignature, t: tx('توقيع الطرفين على عقد التنازل', 'Both parties sign the transfer contract'), d: tx('عند المطور', 'At the developer') },
         { icon: KeyRound, t: tx('دفتر شيكات جديد', 'A new cheque book'), d: tx('باسمك، عشان تكمّل الأقساط', 'In your name, to continue the plan') },
-        { icon: Percent, t: tx('عمولتنا بشيك مصرفي تاني', 'Our fee by a second bank cheque'), d: tx(`${fee}% من إجمالي قيمة الوحدة، بعد التنازل`, `${fee}% of the total unit value, after the transfer`) },
+        { icon: Percent, t: tx('عمولتنا', 'Our fee'), d: tx(`${fee}% من إجمالي قيمة الوحدة طبقًا للعقد، بشيك مصرفي بتسلّمه لمندوب الشركة في جلسة إتمام التنازل عند المطور`, `${fee}% of the total unit value per the contract, by bank cheque handed to our representative at the transfer session at the developer`) },
       ],
       dayCols: 'lg:grid-cols-3',
       cta: { label: tx('تصفح الوحدات', 'Browse units'), page: 'opportunities' },
@@ -160,7 +155,7 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
         { icon: Banknote, t: tx('الفرق بشيك مصرفي', 'The difference by bank cheque'), d: tx('بيستلمه صاحب الوحدة الأعلى سعرًا في مقر المطور.', 'The pricier side receives it at the developer.') },
         { icon: Repeat, t: tx('في نفس اليوم', 'On the same day'), d: tx('التنازلين بيتموا في وقت واحد.', 'Both transfers are signed together.') },
         { icon: KeyRound, t: tx('كل واحد يكمّل أقساط اللي خده', 'Each carries on the plan they took'), d: tx('بعد البدل كل مالك بيكمّل أقساط الوحدة اللي بقت بتاعته.', 'After the swap, each owner continues the installments of the unit they took.') },
-        { icon: Percent, t: tx(`عمولتنا ${fee}% على كل طرف`, `Our ${fee}% from each side`), d: tx(`كل مالك بيدفع ${fee}% من سعر الوحدة اللي بياخدها، بشيك مصرفي بعد التنازل.`, `Each owner pays ${fee}% of the price of the unit they take, by bank cheque after the transfer.`) },
+        { icon: Percent, t: tx(`عمولتنا ${fee}% على كل طرف`, `Our ${fee}% from each side`), d: tx(`كل مالك بيدفع ${fee}% من إجمالي قيمة الوحدة اللي بياخدها طبقًا للعقد، والعمولة بشيك مصرفي في جلسة إتمام التنازل عند المطور.`, `Each owner pays ${fee}% of the total value of the unit they take per the contract, paid by bank cheque at the transfer session at the developer.`) },
         { icon: EyeOff, t: tx('سرية بياناتك', 'Your details stay hidden'), d: tx('اسمك ورقمك مش بيظهروا لأي طرف.', 'Nobody sees your name or number.') },
       ],
       forbidden: [
@@ -174,10 +169,10 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
         { icon: Banknote, t: tx('الفرق بشيك مصرفي', 'The difference by bank cheque'), d: tx('لصاحب الوحدة الأعلى سعرًا', 'To the pricier side') },
         { icon: FileSignature, t: tx('توقيع الطرفين على عقدي التنازل', 'Both owners sign the two transfer contracts'), d: tx('عند المطور، في وقت واحد', 'At the developer, at the same time') },
         { icon: KeyRound, t: tx('كل واحد يكمّل الأقساط', 'Each continues the plan'), d: tx('أقساط الوحدة اللي خدها', 'For the unit they took') },
-        { icon: Percent, t: tx('عمولتنا بشيك مصرفي', 'Our fee by bank cheque'), d: tx(`كل طرف يسلّمنا ${fee}% من سعر الوحدة اللي بياخدها بعد التنازل`, `Each side hands us ${fee}% of the price of the unit they take after the transfer`) },
+        { icon: Percent, t: tx('عمولتنا', 'Our fee'), d: tx(`كل طرف بيدفع ${fee}% من إجمالي قيمة الوحدة اللي بياخدها طبقًا للعقد، بشيك مصرفي في جلسة إتمام التنازل عند المطور`, `Each side pays ${fee}% of the total value of the unit they take per the contract, paid by bank cheque at the transfer session at the developer`) },
       ],
       dayCols: 'lg:grid-cols-5',
-      cta: { label: tx('ابدأ البدل', 'Start a swap'), page: 'swap' },
+      cta: { label: tx('بدّل وحدتك', 'Swap your unit'), page: 'swap' },
     },
   };
 
@@ -188,7 +183,7 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
       <RulesTabBar tab={tab} onTabChange={onTabChange} />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-8 sm:py-12">
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-ink">{tx('ضمان حقك', 'Your protection')}</h1>
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-ink">{tx('حقوقك والتزاماتك', 'Rights & duties')}</h1>
         <p className="mt-2 text-muted">{sub}</p>
 
         <div className="mt-8 grid sm:grid-cols-3 gap-4">

@@ -4,12 +4,14 @@ import { RealEstateUnit } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useUnits } from '../context/UnitsContext';
 import {
+  FREQUENCY_OPTIONS,
   cashPrice,
   currency,
   deliveryLabel,
   isDeal,
   money,
   monthlyInstallment,
+  monthsLeft,
   pick,
   savingsAmount,
   sellerDiscount,
@@ -24,6 +26,8 @@ interface UnitCardProps {
   tag?: { label: string; strong?: boolean };
   /** Extra content at the bottom of the card. */
   footer?: React.ReactNode;
+  /** Swap listings: no discount or market saving, just what was paid. */
+  noDiscount?: boolean;
 }
 
 const full = (n: number) => Math.round(n).toLocaleString('en-US');
@@ -32,16 +36,22 @@ const full = (n: number) => Math.round(n).toLocaleString('en-US');
  * A listing at a glance: the cash to hand over, the monthly instalment, where it is and what it is.
  * Everything else (remaining balance, market comparison, terms) lives on the unit page.
  */
-export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, tag, footer }) => {
+export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, tag, footer, noDiscount }) => {
   const { language, tx } = useLanguage();
   const { isUnitSaved, toggleSaveUnit } = useUnits();
   const saved = isUnitSaved(unit.id);
-  const deal = isDeal(unit);
+  const deal = !noDiscount && isDeal(unit);
   const cur = currency(language);
-  const cash = cashPrice(unit);
-  const savings = savingsAmount(unit);
+  const cash = noDiscount ? unit.paidCashAmount : cashPrice(unit);
+  const savings = noDiscount ? 0 : savingsAmount(unit);
   const ready = unit.deliveryStatus === 'استلام فوري';
-  const dealPct = deal && unit.paidCashAmount > 0 ? Math.round((sellerDiscount(unit) / unit.paidCashAmount) * 100) : 0;
+  const frequency = FREQUENCY_OPTIONS.find((f) => f.ar === unit.installmentFrequency);
+
+  const plan = [
+    { l: tx('الباقي من الأقساط', 'Remaining'), v: `${money(unit.remainingAmount, language)} ${cur}` },
+    { l: tx('نوع القسط', 'Installment type'), v: (language === 'ar' ? unit.installmentFrequency : frequency?.en) || '—' },
+    { l: tx('مدة التقسيط', 'Duration'), v: monthsLeft(unit) > 0 ? tx(`${monthsLeft(unit)} شهر`, `${monthsLeft(unit)} months`) : '—' },
+  ];
 
   const specs = [
     unit.bedrooms > 0 && { icon: BedDouble, v: String(unit.bedrooms), l: tx('غرف', 'beds') },
@@ -67,7 +77,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
           {deal && (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-2 text-base font-extrabold text-white shadow-md">
               <Flame className="w-5 h-5 fill-current" />
-              {tx(`خصم ${dealPct}%`, `Deal · ${dealPct}% off`)}
+              {tx(`خصم ${money(sellerDiscount(unit), language)} ${cur}`, `${money(sellerDiscount(unit), language)} ${cur} off`)}
             </span>
           )}
         </div>
@@ -111,7 +121,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
         {/* The numbers a buyer decides on, and when they get the keys */}
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <span className="block text-sm font-semibold text-ink-soft">{tx('كاش دلوقتي', 'Cash now')}</span>
+            <span className="block text-sm font-semibold text-ink-soft">{noDiscount ? tx('المدفوع فيها', 'Paid so far') : tx('كاش دلوقتي', 'Cash now')}</span>
             <span className="num block font-black text-[28px] text-brand-ink leading-tight whitespace-nowrap">
               {full(cash)} <span className="text-base font-bold text-muted">{cur}</span>
             </span>
@@ -130,6 +140,15 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
 <span className="num font-bold text-ink">{money(monthlyInstallment(unit), language)}</span>{' '}
           {tx('قسط/شهر', '/month')}
         </p>
+
+        <dl className="mt-3 grid grid-cols-3 rounded-xl bg-paper border border-line/70 [&>div+div]:border-s [&>div+div]:border-line/70 text-center">
+          {plan.map((p) => (
+            <div key={p.l} className="px-1.5 py-2 min-w-0">
+              <dt className="text-xs text-muted leading-snug">{p.l}</dt>
+              <dd className="num mt-0.5 text-sm font-bold text-ink leading-snug">{p.v}</dd>
+            </div>
+          ))}
+        </dl>
 
         <h3 className="mt-3 font-bold text-xl text-ink line-clamp-1">{pick(language, unit.compound, unit.compoundEn)}</h3>
         <p className="mt-1 text-base text-muted line-clamp-1">
@@ -156,7 +175,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
         {savings > 0 && (
           <div className="mt-auto pt-3">
             <p className="pt-3 border-t border-line/70 text-base font-bold text-emerald-700">
-              {tx(`خصم ${money(savings, language)} ${cur} عن سعر السوق`, `${money(savings, language)} ${cur} below market`)}
+              {tx(`خصم ${money(savings, language)} ${cur} عن سعر السوق تقريبًا`, `About ${money(savings, language)} ${cur} below market`)}
             </p>
           </div>
         )}

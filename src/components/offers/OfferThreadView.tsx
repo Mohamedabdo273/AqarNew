@@ -88,7 +88,7 @@ export const OfferThreadView: React.FC<{ thread: OfferThread; onChange: (t: Offe
         <span className="num text-end font-semibold text-ink">{money(t.askingPrice)}</span>
         {t.role === 'buyer' && (
           <>
-            <span className="text-muted">{tx(`عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة`, `Our fee: ${BRAND.buyerFeePercent}% of the unit price`)}</span>
+            <span className="text-muted">{tx(`عمولتنا ${BRAND.buyerFeePercent}% من إجمالي قيمة الوحدة طبقًا للعقد`, `Our fee: ${BRAND.buyerFeePercent}% of the total unit value per the contract`)}</span>
             <span className="num text-end font-semibold text-ink">{money(t.buyerFee)}</span>
           </>
         )}
@@ -134,8 +134,8 @@ export const OfferThreadView: React.FC<{ thread: OfferThread; onChange: (t: Offe
           <Handshake className="inline w-4 h-4 me-1" />
           {t.role === 'buyer'
             ? tx(
-                `اتفقتوا على ${money(t.agreedPrice)} + عمولتنا ${money(t.buyerFee)} بشيك مصرفي بعد التنازل. فريقنا هيكلمك خلال يوم عمل.`,
-                `Agreed at ${money(t.agreedPrice)} + our ${money(t.buyerFee)} fee by bank cheque after the transfer. We'll call within one business day.`,
+                `اتفقتوا على ${money(t.agreedPrice)} + عمولتنا ${money(t.buyerFee)} بشيك مصرفي في جلسة إتمام التنازل عند المطور. فريقنا هيكلمك خلال يوم عمل.`,
+                `Agreed at ${money(t.agreedPrice)} + our ${money(t.buyerFee)} fee, paid by bank cheque at the transfer session at the developer. We'll call within one business day.`,
               )
             : tx(
                 `اتفقتوا على ${money(t.agreedPrice)}. فريقنا هيكلمك خلال يوم عمل يرتب الخطوات.`,
@@ -193,7 +193,7 @@ export const OfferThreadView: React.FC<{ thread: OfferThread; onChange: (t: Offe
           {t.role === 'buyer' && (
             <p className="text-xs text-muted text-center">
               {/* The fee is on the unit's contract price, so it doesn't move with the offer. */}
-              {tx(`+ عمولتنا ${money(t.buyerFee)} (${BRAND.buyerFeePercent}% من سعر الوحدة) بشيك مصرفي بعد التنازل`, `+ our ${money(t.buyerFee)} fee (${BRAND.buyerFeePercent}% of the unit price) by bank cheque after the transfer`)}
+              {tx(`+ عمولتنا ${money(t.buyerFee)} (${BRAND.buyerFeePercent}% من إجمالي قيمة الوحدة طبقًا للعقد) بشيك مصرفي في جلسة إتمام التنازل عند المطور`, `+ our ${money(t.buyerFee)} fee (${BRAND.buyerFeePercent}% of the total unit value per the contract), paid by bank cheque at the transfer session at the developer`)}
             </p>
           )}
           <div className="flex gap-2">

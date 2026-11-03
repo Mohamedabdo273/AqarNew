@@ -227,7 +227,6 @@ export default function App() {
             }}
             onNavigate={handleNavigate}
             onSelectUnit={openUnit}
-            onOpenRules={openRules}
             onOpenDeals={openDeals}
             onSearch={searchFromHome}
           />

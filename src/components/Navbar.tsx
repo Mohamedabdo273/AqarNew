@@ -73,7 +73,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
   const buy: Link = { id: 'opportunities', label: tx('اشتري', 'Buy'), icon: Search };
   const sell: Link = { id: 'sell', label: tx('اعرض وحدتك', 'List your unit'), icon: Tag };
   const swap: Link = { id: 'swap', label: tx('بدّل وحدتك', 'Swap'), icon: Repeat };
-  const rules: Link = { id: 'rules', label: tx('ضمان حقك', 'Your protection'), icon: ShieldCheck };
+  const rules: Link = { id: 'rules', label: tx('حقوقك والتزاماتك', 'Rights & duties'), icon: ShieldCheck };
   const contact: Link = { id: 'contact', label: tx('كلمنا', 'Contact'), icon: Phone };
 
   // Desktop order as asked: list · buy · swap · protection · contact. "about" lives in the footer.
@@ -114,7 +114,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
         <div className="page-wrap h-24 sm:h-28 flex items-center justify-between gap-3 sm:gap-5">
           <Logo onClick={() => go('home')} />
 
-          <nav className="hidden lg:flex items-center gap-1">
+          <nav className="hidden xl:flex items-center gap-1">
             {desktop.map((l) => (
               <button
                 key={l.id}
@@ -207,8 +207,8 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
               )}
             </div>
 
-            {/* More dropdown: only on desktop (lg:), mobile uses the Menu sheet */}
-            <div className="hidden lg:block relative">
+            {/* More dropdown: only on desktop (xl:), mobile uses the Menu sheet */}
+            <div className="hidden xl:block relative">
               <button
                 onClick={() => setOpenPanel((v) => (v === 'more' ? null : 'more'))}
                 aria-label={tx('المزيد', 'More')}
@@ -269,7 +269,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
             <button
               onClick={() => setMenuOpen(true)}
               aria-label={tx('القائمة', 'Menu')}
-              className="lg:hidden grid place-items-center w-10 h-10 rounded-xl hover:bg-surface border border-line/60 text-ink transition"
+              className="xl:hidden grid place-items-center w-10 h-10 rounded-xl hover:bg-surface border border-line/60 text-ink transition"
             >
               <Menu className="w-5 h-5" />
             </button>
@@ -279,7 +279,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
 
       {/* Mobile menu sheet */}
       {menuOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
+        <div className="fixed inset-0 z-50 xl:hidden" role="dialog" aria-modal="true">
           <div className="absolute inset-0 bg-ink/40" onClick={() => setMenuOpen(false)} />
           <div className="absolute top-0 inset-x-0 max-h-[90vh] overflow-y-auto bg-surface rounded-b-card p-5 shadow-lift">
             <div className="flex items-center justify-between">

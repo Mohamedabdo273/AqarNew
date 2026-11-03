@@ -7,10 +7,8 @@ export const BRAND = {
   hotline: '17143',
   /** International format without "+" — used for wa.me links. */
   whatsapp: '201019330286',
-  /** Platform fee charged to the buyer only, as % of the contract price, paid after the transfer is signed. */
+  /** Platform fee charged to the buyer only, as % of the contract price, paid by bank cheque at the transfer session at the developer. */
   buyerFeePercent: 1.25,
-  /** Deposit on the unit price: the buyer pays it to the seller on the day of the promise of sale. */
-  depositPercent: 2.5,
   /** Prefix for listing / request codes shown to users. */
   codePrefix: 'WHD',
   /** Home hero background. Placeholder stock photo — swap for a real photo of a compound or one of our units. */

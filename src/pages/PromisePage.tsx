@@ -26,13 +26,8 @@ interface Section {
 export const PromisePage: React.FC<PromisePageProps> = ({ tab, onTabChange, onNavigate }) => {
   const { tx } = useLanguage();
   const fee = BRAND.buyerFeePercent;
-  const dep = BRAND.depositPercent;
 
   const parties = (d: string, dEn: string): Clause => ({ t: tx('بيانات الأطراف', 'The parties'), d: tx(d, dEn), proposed: true });
-  const ourRole: Clause = {
-    t: tx('إحنا طرف تالت كوسيط بس', "We're the third party, only as intermediary"),
-    d: tx('بنوقّع على عقد وعد البيع معاكم، ودورنا نرتب التواصل وميعاد التنازل. مش بايع ولا مشتري ولا ضامن للمطور أو للوحدة، ومش بنستلم ثمن الوحدة.', "We sign the promise of sale with you, and we arrange contact and the transfer appointment. We're not the seller, the buyer or a guarantor of the developer or the unit, and we don't hold the purchase money."),
-  };
   const breach: Clause = {
     t: tx('لو حد رجع في كلامه بعد التوقيع', 'If someone backs out after signing'),
     d: tx('عقد وعد البيع بيحدد مهلة التنفيذ واللي يترتب على التراجع. لسه محتاج قرار من المحامي.', 'The promise of sale sets the deadline and what follows from backing out. Still needs a decision from the lawyer.'),
@@ -48,7 +43,7 @@ export const PromisePage: React.FC<PromisePageProps> = ({ tab, onTabChange, onNa
   const term: Clause = { t: tx('مدة عقد وعد البيع', 'Promise of sale term'), d: tx('ساري لحد تاريخ بيتكتب فيه، أو لحد ما إجراءات التنازل تخلص عند المطور.', 'Valid until a date written in it, or until the transfer is completed at the developer.') };
   const otherCosts: Clause = {
     t: tx('المصاريف التانية', 'Other costs'),
-    d: tx('فروق الصيانة، وزيادة وديعة الصيانة، والضرايب العقارية لحد التسليم، ورسوم نقل الملكية. عقد وعد البيع فيه جدول بيحدد مين عليه كل بند، والطرفين بيوقّعوا عليه.', 'Maintenance differences, any maintenance deposit increase, property taxes up to delivery and ownership transfer fees. A table in the promise of sale says who pays each, and both sides sign it.'),
+    d: tx('فروق الصيانة، وزيادة وديعة الصيانة، ورسوم نقل الملكية، والضرايب العقارية لحد إتمام إجراءات التنازل لدى المطور. عقد وعد البيع فيه جدول بيحدد مين عليه كل بند، والطرفين بيوقّعوا عليه.', 'Maintenance differences, any maintenance deposit increase, ownership transfer fees, and property taxes up to the completion of the transfer at the developer. A table in the promise of sale says who pays each, and both sides sign it.'),
   };
   const contractRules: Section = {
     title: tx('قواعد عقد وعد البيع', 'Promise of sale rules'),
@@ -65,11 +60,11 @@ export const PromisePage: React.FC<PromisePageProps> = ({ tab, onTabChange, onNa
       {
         title: tx('بيتكتب فيه إيه؟', "What's in it?"),
         clauses: [
-          { t: tx('بيانات الأطراف', 'The parties'), d: tx('البايع والمشتري: الاسم والرقم القومي والعنوان، وكل واحد بيقر إن له حق التعاقد ومفيش قانون مانعه من التصرف. وشركتنا طرف تالت كوسيط.', 'Seller and buyer: name, national ID and address, each confirming they can legally contract and that no law bars them from doing so. Our company is the third party, as intermediary.') },
-          { t: tx('بيانات الوحدة', 'The unit'), d: tx('رقم الوحدة والمشروع والمطور والمساحة.', 'Unit number, project, developer and area.') },
+          { t: tx('بيانات الأطراف', 'The parties'), d: tx('البايع والمشتري: الاسم والرقم القومي والعنوان، وكل واحد بيقر إن له حق التعاقد ومفيش قانون مانعه من التصرف.', 'Seller and buyer: name, national ID and address, each confirming they can legally contract and that no law bars them from doing so.') },
+          { t: tx('بيانات الوحدة', 'The unit'), d: tx('اسم المطور، اسم المشروع، المنطقة، نوع الوحدة ورقمها، تفاصيل الوحدة طبقًا لعقد الوحدة.', 'Developer name, project name, area, unit type and number, and unit details per the unit contract.') },
           { t: tx('السعر', 'The price'), d: tx('المبلغ اللي البايع دفعه ناقص أي خصم متفق عليه، من غير أوفر برايس.', 'What the seller paid, less any agreed discount. No overprice.') },
-          { t: tx(`العربون ${dep}%`, `Deposit: ${dep}%`), d: tx(`${dep}% من سعر الوحدة، بتدفعها للبايع يوم توقيع وعد البيع وبتتخصم من شيك المقدم. وتوقيعه على عقد وعد البيع بيبقى إثبات إنه استلمها.`, `${dep}% of the unit price, paid to the seller on the day of signing and taken off the down-payment cheque. Their signature on the promise of sale proves they received it.`) },
-          { t: tx('شيك المقدم', 'The down-payment cheque'), d: tx('شيك مصرفي بقيمة المقدم ناقص العربون، بتسلّمه للبايع يوم التنازل عند المطور.', 'A bank cheque for the down payment minus the deposit, handed to the seller on transfer day at the developer.') },
+          { t: tx('التصرفات العقارية', 'Real-estate disposal tax'), d: tx('هيستلم البايع من المشتري وقت توقيع عقد وعد البيع نقدًا أو بشيك مصرفي قيمة ضريبة التصرفات العقارية، على أن تُخصم هذه القيمة من إجمالي المبلغ المسدد من المشتري للبايع مقابل التنازل عن الوحدة العقارية في مقر المطور.', "When the promise of sale is signed, the seller receives from the buyer, in cash or by bank cheque, the value of the real-estate disposal tax. This amount is deducted from the total the buyer pays the seller for the transfer of the unit at the developer's office.") },
+          { t: tx('شيك مصرفي', 'A bank cheque'), d: tx('شيك مصرفي بتسلّمه للبايع في مقر المطور وقت التنازل، بإجمالي اللي سدده من تمن الوحدة طبقًا للعقد، مخصوم منه قيمة ضريبة التصرفات العقارية اللي دفعتها له وقت التوقيع على عقد وعد البيع.', 'A bank cheque you hand the seller at the developer at the transfer, for the total they paid towards the unit price per the contract, minus the disposal tax value you paid them when the promise of sale was signed.') },
           { t: tx('الأقساط الباقية', 'Remaining installments'), d: tx('بتكمّلها للمطور، وبتاخد مكان البايع في كل التزاماته قدام المطور.', "You continue them with the developer, and take the seller's place in all obligations to the developer.") },
           { t: tx('المتأخرات', 'Overdues'), d: tx('بتتسدد للمطور يوم التنازل وتتخصم من البايع.', "They're settled on transfer day and deducted from the seller.") },
           term,
@@ -80,19 +75,19 @@ export const PromisePage: React.FC<PromisePageProps> = ({ tab, onTabChange, onNa
         clauses: [
           { t: tx('معاينة الوحدة', 'Inspecting the unit'), d: tx('بتوافق تستلم الوحدة بالحالة اللي عاينتها عليها. ولو لسه بتتبني، على حسب الرسومات اللي في ورق المطور.', "You accept the unit as you inspected it. If it's still being built, as shown in the developer's drawings.") },
           { t: tx('رسوم التنازل', 'Transfer fee'), d: tx('رسوم التنازل عند المطور عليك، وقيمتها بتختلف حسب المطور.', "The developer's transfer fee is yours; the amount differs by developer.") },
-          { t: tx('عمولتنا', 'Our fee'), d: tx(`شيك مصرفي تاني بـ ${fee}% من إجمالي قيمة الوحدة، بعد التنازل بس.`, `A second bank cheque for ${fee}% of the total unit value, only after the transfer.`) },
+          { t: tx('عمولتنا', 'Our fee'), d: tx(`${fee}% من إجمالي قيمة الوحدة طبقًا للعقد، والعمولة بشيك مصرفي بتسلّمه لمندوب الشركة في جلسة إتمام التنازل عند المطور.`, `${fee}% of the total unit value per the contract, by bank cheque handed to our representative at the transfer session at the developer.`) },
+          { t: tx('صور الشيكات للمراجعة', 'Cheque copies for review'), d: tx('بعد توقيع عقد وعد البيع بتبعت للشركة صورة الشيك المصرفي الخاص بمستحقات البايع وصورة شيك العمولة للمراجعة.', "After signing the promise of sale, you send the company a copy of the bank cheque for the seller's dues and a copy of the fee cheque for review.") },
           { t: tx('دفتر شيكات جديد', 'A new cheque book'), d: tx('بتجيبه يوم التنازل باسمك، عشان تكمّل الأقساط.', 'You bring it on transfer day in your name, to continue the plan.') },
           otherCosts,
         ],
       },
       {
-        title: tx('لو حصل حاجة؟', 'If something changes'),
+        title: tx('سياسة الإلغاء', 'Cancellation policy'),
         clauses: [
           { t: tx('قبل التوقيع', 'Before signing'), d: tx('تقدر تنسحب في أي وقت قبل توقيع عقد وعد البيع.', 'You can back out any time before signing the promise of sale.') },
-          { t: tx('لو انت رجعت بعد التوقيع', 'If you back out after signing'), d: tx('عقد وعد البيع بيتفسخ، والعربون بيروح للبايع كتعويض.', 'The promise of sale is cancelled, and the deposit goes to the seller as compensation.') },
-          { t: tx('لو البايع رجع بعد التوقيع', 'If the seller backs out after signing'), d: tx('عقد وعد البيع بيتفسخ، والبايع بيرجعلك العربون كامل.', 'The promise of sale is cancelled, and the seller returns your full deposit.') },
-          { t: tx('لو المطور اعترض', 'If the developer objects'), d: tx('وعد البيع بيتفسخ، والعربون بيرجعلك، ومحدش بيدفع حاجة للتاني ولا لينا.', 'The promise of sale is cancelled, your deposit comes back, and nobody owes the other side or us anything.') },
-          ourRole,
+          { t: tx('لو غيرت رأيك بعد التوقيع', 'If you change your mind after signing'), d: tx('عقد وعد البيع بيتفسخ، وقيمة ضريبة التصرفات العقارية اللي دفعتها بتبقى من حق البايع كتعويض، بشرط تقديمه أصل إيصال سداد الضريبة للمطور.', 'The promise of sale is cancelled, and the disposal tax value you paid goes to the seller as compensation, provided they present the original receipt for paying the tax to the developer.') },
+          { t: tx('لو البايع رجع بعد التوقيع', 'If the seller backs out after signing'), d: tx('عقد وعد البيع بيتفسخ، والبايع بيرجعلك قيمة ضريبة التصرفات العقارية كاملة.', 'The promise of sale is cancelled, and the seller returns the full disposal tax value to you.') },
+          { t: tx('لو المطور اعترض', 'If the developer objects'), d: tx('وعد البيع بيتفسخ، وقيمة ضريبة التصرفات العقارية بترجعلك، ومحدش بيدفع حاجة للتاني ولا لينا.', 'The promise of sale is cancelled, the disposal tax value comes back to you, and nobody owes the other side or us anything.') },
         ],
       },
       contractRules,
@@ -101,10 +96,10 @@ export const PromisePage: React.FC<PromisePageProps> = ({ tab, onTabChange, onNa
       {
         title: tx('بيتكتب فيه إيه؟', "What's in it?"),
         clauses: [
-          { t: tx('بيانات الأطراف', 'The parties'), d: tx('البايع والمشتري: الاسم والرقم القومي والعنوان، وكل واحد بيقر إن له حق التعاقد ومفيش قانون مانعه من التصرف. وشركتنا طرف تالت كوسيط.', 'Seller and buyer: name, national ID and address, each confirming they can legally contract and that no law bars them from doing so. Our company is the third party, as intermediary.') },
-          { t: tx('بيانات الوحدة', 'The unit'), d: tx('رقم الوحدة والمشروع والمطور والمساحة.', 'Unit number, project, developer and area.') },
+          { t: tx('بيانات الأطراف', 'The parties'), d: tx('البايع والمشتري: الاسم والرقم القومي والعنوان، وكل واحد بيقر إن له حق التعاقد ومفيش قانون مانعه من التصرف.', 'Seller and buyer: name, national ID and address, each confirming they can legally contract and that no law bars them from doing so.') },
+          { t: tx('بيانات الوحدة', 'The unit'), d: tx('اسم المطور، اسم المشروع، المنطقة، نوع الوحدة ورقمها، تفاصيل الوحدة طبقًا لعقد الوحدة.', 'Developer name, project name, area, unit type and number, and unit details per the unit contract.') },
           { t: tx('السعر', 'The price'), d: tx('اللي دفعته ناقص أي خصم توافق عليه. ما ينفعش يزيد عن اللي دفعته.', 'What you paid, less any discount you agree. It can never go above what you paid.') },
-          { t: tx(`العربون ${dep}%`, `Deposit: ${dep}%`), d: tx(`${dep}% من سعر الوحدة، بتستلمها من المشتري يوم توقيع وعد البيع. وتوقيعك على عقد وعد البيع بيبقى إثبات إنك استلمتها.`, `${dep}% of the unit price, received from the buyer on the day of signing. Your signature on the promise of sale proves you received it.`) },
+          { t: tx('التصرفات العقارية', 'Real-estate disposal tax'), d: tx('هيستلم البايع من المشتري وقت توقيع عقد وعد البيع نقدًا أو بشيك مصرفي قيمة ضريبة التصرفات العقارية، على أن تُخصم هذه القيمة من إجمالي المبلغ المسدد من المشتري للبايع مقابل التنازل عن الوحدة العقارية في مقر المطور.', "When the promise of sale is signed, the seller receives from the buyer, in cash or by bank cheque, the value of the real-estate disposal tax. This amount is deducted from the total the buyer pays the seller for the transfer of the unit at the developer's office.") },
           { t: tx('المتأخرات', 'Overdues'), d: tx('أي أقساط متأخرة أو غرامات بتتكتب، وبتتخصم منك يوم التنازل.', 'Any overdue installments or fines are listed, and deducted from you on transfer day.') },
           term,
         ],
@@ -117,26 +112,25 @@ export const PromisePage: React.FC<PromisePageProps> = ({ tab, onTabChange, onNa
           { t: tx('الوحدة خالصة', 'A clear unit'), d: tx('بتقر إن الوحدة ملكك، ومفيش عليها رهن أو حق لحد تاني أو نزاع، وبتضمن نقل الملكية للمشتري.', 'You confirm the unit is yours, with no mortgage, third-party right or dispute, and you guarantee the transfer of ownership.') },
           { t: tx('الالتزامات القديمة', 'Earlier obligations'), d: tx('أي مبالغ مستحقة على الوحدة لحد تاريخ البيع عليك انت.', 'Anything owed on the unit up to the sale date is on you.') },
           { t: tx('ما تبيعش لحد تاني', "Don't sell elsewhere"), d: tx('ما تبيعش الوحدة لحد تاني وهي في مرحلة اتفاق من غير ما تبلّغنا.', "Don't sell the unit elsewhere during an agreement stage without telling us.") },
-          { t: tx('أصل العقد والمستندات', 'Original contract and documents'), d: tx('بتسلّمهم للمشتري عشان يتم التنازل، ومش قبل كده. وما تسلّمش أصل العقد أو الشيكات لحد قبل التنازل.', "You hand them to the buyer to complete the transfer, and not before. Don't give anyone the original contract or cheques before the transfer.") },
+          { t: tx('أصل عقد الوحدة والمستندات', 'Original unit contract and documents'), d: tx('أصل عقد الوحدة والمستندات بيتم الاطلاع عليهم ومراجعتهم عند التوقيع على عقد وعد البيع. بتسلّم المشتري أصل عقد الوحدة والمستندات وقت التنازل عند المطور، مش قبل كده.', 'The original unit contract and documents are viewed and reviewed when the promise of sale is signed. You hand them to the buyer at the transfer at the developer, not before.') },
           otherCosts,
         ],
       },
       {
-        title: tx('هتاخد إيه؟', 'What you get'),
+        title: tx('ليك إيه؟', "What's yours"),
         clauses: [
-          { t: tx('شيك مصرفي', 'A bank cheque'), d: tx('بقيمة المقدم ناقص العربون اللي استلمته، بتقبضه في مقر المطور يوم التنازل.', 'For the down payment minus the deposit you received, paid at the developer on transfer day.') },
-          { t: tx('شيكاتك القديمة', 'Your old cheques'), d: tx('بترجعلك في نفس اليوم.', 'Returned the same day.') },
+          { t: tx('شيك مصرفي', 'A bank cheque'), d: tx('شيك مصرفي بتستلمه من المشتري في مقر المطور وقت التنازل، بإجمالي اللي سددته من تمن الوحدة طبقًا للعقد، مخصوم منه ضريبة التصرفات العقارية اللي استلمتها وقت التوقيع على عقد وعد البيع.', 'A bank cheque you receive from the buyer at the developer at the transfer, for the total you paid towards the unit price per the contract, minus the disposal tax you received when the promise of sale was signed.') },
+          { t: tx('شيكاتك المتبقية', 'Your remaining cheques'), d: tx('شيكاتك المتبقية بتستلمها من المطور وقت التنازل، والمشتري بيقدم شيكات جديدة بنفس المبالغ ونفس مدد السداد.', 'You collect your remaining cheques from the developer at the transfer, and the buyer provides new cheques for the same amounts and the same payment periods.') },
           { t: tx('صفر عمولة', 'Zero fee'), d: tx('مش هتدفع لينا ولا جنيه.', "You don't pay us anything.") },
         ],
       },
       {
-        title: tx('لو حصل حاجة؟', 'If something changes'),
+        title: tx('سياسة الإلغاء', 'Cancellation policy'),
         clauses: [
           { t: tx('قبل التوقيع', 'Before signing'), d: tx('تقدر تشيل إعلانك في أي وقت ومن غير تكلفة.', 'You can remove your listing any time, free.') },
-          { t: tx('لو انت رجعت بعد التوقيع', 'If you back out after signing'), d: tx('عقد وعد البيع بيتفسخ، وبترجّع للمشتري العربون كامل.', 'The promise of sale is cancelled, and you return the full deposit to the buyer.') },
-          { t: tx('لو المشتري رجع بعد التوقيع', 'If the buyer backs out after signing'), d: tx('عقد وعد البيع بيتفسخ، والعربون بيبقى من حقك كتعويض.', 'The promise of sale is cancelled, and you keep the deposit as compensation.') },
-          { t: tx('لو المطور اعترض', 'If the developer objects'), d: tx('وعد البيع بيتفسخ، والعربون بيرجع للمشتري، ومحدش بيدفع حاجة للتاني ولا لينا.', 'The promise of sale is cancelled, the deposit goes back to the buyer, and nobody owes the other side or us anything.') },
-          ourRole,
+          { t: tx('لو غيرت رأيك بعد التوقيع', 'If you change your mind after signing'), d: tx('عقد وعد البيع بيتفسخ، وبترجّع للمشتري قيمة ضريبة التصرفات العقارية كاملة.', 'The promise of sale is cancelled, and you return the full disposal tax value to the buyer.') },
+          { t: tx('لو المشتري غيّر رأيه بعد التوقيع', 'If the buyer changes their mind after signing'), d: tx('لو المشتري غيّر رأيه بعد توقيع عقد وعد البيع، قيمة ضريبة التصرفات العقارية اللي استلمتها من حقك كتعويض، بشرط تقديم أصل إيصال سداد الضريبة للمطور.', 'If the buyer changes their mind after signing the promise of sale, the disposal tax value you received is yours as compensation, provided you present the original receipt for paying the tax to the developer.') },
+          { t: tx('لو المطور اعترض', 'If the developer objects'), d: tx('وعد البيع بيتفسخ، وقيمة ضريبة التصرفات العقارية بترجع للمشتري، ومحدش بيدفع حاجة للتاني ولا لينا.', 'The promise of sale is cancelled, the disposal tax value goes back to the buyer, and nobody owes the other side or us anything.') },
         ],
       },
       contractRules,
@@ -157,26 +151,25 @@ export const PromisePage: React.FC<PromisePageProps> = ({ tab, onTabChange, onNa
         clauses: [
           { t: tx('الفرق بشيك مصرفي', 'The difference by bank cheque'), d: tx('بيستلمه صاحب الوحدة الأعلى سعرًا في مقر المطور.', 'The pricier side receives it at the developer.') },
           { t: tx('الأقساط', 'Installments'), d: tx('بعد البدل كل مالك بيكمّل أقساط الوحدة اللي خدها.', 'After the swap, each owner continues the installments of the unit they took.') },
-          { t: tx('عمولتنا', 'Our fee'), d: tx(`كل مالك بيدفع ${fee}% من سعر الوحدة اللي بياخدها، بشيك مصرفي بعد التنازل.`, `Each owner pays ${fee}% of the price of the unit they take, by bank cheque after the transfer.`) },
+          { t: tx('عمولتنا', 'Our fee'), d: tx(`كل مالك بيدفع ${fee}% من إجمالي قيمة الوحدة اللي بياخدها طبقًا للعقد، والعمولة بشيك مصرفي في جلسة إتمام التنازل عند المطور.`, `Each owner pays ${fee}% of the total value of the unit they take per the contract, paid by bank cheque at the transfer session at the developer.`) },
           { t: tx('رسوم التنازل', 'Transfer fee'), d: tx('مين بيدفع رسوم التنازل عند المطور في البدل؟ لسه محتاج قرار.', "Who pays the developer's transfer fee in a swap? Still needs a decision."), proposed: true },
         ],
       },
       {
-        title: tx('لو حصل حاجة؟', 'If something changes'),
+        title: tx('سياسة الإلغاء', 'Cancellation policy'),
         clauses: [
           { t: tx('قبل التوقيع', 'Before signing'), d: tx('مفيش بدل غير بموافقة المالكين الاتنين. شروط الانسحاب لسه محتاجة قرار.', 'No swap without both owners agreeing. The withdrawal terms still need a decision.'), proposed: true },
           developerRefuses,
           breach,
-          ourRole,
         ],
       },
     ],
   };
 
   const sub: Record<RulesTab, string> = {
-    buyer: tx('لما تتفق مع البايع بيتكتب عقد وعد البيع بينكم في مقر شركتنا، وإحنا طرف تالت فيه كوسيط.', 'Once you agree with the seller, you both sign a promise of sale at our office, with us as the third party, as intermediary.'),
-    seller: tx('لما تتفق مع المشتري بيتكتب عقد وعد البيع بينكم في مقر شركتنا، وإحنا طرف تالت فيه كوسيط.', 'Once you agree with a buyer, you both sign a promise of sale at our office, with us as the third party, as intermediary.'),
-    swap: tx('لما تتفق مع المالك التاني بيتكتب عقد وعد البيع بينكم في مقر شركتنا، وإحنا طرف تالت فيه كوسيط.', 'Once you agree with the other owner, you both sign a promise of sale at our office, with us as the third party, as intermediary.'),
+    buyer: tx('لما يتفق البايع والمشتري بيوقعوا على عقد وعد البيع في مقر شركتنا.', 'Once seller and buyer agree, they sign the promise of sale at our office.'),
+    seller: tx('لما يتفق البايع والمشتري بيوقعوا على عقد وعد البيع في مقر شركتنا.', 'Once seller and buyer agree, they sign the promise of sale at our office.'),
+    swap: tx('لما تتفق مع المالك التاني بيتكتب عقد وعد البيع بينكم في مقر شركتنا.', 'Once you agree with the other owner, you both sign a promise of sale at our office.'),
   };
 
   return (
@@ -207,7 +200,7 @@ export const PromisePage: React.FC<PromisePageProps> = ({ tab, onTabChange, onNa
         <div className="mt-14 flex flex-col sm:flex-row justify-center gap-3">
           <button onClick={() => onNavigate('rules')} className="btn-ghost">
             <ScrollText className="w-5 h-5 text-brand" />
-            {tx('ضمان حقك', 'Your protection')}
+            {tx('حقوقك والتزاماتك', 'Rights & duties')}
           </button>
           <a href={whatsappLink(tx('عندي سؤال عن عقد وعد البيع', 'I have a question about the promise of sale'))} target="_blank" rel="noreferrer" className="btn-ghost">
             <MessageCircle className="w-5 h-5 text-brand" />

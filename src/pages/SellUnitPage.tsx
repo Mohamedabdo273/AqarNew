@@ -7,10 +7,10 @@ import { useUnits } from '../context/UnitsContext';
 import { useAuth } from '../context/AuthContext';
 import { errorText } from '../services/api';
 import { FormError } from '../components/FormError';
-import { PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, CANCELLATION_PENALTY_MIN_RATE, CANCELLATION_PENALTY_RATE, DELIVERY_OPTIONS, cancellationLoss, currency, money } from '../lib/unitHelpers';
+import { PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, CANCELLATION_PENALTY_MIN_RATE, CANCELLATION_PENALTY_RATE, DELIVERY_OPTIONS, FREQUENCY_OPTIONS, cancellationLoss, currency, money } from '../lib/unitHelpers';
 import { baseName, compoundRank, useDeveloperCatalog } from '../lib/developers';
-import { EMPTY_SELL_FORM, SellForm, fitPlace, isValidPhone, netToSeller } from '../lib/sellForm';
-import { CheckBox, Field, FilePick, FilePickMany, MoneyInput, PhotoPick, SearchSelect, Toggle } from '../components/sell/FormBits';
+import { EMPTY_SELL_FORM, MONTHS_PER_PAYMENT, SellForm, fitPlace, isValidPhone, netToSeller } from '../lib/sellForm';
+import { CheckBox, Field, FilePick, FilePickMany, MoneyInput, NumberInput, PhotoPick, SearchSelect, Select, Toggle } from '../components/sell/FormBits';
 import { placeName, useRegions, useSubAreas } from '../lib/places';
 import { whatsappLink } from '../config/brand';
 
@@ -100,6 +100,10 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
       if (!form.contractPrice) e.push(tx('سعر العقد', 'Contract price'));
       if (!form.paidAmount) e.push(tx('المدفوع', 'Amount paid'));
       if (form.paidAmount > form.contractPrice && form.contractPrice) e.push(tx('المدفوع أكبر من سعر العقد', 'Paid is more than contract price'));
+      if (form.paidAmount && form.contractPrice > form.paidAmount) {
+        if (!form.installmentFrequency) e.push(tx('نوع القسط', 'Installment type'));
+        if (!form.installmentsRemainingCount) e.push(tx('عدد الأقساط', 'Number of installments'));
+      }
       if (form.willingToDiscount && !form.discountAmount) e.push(tx('قيمة الخصم', 'Discount amount'));
       if (form.willingToDiscount && form.discountAmount >= form.paidAmount && form.paidAmount) e.push(tx('الخصم أكبر من المدفوع', 'Discount is more than what you paid'));
     }
@@ -122,7 +126,16 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
     backToTop();
   };
 
-  const cleanForm = (): SellForm => ({ ...form, developer: form.developer.trim(), compound: form.compound.trim(), ownerName: form.ownerName.trim() });
+  const cleanForm = (): SellForm => ({
+    ...form,
+    developer: form.developer.trim(),
+    compound: form.compound.trim(),
+    ownerName: form.ownerName.trim(),
+    installmentPeriodYears:
+      form.installmentFrequency && form.installmentsRemainingCount
+        ? Math.ceil((form.installmentsRemainingCount * MONTHS_PER_PAYMENT[form.installmentFrequency]) / 12)
+        : form.installmentPeriodYears,
+  });
 
   const keepDraft = (d: SellDraft | null) => {
     setDraft(d);
@@ -525,6 +538,34 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               <MoneyInput id="paid" value={form.paidAmount} onChange={(n) => set('paidAmount', n)} placeholder="1,500,000" />
             </Field>
           </div>
+          {form.paidAmount > 0 && form.contractPrice > form.paidAmount && (
+            <div className="grid sm:grid-cols-3 gap-4">
+              <Field label={tx('المتبقي من سعر الوحدة', 'Left of the unit price')} htmlFor="left" hint={tx('سعر الوحدة ناقص اللي دفعته', 'Unit price minus what you paid')}>
+                <div className="relative">
+                  <input
+                    id="left"
+                    readOnly
+                    tabIndex={-1}
+                    dir="ltr"
+                    value={(form.contractPrice - form.paidAmount).toLocaleString('en-US')}
+                    className={`field num font-semibold bg-sand-soft cursor-default ${isRTL ? 'pl-16 text-right' : 'pr-16 text-left'}`}
+                  />
+                  <span className={`absolute top-1/2 -translate-y-1/2 ${isRTL ? 'left-4' : 'right-4'} text-sm text-muted`}>{currency(language)}</span>
+                </div>
+              </Field>
+              <Field label={tx('نوع القسط', 'Installment type')} required htmlFor="freq">
+                <Select
+                  id="freq"
+                  options={FREQUENCY_OPTIONS.map((o) => ({ value: o.ar, label: language === 'ar' ? o.ar : o.en }))}
+                  value={form.installmentFrequency}
+                  onChange={(v) => set('installmentFrequency', v)}
+                />
+              </Field>
+              <Field label={tx('عدد الأقساط', 'Number of installments')} required htmlFor="count" hint={tx('الأقساط الباقية', 'Installments left')}>
+                <NumberInput id="count" value={form.installmentsRemainingCount} onChange={(n) => set('installmentsRemainingCount', Math.floor(n))} placeholder="20" />
+              </Field>
+            </div>
+          )}
           <Toggle
             tone="danger"
             label={tx('عليك أقساط متأخرة أو غرامات؟', 'Any overdue installments or fines?')}

@@ -51,7 +51,7 @@ export const isNegotiable = (unit: RealEstateUnit): boolean => !!unit.negotiable
 /** Cash the buyer actually hands over: what the seller paid, less any agreed discount. */
 export const cashPrice = (unit: RealEstateUnit): number => Math.max(0, unit.paidCashAmount - sellerDiscount(unit));
 
-/** Our fee, paid by the buyer after signing: a % of the contract price. */
+/** Our fee, paid by the buyer at the transfer session: a % of the contract price. */
 export const buyerFee = (unit: RealEstateUnit): number => feeOn(unit.originalContractPrice);
 
 /** Our fee on any contract price — e.g. a swapper's own unit, which isn't listed: the other owner pays on it when they take it. */

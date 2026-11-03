@@ -159,8 +159,8 @@ export const OfferPanel: React.FC<{ unitId: string }> = ({ unitId }) => {
             </ol>
             <p className="text-xs text-muted leading-relaxed">
               {tx(
-                `كل طرف عنده 48 ساعة يرد. لو صاحب الوحدة رفض، مش هتقدر تعرض تاني على نفس الوحدة. عمولتنا ${state.buyerFeePercent}% من سعر الوحدة، بشيك مصرفي بعد التنازل بس.`,
-                `Each side has 48 hours to answer. If the owner says no, you can’t offer on this unit again. Our fee is ${state.buyerFeePercent}% of the unit price, by bank cheque, only after the transfer.`,
+                `كل طرف عنده 48 ساعة يرد. لو صاحب الوحدة رفض، مش هتقدر تعرض تاني على نفس الوحدة. عمولتنا ${state.buyerFeePercent}% من إجمالي قيمة الوحدة طبقًا للعقد، والعمولة بشيك مصرفي في جلسة إتمام التنازل عند المطور.`,
+                `Each side has 48 hours to answer. If the owner says no, you can’t offer on this unit again. Our fee is ${state.buyerFeePercent}% of the total unit value per the contract, paid by bank cheque at the transfer session at the developer.`,
               )}
             </p>
 

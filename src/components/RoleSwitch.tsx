@@ -47,12 +47,12 @@ export const useHomeRole = (onHome: boolean) => {
 };
 
 /* "I want to: buy · sell · swap" — pills on the navy bar under the header on the home page. */
-export const RoleSwitch: React.FC<{ role: HomeRole; onChange: (r: HomeRole) => void; labels?: Record<HomeRole, string> }> = ({ role, onChange, labels }) => {
+export const RoleSwitch: React.FC<{ role: HomeRole; onChange: (r: HomeRole) => void }> = ({ role, onChange }) => {
   const { tx } = useLanguage();
   const options: [HomeRole, string, React.ElementType][] = [
-    ['buy', tx('أشتري', 'Buy'), Search],
-    ['sell', tx('أبيع وحدتي', 'Sell my unit'), Tag],
-    ['swap', tx('أبدّل وحدتي', 'Swap my unit'), Repeat],
+    ['buy', tx('اشتري', 'Buy'), Search],
+    ['sell', tx('بيع', 'Sell'), Tag],
+    ['swap', tx('بدّل', 'Swap'), Repeat],
   ];
   return (
     <div role="tablist" aria-label={tx('أنا عاوز', 'I want to')} className="flex w-full sm:w-auto gap-1 sm:gap-1.5"
@@ -71,7 +71,7 @@ export const RoleSwitch: React.FC<{ role: HomeRole; onChange: (r: HomeRole) => v
           }`}
         >
           <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
-          {labels?.[k] ?? label}
+          {label}
         </button>
       ))}
     </div>

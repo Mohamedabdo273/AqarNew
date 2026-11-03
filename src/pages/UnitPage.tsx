@@ -542,7 +542,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
 
           <ul className="card p-4 grid gap-2.5 text-sm">
             {[
-              { icon: Percent, t: tx(`عمولتنا ${BRAND.buyerFeePercent}% من سعر الوحدة، بشيك مصرفي بعد التنازل بس`, `Our fee is ${BRAND.buyerFeePercent}% of the unit price, by bank cheque, only after the transfer`) },
+              { icon: Percent, t: tx(`عمولتنا ${BRAND.buyerFeePercent}% من إجمالي قيمة الوحدة طبقًا للعقد، والعمولة بشيك مصرفي في جلسة إتمام التنازل عند المطور`, `Our fee is ${BRAND.buyerFeePercent}% of the total unit value per the contract, paid by bank cheque at the transfer session at the developer`) },
               { icon: Undo2, t: tx('تقدر تنسحب قبل توقيع عقد وعد البيع', 'You can withdraw before signing the promise of sale') },
               { icon: Eye, t: tx('لما تبعت إنك مهتم بنكلّمك خلال يوم عمل نكمّل الإجراءات', 'Once you send your interest we call within one business day to go ahead') },
             ].map((r) => (
@@ -601,7 +601,7 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
               {isDeal(unit)
                 ? tx(`التوفير شامل خصم صاحب الوحدة (${money(sellerDiscount(unit), language)}). `, `Includes the owner's ${money(sellerDiscount(unit), language)} discount. `)
                 : ''}
-              {tx(`وبعد خصم عمولتنا (${BRAND.buyerFeePercent}% من سعر الوحدة). `, `Net of our fee (${BRAND.buyerFeePercent}% of the unit price). `)}
+              {tx(`وبعد خصم عمولتنا (${BRAND.buyerFeePercent}% من إجمالي قيمة الوحدة طبقًا للعقد). `, `Net of our fee (${BRAND.buyerFeePercent}% of the total unit value per the contract). `)}
               {tx('سعر المطور النهارده تقديري وقت نشر الإعلان.', "Today's developer price is an estimate from when the listing went up.")}
             </p>
           </div>
