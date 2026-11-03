@@ -1442,7 +1442,7 @@ const HowItWorks: React.FC<{ tab: HomeRole }> = ({ tab }) => {
           { illo: IlloKeys, icon: Handshake, t: tx('استلم باسمك', 'Take it over'), d: tx('تنازل رسمي وتكمّل الأقساط', 'Official transfer, continue the plan') },
         ]
       : [
-          { illo: IlloForm, icon: FileCheck2, t: tx('قولنا وحدتك وعاوز إيه', 'Tell us your unit and what you want'), d: tx('اللي دفعته وقسطك، والمنطقة والنوع', 'What you paid, your monthly, area and type') },
+          { illo: IlloForm, icon: FileCheck2, t: tx('قولنا وحدتك وعاوز إيه', 'Tell us your unit and what you want'), d: tx('اللي دفعته وقسطك، والمنطقة والنوع، وتقييمك لإجمالي سعر الوحدة النهارده', "What you paid, your monthly, area and type, and your estimate of the unit's total price today") },
           { illo: IlloPeople, icon: ArrowLeftRight, t: tx('اختار وحدة صاحبها عايز يبدل', 'Pick a unit whose owner wants to swap'), d: tx('وشوف الفرق والقسط الجديد قبل ما تقرر', 'See the difference and the new monthly first') },
           { illo: IlloReview, icon: ShieldCheck, t: tx('ناخد موافقة الطرف التاني', "We get the other owner's OK"), d: tx('ونراجع العقدين الاتنين', 'And check both contracts') },
           { illo: IlloKeys, icon: Handshake, t: tx('تبدلوا في نفس اليوم', 'Swap on the same day'), d: tx('كل واحد يكمّل أقساط اللي خده، والفرق بيتسوّى بينكم', "Each carries on the other's plan; you settle the difference") },
