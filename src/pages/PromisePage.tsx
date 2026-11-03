@@ -48,7 +48,7 @@ export const PromisePage: React.FC<PromisePageProps> = ({ tab, onTabChange, onNa
   const contractRules: Section = {
     title: tx('قواعد عقد وعد البيع', 'Promise of sale rules'),
     clauses: [
-      { t: tx('المكتوب بس هو اللي بيتحسب', 'Only what is written counts'), d: tx('أي اتفاق تاني، مكتوب أو مش مكتوب، مش بيتحسب. وأي تعديل لازم يبقى في ملحق موقّع من الأطراف.', 'Any other agreement, written or not, does not count. Any change needs an annex signed by the parties.') },
+      { t: tx('المكتوب بس هو اللي بيتحسب', 'Only what is written counts'), d: tx('أي اتفاق تاني، شفهي أو مش مكتوب، مش بيتحسب. وأي تعديل لازم يبقى في ملحق موقّع من الأطراف.', 'Any other agreement, spoken or not in writing, does not count. Any change needs an annex signed by the parties.') },
       { t: tx('العناوين', 'Addresses'), d: tx('العنوان المكتوب في عقد وعد البيع هو اللي بتوصل عليه أي إخطارات، ولو غيرته لازم تبلّغ الطرف التاني.', 'Notices go to the address in the promise of sale. If yours changes, tell the other side.') },
       { t: tx('لو حصل خلاف', 'If there is a dispute'), d: tx('بتنظره المحاكم اللي الوحدة في دايرتها.', 'It goes to the courts where the unit is located.') },
       { t: tx('النسخ', 'Copies'), d: tx('كل طرف بياخد نسخة موقّعة من عقد وعد البيع.', 'Each party keeps a signed copy.') },
