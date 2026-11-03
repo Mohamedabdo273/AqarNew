@@ -866,7 +866,7 @@ const HeroSearch: React.FC<{ units: RealEstateUnit[]; mode: HomeRole; onSearch: 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <p className="text-lg font-bold text-ink">
-                  {mode === 'sell' ? tx('بيع وحدتك باللي دفعته', 'Sell your unit for what you paid') : tx('بدّل وحدتك بوحدة تانية', 'Swap your unit for another')}
+                  {mode === 'sell' ? tx('بيع وحدتك وخد اللي دفعته بالكامل كاش من غير خصم ولا مليم', 'Sell your unit and get everything you paid in cash, without a single pound off') : tx('بدّل وحدتك بوحدة تانية', 'Swap your unit for another')}
                 </p>
               </div>
               <button onClick={() => onNavigate(mode === 'sell' ? 'sell' : 'swap')} className="btn-primary h-14 px-8 text-base shrink-0">
