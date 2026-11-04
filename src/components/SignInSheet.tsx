@@ -6,6 +6,8 @@ import { useUnits } from '../context/UnitsContext';
 import { ApiError, errorText } from '../services/api';
 import { FormError } from './FormError';
 import { isValidPhone } from '../lib/sellForm';
+import { COUNTRIES, DEFAULT_NATIONALITY } from '../lib/countries';
+import { PhoneInput } from './PhoneInput';
 
 const RESEND_SECONDS = 60;
 const MIN_PASSWORD = 8;
@@ -17,7 +19,7 @@ type Mode = 'login' | 'register' | 'register-code' | 'forgot' | 'forgot-code';
  * (the phone is proven once by a code); "forgot password" sends a code to set a new one.
  */
 export const SignInSheet: React.FC = () => {
-  const { tx, isRTL } = useLanguage();
+  const { language, tx, isRTL } = useLanguage();
   const { login, startSignUp, finishSignUp, sendResetCode, resetPassword, closeSignIn } = useAuth();
   const { showToast } = useUnits();
   const Back = isRTL ? ArrowRight : ArrowLeft;
@@ -25,6 +27,7 @@ export const SignInSheet: React.FC = () => {
   const [mode, setMode] = useState<Mode>('login');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [nationality, setNationality] = useState(DEFAULT_NATIONALITY);
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [code, setCode] = useState('');
@@ -101,7 +104,7 @@ export const SignInSheet: React.FC = () => {
     };
 
     if (mode === 'login') {
-      if (!phoneOk) return fail(tx('اكتب رقم موبايل مصري صحيح، 11 رقم', 'Enter a valid 11-digit Egyptian mobile'), 'signin-phone');
+      if (!phoneOk) return fail(tx('اكتب رقم موبايل صحيح', 'Enter a valid mobile number'), 'signin-phone');
       if (!password) return fail(tx('اكتب كلمة السر', 'Enter your password'), 'signin-pw');
       return run(async () => {
         await login(cleanPhone, password);
@@ -110,19 +113,19 @@ export const SignInSheet: React.FC = () => {
     }
     if (mode === 'register' || mode === 'forgot-code') {
       if (mode === 'register' && name.trim().length < 2) return fail(tx('اكتب اسمك', 'Enter your name'), 'signin-name');
-      if (mode === 'register' && !phoneOk) return fail(tx('اكتب رقم موبايل مصري صحيح، 11 رقم', 'Enter a valid 11-digit Egyptian mobile'), 'signin-phone');
+      if (mode === 'register' && !phoneOk) return fail(tx('اكتب رقم موبايل صحيح', 'Enter a valid mobile number'), 'signin-phone');
       if (!pwOk) return fail(tx(`كلمة السر لازم تكون ${MIN_PASSWORD} حروف على الأقل`, `Password must be at least ${MIN_PASSWORD} characters`), 'signin-pw');
       if (password !== confirm) return fail(tx('كلمة السر وتأكيدها مش زي بعض', "Passwords don't match"), 'signin-pw2');
     }
     if (mode === 'register') return sendCode(() => startSignUp(name.trim(), cleanPhone, password), 'register-code');
     if (mode === 'forgot') {
-      if (!phoneOk) return fail(tx('اكتب رقم موبايل مصري صحيح، 11 رقم', 'Enter a valid 11-digit Egyptian mobile'), 'signin-phone');
+      if (!phoneOk) return fail(tx('اكتب رقم موبايل صحيح', 'Enter a valid mobile number'), 'signin-phone');
       return sendCode(() => sendResetCode(cleanPhone), 'forgot-code');
     }
     if (!/^\d{4,8}$/.test(code.trim())) return fail(tx('اكتب الكود اللي وصلك', 'Enter the code you received'), 'signin-code');
     if (mode === 'register-code')
       return run(async () => {
-        await finishSignUp(name.trim(), cleanPhone, password, code.trim());
+        await finishSignUp(name.trim(), cleanPhone, password, code.trim(), nationality);
         done(tx(`أهلاً ${name.trim()}`, `Welcome, ${name.trim()}`));
       });
     return run(async () => {
@@ -182,19 +185,15 @@ export const SignInSheet: React.FC = () => {
       <label htmlFor="signin-phone" className="label">
         {tx('رقم الموبايل', 'Mobile')}
       </label>
-      <input
+      <PhoneInput
         id="signin-phone"
         value={phone}
-        onChange={(e) => {
-          setPhone(e.target.value);
+        onChange={(v) => {
+          setPhone(v);
           setError('');
         }}
-        inputMode="tel"
-        dir="ltr"
-        placeholder="01xxxxxxxxx"
         autoComplete="tel"
-        aria-invalid={bad('signin-phone')}
-        className={`field ${isRTL ? 'text-right' : 'text-left'}`}
+        invalid={bad('signin-phone')}
       />
     </div>
   );
@@ -244,6 +243,18 @@ export const SignInSheet: React.FC = () => {
                   {tx('الاسم', 'Name')}
                 </label>
                 <input id="signin-name" value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" aria-invalid={bad('signin-name')} className="field" />
+              </div>
+              <div>
+                <label htmlFor="signin-nationality" className="label">
+                  {tx('الجنسية', 'Nationality')}
+                </label>
+                <select id="signin-nationality" value={nationality} onChange={(e) => setNationality(e.target.value)} className="field">
+                  {COUNTRIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {language === 'ar' ? c.nationalityAr : c.nationalityEn}
+                    </option>
+                  ))}
+                </select>
               </div>
               {phoneInput}
               {pwInput('signin-pw', password, setPassword, tx('كلمة السر', 'Password'), 'new-password')}

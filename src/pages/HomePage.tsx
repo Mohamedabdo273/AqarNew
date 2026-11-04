@@ -328,8 +328,8 @@ export const HomePage: React.FC<HomePageProps> = ({
       line2: tx('بوحدة تناسبك أكتر.', 'for one that fits you better.'),
       lead: tx('عايز وحدة غير اللي معاك؟', 'Want a different unit?'),
       body: tx(
-        'اختار وحدة صاحبها عايز يبدّل، وشوف الفرق والقسط الجديد قبل ما تقرر. بناخد موافقة الطرف التاني ونراجع العقدين، وتبدلوا في نفس اليوم — واللي وحدته أغلى ياخد الفرق.',
-        'Pick a unit whose owner wants to swap and see the difference and new monthly before you decide. We get the other owner’s OK and check both contracts, and you swap the same day — the pricier side gets the difference.',
+        'اختار وحدة صاحبها عايز يبدّل، وشوف القسط الجديد قبل ما تقرر. بنساعدكم في تقييم الوحدتين بسعر النهارده، وبتبدلوا في نفس اليوم — واللي وحدته أعلى ياخد الفرق من الطرف التاني.',
+        'Pick a unit whose owner wants to swap and see the new monthly before you decide. We help you value both units at today\'s price, and you swap the same day — the owner of the pricier unit gets the difference from the other side.',
       ),
       points: [] as string[],
       cards: [
@@ -1293,8 +1293,8 @@ const ThreeWays: React.FC<{ onSell: () => void }> = ({ onSell }) => {
 /* Swap is ours alone — show it with a worked example instead of hiding it in the menu. */
 const SwapFeature: React.FC = () => {
   const { language, tx } = useLanguage();
-  const mine = 1_500_000;
-  const theirs = 2_000_000;
+  const mine = 4_000_000;
+  const theirs = 4_500_000;
   return (
     <section className="bg-sand-soft border-y border-line">
       <div className="page-wrap py-14 sm:py-20 grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
@@ -1310,7 +1310,7 @@ const SwapFeature: React.FC = () => {
         <ul className="mt-6 space-y-3 text-ink-soft">
           {[
             tx('وحدة قسطها أقل لو القسط تقل عليك — أو أكبر، أو في منطقة تانية', 'A lower monthly if yours is too heavy — or bigger, or elsewhere'),
-            tx('الفرق بيتحسب على المدفوع، مش على سعر النهارده', "The difference is on what's paid, not today's price"),
+            tx('الفرق بيتحسب بعد تقييم سعر الوحدتين النهارده، وإحنا بنساعدكم في التقييم', "The difference is worked out after valuing both units at today's price, and we help you with that"),
           ].map((p) => (
             <li key={p} className="flex items-start gap-3">
               <ShieldCheck className="w-5 h-5 text-ink shrink-0 mt-0.5" />
@@ -1323,14 +1323,14 @@ const SwapFeature: React.FC = () => {
       <div className="rounded-card border border-line bg-surface shadow-lift p-5 sm:p-8">
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 sm:gap-5">
           <div className="rounded-xl bg-paper border border-line p-3 sm:p-5">
-            <p className="text-xs sm:text-sm text-muted">{tx('وحدتك — مدفوع فيها', 'Your unit — paid')}</p>
+            <p className="text-xs sm:text-sm text-muted">{tx('وحدتك — سعرها النهارده', "Your unit — today's price")}</p>
             <p className="num font-display mt-2 text-lg sm:text-3xl font-bold text-ink whitespace-nowrap">{money(mine, language)}</p>
           </div>
           <span className="grid place-items-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-brand text-white">
             <ArrowLeftRight className="w-5 h-5" />
           </span>
           <div className="rounded-xl bg-paper border border-line p-3 sm:p-5">
-            <p className="text-xs sm:text-sm text-muted">{tx('وحدة اللي هيبدل معاك — مدفوع فيها', "The other owner's unit — paid")}</p>
+            <p className="text-xs sm:text-sm text-muted">{tx('وحدة اللي هيبدل معاك — سعرها النهارده', "The other owner's unit — today's price")}</p>
             <p className="num font-display mt-2 text-lg sm:text-3xl font-bold text-ink whitespace-nowrap">{money(theirs, language)}</p>
           </div>
         </div>
@@ -1340,7 +1340,7 @@ const SwapFeature: React.FC = () => {
             {money(theirs - mine, language)} <span className="text-sm font-medium text-white/60">{currency(language)}</span>
           </span>
         </div>
-        <p className="mt-3 text-xs text-muted">{tx('مثال توضيحي. وحدته مدفوع فيها أكتر، فانت اللي بتدفعله الفرق — ولو العكس هو اللي بيدفعلك. الفرق الفعلي بيتحدد بعد مراجعة العقدين.', 'Illustrative. Theirs has more paid in, so you pay them the difference — the other way round, they pay you. The actual figure is set after both contracts are reviewed.')}</p>
+        <p className="mt-3 text-xs text-muted">{tx('مثال توضيحي. وحدته سعرها أعلى، فانت اللي بتدفعله الفرق — ولو العكس هو اللي بيدفعلك. الفرق الفعلي بيتحدد بعد تقييم الوحدتين.', 'Illustrative. Theirs is priced higher, so you pay them the difference — the other way round, they pay you. The actual figure is set after both units are valued.')}</p>
       </div>
       </div>
     </section>
@@ -1442,10 +1442,10 @@ const HowItWorks: React.FC<{ tab: HomeRole }> = ({ tab }) => {
           { illo: IlloKeys, icon: Handshake, t: tx('استلم باسمك', 'Take it over'), d: tx('تنازل رسمي وتكمّل الأقساط', 'Official transfer, continue the plan') },
         ]
       : [
-          { illo: IlloForm, icon: FileCheck2, t: tx('قولنا وحدتك وعاوز إيه', 'Tell us your unit and what you want'), d: tx('اللي دفعته وقسطك، والمنطقة والنوع، وتقييمك لإجمالي سعر الوحدة النهارده', "What you paid, your monthly, area and type, and your estimate of the unit's total price today") },
-          { illo: IlloPeople, icon: ArrowLeftRight, t: tx('اختار وحدة صاحبها عايز يبدل', 'Pick a unit whose owner wants to swap'), d: tx('وشوف الفرق والقسط الجديد قبل ما تقرر', 'See the difference and the new monthly first') },
+          { illo: IlloForm, icon: FileCheck2, t: tx('قولنا وحدتك وعاوز إيه', 'Tell us your unit and what you want'), d: tx('اللي دفعته وقسطك، والمنطقة والنوع، وإحنا بنقيّملك إجمالي سعر الوحدة النهارده', "What you paid, your monthly, area and type, and we value the unit's total price today") },
+          { illo: IlloPeople, icon: ArrowLeftRight, t: tx('اختار وحدة صاحبها عايز يبدل', 'Pick a unit whose owner wants to swap'), d: tx('وشوف القسط الجديد قبل ما تقرر', 'See the new monthly first') },
           { illo: IlloReview, icon: ShieldCheck, t: tx('ناخد موافقة الطرف التاني', "We get the other owner's OK"), d: tx('ونراجع العقدين الاتنين', 'And check both contracts') },
-          { illo: IlloKeys, icon: Handshake, t: tx('تبدلوا في نفس اليوم', 'Swap on the same day'), d: tx('كل واحد يكمّل أقساط اللي خده، والفرق بيتسوّى بينكم', "Each carries on the other's plan; you settle the difference") },
+          { illo: IlloKeys, icon: Handshake, t: tx('تبدلوا في نفس اليوم', 'Swap on the same day'), d: tx('التنازل بين الطرفين عند كل مطور. كل واحد بيكمّل أقساط اللي خده، وبيدفع الفرق في نفس اليوم حسب الاتفاق', "The transfer is between both sides at each developer. Each carries on the plan they took and pays the difference the same day, as agreed") },
         ];
 
   return (
@@ -1477,7 +1477,7 @@ const RulesPreview: React.FC<{ role: HomeRole }> = ({ role }) => {
   const { tx } = useLanguage();
   const RULES: Record<HomeRole, { icon: React.ElementType; t: string; d: string }[]> = {
     buy: [
-      { icon: Landmark, t: tx('الدفع في مقر المطوّر', 'Money at the developer'), d: tx('قيمة ضريبة التصرفات العقارية هتدفعها للبايع يوم توقيع عقد وعد البيع، علشان البايع يسددها للمطور ليتم التنازل', 'The disposal tax value, which you pay the seller on the day the promise of sale is signed, so the seller can pay it to the developer and the transfer can go ahead') },
+      { icon: Landmark, t: tx('الدفع في مقر المطوّر', 'Money at the developer'), d: tx('عربون هتدفعه للبايع يوم توقيع عقد وعد البيع، علشان البايع يسدد ضريبة التصرفات العقارية للمطور ليتم التنازل', 'A deposit you pay the seller on the day the promise of sale is signed, so the seller can pay the disposal tax to the developer and the transfer can go ahead') },
       { icon: Ban, t: tx('صفر أوفر برايس', 'Zero overprice'), d: tx('تدفع ما دفعه المالك فقط، دون أي زيادة', 'You pay what the owner paid, not a pound more') },
       { icon: FileText, t: tx('مستندات مُراجَعة', 'Papers checked'), d: tx('احنا بنراجع تفاصيل العقد والإيصال والمديونية قبل الدفع', 'We review the contract details, the receipt and the dues before you pay') },
       { icon: UserCheck, t: tx('من المالك مباشرةً', 'Straight from the owner'), d: tx('بدون وسطاء أو سماسرة', 'No brokers in between') },
@@ -1494,8 +1494,10 @@ const RulesPreview: React.FC<{ role: HomeRole }> = ({ role }) => {
     ],
     swap: [
       { icon: FileText, t: tx('مديونية الوحدتين', "Both units' dues"), d: tx('مكتوبة قبل ما تقرر', 'In writing before you decide') },
-      { icon: Landmark, t: tx('فرق السعر بشيك مصرفي', 'The difference by bank cheque'), d: tx('يستلمه صاحب الوحدة الأعلى سعرًا في مقر المطوّر', 'The pricier side receives it at the developer') },
-      { icon: Percent, t: tx(`عمولتنا ${BRAND.buyerFeePercent}% على كل طرف`, `Our ${BRAND.buyerFeePercent}% from each side`), d: tx('من إجمالي قيمة الوحدة اللي بياخدها طبقًا للعقد، والعمولة بشيك مصرفي في جلسة إتمام التنازل عند المطور', 'Of the total value of the unit they take per the contract, paid by bank cheque at the transfer session at the developer') },
+      { icon: Landmark, t: tx('فرق السعر بشيك مصرفي', 'The difference by bank cheque'), d: tx('يستلمه صاحب الوحدة الأعلى سعرًا من الطرف التاني في جلسة التنازل', 'The owner of the pricier unit receives it from the other side at the transfer session') },
+      { icon: Percent, t: tx(`عمولتنا ${BRAND.buyerFeePercent}% على الطرفين`, `Our ${BRAND.buyerFeePercent}% from both sides`), d: tx('من إجمالي سعر الوحدة، بشيك مصرفي في جلسة التنازل', 'Of the total unit price, by bank cheque at the transfer session') },
+      { icon: Scale, t: tx('تقييم الوحدتين', 'Valuing both units'), d: tx('الفرق بيتحسب بعد سعر الوحدتين النهارده، وإحنا بنساعدكم في التقييم', "The difference is worked out from both units' price today, and we help you value them") },
+      { icon: Receipt, t: tx('فرق ضريبة التصرفات العقارية', 'The disposal tax difference'), d: tx('بيدفعه اللي ضريبته أقل', 'Paid by whoever has the lower tax') },
       { icon: EyeOff, t: tx('سرية بياناتك', 'Your details stay hidden'), d: tx('لا يظهر اسمك أو رقمك لأي طرف', 'Nobody sees your name or number') },
     ],
   };
@@ -1512,7 +1514,7 @@ const RulesPreview: React.FC<{ role: HomeRole }> = ({ role }) => {
         title={role === 'sell' ? tx('قواعد البيع', 'Selling rules') : role === 'swap' ? tx('قواعد البدل', 'Swap rules') : tx('قواعد الشراء', 'Buying rules')}
         sub={SUB[role]}
       />
-      <div className={`mt-8 sm:mt-10 grid grid-cols-2 gap-2 sm:gap-3 ${role === 'swap' ? 'lg:grid-cols-4' : 'lg:grid-cols-3'}`}>
+      <div className="mt-8 sm:mt-10 grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
         {rules.map((r) => (
           <div key={r.t} className="card p-4 sm:p-5 flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
             <span className="grid place-items-center w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-brand-soft text-ink shrink-0">
@@ -1554,18 +1556,19 @@ const Faq: React.FC<{ role: HomeRole }> = ({ role }) => {
     ],
     sell: [
       { q: tx('عليا أقساط متأخرة وغرامات، ينفع أبيع؟', "I'm behind and have fines — can I still sell?"), a: tx('أيوه. بنكتب المتأخرات في الإعلان بصراحة، وبتتخصم من فلوسك يوم التنازل والمشتري يسددها للمطور. مش محتاج تدفع حاجة قبلها.', 'Yes. We list the arrears openly; they come out of your payout on transfer day and the buyer settles them with the developer. Nothing to pay before.') },
-      { q: tx('هسترد فلوسي كلها فعلاً؟', 'Do I really get all my money back?'), a: tx('بتسترد كل اللي دفعته للمطور ناقص ضريبة التصرفات العقارية، ومن غير عمولة عليك. بتستلم قيمة الضريبة من المشتري وقت توقيع عقد وعد البيع، وبتدفعها للمطور.', 'You get back everything you paid the developer minus the disposal tax, with no fee for you. You receive the tax value from the buyer when the promise of sale is signed, and you pay it to the developer.') },
+      { q: tx('هسترد فلوسي كلها فعلاً؟', 'Do I really get all my money back?'), a: tx('بتسترد كل اللي دفعته للمطور ناقص ضريبة التصرفات العقارية، ومن غير عمولة عليك. بتستلم العربون من المشتري وقت توقيع عقد وعد البيع، وبتدفع الضريبة للمطور.', 'You get back everything you paid the developer minus the disposal tax, with no fee for you. You receive the deposit from the buyer when the promise of sale is signed, and you pay the tax to the developer.') },
       { q: tx('لو الأحسن إني أكمّل أقساطي، هتقولولي؟', "If I'm better off keeping my unit, will you say so?"), a: tx('أيوه. كشف الحساب بيقارن كل الاختيارات، ولو الاستمرار أحسن ليك هنقولك ده، ومن غير أي التزام.', 'Yes. The statement compares every option; if keeping it is better for you, we will tell you — no commitment.') },
       { q: tx('حد هيعرف إني ببيع وحدتي؟', 'Will people know I’m selling?'), a: tx('اسمك ورقمك مش بيظهروا في أي مكان. الإعلان فيه بيانات الوحدة بس، وأي مشتري بيكلمنا احنا الأول.', 'Your name and number never appear anywhere. The listing shows the unit only, and buyers contact us first.') },
-      { q: feeQ, a: tx('مفيش عمولة عليك. ورسوم التنازل عند المطور على المشتري. وضريبة التصرفات العقارية عليك، وبتستلم قيمتها من المشتري وقت توقيع عقد وعد البيع وبتدفعها للمطور.', "You pay no fee. The developer's transfer fee is on the buyer. The disposal tax is on you: you receive its value from the buyer when the promise of sale is signed, and you pay it to the developer.") },
+      { q: feeQ, a: tx('مفيش عمولة عليك. ورسوم التنازل عند المطور على المشتري. وضريبة التصرفات العقارية عليك، وبتستلم العربون من المشتري وقت توقيع عقد وعد البيع وبتدفع الضريبة للمطور.', "You pay no fee. The developer's transfer fee is on the buyer. The disposal tax is on you: you receive the deposit from the buyer when the promise of sale is signed, and you pay the tax to the developer.") },
       { q: protectedQ, a: saleProtection },
     ],
     swap: [
-      { q: tx('إزاي البدل بيشتغل؟', 'How does a swap work?'), a: tx('بتختار وحدة صاحبها عايز يبدّل، وبعد موافقة المالكين الاتنين ومراجعة العقدين بتتبدلوا في نفس اليوم في مقر المطور. وكل واحد بيكمّل أقساط الوحدة اللي خدها.', 'Pick a unit whose owner wants to swap. Once both owners agree and both contracts are checked, you swap on the same day at the developer. Each of you carries on the plan of the unit you took.') },
-      { q: tx('الفرق بيتحسب إزاي؟', 'How is the difference worked out?'), a: tx('بيتحسب على المدفوع في الوحدتين، مش على سعر النهارده، واللي وحدته أغلى بياخد الفرق بشيك مصرفي في مقر المطور.', "On what was paid in both units, not today's price. The pricier side receives the difference by bank cheque at the developer.") },
-      { q: tx('كام العمولة؟', 'What is the fee?'), a: tx(`عمولتنا ${BRAND.buyerFeePercent}% على كل طرف من إجمالي قيمة الوحدة اللي بياخدها طبقًا للعقد، والعمولة بشيك مصرفي في جلسة إتمام التنازل عند المطور.`, `Our fee is ${BRAND.buyerFeePercent}% from each side, of the total value of the unit they take per the contract, paid by bank cheque at the transfer session at the developer.`) },
+      { q: tx('إزاي البدل بيشتغل؟', 'How does a swap work?'), a: tx('بتختار وحدة صاحبها عايز يبدّل، وبعد موافقة المالكين الاتنين ومراجعة العقدين بيتم التنازل بين الطرفين في نفس اليوم عند كل مطور. وكل واحد بيكمّل أقساط الوحدة اللي خدها.', 'Pick a unit whose owner wants to swap. Once both owners agree and both contracts are checked, the transfer takes place between both sides on the same day at each developer. Each of you carries on the plan of the unit you took.') },
+      { q: tx('الفرق بيتحسب إزاي؟', 'How is the difference worked out?'), a: tx('بيتحسب بعد تقييم سعر الوحدتين النهارده، وإحنا بنساعدكم في التقييم. واللي وحدته أعلى بياخد الفرق من الطرف التاني بشيك مصرفي في جلسة التنازل.', "It's worked out after valuing both units at today's price, and we help you with that. The owner of the pricier unit gets the difference from the other side by bank cheque at the transfer session.") },
+      { q: tx('مين بيدفع فرق ضريبة التصرفات العقارية؟', 'Who pays the disposal tax difference?'), a: tx('اللي ضريبته أقل بيدفع فرق ضريبة التصرفات العقارية.', 'Whoever has the lower tax pays the disposal tax difference.') },
+      { q: tx('كام العمولة؟', 'What is the fee?'), a: tx(`عمولتنا ${BRAND.buyerFeePercent}% من إجمالي سعر الوحدة على الطرفين، بشيك مصرفي في جلسة التنازل.`, `Our fee is ${BRAND.buyerFeePercent}% of the total unit price from both sides, by bank cheque at the transfer session.`) },
       { q: tx('حد هيعرف إني ببدّل وحدتي؟', 'Will people know I’m swapping?'), a: tx('اسمك ورقمك مش بيظهروا لأي طرف.', 'Nobody sees your name or number.') },
-      { q: protectedQ, a: tx('مفيش بدل غير بموافقة المالكين الاتنين. بنراجع العقدين، ومديونية الوحدتين بتتكتب قبل ما تقرر، والتنازلين بيتموا في وقت واحد في مقر المطور.', 'No swap without both owners agreeing. We check both contracts, both units’ dues are in writing before you decide, and both transfers are signed together at the developer.') },
+      { q: protectedQ, a: tx('مفيش بدل غير بموافقة المالكين الاتنين. بنراجع العقدين، ومديونية الوحدتين بتتكتب قبل ما تقرر، والتنازل بيتم في نفس اليوم عند كل مطور.', 'No swap without both owners agreeing. We check both contracts, both units’ dues are in writing before you decide, and the transfers take place on the same day at each developer.') },
     ],
   };
   const items = QUESTIONS[role];

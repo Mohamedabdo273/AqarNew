@@ -9,6 +9,8 @@ export const BRAND = {
   whatsapp: '201019330286',
   /** Platform fee charged to the buyer only, as % of the contract price, paid by bank cheque at the transfer session at the developer. */
   buyerFeePercent: 1.25,
+  /** Deposit on the total unit value: the buyer pays it to the seller when the promise of sale is signed. */
+  depositPercent: 2.5,
   /** Prefix for listing / request codes shown to users. */
   codePrefix: 'WHD',
   /** Home hero background. Placeholder stock photo — swap for a real photo of a compound or one of our units. */

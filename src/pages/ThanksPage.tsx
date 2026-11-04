@@ -74,9 +74,9 @@ export const ThanksPage: React.FC<ThanksPageProps> = ({ kind, code, unit, sugges
       sub: tx('مستشارك هيكلمك خلال يوم عمل يراجع معاك الأرقام.', 'Your advisor will call within one business day to go over the numbers.'),
       steps: [
         { icon: PhoneCall, t: tx('مكالمة من مستشارك', 'A call from your advisor'), d: tx('خلال يوم عمل', 'Within one business day') },
-        { icon: FileSearch, t: tx('نراجع العقدين', 'We check both contracts'), d: tx('عقد وحدتك وعقد الوحدة الجديدة، والفرق الفعلي', 'Yours and the new one, and the real difference') },
+        { icon: FileSearch, t: tx('نراجع العقدين', 'We check both contracts'), d: tx('وبنساعدكم في تقييم سعر الوحدتين النهارده', "And we help you value both units at today's price") },
         { icon: Users, t: tx('ناخد موافقة الطرف التاني', "We get the other owner's OK"), d: tx('بنعرض عليه وحدتك، واسمك ورقمك مش بيظهروا', 'We show them your unit; your name and number stay hidden') },
-        { icon: Handshake, t: tx('تنازلين مترتبين مع بعض', 'Two transfers, arranged together'), d: tx(`تدفع أو تاخد الفرق بس. عمولتنا ${BRAND.buyerFeePercent}% على كل طرف من إجمالي قيمة الوحدة اللي بياخدها طبقًا للعقد، والعمولة بشيك مصرفي في جلسة إتمام التنازل عند المطور`, `You just settle the difference. Our fee is ${BRAND.buyerFeePercent}% from each side, of the total value of the unit they take per the contract, paid by bank cheque at the transfer session at the developer`) },
+        { icon: Handshake, t: tx('تنازلين مترتبين مع بعض', 'Two transfers, arranged together'), d: tx(`تدفع أو تاخد الفرق بس. عمولتنا ${BRAND.buyerFeePercent}% من إجمالي سعر الوحدة على الطرفين، بشيك مصرفي في جلسة التنازل`, `You just settle the difference. Our fee is ${BRAND.buyerFeePercent}% of the total unit price from both sides, by bank cheque at the transfer session`) },
       ],
     },
     alert: {

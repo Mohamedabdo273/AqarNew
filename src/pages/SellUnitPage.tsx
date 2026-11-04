@@ -10,9 +10,11 @@ import { FormError } from '../components/FormError';
 import { PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, CANCELLATION_PENALTY_MIN_RATE, CANCELLATION_PENALTY_RATE, DELIVERY_OPTIONS, FREQUENCY_OPTIONS, cancellationLoss, currency, money } from '../lib/unitHelpers';
 import { baseName, compoundRank, useDeveloperCatalog } from '../lib/developers';
 import { EMPTY_SELL_FORM, MONTHS_PER_PAYMENT, SellForm, fitPlace, isValidPhone, netToSeller } from '../lib/sellForm';
-import { CheckBox, Field, FilePick, FilePickMany, MoneyInput, NumberInput, PhotoPick, SearchSelect, Select, Toggle } from '../components/sell/FormBits';
+import { CheckBox, Field, FilePick, FilePickMany, MoneyInput, PhotoPick, SearchSelect, Select, Toggle } from '../components/sell/FormBits';
 import { placeName, useRegions, useSubAreas } from '../lib/places';
 import { whatsappLink } from '../config/brand';
+import { COUNTRIES } from '../lib/countries';
+import { PhoneInput } from '../components/PhoneInput';
 
 interface SellUnitPageProps {
   onSubmitted: (code: string) => void;
@@ -84,8 +86,8 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
     const e: string[] = [];
     if (target === 1) {
       if (!form.ownerName.trim()) e.push(tx('اسمك', 'Your name'));
-      if (!isValidPhone(form.ownerPhone)) e.push(tx('موبايل صحيح (01xxxxxxxxx)', 'Valid mobile (01xxxxxxxxx)'));
-      if (form.ownerAltPhone.trim() && !isValidPhone(form.ownerAltPhone)) e.push(tx('رقم تاني صحيح (01xxxxxxxxx)', 'Valid second number (01xxxxxxxxx)'));
+      if (!isValidPhone(form.ownerPhone)) e.push(tx('موبايل صحيح', 'Valid mobile'));
+      if (form.ownerAltPhone.trim() && !isValidPhone(form.ownerAltPhone)) e.push(tx('الرقم اللي تحب نكلمك عليه مش صحيح', "The number you'd like us to call isn't valid"));
     }
     if (target === 2) {
       if (!form.regionId) e.push(tx('المنطقة', 'Area'));
@@ -102,7 +104,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
       if (form.paidAmount > form.contractPrice && form.contractPrice) e.push(tx('المدفوع أكبر من سعر العقد', 'Paid is more than contract price'));
       if (form.paidAmount && form.contractPrice > form.paidAmount) {
         if (!form.installmentFrequency) e.push(tx('نوع القسط', 'Installment type'));
-        if (!form.installmentsRemainingCount) e.push(tx('عدد الأقساط', 'Number of installments'));
+        if (!form.installmentValue) e.push(tx('قيمة القسط', 'Installment amount'));
       }
       if (form.willingToDiscount && !form.discountAmount) e.push(tx('قيمة الخصم', 'Discount amount'));
       if (form.willingToDiscount && form.discountAmount >= form.paidAmount && form.paidAmount) e.push(tx('الخصم أكبر من المدفوع', 'Discount is more than what you paid'));
@@ -126,14 +128,20 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
     backToTop();
   };
 
+  const unitBalance = Math.max(0, form.contractPrice - form.paidAmount);
+  // Round, not ceil: instalments are rounded, so a few pounds over isn't another instalment.
+  const installmentCount = form.installmentValue > 0 ? Math.round(unitBalance / form.installmentValue) : 0;
+
   const cleanForm = (): SellForm => ({
     ...form,
     developer: form.developer.trim(),
     compound: form.compound.trim(),
     ownerName: form.ownerName.trim(),
+    // Worked out here so what the seller sees on this step is what gets saved.
+    installmentsRemainingCount: installmentCount || form.installmentsRemainingCount,
     installmentPeriodYears:
-      form.installmentFrequency && form.installmentsRemainingCount
-        ? Math.ceil((form.installmentsRemainingCount * MONTHS_PER_PAYMENT[form.installmentFrequency]) / 12)
+      form.installmentFrequency && (installmentCount || form.installmentsRemainingCount)
+        ? Math.ceil(((installmentCount || form.installmentsRemainingCount) * MONTHS_PER_PAYMENT[form.installmentFrequency]) / 12)
         : form.installmentPeriodYears,
   });
 
@@ -205,16 +213,16 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
   const catalog = useDeveloperCatalog();
   const developerOptions = useMemo(() => {
     const map = new Map<string, { value: string; label: string; search: string }>();
-    const known = [...catalog].sort((a, b) => {
-      const last = Number(a.id === 'inshaa-other') - Number(b.id === 'inshaa-other');
-      return last || Number(!!b.popular) - Number(!!a.popular) || (b.popular ? 0 : a.nameAr.localeCompare(b.nameAr, 'ar'));
-    });
+    const known = [...catalog].sort((a, b) => Number(!!b.popular) - Number(!!a.popular) || (b.popular ? 0 : a.nameAr.localeCompare(b.nameAr, 'ar')));
     for (const d of known) {
       map.set(baseName(d.nameAr), { value: d.nameAr, label: language === 'ar' ? d.nameAr : d.nameEn || d.nameAr, search: `${d.nameAr} ${d.nameEn} ${d.compounds.map((c) => `${c.ar} ${c.en}`).join(' ')}` });
     }
     for (const u of units) {
       if (u.developer && !map.has(baseName(u.developer))) map.set(baseName(u.developer), { value: u.developer, label: language === 'ar' ? u.developer : u.developerEn || u.developer, search: u.developerEn ?? '' });
     }
+    // "Other developer" isn't a real choice: a seller whose developer isn't listed types the name instead.
+    const other = catalog.find((d) => d.id === 'inshaa-other');
+    if (other) map.delete(baseName(other.nameAr));
     return [...map.values()];
   }, [catalog, units, language]);
   const compoundOptions = useMemo(() => {
@@ -373,25 +381,17 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               <input id="oname" value={form.ownerName} onChange={(e) => set('ownerName', e.target.value)} className="field" />
             </Field>
             <Field label={tx('موبايل (واتساب)', 'Mobile (WhatsApp)')} required htmlFor="ophone">
-              <input
-                id="ophone"
-                value={form.ownerPhone}
-                onChange={(e) => set('ownerPhone', e.target.value)}
-                inputMode="tel"
-                dir="ltr"
-                placeholder="01xxxxxxxxx"
-                className={`field ${isRTL ? 'text-right' : 'text-left'}`}
-              />
+              <PhoneInput id="ophone" value={form.ownerPhone} onChange={(v) => set('ownerPhone', v)} />
             </Field>
-            <Field label={tx('رقم تاني (اختياري)', 'Second number (optional)')} htmlFor="oaltphone">
-              <input
-                id="oaltphone"
-                value={form.ownerAltPhone}
-                onChange={(e) => set('ownerAltPhone', e.target.value)}
-                inputMode="tel"
-                dir="ltr"
-                placeholder="01xxxxxxxxx"
-                className={`field ${isRTL ? 'text-right' : 'text-left'}`}
+            <Field label={tx('الرقم اللي تحب نكلمك عليه', "The number you'd like us to call")} htmlFor="oaltphone">
+              <PhoneInput id="oaltphone" value={form.ownerAltPhone} onChange={(v) => set('ownerAltPhone', v)} />
+            </Field>
+            <Field label={tx('الجنسية', 'Nationality')} required htmlFor="onationality">
+              <Select
+                id="onationality"
+                options={COUNTRIES.map((c) => ({ value: c.code, label: language === 'ar' ? c.nationalityAr : c.nationalityEn }))}
+                value={form.ownerNationality}
+                onChange={(v) => set('ownerNationality', v)}
               />
             </Field>
           </div>
@@ -539,7 +539,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
             </Field>
           </div>
           {form.paidAmount > 0 && form.contractPrice > form.paidAmount && (
-            <div className="grid sm:grid-cols-3 gap-4">
+            <div className="grid sm:grid-cols-2 gap-4">
               <Field label={tx('المتبقي من سعر الوحدة', 'Left of the unit price')} htmlFor="left" hint={tx('سعر الوحدة ناقص اللي دفعته', 'Unit price minus what you paid')}>
                 <div className="relative">
                   <input
@@ -547,7 +547,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
                     readOnly
                     tabIndex={-1}
                     dir="ltr"
-                    value={(form.contractPrice - form.paidAmount).toLocaleString('en-US')}
+                    value={unitBalance.toLocaleString('en-US')}
                     className={`field num font-semibold bg-sand-soft cursor-default ${isRTL ? 'pl-16 text-right' : 'pr-16 text-left'}`}
                   />
                   <span className={`absolute top-1/2 -translate-y-1/2 ${isRTL ? 'left-4' : 'right-4'} text-sm text-muted`}>{currency(language)}</span>
@@ -561,8 +561,19 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
                   onChange={(v) => set('installmentFrequency', v)}
                 />
               </Field>
-              <Field label={tx('عدد الأقساط', 'Number of installments')} required htmlFor="count" hint={tx('الأقساط الباقية', 'Installments left')}>
-                <NumberInput id="count" value={form.installmentsRemainingCount} onChange={(n) => set('installmentsRemainingCount', Math.floor(n))} placeholder="20" />
+              <Field label={tx('قيمة القسط', 'Installment amount')} required htmlFor="instvalue">
+                <MoneyInput id="instvalue" value={form.installmentValue} onChange={(n) => set('installmentValue', n)} placeholder="125,000" />
+              </Field>
+              <Field label={tx('عدد الأقساط الباقية', 'Installments left')} htmlFor="count" hint={tx('المتبقي ÷ قيمة القسط', 'Balance ÷ installment amount')}>
+                <input
+                  id="count"
+                  readOnly
+                  tabIndex={-1}
+                  dir="ltr"
+                  value={installmentCount || ''}
+                  placeholder="—"
+                  className={`field num font-semibold bg-sand-soft cursor-default ${isRTL ? 'text-right' : 'text-left'}`}
+                />
               </Field>
             </div>
           )}

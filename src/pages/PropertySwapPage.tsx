@@ -23,8 +23,8 @@ interface PropertySwapPageProps {
 const PAGE_SIZE = 12;
 
 /**
- * Swap = two owners exchange units: each takes the other's unit and carries on its plan; only the difference in what
- * was paid changes hands. So only units whose owner said "open to swap" are shown — and an advisor gets that owner's
+ * Swap = two owners exchange units: each takes the other's unit and carries on its plan; only the difference between
+ * the two units' prices today changes hands, set once an advisor has helped value both. So only units whose owner said "open to swap" are shown — and an advisor gets that owner's
  * OK on this visitor's unit before anything moves.
  */
 export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSelectUnit, onRequested }) => {
@@ -45,11 +45,6 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
   const resultsTop = useRef<HTMLDivElement>(null);
 
   const myArrears = hasArrears ? arrearsAmount : 0;
-  // What actually comes out of selling theirs: what they paid, less the arrears settled at transfer.
-  const myNet = Math.max(0, myPaid - myArrears);
-  // Both owners pay our fee in a swap, each on the unit they take — so what comes out of this visitor's pocket is the
-  // difference between the two units plus their fee on the unit they're taking.
-  const swapDiff = (u: RealEstateUnit) => u.paidCashAmount - myNet + buyerFee(u);
 
   // "Lower monthly" only means something once we know their current monthly.
   const filterLower = lowerOnly && myMonthly > 0;
@@ -61,35 +56,15 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
         .filter((u) => !wantRegion || u.regionId === wantRegion)
         .filter((u) => !wantType || (wantType === 'residential' ? isResidential(u.propertyType) : u.propertyType === wantType))
         .filter((u) => !filterLower || monthlyInstallment(u) < myMonthly)
-        .sort((a, b) =>
-          filterLower
-            ? monthlyInstallment(a) - monthlyInstallment(b)
-            : myPaid
-              ? Math.abs(swapDiff(a)) - Math.abs(swapDiff(b))
-              : 0,
-        ),
-    [units, wantRegion, wantType, filterLower, myMonthly, myPaid, myNet],
+        .sort((a, b) => (filterLower ? monthlyInstallment(a) - monthlyInstallment(b) : 0)),
+    [units, wantRegion, wantType, filterLower, myMonthly],
   );
 
-  useEffect(() => setPage(1), [wantRegion, wantType, filterLower, myMonthly, myPaid, myArrears]);
+  useEffect(() => setPage(1), [wantRegion, wantType, filterLower, myMonthly]);
 
   const totalPages = Math.max(1, Math.ceil(matches.length / PAGE_SIZE));
   const current = Math.min(page, totalPages);
   const pageItems = matches.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
-
-  const diffTag = (u: RealEstateUnit) => {
-    if (!myPaid) return undefined;
-    const diff = swapDiff(u);
-    return {
-      strong: diff <= 0,
-      label:
-        diff > 0
-          ? tx(`تدفع فرق ${money(diff, language)}`, `You pay ${money(diff, language)}`)
-          : diff < 0
-            ? tx(`تاخد فرق ${money(-diff, language)}`, `You get ${money(-diff, language)}`)
-            : tx('من غير فرق', 'Even swap'),
-    };
-  };
 
   return (
     <div className="page-wrap py-8 sm:py-12">
@@ -101,8 +76,8 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
         <h1 className="mt-4 text-3xl sm:text-4xl font-bold text-ink">{tx('بدّل وحدتك بوحدة قسطها يريحك', 'Swap for a unit whose instalment you can manage')}</h1>
         <p className="mt-3 text-ink-soft leading-relaxed">
           {tx(
-            'لاقي حد عايز يبدل معاك: انت تاخد وحدته وهو ياخد وحدتك، وكل واحد يكمّل أقساط اللي خده. بنوريك بس الوحدات اللي أصحابها عايزين يبدلوا، واللي بيتدفع هو الفرق بس.',
-            "Find an owner who wants to swap with you: you take their unit, they take yours, and each carries on the other's plan. Only units whose owners want to swap are shown, and only the difference changes hands.",
+            'لاقي حد عايز يبدل معاك: انت تاخد وحدته وهو ياخد وحدتك، وكل واحد يكمّل أقساط اللي خده. بنوريك بس الوحدات اللي أصحابها عايزين يبدلوا، واللي بيتدفع هو الفرق بين الوحدتين بس.',
+            "Find an owner who wants to swap with you: you take their unit, they take yours, and each carries on the other's plan. Only units whose owners want to swap are shown, and only the difference between the units changes hands.",
           )}
         </p>
       </div>
@@ -110,14 +85,14 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
       {/* How it works — the questions everyone has before they try it. */}
       <ol className="mt-8 grid sm:grid-cols-3 gap-3">
         {[
-          { icon: ClipboardList, t: tx('قولنا وحدتك وعاوز إيه', 'Tell us your unit and what you want'), d: tx('اللي دفعته وقسطك، والمنطقة والنوع', 'What you paid, your monthly, area and type') },
-          { icon: Search, t: tx('ناخد موافقة الطرف التاني', "We get the other owner's OK"), d: tx('بنعرض عليه وحدتك، ونراجع العقدين', 'We show them your unit and check both contracts') },
+          { icon: ClipboardList, t: tx('قولنا وحدتك وعاوز إيه', 'Tell us your unit and what you want'), d: tx('اللي دفعته وقسطك، والمنطقة والنوع، وإحنا بنقيّملك إجمالي سعر الوحدة النهارده', "What you paid, your monthly, area and type, and we value the unit's total price today") },
+          { icon: Search, t: tx('ناخد موافقة الطرف التاني', "We get the other owner's OK"), d: tx('بنعرض عليه وحدتك، ونراجع العقدين، ونحسب الفرق بعد سعر الوحدتين النهارده', "We show them your unit, check both contracts, and work out the difference from both units' price today") },
           {
             icon: Handshake,
             t: tx('تبدلوا في نفس اليوم', 'Swap on the same day'),
             d: tx(
-              `كل واحد يكمّل أقساط اللي خده، والفرق بيتسوّى بينكم. عمولتنا ${BRAND.buyerFeePercent}% على كل طرف من إجمالي قيمة الوحدة اللي بياخدها طبقًا للعقد، والعمولة بشيك مصرفي في جلسة إتمام التنازل عند المطور`,
-              `Each carries on the other's plan; you settle the difference. Our fee is ${BRAND.buyerFeePercent}% from each side, of the total value of the unit they take per the contract, paid by bank cheque at the transfer session at the developer`,
+              `التنازل بين الطرفين عند كل مطور. كل واحد بيكمّل أقساط اللي خده، وبيدفع الفرق بشيك مصرفي في نفس اليوم حسب الاتفاق. واللي ضريبته أقل بيدفع فرق ضريبة التصرفات العقارية. عمولتنا ${BRAND.buyerFeePercent}% من إجمالي سعر الوحدة على الطرفين في جلسة التنازل`,
+              `The transfer is between both sides at each developer. Each carries on the plan they took and pays the difference by bank cheque the same day, as agreed. Whoever has the lower tax pays the disposal tax difference. Our fee is ${BRAND.buyerFeePercent}% of the total unit price from both sides at the transfer session`,
             ),
           },
         ].map((s, i) => (
@@ -134,7 +109,7 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
       <div className="mt-6 card p-6 sm:p-8 grid lg:grid-cols-[1fr_auto_1fr] gap-6 lg:gap-8 items-start">
         <div className="space-y-4">
           <p className="font-bold text-ink">{tx('وحدتك', 'Your unit')}</p>
-          <Field label={tx('دفعت فيها كام؟', 'Paid so far')} htmlFor="sw-paid" hint={tx('عشان نحسب الفرق', 'To work out the difference')}>
+          <Field label={tx('دفعت فيها كام؟', 'Paid so far')} htmlFor="sw-paid" hint={tx('عشان نراجعه مع العقد', 'To check it against your contract')}>
             <MoneyInput id="sw-paid" value={myPaid} onChange={setMyPaid} placeholder="1,500,000" />
           </Field>
           <Field label={tx('قسطك الشهري دلوقتي كام؟', 'Your monthly instalment now')} htmlFor="sw-monthly" hint={tx('لو بتدفع كل 3 شهور، اقسم على 3', 'If you pay quarterly, divide by 3')}>
@@ -143,7 +118,7 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
           <Field
             label={tx('سعر العقد بتاع وحدتك', "Your unit's contract price")}
             htmlFor="sw-price"
-            hint={tx(`عمولتنا ${BRAND.buyerFeePercent}% على كل طرف من إجمالي قيمة الوحدة اللي بياخدها طبقًا للعقد`, `Our fee is ${BRAND.buyerFeePercent}% from each side, of the total value of the unit they take per the contract`)}
+            hint={tx(`عمولتنا ${BRAND.buyerFeePercent}% من إجمالي سعر الوحدة على الطرفين`, `Our fee is ${BRAND.buyerFeePercent}% of the total unit price from both sides`)}
           >
             <MoneyInput id="sw-price" value={myPrice} onChange={setMyPrice} placeholder="4,000,000" />
           </Field>
@@ -215,7 +190,6 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
                   key={u.id}
                   unit={u}
                   onOpen={onSelectUnit}
-                  tag={diffTag(u)}
                   noDiscount
                   footer={
                     <div className="mt-4 pt-4 border-t border-line space-y-3">
@@ -281,7 +255,6 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
           myPaid={myPaid}
           myArrears={myArrears}
           myPrice={myPrice}
-          diff={myPaid ? swapDiff(target) : null}
           myMonthly={myMonthly}
           onClose={() => setTarget(null)}
           onSent={() => {
@@ -302,12 +275,10 @@ const SwapRequestSheet: React.FC<{
   myArrears: number;
   /** Contract price of the visitor's own unit — the other owner's side of our fee. 0 = not given. */
   myPrice: number;
-  /** New unit's cash, minus what theirs nets, plus their fee on the new unit. null until they enter what they paid. */
-  diff: number | null;
   myMonthly: number;
   onClose: () => void;
   onSent: () => void;
-}> = ({ target, myPaid, myArrears, myPrice, diff, myMonthly, onClose, onSent }) => {
+}> = ({ target, myPaid, myArrears, myPrice, myMonthly, onClose, onSent }) => {
   const { language, tx, isRTL } = useLanguage();
   const { user } = useAuth();
   const [name, setName] = useState(user?.fullName ?? '');
@@ -374,22 +345,10 @@ const SwapRequestSheet: React.FC<{
             <dt className="text-muted">{tx('الوحدة الجديدة', 'New unit')}</dt>
             <dd className="font-semibold text-ink text-end truncate">{pick(language, target.compound, target.compoundEn)}</dd>
           </div>
-          {diff !== null && (
-            <>
-              <div className="flex justify-between gap-3">
-                <dt className="text-muted">
-                  {diff > 0 ? tx('هتدفع فرق', "You'll pay") : diff < 0 ? tx('هتاخد فرق', "You'll get") : tx('الفرق', 'Difference')}
-                </dt>
-                <dd className="num font-semibold text-ink">
-                  {diff === 0 ? tx('من غير فرق', 'Even swap') : `${money(Math.abs(diff), language)} ${currency(language)}`}
-                </dd>
-              </div>
-              <p className="text-xs text-muted leading-relaxed">
-                {tx(`محسوب بعد عمولتنا عليك ${money(myFee, language)} (${BRAND.buyerFeePercent}% من إجمالي قيمة الوحدة اللي هتاخدها طبقًا للعقد)`, `Includes your fee of ${money(myFee, language)} (${BRAND.buyerFeePercent}% of the total value of the unit you take per the contract)`)}
-                {myArrears > 0 && tx(` وبعد متأخراتك ${money(myArrears, language)}`, ` and your ${money(myArrears, language)} arrears`)}
-              </p>
-            </>
-          )}
+          <div className="flex justify-between gap-3">
+            <dt className="text-muted">{tx('الفرق', 'Difference')}</dt>
+            <dd className="font-semibold text-ink text-end">{tx('بيتحدد بعد تقييم الوحدتين', 'Set after valuing both units')}</dd>
+          </div>
           <div className="flex justify-between gap-3">
             <dt className="text-muted">{tx('قسطك الجديد تقريباً', 'New monthly, roughly')}</dt>
             <dd className="num font-semibold text-ink">
@@ -401,13 +360,13 @@ const SwapRequestSheet: React.FC<{
 
         {/* Both owners pay us — say so before they send, not after. */}
         <div className="mt-3 rounded-xl border border-brand/25 bg-brand-soft px-4 py-3 text-sm text-brand-ink leading-relaxed">
-          <p className="font-bold">{tx(`عمولتنا ${BRAND.buyerFeePercent}% على كل طرف من إجمالي قيمة الوحدة اللي بياخدها طبقًا للعقد`, `Our fee: ${BRAND.buyerFeePercent}% from each side, of the total value of the unit they take per the contract`)}</p>
+          <p className="font-bold">{tx(`عمولتنا ${BRAND.buyerFeePercent}% من إجمالي سعر الوحدة على الطرفين`, `Our fee: ${BRAND.buyerFeePercent}% of the total unit price from both sides`)}</p>
           <p className="mt-1">
             {tx('عليك', 'You')}: <span className="num font-semibold">{money(myFee, language)} {currency(language)}</span>
             {' · '}
             {tx('على صاحب الوحدة', 'The other owner')}: <span className="num font-semibold">{theirFee ? `${money(theirFee, language)} ${currency(language)}` : tx(`${BRAND.buyerFeePercent}% من إجمالي قيمة وحدتك طبقًا للعقد`, `${BRAND.buyerFeePercent}% of your unit's total value per the contract`)}</span>
           </p>
-          <p className="mt-1 text-xs">{tx('بتتدفع بشيك مصرفي في جلسة إتمام التنازل عند المطور', 'Paid by bank cheque at the transfer session at the developer')}</p>
+          <p className="mt-1 text-xs">{tx('بتتدفع بشيك مصرفي في جلسة التنازل', 'Paid by bank cheque at the transfer session')}</p>
         </div>
 
         <div className="mt-5 space-y-4">
@@ -442,7 +401,7 @@ const SwapRequestSheet: React.FC<{
           {sending ? tx('بنبعت...', 'Sending...') : tx('ابعت طلب التبديل', 'Send swap request')}
         </button>
         <FormError className="mt-4" messages={sendError} />
-        <p className="mt-3 text-center text-xs text-muted">{tx('الأرقام تقديرية لحد ما نراجع العقدين. مفيش أي التزام دلوقتي.', 'Figures are estimates until both contracts are reviewed. No commitment now.')}</p>
+        <p className="mt-3 text-center text-xs text-muted">{tx('الفرق بيتحسب بعد سعر الوحدتين النهارده، وإحنا بنساعدكم في التقييم. مفيش أي التزام دلوقتي.', "The difference is worked out from both units' price today, and we help you value them. No commitment now.")}</p>
       </form>
     </div>
   );

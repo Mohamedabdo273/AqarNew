@@ -25,7 +25,7 @@ interface AuthContextType {
   /** Sign-up step 1: checks the details and sends a code to the phone. 409 if the phone already has an account. */
   startSignUp: (fullName: string, phone: string, password: string) => Promise<void>;
   /** Sign-up step 2: the code from the phone creates the account and signs in. */
-  finishSignUp: (fullName: string, phone: string, password: string, code: string) => Promise<void>;
+  finishSignUp: (fullName: string, phone: string, password: string, code: string, nationality: string) => Promise<void>;
   /** "Forgot password", step 1: sends a code to the phone. */
   sendResetCode: (phone: string) => Promise<void>;
   /** "Forgot password", step 2: the code sets the new password and signs in. */
@@ -95,8 +95,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     await startRegistration({ fullName, phone, password });
   };
 
-  const finishSignUp = async (fullName: string, phone: string, password: string, code: string) =>
-    signIn(await register({ fullName, phone, password, code }));
+  const finishSignUp = async (fullName: string, phone: string, password: string, code: string, nationality: string) =>
+    signIn(await register({ fullName, phone, password, code, nationality }));
 
   const sendResetCode = async (phone: string) => {
     await requestOtp(phone);

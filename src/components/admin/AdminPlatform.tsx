@@ -598,7 +598,7 @@ export const AdminPlatform: React.FC<AdminPlatformProps> = ({
                           <td className="p-3.5 text-center">
                             <div className="flex items-center justify-center gap-1.5">
                               <a
-                                href={`https://wa.me/2${inq.clientPhone.replace(/\D/g, '')}?text=${encodeURIComponent(
+                                href={`https://wa.me/${inq.clientPhone.startsWith('+') ? '' : '2'}${inq.clientPhone.replace(/\D/g, '')}?text=${encodeURIComponent(
                                   `مرحباً ${inq.clientName}، مع حضرتك مستشار العمليات بمنصة DEAL بخصوص طلبك (${inq.inquiryCode}).`
                                 )}`}
                                 target="_blank"

@@ -1,5 +1,6 @@
 import type { UnitView } from '../types';
 import { categoryOfType } from './unitHelpers';
+import { DEFAULT_NATIONALITY } from './countries';
 import { DeliveryStatus, FinishingType, InstallmentFrequency, PropertyCategory, PropertyType, RealEstateUnit } from '../types';
 
 export type View = 'بحري صريح' | 'بحري شرقي' | 'قبلي' | 'شرقي' | 'غربي';
@@ -28,6 +29,7 @@ export interface SellForm {
   ownerPhone: string;
   /** رقم تاني اختياري نوصل بيه للبايع. */
   ownerAltPhone: string;
+  ownerNationality: string;
   ackOwner: boolean;
   ackNoOverprice: boolean;
   ackDeclareDues: boolean;
@@ -111,6 +113,7 @@ export const EMPTY_SELL_FORM: SellForm = {
   ownerName: '',
   ownerPhone: '',
   ownerAltPhone: '',
+  ownerNationality: DEFAULT_NATIONALITY,
   ackOwner: false,
   ackNoOverprice: false,
   ackDeclareDues: false,
@@ -168,7 +171,8 @@ export const EMPTY_SELL_FORM: SellForm = {
 export const fitPlace = (f: SellForm): SellForm =>
   f.regionId ? f : { ...f, regionId: null, subAreaId: null, districtId: null, region: '', subArea: '', district: '' };
 
-export const isValidPhone = (phone: string) => /^01\d{9}$/.test(phone.replace(/\s/g, ''));
+/** Egyptian as 01xxxxxxxxx, any other country as +<code><number>. */
+export const isValidPhone = (phone: string) => /^(01\d{9}|\+[1-9]\d{7,13})$/.test(phone.replace(/\s/g, ''));
 /** سكني = أي نوع تحت نشاط "سكني". لسه ماختارش نوع → بنعامله سكني (أغلب الوحدات). */
 export const isResidential = (type: PropertyType | '') => !type || categoryOfType(type) === 'سكني';
 

@@ -362,6 +362,7 @@ export interface AccountUser {
   email: string | null;
   role: number;
   isPhoneVerified: boolean;
+  nationality?: string | null;
   avatarUrl: string | null;
   createdAt: string;
 }
@@ -383,7 +384,7 @@ export const startRegistration = (body: { fullName: string; phone: string; passw
   request<{ success: boolean }>('/auth/register/start', json('POST', body));
 
 /** Sign-up, step 2: same details plus the code. */
-export const register = (body: { fullName: string; phone: string; password: string; code: string }) =>
+export const register = (body: { fullName: string; phone: string; password: string; code: string; nationality?: string }) =>
   request<AuthResponse>('/auth/register', json('POST', body));
 
 export const login = (phone: string, password: string) => request<AuthResponse>('/auth/login', json('POST', { phone, password }));

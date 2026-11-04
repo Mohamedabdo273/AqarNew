@@ -594,9 +594,9 @@ export function SearchSelect({
                     setManual(true);
                     pick(query.trim());
                   }}
-                  className="w-full flex items-center gap-2 rounded-lg px-3 py-2 text-start text-xs font-bold text-brand hover:bg-brand-soft/20 transition-colors cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2 rounded-xl min-h-12 px-4 py-2.5 text-base font-bold bg-accent text-white hover:bg-accent-ink transition-colors cursor-pointer"
                 >
-                  <Plus className="w-3.5 h-3.5 shrink-0" />
+                  <Plus className="w-5 h-5 shrink-0" />
                   <span>{customLabel ?? tx('مش موجود؟ اكتب الاسم', "Not listed? Type the name")}</span>
                 </button>
               </li>
