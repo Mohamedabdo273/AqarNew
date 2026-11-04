@@ -1429,23 +1429,23 @@ const HowItWorks: React.FC<{ tab: HomeRole }> = ({ tab }) => {
   const steps =
     tab === 'sell'
       ? [
-          { illo: IlloForm, icon: FileCheck2, t: tx('ابعت بيانات وحدتك', 'Send your unit details'), d: tx('سعر الوحدة واللي دفعته، ونوع القسط وعدد الأقساط', 'Unit price and what you paid, installment type and number of installments') },
-          { illo: IlloReview, icon: ClipboardCheck, t: tx('كشف حساب مجاني', 'Free statement'), d: tx('نراجع العقد والمديونية ونقولك موقفك', 'We check contract and dues, and tell you where you stand') },
-          { illo: IlloPeople, icon: Users, t: tx('نوصلك بمشتري جاد', 'We find a serious buyer'), d: tx('واسمك ورقمك مش بيظهروا', 'Your name and number stay hidden') },
-          { illo: IlloKeys, icon: Handshake, t: tx('تتنازل وتقبض', 'Transfer & get paid'), d: tx('في مقر المطور بشيك مصرفي', 'At the developer, by bank cheque') },
+          { illo: IlloForm, icon: FileCheck2, t: tx('ابعت بيانات وحدتك', 'Send your unit details'), d: tx('المنطقة والمطور والكمبوند، وسعر الوحدة واللي دفعته، ونوع القسط وعدد الأقساط، وصور العقد', 'Area, developer and compound, unit price and what you paid, installment type and number of installments, and contract photos') },
+          { illo: IlloReview, icon: ClipboardCheck, t: tx('كشف حساب مجاني', 'Free statement'), d: tx('هنراجع المستندات والأرقام ونتأكد من صحتها', "We'll review your documents and figures and confirm they're correct") },
+          { illo: IlloPeople, icon: Users, t: tx('نوصلك بمشتري جاد', 'We find a serious buyer'), d: tx('مشترين جادين بنراجع بياناتهم قبل ما يتواصلوا معاك، واسمك ورقمك في سرية تامة', 'Serious buyers whose details we check before they contact you; your name and number stay fully confidential') },
+          { illo: IlloKeys, icon: Handshake, t: tx('تتنازل وتقبض', 'Transfer & get paid'), d: tx(`عقد وعد البيع في مقر شركتنا بعربون ${BRAND.depositPercent}%، والتنازل في مقر المطور، وتقبض باقي فلوسك بشيك مصرفي، وصفر عمولة عليك`, `The promise of sale at our office with a ${BRAND.depositPercent}% deposit, the transfer at the developer, the rest of your money by bank cheque, and zero fee for you`) },
         ]
       : tab === 'buy'
       ? [
-          { illo: IlloForm, icon: Wallet, t: tx('حدد ميزانيتك', 'Set your budget'), d: tx('الكاش اللي معاك والقسط اللي يريحك', 'Your cash and a comfortable monthly') },
-          { illo: IlloPeople, icon: UserCheck, t: tx('قول إنك مهتم بالشراء', 'Say you want to buy'), d: tx('باسمك ورقمك، وإحنا نكلّمك', 'Name and mobile — we call you') },
-          { illo: IlloReview, icon: ShieldCheck, t: tx('اطمن على الورق', 'Check the papers'), d: tx('العقد والمديونية متراجعين', 'Contract & dues verified') },
-          { illo: IlloKeys, icon: Handshake, t: tx('استلم باسمك', 'Take it over'), d: tx('تنازل رسمي وتكمّل الأقساط', 'Official transfer, continue the plan') },
+          { illo: IlloForm, icon: Wallet, t: tx('حدد ميزانيتك', 'Set your budget'), d: tx('الكاش اللي معاك والقسط اللي يريحك، والمنطقة ونوع الوحدة', 'Your cash and a comfortable monthly, the area and unit type') },
+          { illo: IlloPeople, icon: UserCheck, t: tx('قول إنك مهتم بالشراء', 'Say you want to buy'), d: tx('باسمك ورقمك، وإحنا نكلّمك خلال يوم عمل ونرتب مع صاحبها', 'Name and mobile — we call you within one business day and arrange it with the owner') },
+          { illo: IlloReview, icon: ShieldCheck, t: tx('اطمن على الورق', 'Check the papers'), d: tx(`العقد والمديونية متراجعين، وبيتكتب عقد وعد البيع في مقر شركتنا بعربون ${BRAND.depositPercent}% من إجمالي قيمة الوحدة`, `Contract & dues verified, and the promise of sale is signed at our office with a ${BRAND.depositPercent}% deposit on the total unit value`) },
+          { illo: IlloKeys, icon: Handshake, t: tx('استلم باسمك', 'Take it over'), d: tx(`تنازل رسمي في مقر المطور، وتكمّل الأقساط بشيكات جديدة باسمك، وعمولتنا ${BRAND.buyerFeePercent}% في جلسة التنازل`, `Official transfer at the developer, continue the plan with new cheques in your name, and our ${BRAND.buyerFeePercent}% fee at the transfer session`) },
         ]
       : [
           { illo: IlloForm, icon: FileCheck2, t: tx('قولنا وحدتك وعاوز إيه', 'Tell us your unit and what you want'), d: tx('اللي دفعته وقسطك، والمنطقة والنوع، وإحنا بنقيّملك إجمالي سعر الوحدة النهارده', "What you paid, your monthly, area and type, and we value the unit's total price today") },
-          { illo: IlloPeople, icon: ArrowLeftRight, t: tx('اختار وحدة صاحبها عايز يبدل', 'Pick a unit whose owner wants to swap'), d: tx('وشوف القسط الجديد قبل ما تقرر', 'See the new monthly first') },
-          { illo: IlloReview, icon: ShieldCheck, t: tx('ناخد موافقة الطرف التاني', "We get the other owner's OK"), d: tx('ونراجع العقدين الاتنين', 'And check both contracts') },
-          { illo: IlloKeys, icon: Handshake, t: tx('تبدلوا في نفس اليوم', 'Swap on the same day'), d: tx('التنازل بين الطرفين عند كل مطور. كل واحد بيكمّل أقساط اللي خده، وبيدفع الفرق في نفس اليوم حسب الاتفاق', "The transfer is between both sides at each developer. Each carries on the plan they took and pays the difference the same day, as agreed") },
+          { illo: IlloPeople, icon: ArrowLeftRight, t: tx('اختار وحدة صاحبها عايز يبدل', 'Pick a unit whose owner wants to swap'), d: tx('وشوف الفرق والقسط الجديد قبل ما تقرر', 'See the difference and the new monthly before you decide') },
+          { illo: IlloReview, icon: ShieldCheck, t: tx('ناخد موافقة الطرف التاني', "We get the other owner's OK"), d: tx('ونراجع العقدين، ونحسب الفرق بعد سعر الوحدتين النهارده، وبيتكتب عقد وعد البيع في مقر شركتنا', "We check both contracts and work out the difference from both units' price today, and the promise of sale is signed at our office") },
+          { illo: IlloKeys, icon: Handshake, t: tx('تبدلوا في نفس اليوم', 'Swap on the same day'), d: tx(`التنازل بين الطرفين عند كل مطور، وكل واحد بيكمّل أقساط اللي خده. صاحب الوحدة الأعلى سعرًا بياخد الفرق بشيك مصرفي، وعمولتنا ${BRAND.buyerFeePercent}% على الطرفين في جلسة التنازل`, `The transfer is between both sides at each developer, and each carries on the plan they took. The owner of the pricier unit gets the difference by bank cheque, and our ${BRAND.buyerFeePercent}% fee from both sides is paid at the transfer session`) },
         ];
 
   return (

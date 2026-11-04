@@ -91,8 +91,8 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
             icon: Handshake,
             t: tx('تبدلوا في نفس اليوم', 'Swap on the same day'),
             d: tx(
-              `التنازل بين الطرفين عند كل مطور. كل واحد بيكمّل أقساط اللي خده، وبيدفع الفرق بشيك مصرفي في نفس اليوم حسب الاتفاق. واللي ضريبته أقل بيدفع فرق ضريبة التصرفات العقارية. عمولتنا ${BRAND.buyerFeePercent}% من إجمالي سعر الوحدة على الطرفين في جلسة التنازل`,
-              `The transfer is between both sides at each developer. Each carries on the plan they took and pays the difference by bank cheque the same day, as agreed. Whoever has the lower tax pays the disposal tax difference. Our fee is ${BRAND.buyerFeePercent}% of the total unit price from both sides at the transfer session`,
+              `التنازل بين الطرفين عند كل مطور. كل واحد بيكمّل أقساط اللي خده، وصاحب الوحدة الأعلى سعرًا بياخد الفرق بشيك مصرفي في نفس اليوم. واللي ضريبته أقل بيدفع فرق ضريبة التصرفات العقارية. عمولتنا ${BRAND.buyerFeePercent}% من إجمالي سعر الوحدة على الطرفين في جلسة التنازل`,
+              `The transfer is between both sides at each developer. Each carries on the plan they took, and the owner of the pricier unit gets the difference by bank cheque the same day. Whoever has the lower tax pays the disposal tax difference. Our fee is ${BRAND.buyerFeePercent}% of the total unit price from both sides at the transfer session`,
             ),
           },
         ].map((s, i) => (
