@@ -76,7 +76,7 @@ export const ThanksPage: React.FC<ThanksPageProps> = ({ kind, code, unit, sugges
         { icon: PhoneCall, t: tx('مكالمة من مستشارك', 'A call from your advisor'), d: tx('خلال يوم عمل', 'Within one business day') },
         { icon: FileSearch, t: tx('نراجع العقدين', 'We check both contracts'), d: tx('وبنساعدكم في تقييم سعر الوحدتين النهارده', "And we help you value both units at today's price") },
         { icon: Users, t: tx('ناخد موافقة الطرف التاني', "We get the other owner's OK"), d: tx('بنعرض عليه وحدتك، واسمك ورقمك مش بيظهروا', 'We show them your unit; your name and number stay hidden') },
-        { icon: Handshake, t: tx('تنازلين مترتبين مع بعض', 'Two transfers, arranged together'), d: tx(`تدفع أو تاخد الفرق بس. عمولتنا ${BRAND.buyerFeePercent}% من إجمالي سعر الوحدة على الطرفين، بشيك مصرفي في جلسة التنازل`, `You just settle the difference. Our fee is ${BRAND.buyerFeePercent}% of the total unit price from both sides, by bank cheque at the transfer session`) },
+        { icon: Handshake, t: tx('تنازلين مترتبين مع بعض', 'Two transfers, arranged together'), d: tx(`تدفع أو تاخد الفرق بس. عمولتنا ${BRAND.buyerFeePercent}% من كل طرف من إجمالي سعر الوحدة اللي هتتنقل ملكيتها إليه، بشيك مصرفي في جلسة التنازل`, `You just settle the difference. Our fee is ${BRAND.buyerFeePercent}% from each side, of the total price of the unit whose ownership passes to them, by bank cheque at the transfer session`) },
       ],
     },
     alert: {

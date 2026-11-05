@@ -86,13 +86,13 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
       <ol className="mt-8 grid sm:grid-cols-3 gap-3">
         {[
           { icon: ClipboardList, t: tx('قولنا وحدتك وعاوز إيه', 'Tell us your unit and what you want'), d: tx('اللي دفعته وقسطك، والمنطقة والنوع، وإحنا بنقيّملك إجمالي سعر الوحدة النهارده', "What you paid, your monthly, area and type, and we value the unit's total price today") },
-          { icon: Search, t: tx('ناخد موافقة الطرف التاني', "We get the other owner's OK"), d: tx('بنعرض عليه وحدتك، ونراجع العقدين، ونحسب الفرق بعد سعر الوحدتين النهارده', "We show them your unit, check both contracts, and work out the difference from both units' price today") },
+          { icon: Search, t: tx('ناخد موافقة الطرف التاني', "We get the other owner's OK"), d: tx('بنعرض عليه وحدتك، ونراجع العقدين، ونحسب الفرق بعد تحديد سعر الوحدتين النهارده', "We show them your unit, check both contracts, and work out the difference after setting both units' price today") },
           {
             icon: Handshake,
             t: tx('تبدلوا في نفس اليوم', 'Swap on the same day'),
             d: tx(
-              `التنازل بين الطرفين عند كل مطور. كل واحد بيكمّل أقساط اللي خده، وصاحب الوحدة الأعلى سعرًا بياخد الفرق بشيك مصرفي في نفس اليوم. واللي ضريبته أقل بيدفع فرق ضريبة التصرفات العقارية. عمولتنا ${BRAND.buyerFeePercent}% من إجمالي سعر الوحدة على الطرفين في جلسة التنازل`,
-              `The transfer is between both sides at each developer. Each carries on the plan they took, and the owner of the pricier unit gets the difference by bank cheque the same day. Whoever has the lower tax pays the disposal tax difference. Our fee is ${BRAND.buyerFeePercent}% of the total unit price from both sides at the transfer session`,
+              `التنازل بين الطرفين عند كل مطور. كل واحد بيكمّل أقساط اللي خده، وصاحب الوحدة الأعلى سعرًا بياخد الفرق بشيك مصرفي في نفس اليوم. والتصرفات العقارية ورسوم التنازل يسددها الطرفين: ضريبة التصرفات العقارية عند المطور الخاص بكل طرف، ورسوم التنازل يسددها المتنازل إليه إلى المتنازل عند المطور التابع للمتنازل. عمولتنا ${BRAND.buyerFeePercent}% من كل طرف من إجمالي سعر الوحدة اللي هتتنقل ملكيتها إليه في جلسة التنازل`,
+              `The transfer is between both sides at each developer. Each carries on the plan they took, and the owner of the pricier unit gets the difference by bank cheque the same day. Both sides pay the disposal tax and the transfer fee: the disposal tax at each side's own developer, and the transfer fee is paid by the transferee to the transferor at the transferor's developer. Our fee is ${BRAND.buyerFeePercent}% from each side, of the total price of the unit whose ownership passes to them at the transfer session`,
             ),
           },
         ].map((s, i) => (
@@ -118,7 +118,7 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
           <Field
             label={tx('سعر العقد بتاع وحدتك', "Your unit's contract price")}
             htmlFor="sw-price"
-            hint={tx(`عمولتنا ${BRAND.buyerFeePercent}% من إجمالي سعر الوحدة على الطرفين`, `Our fee is ${BRAND.buyerFeePercent}% of the total unit price from both sides`)}
+            hint={tx(`عمولتنا ${BRAND.buyerFeePercent}% من كل طرف من إجمالي سعر الوحدة اللي هتتنقل ملكيتها إليه`, `Our fee is ${BRAND.buyerFeePercent}% from each side, of the total price of the unit whose ownership passes to them`)}
           >
             <MoneyInput id="sw-price" value={myPrice} onChange={setMyPrice} placeholder="4,000,000" />
           </Field>
@@ -360,7 +360,7 @@ const SwapRequestSheet: React.FC<{
 
         {/* Both owners pay us — say so before they send, not after. */}
         <div className="mt-3 rounded-xl border border-brand/25 bg-brand-soft px-4 py-3 text-sm text-brand-ink leading-relaxed">
-          <p className="font-bold">{tx(`عمولتنا ${BRAND.buyerFeePercent}% من إجمالي سعر الوحدة على الطرفين`, `Our fee: ${BRAND.buyerFeePercent}% of the total unit price from both sides`)}</p>
+          <p className="font-bold">{tx(`عمولتنا ${BRAND.buyerFeePercent}% من كل طرف من إجمالي سعر الوحدة اللي هتتنقل ملكيتها إليه`, `Our fee: ${BRAND.buyerFeePercent}% from each side, of the total price of the unit whose ownership passes to them`)}</p>
           <p className="mt-1">
             {tx('عليك', 'You')}: <span className="num font-semibold">{money(myFee, language)} {currency(language)}</span>
             {' · '}
@@ -401,7 +401,7 @@ const SwapRequestSheet: React.FC<{
           {sending ? tx('بنبعت...', 'Sending...') : tx('ابعت طلب التبديل', 'Send swap request')}
         </button>
         <FormError className="mt-4" messages={sendError} />
-        <p className="mt-3 text-center text-xs text-muted">{tx('الفرق بيتحسب بعد سعر الوحدتين النهارده، وإحنا بنساعدكم في التقييم. مفيش أي التزام دلوقتي.', "The difference is worked out from both units' price today, and we help you value them. No commitment now.")}</p>
+        <p className="mt-3 text-center text-xs text-muted">{tx('الفرق بيتحسب بعد تحديد سعر الوحدتين النهارده، وإحنا بنساعدكم في التقييم. مفيش أي التزام دلوقتي.', "The difference is worked out after setting both units' price today, and we help you value them. No commitment now.")}</p>
       </form>
     </div>
   );
