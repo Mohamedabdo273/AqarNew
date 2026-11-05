@@ -18,6 +18,8 @@ interface Clause {
   steps?: string[];
   /** Takes the whole row on desktop. */
   wide?: boolean;
+  /** A numbered stage (first, second): the word before the colon stands out in orange. */
+  stage?: boolean;
 }
 
 interface Section {
@@ -39,7 +41,7 @@ export const PromisePage: React.FC<PromisePageProps> = ({ tab, onTabChange, onNa
   const term: Clause = { t: tx('مدة عقد وعد البيع', 'Promise of sale term'), d: tx('ساري بحد أقصى شهرين من تاريخ تحرير العقد، ويمكن مد فترة التعاقد في حالة موافقة البايع والمشتري.', 'Valid for up to two months from the date the contract is drawn up. The term can be extended if the seller and buyer agree.') };
   const otherCosts: Clause = {
     t: tx('تحديد المصاريف بالتفصيل', 'Costs in detail'),
-    d: tx('بعد توقيع البايع و المشترى عقد وعد البيع فى جدول فى العقد بيحدد الالتزامات الماديه على كل طرف زى فروق الصيانه , زياده وديعه الصيانه,رسوم الملكيه و الضرائب العقاريه بعد اجراءات التنازل عند المطور', 'Maintenance differences, any maintenance deposit increase, ownership transfer fees, and property taxes up to the completion of the transfer at the developer. A table in the promise of sale says who pays each, and both sides sign it.'),
+    d: tx('يتم تحديد المصاريف و الالتزامات الماديه التى تخص كل طرف سواء البايع او المشترى بالتفصيل زى فروق الصيانه , زياده وديعه الصيانه , رسوم الملكيه , رسوم التنازل و ضرائب التصرفات العقاريه.', 'Maintenance differences, any maintenance deposit increase, ownership transfer fees, and property taxes up to the completion of the transfer at the developer. A table in the promise of sale says who pays each, and both sides sign it.'),
   };
   // The same two stages for the buyer and the seller.
   const afterSigning: Clause = {
@@ -49,6 +51,7 @@ export const PromisePage: React.FC<PromisePageProps> = ({ tab, onTabChange, onNa
       'After the seller and buyer sign the promise of sale and the buyer pays the seller the deposit, the seller sets a date for the transfer session at the developer, confirms the fines or amounts due on the unit, and pays the disposal tax if needed, all by an email the seller sends to our company.',
     ),
     wide: true,
+    stage: true,
   };
   const transferSession: Clause = {
     t: tx('ثانيًا: أثناء جلسة التنازل عند المطور', 'Second: during the transfer session at the developer'),
@@ -63,6 +66,7 @@ export const PromisePage: React.FC<PromisePageProps> = ({ tab, onTabChange, onNa
       tx(`يسلّم المشتري للمستشار العقاري التابع لشركتنا شيك مصرفي الخاص بالعمولة، بما يعادل ${fee}% من إجمالي قيمة الوحدة العقارية.`, `The buyer hands our real-estate advisor the bank cheque for the fee, equal to ${fee}% of the total unit value.`),
     ],
     wide: true,
+    stage: true,
   };
 
   const contractRules: Section = {
@@ -84,8 +88,7 @@ export const PromisePage: React.FC<PromisePageProps> = ({ tab, onTabChange, onNa
           { t: tx('بيانات الوحدة', 'The unit'), d: tx('اسم المطور، اسم المشروع، المنطقة، نوع الوحدة ورقمها، تفاصيل الوحدة طبقًا لعقد الوحدة.', 'Developer name, project name, area, unit type and number, and unit details per the unit contract.') },
           { t: tx('السعر', 'The price'), d: tx('المبلغ اللي البايع دفعه ناقص أي خصم متفق عليه، من غير أوفر برايس.', 'What the seller paid, less any agreed discount. No overprice.') },
           { t: tx('العربون', 'Deposit'), d: tx(`هيستلم البايع من المشتري وقت توقيع عقد وعد البيع نقدًا أو بشيك مصرفي عربون ${dep}% من إجمالي قيمة الوحدة، على أن تُخصم هذه القيمة من إجمالي المبلغ المسدد من المشتري للبايع مقابل التنازل عن الوحدة العقارية في مقر المطور.`, `When the promise of sale is signed, the seller receives from the buyer, in cash or by bank cheque, a deposit of ${dep}% of the total unit value. This amount is deducted from the total the buyer pays the seller for the transfer of the unit at the developer's office.`) },
-          { t: tx('الأقساط الباقية', 'Remaining installments'), d: tx('بتكمّلها للمطور، وبتاخد مكان البايع في كل التزاماته قدام المطور.', "You continue them with the developer, and take the seller's place in all obligations to the developer.") },
-          { t: tx('المتأخرات', 'Overdues'), d: tx('بتتسدد للمطور يوم التنازل وتتخصم من البايع.', "They're settled on transfer day and deducted from the seller.") },
+          { t: tx('الأقساط الباقية / المتأخرات', 'Remaining installments'), d: tx('الاقساط الباقيه بتكملها للمطور فى جلسه التنازل  وبتاخد مكان البايع في كل التزاماته امام المطور. (المتأخرات) ان وجدت تسدد يوم التنازل و تخصم من البايع.', "You continue them with the developer, and take the seller's place in all obligations to the developer.") },
           term,
         ],
       },
@@ -130,7 +133,7 @@ export const PromisePage: React.FC<PromisePageProps> = ({ tab, onTabChange, onNa
           { t: tx('حجز الميعاد', 'Booking the date'), d: tx('بعد وعد البيع بتحجز ميعاد التنازل مع المطور وتبلّغنا بيه.', 'After the promise of sale, you book the transfer with the developer and tell us the date.') },
           { t: tx('ضريبة التصرفات العقارية', 'Real-estate disposal tax'), d: tx('بتدفعها وبتجيب إيصال الدفع.', 'You pay it yourself and bring the payment receipt.') },
           { t: tx('الوحدة خالصة', 'A clear unit'), d: tx('بتقر إن الوحدة ملكك، ومفيش عليها رهن أو حق لحد تاني أو نزاع، وبتضمن نقل الملكية للمشتري.', 'You confirm the unit is yours, with no mortgage, third-party right or dispute, and you guarantee the transfer of ownership.') },
-          { t: tx('الالتزامات القديمة', 'Earlier obligations'), d: tx('أي مبالغ مستحقة على الوحدة لحد تاريخ البيع  البايع ملتزم بتسددها.', 'Anything owed on the unit up to the sale date is on you.') },
+          { t: tx('المتأخرات و الغرامات', 'Earlier obligations'), d: tx('أي مبالغ مستحقة على الوحدة لحد تاريخ البيع , البايع ملتزم بتسددها.', 'Anything owed on the unit up to the sale date is on you.') },
           { t: tx('ما تبيعش لحد تاني', "Don't sell elsewhere"), d: tx('ممنوع بيع الوحدة لصالح شخص آخر بعد توقيع عقد وعد البيع.', 'Selling the unit to anyone else is not allowed after the promise of sale is signed.') },
           { t: tx('أصل عقد الوحدة والمستندات', 'Original unit contract and documents'), d: tx('أصل عقد الوحدة والمستندات بيتم الاطلاع عليهم ومراجعتهم عند التوقيع على عقد وعد البيع. بتسلّم  أصل عقد الوحدة والمستندات وقت التنازل عند المطور، مش قبل كده.', 'The original unit contract and documents are viewed and reviewed when the promise of sale is signed. You hand them to the buyer at the transfer at the developer, not before.') },
           { ...otherCosts, wide: true },
@@ -171,12 +174,13 @@ export const PromisePage: React.FC<PromisePageProps> = ({ tab, onTabChange, onNa
               'After both owners sign the promise of sale, a date is set for the transfer session on the same day at each developer, the fines or amounts due on each unit are confirmed, and the disposal tax is paid if needed, all by an email to our company.',
             ),
             wide: true,
+            stage: true,
           },
           { t: tx('صور الشيكات للمراجعة', 'Cheque copies for review'), d: tx('بعد توقيع عقد وعد البيع بتبعت للشركة صورة شيك العمولة، وصورة شيك الفرق لو هتدفعه، للمراجعة.', 'After signing the promise of sale, you send the company a copy of the fee cheque, and of the difference cheque if you are paying it, for review.') },
           otherCosts,
           { t: tx('أصل عقد الوحدة والمستندات', 'Original unit contract and documents'), d: tx('أصل عقد كل وحدة والمستندات بيتم الاطلاع عليهم ومراجعتهم عند التوقيع على عقد وعد البيع، وبيتسلّموا وقت التنازل عند المطور، مش قبل كده.', 'The original contract and documents of each unit are viewed and reviewed when the promise of sale is signed, and handed over at the transfer at the developer, not before.') },
           { t: tx('ما تبيعش لحد تاني', "Don't sell elsewhere"), d: tx('ممنوع بيع الوحدة لصالح شخص آخر بعد توقيع عقد وعد البيع.', 'Selling the unit to anyone else is not allowed after the promise of sale is signed.') },
-          { t: tx('الالتزامات القديمة', 'Earlier obligations'), d: tx('أي مبالغ مستحقة على وحدتك لحد تاريخ التنازل البايع ملتزم بتسددها.', 'Anything owed on your unit up to the transfer date is on you.'), wide: true },
+          { t: tx('المتأخرات و الغرانات', 'Earlier obligations'), d: tx('أي مبالغ مستحقة على وحدتك لحد تاريخ التنازل البايع ملتزم بتسددها.', 'Anything owed on your unit up to the transfer date is on you.'), wide: true },
           {
             t: tx('ثانيًا: أثناء جلسة التنازل عند المطور', 'Second: during the transfer session at the developer'),
             d: tx('يجب حضور المالكين والمستشار العقاري التابع لشركتنا.', 'Both owners and our real-estate advisor must attend.'),
@@ -188,6 +192,7 @@ export const PromisePage: React.FC<PromisePageProps> = ({ tab, onTabChange, onNa
               tx(`كل طرف بيسدد لمندوب الشركة شيك مصرفي بالعمولة: ${fee}% من إجمالي سعر الوحدة اللي هتتنقل ملكيتها إليه.`, `Each side pays our representative a bank cheque for the fee: ${fee}% of the total price of the unit whose ownership passes to them.`),
             ],
             wide: true,
+            stage: true,
           },
         ],
       },
@@ -230,17 +235,26 @@ export const PromisePage: React.FC<PromisePageProps> = ({ tab, onTabChange, onNa
 
         {sections[tab].map((section) => (
           <section key={section.title} className="mt-10">
-            <h2 className="text-2xl font-bold text-ink">{section.title}</h2>
+            <h2 className="inline-block rounded-xl bg-accent px-5 py-2.5 text-xl sm:text-2xl font-bold text-white shadow-sm">{section.title}</h2>
             <ul className="mt-5 grid sm:grid-cols-2 sm:grid-flow-row-dense gap-3">
               {section.clauses.map((c) => (
                 <li key={c.t} className={`card p-5 ${c.wide ? 'sm:col-span-2' : ''}`}>
-                  <p className="font-bold text-ink">{c.t}</p>
+                  <p className="font-bold text-ink">
+                    {c.stage ? (
+                      <>
+                        <span className="text-xl sm:text-2xl text-accent">{c.t.slice(0, c.t.indexOf(':') + 1)}</span>
+                        {c.t.slice(c.t.indexOf(':') + 1)}
+                      </>
+                    ) : (
+                      c.t
+                    )}
+                  </p>
                   <p className="mt-1 text-ink-soft text-[15px] leading-relaxed">{c.d}</p>
                   {c.steps && (
                     <ol className="mt-3 space-y-2 text-ink-soft text-[15px] leading-relaxed">
                       {c.steps.map((step, i) => (
                         <li key={step} className="flex items-start gap-2.5">
-                          <span className="num grid place-items-center w-6 h-6 rounded-full bg-brand-soft text-brand-ink text-sm font-bold shrink-0">{i + 1}</span>
+                          <span className="num grid place-items-center w-6 h-6 rounded-full bg-accent text-white text-sm font-bold shrink-0">{i + 1}</span>
                           <span className="min-w-0">{step}</span>
                         </li>
                       ))}

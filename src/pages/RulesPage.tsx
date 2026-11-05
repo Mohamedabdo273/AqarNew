@@ -84,20 +84,19 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
       ],
       rules: [
         { icon: UserCheck, t: tx('الملّاك بس — مفيش سماسرة', 'Owners only — no brokers'), d: tx('العقد باسمك، أو معاك توكيل رسمي بنراجعه. ممنوع السماسرة والوسطاء يعرضوا وحدات، وأي وحدة يبان إنها من وسيط بتتشال نهائياً.', 'The contract is in your name, or you hold a formal power of attorney we review. Brokers and middlemen may not list; any unit found to come from one is removed for good.') },
-        { icon: Tag, t: tx('السعر = اللي دفعته', 'Price = what you paid'), d: tx('تقدر تعمل خصم، بس ما تقدرش تزوّد.', 'You can offer a discount, never add on top.') },
-        { icon: Wallet, t: tx('صفر عمولة عليك', 'Zero fee for you'), d: tx('مش هتدفع لينا ولا جنيه.', "You don't pay us anything.") },
+        { icon: Tag, t: tx('السعر = اللي دفعته / صفر عموله عليك', 'Price = what you paid'), d: tx(' تقدر تعمل خصم على سعر الوحده ، بس ما تقدرش تزوّد.\nمش هتدفع لينا ولا جنيه عموله', 'You can offer a discount, never add on top.') },
         { icon: AlertTriangle, t: tx('قول على المديونية', 'Declare all dues'), d: tx('أي أقساط متأخرة أو غرامات لازم تتكتب. لو اتخبّت، الإعلان بيتشال.', 'Any overdue installments or fines must be listed. Hidden dues get the listing removed.') },
         { icon: FileSearch, t: tx('مراجعة قبل النشر', 'Reviewed before listing'), d: tx('بنراجع العقد وكشف الحساب خلال 24 ساعة.', 'We check the contract and statement within 24h.') },
         { icon: FileSignature, t: tx('وعد بيع مكتوب', 'A written promise of sale'), d: tx('لما تتفق مع المشتري بيتكتب بينكم وعد بيع في مقر شركتنا، فيه كل البنود الخاصة بالوحدة والسعر.', 'Once you agree with a buyer, you both sign a promise of sale at our office, with all unit terms and the price.') },
         { icon: HandCoins, t: tx('ضريبه التصرفات العقاريه', 'Deposit'), d: tx(`هيستلم البايع من المشتري وقت توقيع عقد وعد البيع نقدًا أو بشيك مصرفي عربون ${dep}% من إجمالي قيمة الوحدة ليسدد ضريبة التصرفات العقارية، على أن تُخصم هذه القيمة من إجمالي المبلغ المسدد من المشتري للبايع مقابل التنازل عن الوحدة العقارية في مقر المطور.`, `When the promise of sale is signed, the seller receives from the buyer, in cash or by bank cheque, a deposit of ${dep}% of the total unit value, to pay the real-estate disposal tax. This amount is deducted from the total the buyer pays the seller for the transfer of the unit at the developer's office.`) },
-        { icon: Building2, t: tx('حجز الميعاد لجلسه التنازل عند المطور', 'Booking the date'), d: tx('بعد وعد البيع بتحجز ميعاد التنازل مع المطور وتبلّغنا بيه.', 'After the promise of sale, you book the transfer with the developer and tell us the date.') },
-        { icon: Building2, t: tx('تقبض في مقر المطور', 'Paid at the developer'), d: tx('بتجيب معاك أصل عقد الوحدة، وبتقبض بشيك مصرفي، وشيكاتك القديمة بترجعلك في نفس اليوم.', 'You bring the original unit contract, you are paid by bank cheque, and your old cheques are returned the same day.') },
-        { icon: MessageSquareHeart, t: tx('نصيحة بصراحة', 'Honest advice'), d: tx('بنعرض عليك كل الاختيارات، وهننصحك لو الأحسن ليك إنك تكمّل تعقدك أو تبدّل وحدتك.', "We lay out every option, and we'll advise you if you're better off keeping your contract or swapping your unit.") },
+        { icon: Building2, t: tx('حجز الميعاد لجلسه التنازل عند المطور', 'Booking the date'), d: tx('بعد توقيع عقد وعد البيع بين البايع و المشترى يقوم البايع بحجز معاد لجلسه التنازل عند المطور و بتبلغنا بيه.', 'After the promise of sale, you book the transfer with the developer and tell us the date.') },
+        { icon: Building2, t: tx('تقبض في مقر المطور', 'Paid at the developer'), d: tx('بتجيب معاك أصل عقد الوحدة و مستندات الوحده، وبتقبض بشيك مصرفي، وشيكاتك القديمة بترجعلك في نفس اليوم.', 'You bring the original unit contract, you are paid by bank cheque, and your old cheques are returned the same day.') },
+        { icon: MessageSquareHeart, t: tx('مصلحتك فين', 'Honest advice'), d: tx('بنعرض عليك كل الاختيارات، وهننصحك لو الأحسن ليك إنك تكمّل تعقدك أو تبدّل وحدتك.', "We lay out every option, and we'll advise you if you're better off keeping your contract or swapping your unit.") },
         { icon: Undo2, t: tx('حرية الانسحاب', 'You can withdraw'), d: tx('قبل التوقيع على عقد وعد البيع، ودون أي تكلفة.', 'Before signing the promise of sale, at no cost.') },
       ],
       forbidden: [
-        tx('تطلب أي مبلغ فوق اللي دفعته', 'Asking for anything above what you paid'),
-        tx('تسلّم أصل العقد أو الشيكات لحد قبل التنازل', 'Handing over the original contract or cheques before transfer'),
+        tx('تتنازل عن الوحده قبل الاطلاع على الشيك المصرفى.', 'Asking for anything above what you paid'),
+        tx('تسلّم أصل العقد أو الشيكات لحد قبل التنازل.', 'Handing over the original contract or cheques before transfer'),
       ],
       dayTitle: tx('يوم التنازل بيحصل إيه؟', 'What happens on transfer day?'),
       day: [
@@ -155,10 +154,10 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
         { icon: FileSearch, t: tx('مراجعة العقدين', 'Both contracts checked'), d: tx('بنراجع العقدين، وبنساعدكم في تقييم الوحدتين.', 'We review both contracts and help you value both units.') },
         { icon: Scale, t: tx('الفرق بسعر النهارده', "The difference at today's price"), d: tx('بيتحسب بعد تحديد سعر الوحدتين النهارده، واللي بيتدفع هو الفرق بين الوحدتين بس.', "It's worked out after setting both units' price today, and only the difference between them is paid.") },
         { icon: Banknote, t: tx('الفرق بشيك مصرفي', 'The difference by bank cheque'), d: tx('بيستلمه صاحب الوحدة الأعلى سعرًا من الطرف التاني في جلسة التنازل.', 'The owner of the pricier unit receives it from the other side at the transfer session.') },
-        { icon: Receipt, t: tx('ضريبة التصرفات العقارية ورسوم التنازل', 'Disposal tax and transfer fee'), d: tx(' يسدد الطرفين ضريبه التصرفات العقارية عند المطور الخاص بكل طرف و ايضا رسوم التنازل يسددها المتنازل إليه إلى المتنازل عند المطور التابع للمتنازل .', "Both sides pay the disposal tax and the transfer fee: the disposal tax at each side's own developer, and the transfer fee is paid by the transferee to the transferor at the transferor's developer.") },
-        { icon: Repeat, t: tx('في نفس اليوم', 'On the same day'), d: tx('التنازل بيتم فى نفس اليوم فى وجود المستشار العقارى الخاص بشركتنا', 'The transfer takes place between both sides on the same day at each developer.') },
-        { icon: KeyRound, t: tx('كل واحد يكمّل أقساط اللي خده', 'Each carries on the plan they took'), d: tx('اثناء جلسه التنازل بيستلم المتنازل شيكاته القديمه التى تخص الاقساط المتبقيه و بيقدم المتنازل اليه شيكات جديده بنفس قيمه الاقساط و مدد السداد', 'After the swap, each owner continues the installments of the unit they took.') },
-        { icon: Percent, t: tx(`عمولتنا ${fee}% على الطرفين من كل طرف`, `Our ${fee}% from each side`), d: tx('كل طرف بيسدد 1.25% من اجمالى سعر الوحده الى هتتنقل ملكيتها اليه ', 'Of the total price of the unit whose ownership passes to them, by bank cheque at the transfer session.') },
+        { icon: Receipt, t: tx('ضريبة التصرفات العقارية ورسوم التنازل', 'Disposal tax and transfer fee'), d: tx(' يسدد الطرفين ضريبه التصرفات العقارية عند المطور الخاص بكل طرف , اما رسوم التنازل يسددها المتنازل إليه للمطور التابع للمتنازل .', "Both sides pay the disposal tax and the transfer fee: the disposal tax at each side's own developer, and the transfer fee is paid by the transferee to the transferor at the transferor's developer.") },
+        { icon: Repeat, t: tx('التنازل', 'On the same day'), d: tx('التنازل لكل طرف بيتم فى نفس اليوم فى وجود المستشار العقارى الخاص بشركتنا.', 'The transfer takes place between both sides on the same day at each developer.') },
+        { icon: KeyRound, t: tx('كل واحد يكمّل أقساط اللي خده', 'Each carries on the plan they took'), d: tx('اثناء جلسه التنازل بيستلم المتنازل شيكاته القديمه من المطور التى تخص الاقساط المتبقيه و بيقدم المتنازل اليه شيكات جديده بنفس قيمه الاقساط و مدد السداد.', 'After the swap, each owner continues the installments of the unit they took.') },
+        { icon: Percent, t: tx(`عمولتنا ${fee}%  على كل طرف`, `Our ${fee}% from each side`), d: tx('كل طرف بيسدد 1.25% من اجمالى سعر الوحده الى هتتنقل ملكيتها اليه ', 'Of the total price of the unit whose ownership passes to them, by bank cheque at the transfer session.') },
         { icon: EyeOff, t: tx('سرية بياناتك', 'Your details stay hidden'), d: tx('اسمك ورقمك مش بيظهروا لأي طرف.', 'Nobody sees your name or number.') },
       ],
       forbidden: [
@@ -202,15 +201,15 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
         <ol className="mt-6 grid sm:grid-cols-2 gap-3">
           {rules.map((r, i) => (
             <li key={r.t} className="card p-5 flex gap-4">
-              <span className="grid place-items-center w-12 h-12 rounded-xl bg-brand-soft text-brand shrink-0">
+              <span className="grid place-items-center w-12 h-12 rounded-xl bg-accent-soft text-accent shrink-0">
                 <r.icon className="w-6 h-6" />
               </span>
               <div>
                 <p className="font-bold text-ink">
-                  <span className="num text-muted me-1.5">{i + 1}.</span>
+                  <span className="num text-accent me-1.5">{i + 1}.</span>
                   {r.t}
                 </p>
-                <p className="mt-1 text-ink-soft text-[15px] leading-relaxed">{r.d}</p>
+                <p className="mt-1 text-ink-soft text-[15px] leading-relaxed whitespace-pre-line">{r.d}</p>
               </div>
             </li>
           ))}
@@ -244,8 +243,8 @@ export const RulesPage: React.FC<RulesPageProps> = ({ tab, onTabChange, onNaviga
           <ol className={`mt-6 grid sm:grid-cols-2 ${dayCols} gap-3`}>
             {day.map((s, i) => (
               <li key={s.t} className="relative card p-5">
-                <span className="absolute top-4 end-5 num text-4xl font-bold text-line-strong">{i + 1}</span>
-                <s.icon className="w-6 h-6 text-brand" />
+                <span className="absolute top-4 end-5 num text-4xl font-bold text-accent">{i + 1}</span>
+                <s.icon className="w-6 h-6 text-accent" />
                 <p className="mt-4 font-bold text-ink">{s.t}</p>
                 <p className="mt-1 text-sm text-muted">{s.d}</p>
               </li>
