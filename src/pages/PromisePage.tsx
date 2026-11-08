@@ -41,7 +41,7 @@ export const PromisePage: React.FC<PromisePageProps> = ({ tab, onTabChange, onNa
   const term: Clause = { t: tx('مدة عقد وعد البيع', 'Promise of sale term'), d: tx('ساري بحد أقصى شهرين من تاريخ تحرير العقد، ويمكن مد فترة التعاقد في حالة موافقة البايع والمشتري.', 'Valid for up to two months from the date the contract is drawn up. The term can be extended if the seller and buyer agree.') };
   const otherCosts: Clause = {
     t: tx('تحديد المصاريف بالتفصيل', 'Costs in detail'),
-    d: tx('يتم تحديد المصاريف و الالتزامات الماديه التى تخص كل طرف سواء البايع او المشترى بالتفصيل زى فروق الصيانه , زياده وديعه الصيانه , رسوم الملكيه , رسوم التنازل و ضرائب التصرفات العقاريه.', 'Maintenance differences, any maintenance deposit increase, ownership transfer fees, and property taxes up to the completion of the transfer at the developer. A table in the promise of sale says who pays each, and both sides sign it.'),
+    d: tx('يتم تحديد المصاريف و الالتزامات الماديه التى تخص كل طرف سواء البايع او المشترى بالتفصيل زى فروق الصيانه , زياده وديعه الصيانه , رسوم الملكيه , رسوم التنازل و ضرائب التصرفات العقاريه.', 'The costs and financial obligations of each side, seller or buyer, are set out in detail, such as maintenance differences, any increase in the maintenance deposit, ownership fees, transfer fees and real-estate disposal taxes.'),
   };
   // The same two stages for the buyer and the seller.
   const afterSigning: Clause = {
@@ -88,7 +88,7 @@ export const PromisePage: React.FC<PromisePageProps> = ({ tab, onTabChange, onNa
           { t: tx('بيانات الوحدة', 'The unit'), d: tx('اسم المطور، اسم المشروع، المنطقة، نوع الوحدة ورقمها، تفاصيل الوحدة طبقًا لعقد الوحدة.', 'Developer name, project name, area, unit type and number, and unit details per the unit contract.') },
           { t: tx('السعر', 'The price'), d: tx('المبلغ اللي البايع دفعه ناقص أي خصم متفق عليه، من غير أوفر برايس.', 'What the seller paid, less any agreed discount. No overprice.') },
           { t: tx('العربون', 'Deposit'), d: tx(`هيستلم البايع من المشتري وقت توقيع عقد وعد البيع نقدًا أو بشيك مصرفي عربون ${dep}% من إجمالي قيمة الوحدة، على أن تُخصم هذه القيمة من إجمالي المبلغ المسدد من المشتري للبايع مقابل التنازل عن الوحدة العقارية في مقر المطور.`, `When the promise of sale is signed, the seller receives from the buyer, in cash or by bank cheque, a deposit of ${dep}% of the total unit value. This amount is deducted from the total the buyer pays the seller for the transfer of the unit at the developer's office.`) },
-          { t: tx('الأقساط الباقية / المتأخرات', 'Remaining installments'), d: tx('الاقساط الباقيه بتكملها للمطور فى جلسه التنازل  وبتاخد مكان البايع في كل التزاماته امام المطور. (المتأخرات) ان وجدت تسدد يوم التنازل و تخصم من البايع.', "You continue them with the developer, and take the seller's place in all obligations to the developer.") },
+          { t: tx('الأقساط الباقية / المتأخرات', 'Remaining installments / overdues'), d: tx('الاقساط الباقيه بتكملها للمطور فى جلسه التنازل  وبتاخد مكان البايع في كل التزاماته امام المطور. (المتأخرات) ان وجدت تسدد يوم التنازل و تخصم من البايع.', "You continue the remaining installments with the developer from the transfer session, and take the seller's place in all obligations to the developer. Overdues, if any, are paid on transfer day and deducted from the seller.") },
           term,
         ],
       },
@@ -131,11 +131,11 @@ export const PromisePage: React.FC<PromisePageProps> = ({ tab, onTabChange, onNa
         clauses: [
           afterSigning,
           { t: tx('حجز الميعاد', 'Booking the date'), d: tx('بعد وعد البيع بتحجز ميعاد التنازل مع المطور وتبلّغنا بيه.', 'After the promise of sale, you book the transfer with the developer and tell us the date.') },
-          { t: tx('ضريبة التصرفات العقارية', 'Real-estate disposal tax'), d: tx('بتدفعها وبتجيب إيصال الدفع.', 'You pay it yourself and bring the payment receipt.') },
+          { t: tx('ضريبة التصرفات العقارية', 'Real-estate disposal tax'), d: tx('بتدفعها وبتجيب إيصال الدفع.', 'You pay it and bring the payment receipt.') },
           { t: tx('الوحدة خالصة', 'A clear unit'), d: tx('بتقر إن الوحدة ملكك، ومفيش عليها رهن أو حق لحد تاني أو نزاع، وبتضمن نقل الملكية للمشتري.', 'You confirm the unit is yours, with no mortgage, third-party right or dispute, and you guarantee the transfer of ownership.') },
-          { t: tx('المتأخرات و الغرامات', 'Earlier obligations'), d: tx('أي مبالغ مستحقة على الوحدة لحد تاريخ البيع , البايع ملتزم بتسددها.', 'Anything owed on the unit up to the sale date is on you.') },
+          { t: tx('المتأخرات و الغرامات', 'Overdues and fines'), d: tx('أي مبالغ مستحقة على الوحدة لحد تاريخ البيع , البايع ملتزم بتسددها.', 'The seller must pay any amounts owed on the unit up to the sale date.') },
           { t: tx('ما تبيعش لحد تاني', "Don't sell elsewhere"), d: tx('ممنوع بيع الوحدة لصالح شخص آخر بعد توقيع عقد وعد البيع.', 'Selling the unit to anyone else is not allowed after the promise of sale is signed.') },
-          { t: tx('أصل عقد الوحدة والمستندات', 'Original unit contract and documents'), d: tx('أصل عقد الوحدة والمستندات بيتم الاطلاع عليهم ومراجعتهم عند التوقيع على عقد وعد البيع. بتسلّم  أصل عقد الوحدة والمستندات وقت التنازل عند المطور، مش قبل كده.', 'The original unit contract and documents are viewed and reviewed when the promise of sale is signed. You hand them to the buyer at the transfer at the developer, not before.') },
+          { t: tx('أصل عقد الوحدة والمستندات', 'Original unit contract and documents'), d: tx('أصل عقد الوحدة والمستندات بيتم الاطلاع عليهم ومراجعتهم عند التوقيع على عقد وعد البيع. بتسلّم  أصل عقد الوحدة والمستندات وقت التنازل عند المطور، مش قبل كده.', 'The original unit contract and documents are viewed and reviewed when the promise of sale is signed. You hand over the original unit contract and documents at the transfer at the developer, not before.') },
           { ...otherCosts, wide: true },
           transferSession,
         ],
@@ -180,7 +180,7 @@ export const PromisePage: React.FC<PromisePageProps> = ({ tab, onTabChange, onNa
           otherCosts,
           { t: tx('أصل عقد الوحدة والمستندات', 'Original unit contract and documents'), d: tx('أصل عقد كل وحدة والمستندات بيتم الاطلاع عليهم ومراجعتهم عند التوقيع على عقد وعد البيع، وبيتسلّموا وقت التنازل عند المطور، مش قبل كده.', 'The original contract and documents of each unit are viewed and reviewed when the promise of sale is signed, and handed over at the transfer at the developer, not before.') },
           { t: tx('ما تبيعش لحد تاني', "Don't sell elsewhere"), d: tx('ممنوع بيع الوحدة لصالح شخص آخر بعد توقيع عقد وعد البيع.', 'Selling the unit to anyone else is not allowed after the promise of sale is signed.') },
-          { t: tx('المتأخرات و الغرانات', 'Earlier obligations'), d: tx('أي مبالغ مستحقة على وحدتك لحد تاريخ التنازل البايع ملتزم بتسددها.', 'Anything owed on your unit up to the transfer date is on you.'), wide: true },
+          { t: tx('المتأخرات و الغرانات', 'Overdues and fines'), d: tx('أي مبالغ مستحقة على وحدتك لحد تاريخ التنازل البايع ملتزم بتسددها.', 'The seller must pay any amounts owed on your unit up to the transfer date.'), wide: true },
           {
             t: tx('ثانيًا: أثناء جلسة التنازل عند المطور', 'Second: during the transfer session at the developer'),
             d: tx('يجب حضور المالكين والمستشار العقاري التابع لشركتنا.', 'Both owners and our real-estate advisor must attend.'),
