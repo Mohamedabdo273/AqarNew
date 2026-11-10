@@ -435,6 +435,7 @@ export function SearchSelect({
   searchable,
   allowCustom,
   customLabel,
+  onQueryChange,
 }: {
   id?: string;
   /** `search` = extra text to match (e.g. the other language's name). */
@@ -448,6 +449,8 @@ export function SearchSelect({
   searchable?: boolean;
   allowCustom?: boolean;
   customLabel?: string;
+  /** What's typed in the search box — for options that come from a server search. */
+  onQueryChange?: (q: string) => void;
 }) {
   const { tx } = useLanguage();
   const [open, setOpen] = useState(false);
@@ -475,6 +478,7 @@ export function SearchSelect({
     onChange(v);
     setOpen(false);
     setQuery('');
+    onQueryChange?.('');
   };
 
   const showSearchInput = searchable ?? options.length > 8;
@@ -537,7 +541,10 @@ export function SearchSelect({
               autoFocus
               type="search"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                onQueryChange?.(e.target.value);
+              }}
               placeholder={tx('دوّر…', 'Search…')}
               aria-label={tx('دوّر', 'Search')}
               className="field mb-1.5 py-2 text-sm"

@@ -193,7 +193,7 @@ export interface SubAreaOption extends PlaceOption {
   districtsCount: number;
 }
 
-/** The place lists hardly ever change, so each one is fetched once per visit (a failed fetch is retried next time). */
+/** The place and developer lists hardly ever change, so each one is fetched once per visit (a failed fetch is retried next time). */
 const placeCache = new Map<string, Promise<unknown>>();
 function cachedPlaces<T>(path: string): Promise<T> {
   if (!placeCache.has(path)) placeCache.set(path, request<T>(path).catch((e) => (placeCache.delete(path), Promise.reject(e))));
@@ -201,6 +201,28 @@ function cachedPlaces<T>(path: string): Promise<T> {
 }
 export const fetchRegions = () => cachedPlaces<PlaceOption[]>('/locations/regions');
 export const fetchSubAreas = (regionId: number) => cachedPlaces<SubAreaOption[]>(`/locations/regions/${regionId}/sub-areas`);
+
+/** A developer from the catalog (GET /api/developers), the big names first. Kept by staff in the admin. */
+export interface DeveloperOption {
+  id: number;
+  ar: string;
+  en: string;
+  compoundsCount: number;
+  /** With a search only: its compounds that matched. */
+  matches?: string[] | null;
+}
+export interface CompoundOption {
+  id: number;
+  ar: string;
+  en: string;
+  /** What the unit stores: "عربي (English)". */
+  name: string;
+  regionId: number | null;
+  subAreaId: number | null;
+}
+export const fetchDevelopers = () => cachedPlaces<DeveloperOption[]>('/developers');
+export const searchDevelopers = (q: string) => request<DeveloperOption[]>(`/developers?q=${encodeURIComponent(q)}`);
+export const fetchCompounds = (developerId: number) => cachedPlaces<CompoundOption[]>(`/developers/${developerId}/compounds`);
 
 /** Every published unit, all pages. The listing filters and sorts on the client. */
 export async function fetchAllUnits(): Promise<RealEstateUnit[]> {

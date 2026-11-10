@@ -3,7 +3,7 @@ import { ChevronDown, Search, Check } from 'lucide-react';
 import { RealEstateUnit } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { Budget, BudgetFinder } from './BudgetFinder';
-import { Filters } from '../lib/unitFilters';
+import { Filters, developerKey } from '../lib/unitFilters';
 import { DELIVERY_OPTIONS, FINISHING_OPTIONS, VIEW_OPTIONS, FREQUENCY_OPTIONS, PROPERTY_CATEGORIES, typesFor, pick } from '../lib/unitHelpers';
 import { useRegions, useSubAreas } from '../lib/places';
 
@@ -153,9 +153,10 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
   const developers = useMemo(() => {
     const map = new Map<string, { value: string; label: string; count: number }>();
     units.forEach((u) => {
-      const cur = map.get(u.developer);
+      const key = developerKey(u);
+      const cur = map.get(key);
       if (cur) cur.count++;
-      else map.set(u.developer, { value: u.developer, label: pick(language, u.developer, u.developerEn), count: 1 });
+      else map.set(key, { value: key, label: pick(language, u.developer, u.developerEn), count: 1 });
     });
     return [...map.values()].sort((a, b) => b.count - a.count);
   }, [units, language]);

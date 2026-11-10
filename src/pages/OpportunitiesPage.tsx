@@ -8,7 +8,7 @@ import { UnitSearchInput } from '../components/UnitSearchInput';
 import { Budget, BudgetSlider, CASH_RANGE, MONTHLY_RANGE } from '../components/BudgetFinder';
 import { FilterPanel } from '../components/FilterPanel';
 import { Pagination } from '../components/Pagination';
-import { EMPTY_FILTERS, Filters, SortKey, applyFilters } from '../lib/unitFilters';
+import { EMPTY_FILTERS, Filters, SortKey, applyFilters, developerKey } from '../lib/unitFilters';
 import {
   DELIVERY_OPTIONS,
   FINISHING_OPTIONS,
@@ -166,7 +166,7 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
     ...filters.subAreaIds.map((v) => ({ key: `s-${v}`, label: placeLabelOf(subAreas, v), remove: () => pickPlaces(filters.regionIds, withoutId(filters.subAreaIds, v)) })),
     ...filters.types.map((v) => ({ key: `t-${v}`, label: labelOf(PROPERTY_TYPES, v), remove: () => patch({ types: without(filters.types, v) }) })),
     ...filters.developers.map((v) => {
-      const u = units.find((x) => x.developer === v);
+      const u = units.find((x) => developerKey(x) === v || x.developer === v);
       return { key: `d-${v}`, label: u ? pick(language, u.developer, u.developerEn) : v, remove: () => patch({ developers: without(filters.developers, v) }) };
     }),
     ...(filters.bedrooms !== null

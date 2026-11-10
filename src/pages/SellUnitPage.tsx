@@ -8,7 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { errorText } from '../services/api';
 import { FormError } from '../components/FormError';
 import { PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, CANCELLATION_PENALTY_MIN_RATE, CANCELLATION_PENALTY_RATE, DELIVERY_OPTIONS, FREQUENCY_OPTIONS, cancellationLoss, currency, money } from '../lib/unitHelpers';
-import { baseName, compoundRank, useDeveloperCatalog } from '../lib/developers';
+import { baseName, compoundRank, useCompounds, useDeveloperCatalog, useDeveloperSearch } from '../lib/developers';
 import { EMPTY_SELL_FORM, MONTHS_PER_PAYMENT, SellForm, fitPlace, isValidPhone, netToSeller } from '../lib/sellForm';
 import { CheckBox, Field, FilePick, FilePickMany, MoneyInput, PhotoPick, SearchSelect, Select, Toggle } from '../components/sell/FormBits';
 import { placeName, useRegions, useSubAreas } from '../lib/places';
@@ -208,36 +208,51 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
     const a = subAreas.find((x) => x.id === id);
     setForm((f) => ({ ...f, subAreaId: a?.id ?? null, subArea: a?.ar ?? '', districtId: null, district: '' }));
   };
-  // الكتالوج + أي مطور على الموقع؛ والكمبوندات بتاعة المطور المختار. البحث في المطور بيدوّر في كمبونداته كمان،
-  // فاللي عارف اسم الكمبوند بس يكتبه ويلاقي مطوره. (الوحدات بتتخزن بالاسم كنص، فالأسماء القديمة فاضلة شغالة.)
+  // الكتالوج (من الـ API) + أي مطور على الموقع؛ والكمبوندات بتاعة المطور المختار. البحث في المطور بيدوّر في كمبونداته كمان
+  // (على السيرفر)، فاللي عارف اسم الكمبوند بس يكتبه ويلاقي مطوره. الاختيار من القايمة بيتبعت بالـ id، والاسم المكتوب بالإيد
+  // بيتبعت كنص والموظفين بيراجعوه.
   const catalog = useDeveloperCatalog();
+  const [developerQuery, setDeveloperQuery] = useState('');
+  const compoundMatches = useDeveloperSearch(developerQuery);
+  const compounds = useCompounds(form.developerId);
+  // مسودة قديمة (قبل الـ ids) أو اسم مكتوب بالظبط زي اللي في القايمة: نربطه بالمطور عشان كمبونداته تظهر.
+  useEffect(() => {
+    if (form.developerId || !form.developer || !catalog.length) return;
+    const d = catalog.find((x) => x.ar === form.developer);
+    if (d) setForm((f) => (f.developer === d.ar ? { ...f, developerId: d.id } : f));
+  }, [catalog, form.developer, form.developerId]);
   const developerOptions = useMemo(() => {
     const map = new Map<string, { value: string; label: string; search: string }>();
-    const known = [...catalog].sort((a, b) => Number(!!b.popular) - Number(!!a.popular) || (b.popular ? 0 : a.nameAr.localeCompare(b.nameAr, 'ar')));
-    for (const d of known) {
-      map.set(baseName(d.nameAr), { value: d.nameAr, label: language === 'ar' ? d.nameAr : d.nameEn || d.nameAr, search: `${d.nameAr} ${d.nameEn} ${d.compounds.map((c) => `${c.ar} ${c.en}`).join(' ')}` });
+    for (const d of catalog) {
+      map.set(baseName(d.ar), { value: d.ar, label: language === 'ar' ? d.ar : d.en || d.ar, search: `${d.ar} ${d.en} ${(compoundMatches.get(d.id) ?? []).join(' ')}` });
     }
     for (const u of units) {
       if (u.developer && !map.has(baseName(u.developer))) map.set(baseName(u.developer), { value: u.developer, label: language === 'ar' ? u.developer : u.developerEn || u.developer, search: u.developerEn ?? '' });
     }
-    // "Other developer" isn't a real choice: a seller whose developer isn't listed types the name instead.
-    const other = catalog.find((d) => d.id === 'inshaa-other');
-    if (other) map.delete(baseName(other.nameAr));
     return [...map.values()];
-  }, [catalog, units, language]);
+  }, [catalog, compoundMatches, units, language]);
   const compoundOptions = useMemo(() => {
     if (!form.developer) return [];
     const map = new Map<string, { value: string; label: string; search: string }>();
+    const ranked = [...compounds].sort((a, b) => compoundRank(a, form.subAreaId, form.regionId, subAreas) - compoundRank(b, form.subAreaId, form.regionId, subAreas));
+    for (const c of ranked) map.set(baseName(c.name), { value: c.name, label: language === 'ar' ? c.name : c.en || c.name, search: `${c.ar} ${c.en}` });
     const devKey = baseName(form.developer);
-    const known = catalog.find((d) => baseName(d.nameAr) === devKey || d.nameEn === form.developer);
-    const regionAreas = subAreas.map((s) => s.ar);
-    const ranked = [...(known?.compounds ?? [])].sort((a, b) => compoundRank(a, form.subArea, form.region, regionAreas) - compoundRank(b, form.subArea, form.region, regionAreas));
-    for (const c of ranked) map.set(baseName(c.ar), { value: c.ar, label: language === 'ar' ? c.ar : c.en || c.ar, search: `${c.ar} ${c.en}` });
     for (const u of units) {
       if (baseName(u.developer) === devKey && u.compound && !map.has(baseName(u.compound))) map.set(baseName(u.compound), { value: u.compound, label: language === 'ar' ? u.compound : u.compoundEn || u.compound, search: u.compoundEn ?? '' });
     }
     return [...map.values()];
-  }, [catalog, units, language, form.developer, form.subArea, form.region, subAreas]);
+  }, [compounds, units, language, form.developer, form.subAreaId, form.regionId, subAreas]);
+  const pickDeveloper = (v: string) => {
+    const d = catalog.find((x) => x.ar === v);
+    setForm((f) => {
+      const same = v === f.developer;
+      return { ...f, developer: v, developerId: d?.id ?? null, compound: same ? f.compound : '', compoundId: same ? f.compoundId : null };
+    });
+  };
+  const pickCompound = (v: string) => {
+    const c = compounds.find((x) => x.name === v);
+    setForm((f) => ({ ...f, compound: v, compoundId: c?.id ?? null }));
+  };
 
   const submit = async () => {
     if (sending) return;
@@ -444,7 +459,8 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
                 searchable
                 allowCustom
                 value={form.developer}
-                onChange={(v) => setForm((f) => ({ ...f, developer: v, compound: v === f.developer ? f.compound : '' }))}
+                onChange={pickDeveloper}
+                onQueryChange={setDeveloperQuery}
                 placeholder={tx('اختار المطور', 'Choose the developer')}
                 options={developerOptions}
               />
@@ -456,7 +472,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
                 allowCustom
                 disabled={!form.developer}
                 value={form.compound}
-                onChange={(v) => set('compound', v)}
+                onChange={pickCompound}
                 placeholder={form.developer ? tx('اختار الكمبوند', 'Choose the compound') : tx('اختار المطور الأول', 'Choose the developer first')}
                 options={compoundOptions}
               />

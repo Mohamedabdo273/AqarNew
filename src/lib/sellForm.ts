@@ -12,6 +12,9 @@ export type TaxBearer = 'بائع' | 'مشتري' | 'حسب القانون' | '�
 /** Everything a seller can tell us. Phase 1 (quick) fills the basics; phase 2 (details) fills the rest. */
 export interface SellForm {
   // Basics — phase 1
+  /** المطور والكمبوند من القايمة (GET /api/developers) بالـ id؛ اسم مكتوب بالإيد مالوش id والموظفين بيراجعوه. */
+  developerId: number | null;
+  compoundId: number | null;
   developer: string;
   compound: string;
   /** المنطقة ← الموقع ← المنطقة التفصيلية (اختيارية) بالـ id (GET /api/locations/…)؛ الأسامي جنبهم للعرض بس. */
@@ -98,6 +101,8 @@ export interface SellForm {
 }
 
 export const EMPTY_SELL_FORM: SellForm = {
+  developerId: null,
+  compoundId: null,
   developer: '',
   compound: '',
   regionId: null,

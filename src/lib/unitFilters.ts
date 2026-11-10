@@ -3,6 +3,9 @@ import { Budget, fitsBudget } from '../components/BudgetFinder';
 import { foldArabic } from './developers';
 import { cashPrice, categoryOf, isDeal, isNegotiable, monthlyInstallment, savingsPercent, sellerDiscount } from './unitHelpers';
 
+/** How the developer filter names a unit's developer: its catalog id when it has one (spelling variants count as one), else the name. */
+export const developerKey = (u: Pick<RealEstateUnit, 'developer' | 'developerId'>) => (u.developerId ? `#${u.developerId}` : u.developer);
+
 export interface Filters {
   query: string;
   /** Place filters by id (GET /api/locations/…): regions and their sub-areas. */
@@ -82,7 +85,7 @@ export const applyFilters = (
     if (f.subAreaIds.length && !f.subAreaIds.includes(u.subAreaId ?? 0)) return false;
     if (f.categories.length && !f.categories.includes(categoryOf(u))) return false;
     if (f.types.length && !f.types.includes(u.propertyType)) return false;
-    if (f.developers.length && !f.developers.includes(u.developer)) return false;
+    if (f.developers.length && !f.developers.includes(developerKey(u)) && !f.developers.includes(u.developer)) return false;
     if (f.bedrooms !== null && (f.bedrooms >= 5 ? u.bedrooms < 5 : u.bedrooms !== f.bedrooms)) return false;
     if (f.areaMin && u.areaM2 < f.areaMin) return false;
     if (f.areaMax && u.areaM2 > f.areaMax) return false;

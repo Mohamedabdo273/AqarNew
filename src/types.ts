@@ -106,8 +106,11 @@ export interface RealEstateUnit {
   id: string;
   title: string;
   titleEn?: string;
+  /** Catalog id; missing when the seller typed a name that isn't listed. */
+  developerId?: number | null;
   developer: string;
   developerEn?: string;
+  compoundId?: number | null;
   compound: string;
   compoundEn?: string;
   location: string;
