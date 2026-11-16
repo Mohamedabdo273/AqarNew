@@ -82,6 +82,11 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
         </p>
       </div>
 
+      <button type="button" onClick={() => (window.location.hash = 'sell/swap')} className="btn-accent mt-6 min-h-12 px-6">
+        <Repeat className="w-5 h-5" />
+        {tx('اعرض وحدتك للبدل', 'List your unit for a swap')}
+      </button>
+
       {/* How it works — the questions everyone has before they try it. */}
       <ol className="mt-8 grid sm:grid-cols-3 gap-3">
         {[

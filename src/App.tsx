@@ -95,6 +95,8 @@ export default function App() {
   const [listPreset, setListPreset] = useState<HomeSearch | null>(null);
   const [rulesTab, setRulesTab] = useState<RulesTab>('seller');
   const [verifyCode, setVerifyCode] = useState<string | null>(null);
+  // #sell/swap — the same step-by-step listing form, for an owner listing the unit for a swap.
+  const [sellSwap, setSellSwap] = useState(false);
   const [adminIn, setAdminIn] = useState(hasAdminSession);
   const { compareIds } = useCompare();
 
@@ -111,6 +113,9 @@ export default function App() {
       setUnitId(head === 'unit' ? tail : null);
       setRequestCode(head === 'requests' && tail ? tail : null);
       setOfferTarget(head === 'offers' && tail ? tail : null);
+      setSellSwap(head === 'sell' && tail === 'swap');
+
+      if (head === 'sell') return setActivePage('sell');
 
       if (head === 'unit' && tail) return setActivePage('unit');
       if (head === 'verify') {
@@ -267,7 +272,7 @@ export default function App() {
             title={tx('سجّل دخول الأول عشان تعرض وحدتك', 'Log in first to list your unit')}
             text={tx('بنربط الطلب بحسابك، فتتابعه وتعدّله من أي جهاز، وإحنا نعرف إن اللي بيعرض هو المالك.', "We tie the request to your account so you can follow and edit it from any device — and we know it's the owner listing.")}
           >
-            <SellUnitPage onSubmitted={(code) => go(`thanks/sell/${code}`)} onOpenRules={() => openRules('seller')} onNavigate={handleNavigate} />
+            <SellUnitPage key={sellSwap ? 'swap' : 'sell'} swapMode={sellSwap} onSubmitted={(code) => go(`thanks/sell/${code}`)} onOpenRules={() => openRules('seller')} onNavigate={handleNavigate} />
           </RequireAuth>
         )}
         {activePage === 'thanks' && (

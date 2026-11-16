@@ -20,9 +20,13 @@ interface SellUnitPageProps {
   onSubmitted: (code: string) => void;
   onOpenRules: () => void;
   onNavigate: (page: PageId) => void;
+  /** Opened from the swap page (#sell/swap): the unit is listed for a swap. */
+  swapMode?: boolean;
 }
 
 const DRAFT_KEY = 'wahdety_sell_quick_draft_v1';
+/** Developer name sent for a unit that isn't with any developer (an old flat, a private building) — the API knows it. */
+const NO_DEVELOPER = 'بدون مطور';
 /** The draft saved on the server (code + token), so a reload carries on from where the seller was. */
 const SERVER_DRAFT_KEY = 'deal_sell_server_draft_v1';
 
@@ -30,7 +34,7 @@ const SERVER_DRAFT_KEY = 'deal_sell_server_draft_v1';
  * Phase 1 of listing: only what we need to call the seller back.
  * Everything else is filled later from "My requests" (or by an advisor on the phone).
  */
-export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenRules, onNavigate }) => {
+export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenRules, onNavigate, swapMode = false }) => {
   const { language, tx, isRTL } = useLanguage();
   const Arrow = isRTL ? ArrowLeft : ArrowRight;
   const { createRequest, saveDraft } = useRequests();
@@ -66,6 +70,16 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
   const [saving, setSaving] = useState(false);
   const [sendError, setSendError] = useState('');
 
+  // Swap listings can be old units: not with any developer, or fully paid long ago.
+  const noDeveloper = form.developer === NO_DEVELOPER;
+  const [paidOff, setPaidOff] = useState(() => swapMode && form.contractPrice > 0 && form.paidAmount === form.contractPrice);
+  const hasBalance = form.contractPrice > form.paidAmount;
+
+  // Listing for a swap: "open to swapping" is the point, so it's on and stays on.
+  useEffect(() => {
+    if (swapMode) setForm((f) => (f.eligibleForSwap ? f : { ...f, eligibleForSwap: true }));
+  }, [swapMode, form.eligibleForSwap]);
+
   // Signed in: fill the owner's name and mobile from the account, without overwriting what they typed.
   useEffect(() => {
     if (!user) return;
@@ -93,7 +107,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
       if (!form.regionId) e.push(tx('المنطقة', 'Area'));
       if (form.regionId && !form.subAreaId) e.push(tx('الموقع', 'Location'));
       if (!form.developer.trim()) e.push(tx('المطور', 'Developer'));
-      if (!form.compound.trim()) e.push(tx('الكمبوند', 'Compound'));
+      if (!form.compound.trim()) e.push(noDeveloper ? tx('عنوان الوحدة', 'Unit address') : tx('الكمبوند', 'Compound'));
       if (!form.propertyCategory) e.push(tx('النشاط', 'Activity'));
       if (form.propertyCategory && !form.propertyType) e.push(tx('نوع الوحدة', 'Unit type'));
       if (!form.deliveryStatus) e.push(tx('الاستلام', 'Delivery'));
@@ -112,9 +126,10 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
     // الصور اختيارية، بس المستندات الأربعة لازم تترفع، ولازم يوافق على القواعد
     if (target === 4) {
       if (!contractPageFiles.length) e.push(tx('صور العقد', 'Contract pages'));
-      if (!scheduleFile) e.push(tx('جدول سداد الأقساط', 'Payment schedule'));
-      if (!planFile) e.push(tx('بلان الوحدة', 'Unit plan'));
-      if (!locationFile) e.push(tx('تحديد موقع الوحدة في المشروع', 'Unit location in the project'));
+      // A fully paid unit has no schedule; a unit with no developer has no project plan or location annex.
+      if (hasBalance && !scheduleFile) e.push(tx('جدول سداد الأقساط', 'Payment schedule'));
+      if (!noDeveloper && !planFile) e.push(tx('بلان الوحدة', 'Unit plan'));
+      if (!noDeveloper && !locationFile) e.push(tx('تحديد موقع الوحدة في المشروع', 'Unit location in the project'));
       if (!form.ackOwner || !form.ackNoOverprice || !form.ackDeclareDues) e.push(tx('الموافقة على القواعد التلاتة', 'Agree to the three rules'));
     }
     return e;
@@ -308,10 +323,10 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
       <header className="max-w-3xl">
         <span className="inline-flex items-center gap-2 rounded-full bg-accent-soft px-3.5 py-1.5 text-sm font-bold text-accent">
           <Clock className="w-4 h-4" />
-          {tx('دقيقة واحدة · مجاناً · من غير عمولة عليك', 'One minute · free · no fee for you')}
+          {swapMode ? tx('4 خطوات بسيطة · من غير أي التزام', '4 simple steps · no commitment') : tx('دقيقة واحدة · مجاناً · من غير عمولة عليك', 'One minute · free · no fee for you')}
         </span>
         <h1 className="mt-4 text-4xl sm:text-5xl font-extrabold leading-tight text-ink">
-          {tx('اعرض وحدتك في دقيقة', 'List your unit in a minute')}
+          {swapMode ? tx('اعرض وحدتك للبدل', 'List your unit for a swap') : tx('اعرض وحدتك في دقيقة', 'List your unit in a minute')}
         </h1>
         <p className="mt-3 text-lg text-ink-soft leading-relaxed">
           {tx(
@@ -452,6 +467,19 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
           </div>
 
           {/* 2. المطور والكمبوند — قوايم بحث؛ لو مش موجود يكتبه ويختار "استخدام ..." */}
+          {swapMode && (
+            <Toggle
+              label={tx('الوحدة مش تبع مطور', 'Not with a developer')}
+              hint={tx('شقة في عمارة أو وحدة قديمة مش في كمبوند', 'A flat in a building, or an older unit outside a compound')}
+              on={noDeveloper}
+              onChange={(v) => setForm((f) => ({ ...f, developer: v ? NO_DEVELOPER : '', developerId: null, compound: '', compoundId: null }))}
+            />
+          )}
+          {noDeveloper ? (
+            <Field label={tx('عنوان الوحدة', 'Unit address')} required htmlFor="address" hint={tx('الشارع ورقم العمارة أو اسم المنطقة السكنية', 'Street and building number, or the neighbourhood')}>
+              <input id="address" value={form.compound} onChange={(e) => set('compound', e.target.value)} placeholder={tx('مثلاً: 12 شارع مكرم عبيد، مدينة نصر', 'e.g. 12 Makram Ebeid St, Nasr City')} className="field" />
+            </Field>
+          ) : (
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label={tx('المطور العقاري', 'Developer')} required htmlFor="developer">
               <SearchSelect
@@ -478,6 +506,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               />
             </Field>
           </div>
+          )}
 
           {/* 3. النشاط ونوع الوحدة والفيو — قوايم منسدلة */}
           <div className="grid sm:grid-cols-2 gap-4">
@@ -531,7 +560,11 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               <option value="">{tx('اختار موعد الاستلام', 'Choose delivery')}</option>
               {DELIVERY_OPTIONS.map((o) => (
                 <option key={o.ar} value={o.ar}>
-                  {o.ar === 'استلام فوري' ? tx('اتسلمت خلاص', 'Already handed over') : tx(o.ar, `Delivery ${o.en}`)}
+                  {o.ar === 'استلام فوري'
+                    ? swapMode
+                      ? tx('اتسلمت خلاص / وحدة قديمة', 'Handed over / an older unit')
+                      : tx('اتسلمت خلاص', 'Already handed over')
+                    : tx(o.ar, `Delivery ${o.en}`)}
                 </option>
               ))}
             </select>
@@ -542,17 +575,33 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
 
           {step === 3 && (
           <div className="space-y-7">
+          {swapMode && (
+            <Toggle
+              label={tx('الوحدة متسددة بالكامل', 'Fully paid off')}
+              hint={tx('شاريها من زمان أو خلصت أقساطها', 'Bought long ago, or the instalments are done')}
+              on={paidOff}
+              onChange={(v) => {
+                setPaidOff(v);
+                setForm((f) => (v ? { ...f, paidAmount: f.contractPrice, installmentFrequency: '', installmentValue: 0, hasLatePenalties: false, latePenaltiesAmount: 0 } : { ...f, paidAmount: 0 }));
+              }}
+            />
+          )}
           <div className="grid sm:grid-cols-2 gap-4">
-            <Field label={tx('سعر الوحدة في العقد', 'Contract price')} required htmlFor="price">
-              <MoneyInput id="price" value={form.contractPrice} onChange={(n) => set('contractPrice', n)} placeholder="5,000,000" />
+            <Field
+              label={paidOff ? tx('سعر شراء الوحدة', 'Purchase price') : tx('سعر الوحدة في العقد', 'Contract price')}
+              required
+              htmlFor="price"
+              hint={paidOff ? tx('اللي في عقدك — ولو مش فاكره اكتب تقديرك لسعرها النهارده', "From your contract — or your estimate of today's price if you don't remember") : undefined}
+            >
+              <MoneyInput id="price" value={form.contractPrice} onChange={(n) => setForm((f) => ({ ...f, contractPrice: n, paidAmount: paidOff ? n : f.paidAmount }))} placeholder="5,000,000" />
             </Field>
-            <Field label={tx('دفعت كام لحد النهارده؟', 'Paid so far')} required htmlFor="paid" hint={
+            {!paidOff && <Field label={tx('دفعت كام لحد النهارده؟', 'Paid so far')} required htmlFor="paid" hint={
                 paidLooksLow
                   ? tx('الرقم ده صغير أوي مقارنة بسعر الوحدة — اتأكد إنك كاتبه صح', 'That is very small next to the unit price — double-check it')
                   : tx('المقدم + الأقساط اللي اتدفعت', 'Down payment + paid installments')
               }>
               <MoneyInput id="paid" value={form.paidAmount} onChange={(n) => set('paidAmount', n)} placeholder="1,500,000" />
-            </Field>
+            </Field>}
           </div>
           {form.paidAmount > 0 && form.contractPrice > form.paidAmount && (
             <div className="grid sm:grid-cols-2 gap-4">
@@ -593,7 +642,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               </Field>
             </div>
           )}
-          <Toggle
+          {!paidOff && <Toggle
             tone="danger"
             label={tx('عليك أقساط متأخرة أو غرامات؟', 'Any overdue installments or fines?')}
             hint={tx('قول بصراحة — ده مش هيوقف البيع، وبيخلّي الحسبة أدق', "Be upfront — it won't stop the sale, and keeps the maths honest")}
@@ -603,9 +652,24 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
             <Field label={tx('حوالي كام؟', 'Roughly how much? (if you know)')} htmlFor="fines">
               <MoneyInput id="fines" value={form.latePenaltiesAmount} onChange={(n) => set('latePenaltiesAmount', n)} placeholder="80,000" />
             </Field>
-          </Toggle>
+          </Toggle>}
 
-          {/* Our own levers, shown before sending — not buried in the details later. */}
+          {swapMode ? (
+            <Field
+              label={tx('عايز تبدّلها بإيه؟', 'What would you swap into?')}
+              htmlFor="swapwish"
+              hint={tx('اختياري — اكتبها بكلامك: نوع الوحدة أو المنطقة أو قد إيه القسط', 'Optional — in your words: type, area, or the monthly you want')}
+            >
+              <input
+                id="swapwish"
+                value={form.swapTargetType}
+                onChange={(e) => set('swapTargetType', e.target.value)}
+                placeholder={tx('مثلاً: شقة أصغر بقسط أقل في أكتوبر', 'e.g. a smaller flat with a lower monthly in October')}
+                className="field"
+              />
+            </Field>
+          ) : (
+          /* Our own levers, shown before sending — not buried in the details later. */
           <div className="space-y-3">
             <p className="font-bold text-ink">
               {tx('عايز تبيع أسرع؟', 'Want to sell faster?')} <span className="text-sm font-medium text-muted">{tx('(اختياري)', '(optional)')}</span>
@@ -649,6 +713,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               </Field>
             </Toggle>
           </div>
+          )}
 
           </div>
           )}
@@ -668,7 +733,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
             </p>
 
             <FilePickMany
-              label={tx('أول 4 صور في العقد', 'First 4 pages of the contract')}
+              label={tx('صور اول 4 ورقات من عقد الوحده', 'First 4 pages of the contract')}
               hint={tx('الصفحات اللي فيها بياناتك وبيانات الوحدة والسعر', 'The pages with your details, the unit and the price')}
               max={4}
               value={form.contractPages}
@@ -677,30 +742,30 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               onFilesChange={setContractPageFiles}
               required
             />
-            <FilePick
+            {hasBalance && <FilePick
               label={tx('جدول سداد الأقساط', 'Payment schedule')}
               hint={tx('الملحق بالعقد', 'The contract annex')}
               value={form.paymentScheduleFile}
               onChange={(v) => set('paymentScheduleFile', v)}
               onFile={setScheduleFile}
               required
-            />
-            <FilePick
+            />}
+            {!noDeveloper && <FilePick
               label={tx('صورة بلان الوحدة', 'Unit plan')}
               hint={tx('الملحق بالعقد', 'The contract annex')}
               value={form.unitPlanFile}
               onChange={(v) => set('unitPlanFile', v)}
               onFile={setPlanFile}
               required
-            />
-            <FilePick
+            />}
+            {!noDeveloper && <FilePick
               label={tx('تحديد موقع الوحدة في المشروع', 'Unit location in the project')}
               hint={tx('الملحق بالعقد', 'The contract annex')}
               value={form.unitLocationFile}
               onChange={(v) => set('unitLocationFile', v)}
               onFile={setLocationFile}
               required
-            />
+            />}
           {/* The three seller rules that matter most, agreed to right where they apply. */}
           <div className="rounded-xl bg-paper p-5 space-y-4">
             <div className="flex items-center justify-between gap-3">
