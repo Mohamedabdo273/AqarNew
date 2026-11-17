@@ -55,6 +55,7 @@ import {
   savingsPercent,
   transferFeeText,
   VIEW_OPTIONS,
+  FREQUENCY_OPTIONS,
 } from '../lib/unitHelpers';
 
 interface UnitPageProps {
@@ -123,18 +124,26 @@ export const UnitPage: React.FC<UnitPageProps> = ({ unit, units, onBack, onSelec
   // The money a buyer weighs, in one row.
   const left = installmentsLeft(unit);
   const keyNumbers = [
-    { l: tx('سعر العقد', 'Contract price'), v: fullMoney(unit.originalContractPrice, language) },
     { l: tx('صاحبها دفع', 'Owner paid'), v: fullMoney(unit.paidCashAmount, language) },
     { l: tx('باقي للمطور', 'Left to developer'), v: fullMoney(unit.remainingAmount, language) },
+    { l: tx('سعر العقد', 'Contract price'), v: fullMoney(unit.originalContractPrice, language) },
     { l: tx('القسط في الشهر تقريباً', 'Monthly, roughly'), v: fullMoney(monthlyInstallment(unit), language) },
-    ...(left > 0 ? [{ l: tx('عدد الأقساط المتبقية', 'Instalments left'), v: tx(`${left} قسط`, `${left}`) }] : []),
-    ...(monthsLeft(unit) > 0 ? [{ l: tx('المدة المتبقية', 'Time left'), v: durationLabel(monthsLeft(unit), language) }] : []),
+    // Say how often, or "20" next to a monthly figure reads as 20 months.
+    ...(left > 0
+      ? [{
+          l: tx('عدد الأقساط المتبقية', 'Instalments left'),
+          v: unit.installmentFrequency
+            ? tx(`${left} قسط ${unit.installmentFrequency}`, `${left} ${(FREQUENCY_OPTIONS.find((f) => f.ar === unit.installmentFrequency)?.en ?? '').toLowerCase()}`.trim())
+            : tx(`${left} قسط`, `${left}`),
+        }]
+      : []),
+    ...(monthsLeft(unit) > 0 ? [{ l: tx('المدة المتبقية', 'Years of instalments'), v: durationLabel(monthsLeft(unit), language) }] : []),
   ];
 
   // What the unit is, at a glance, under the title.
   const facts = [
     { icon: Building2, l: tx('النوع', 'Type'), v: pick(language, unit.propertyType, unit.propertyTypeEn) },
-    { icon: Maximize2, l: tx('المساحة', 'Area'), v: `${unit.areaM2} ${tx('م²', 'm²')}` },
+    { icon: Maximize2, l: tx('المساحة', 'Built up area'), v: `${unit.areaM2} ${tx('م²', 'm²')}` },
     unit.bedrooms > 0 && { icon: BedDouble, l: tx('الغرف', 'Bedrooms'), v: String(unit.bedrooms) },
     unit.bathrooms > 0 && { icon: Bath, l: tx('الحمامات', 'Bathrooms'), v: String(unit.bathrooms) },
     { icon: Paintbrush, l: tx('التشطيب', 'Finishing'), v: pick(language, unit.finishing, unit.finishingEn) },

@@ -22,7 +22,6 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
         { id: 'saved', l: tx('المفضلة', 'Saved') },
         { id: 'requests', l: tx('حسابي', 'My account') },
         { id: 'compare', l: tx('قارن وحداتك', 'Compare units') },
-        { id: 'market-comparisons', l: tx('مقارنات السوق', 'Market comparisons') },
       ],
     },
     {

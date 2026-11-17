@@ -205,7 +205,7 @@ export const DELIVERY_OPTIONS: { ar: RealEstateUnit['deliveryStatus']; en: strin
 ];
 
 export const FINISHING_OPTIONS: { ar: RealEstateUnit['finishing']; en: string }[] = [
-  { ar: 'طوب أحمر', en: 'Red brick (core & shell)' },
+  { ar: 'طوب أحمر', en: 'Core & shell (Red brick)' },
   { ar: 'نص تشطيب', en: 'Semi-finished' },
   { ar: 'تلت تربع تشطيب', en: 'Three-quarters finished' },
   { ar: 'كامل التشطيب', en: 'Fully finished' },

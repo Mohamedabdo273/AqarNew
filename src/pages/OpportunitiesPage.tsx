@@ -310,16 +310,16 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
             </>
           )}
           <BarDivider />
-          <BarCell label={tx('النشاط', 'Activity')}>
+          <BarCell label={tx('النشاط', 'Category')}>
             <select
               value={oneCategory ?? (filters.categories.length > 1 ? 'many' : '')}
               onChange={(e) => patch({ categories: e.target.value ? [e.target.value] : [], types: [] })}
               className={SELECT_CLASS}
             >
-              <option value="">{tx('كل الأنشطة', 'All activities')}</option>
+              <option value="">{tx('كل الأنشطة', 'All categories')}</option>
               {filters.categories.length > 1 && (
                 <option value="many" disabled>
-                  {tx(`${filters.categories.length} أنشطة`, `${filters.categories.length} activities`)}
+                  {tx(`${filters.categories.length} أنشطة`, `${filters.categories.length} categories`)}
                 </option>
               )}
               {PROPERTY_CATEGORIES.map((c) => (

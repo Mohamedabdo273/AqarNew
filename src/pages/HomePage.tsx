@@ -534,8 +534,8 @@ export const HomePage: React.FC<HomePageProps> = ({
               options={subAreasShown.map((x) => ({ value: x.o.ar, label: language === 'ar' ? x.o.ar : x.o.en, count: x.count }))}
             />
             <FilterSelect
-              label={tx('النشاط', 'Activity')}
-              allLabel={tx('كل الأنشطة', 'All activities')}
+              label={tx('النشاط', 'Category')}
+              allLabel={tx('كل الأنشطة', 'All categories')}
               allCount={afterSubArea.length}
               value={cardCategory}
               onPick={(v) => {
@@ -799,10 +799,10 @@ const HeroSearch: React.FC<{ units: RealEstateUnit[]; mode: HomeRole; onSearch: 
                     setCategory(e.target.value);
                     setType(''); // التصنيف اتغير، فالنوع القديم مابقاش تحته
                   }}
-                  aria-label={tx('الأنشطة', 'Activity')}
+                  aria-label={tx('الأنشطة', 'Category')}
                   className="field h-14"
                 >
-                  <option value="">{tx('كل الأنشطة', 'All activities')}</option>
+                  <option value="">{tx('كل الأنشطة', 'All categories')}</option>
                   {PROPERTY_CATEGORIES.map((c) => (
                     <option key={c.ar} value={c.ar}>
                       {language === 'ar' ? c.ar : c.en}
@@ -811,7 +811,10 @@ const HeroSearch: React.FC<{ units: RealEstateUnit[]; mode: HomeRole; onSearch: 
                 </select>
                 {category && (
                   <select value={type} onChange={(e) => setType(e.target.value)} aria-label={tx('نوع الوحدة', 'Unit type')} className="field h-14">
-                    <option value="">{tx('كل أنواع ', 'All ') + category}</option>
+                    {/* category is the Arabic value — show its English name in English. */}
+                    <option value="">
+                      {tx(`كل أنواع ${category}`, `All ${(PROPERTY_CATEGORIES.find((c) => c.ar === category)?.en ?? category).toLowerCase()} types`)}
+                    </option>
                     {(TYPES_BY_CATEGORY[category as keyof typeof TYPES_BY_CATEGORY] ?? []).map((p) => (
                       <option key={p.ar} value={p.ar}>
                         {language === 'ar' ? p.ar : p.en}

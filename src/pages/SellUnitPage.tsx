@@ -108,7 +108,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
       if (form.regionId && !form.subAreaId) e.push(tx('الموقع', 'Location'));
       if (!form.developer.trim()) e.push(tx('المطور', 'Developer'));
       if (!form.compound.trim()) e.push(noDeveloper ? tx('عنوان الوحدة', 'Unit address') : tx('الكمبوند', 'Compound'));
-      if (!form.propertyCategory) e.push(tx('النشاط', 'Activity'));
+      if (!form.propertyCategory) e.push(tx('النشاط', 'Category'));
       if (form.propertyCategory && !form.propertyType) e.push(tx('نوع الوحدة', 'Unit type'));
       if (!form.deliveryStatus) e.push(tx('الاستلام', 'Delivery'));
     }
@@ -127,8 +127,8 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
     if (target === 4) {
       if (!contractPageFiles.length) e.push(tx('صور العقد', 'Contract pages'));
       // A fully paid unit has no schedule; a unit with no developer has no project plan or location annex.
-      if (hasBalance && !scheduleFile) e.push(tx('جدول سداد الأقساط', 'Payment schedule'));
-      if (!noDeveloper && !planFile) e.push(tx('بلان الوحدة', 'Unit plan'));
+      if (hasBalance && !scheduleFile) e.push(tx('جدول سداد الأقساط', 'Payment plan'));
+      if (!noDeveloper && !planFile) e.push(tx('بلان الوحدة', 'Layout'));
       if (!noDeveloper && !locationFile) e.push(tx('تحديد موقع الوحدة في المشروع', 'Unit location in the project'));
       if (!form.ackOwner || !form.ackNoOverprice || !form.ackDeclareDues) e.push(tx('الموافقة على القواعد التلاتة', 'Agree to the three rules'));
     }
@@ -510,7 +510,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
 
           {/* 3. النشاط ونوع الوحدة والفيو — قوايم منسدلة */}
           <div className="grid sm:grid-cols-2 gap-4">
-            <Field label={tx('النشاط', 'Activity')} required htmlFor="category">
+            <Field label={tx('النشاط', 'Category')} required htmlFor="category">
               <select
                 id="category"
                 value={form.propertyCategory}
@@ -520,7 +520,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
                 }}
                 className="field"
               >
-                <option value="">{tx('اختار النشاط', 'Choose an activity')}</option>
+                <option value="">{tx('اختار النشاط', 'Choose a category')}</option>
                 {PROPERTY_CATEGORIES.map((o) => (
                   <option key={o.ar} value={o.ar}>
                     {language === 'ar' ? o.ar : o.en}
@@ -536,7 +536,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
                 disabled={!form.propertyCategory}
                 className="field disabled:opacity-60"
               >
-                <option value="">{form.propertyCategory ? tx('اختار نوع الوحدة', 'Choose a unit type') : tx('اختار النشاط الأول', 'Choose the activity first')}</option>
+                <option value="">{form.propertyCategory ? tx('اختار نوع الوحدة', 'Choose a unit type') : tx('اختار النشاط الأول', 'Choose the category first')}</option>
                 {(form.propertyCategory ? TYPES_BY_CATEGORY[form.propertyCategory] ?? [] : []).map((o) => (
                   <option key={o.ar} value={o.ar}>
                     {language === 'ar' ? o.ar : o.en}
@@ -743,7 +743,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               required
             />
             {hasBalance && <FilePick
-              label={tx('جدول سداد الأقساط', 'Payment schedule')}
+              label={tx('جدول سداد الأقساط', 'Payment plan')}
               hint={tx('الملحق بالعقد', 'The contract annex')}
               value={form.paymentScheduleFile}
               onChange={(v) => set('paymentScheduleFile', v)}
@@ -751,7 +751,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
               required
             />}
             {!noDeveloper && <FilePick
-              label={tx('صورة بلان الوحدة', 'Unit plan')}
+              label={tx('صورة بلان الوحدة', 'Layout')}
               hint={tx('الملحق بالعقد', 'The contract annex')}
               value={form.unitPlanFile}
               onChange={(v) => set('unitPlanFile', v)}

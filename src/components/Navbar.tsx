@@ -93,7 +93,6 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
     buy,
     rules,
     contact,
-    { id: 'market-comparisons', label: tx('مقارنات السوق', 'Market Comparisons'), icon: Sparkles },
     { id: 'saved', label: tx('المفضلة', 'Saved'), icon: Heart },
     { id: 'requests', label: tx('حسابي', 'My account'), icon: ClipboardList },
     { id: 'offers', label: tx('العروض والتفاوض', 'Offers'), icon: HandCoins },
@@ -225,7 +224,6 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
                   {[
                     { id: 'requests' as PageId, label: tx('حسابي', 'My account'), icon: ClipboardList, n: requests.length },
                     { id: 'offers' as PageId, label: tx('العروض والتفاوض', 'Offers'), icon: HandCoins, n: 0 },
-                    { id: 'market-comparisons' as PageId, label: tx('مقارنات السوق', 'Market Comparisons'), icon: Sparkles, n: 0 },
                     { id: 'about' as PageId, label: tx('احنا مين', 'About us'), icon: Info, n: 0 },
                   ].map((m) => (
                     <button

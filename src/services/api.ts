@@ -165,7 +165,7 @@ const RENAMED_TYPES: Record<string, RealEstateUnit['propertyType']> = {
 
 /** أسامي التشطيب القديمة (قبل أكتوبر 2026) → الجديدة، لحد ما migration الـ API تتطبق على الداتابيز. */
 export const LEGACY_FINISHINGS: Record<string, { ar: RealEstateUnit['finishing']; en: string }> = {
-  'بدون تشطيب': { ar: 'طوب أحمر', en: 'Red brick (core & shell)' },
+  'بدون تشطيب': { ar: 'طوب أحمر', en: 'Core & shell (Red brick)' },
   'نصف تشطيب': { ar: 'نص تشطيب', en: 'Semi-finished' },
   'تشطيب كامل سوبر لوكس': { ar: 'كامل التشطيب', en: 'Fully finished' },
   'ألترا سوبر لوكس': { ar: 'كامل التشطيب', en: 'Fully finished' },

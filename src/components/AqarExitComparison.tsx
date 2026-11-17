@@ -125,7 +125,8 @@ export const AqarExitComparison: React.FC<AqarExitComparisonProps> = ({
 
   const getUnitLabel = (u: RealEstateUnit, idx: number) => {
     if (u.id === currentUnit.id) return tx('الوحدة اللي بتشوفها', 'Current unit');
-    return `${tx('وحدة', 'Unit')} ${idx + 1}`;
+    // The code names the unit; the number is only a fallback for a unit without one.
+    return u.verificationCode ? `${tx('وحدة', 'Unit')} ${u.verificationCode}` : `${tx('وحدة', 'Unit')} ${idx + 1}`;
   };
 
   return (
@@ -236,8 +237,18 @@ export const AqarExitComparison: React.FC<AqarExitComparisonProps> = ({
                                   isCurrent ? 'text-brand' : 'text-ink'
                                 }`}
                               >
-                                {getUnitLabel(u, idx)}
+                                {isCurrent ? getUnitLabel(u, idx) : pick(language, u.propertyType, u.propertyTypeEn)}
                               </span>
+                              {/* All units here are in the same project, so tell them apart by what each is and its code. */}
+                              <span className="mt-0.5 text-xs text-ink-soft block">
+                                {isCurrent && <>{pick(language, u.propertyType, u.propertyTypeEn)} · </>}
+                                <span className="num">{u.areaM2}</span> {tx('م²', 'm²')}
+                              </span>
+                              {u.verificationCode && (
+                                <span className="num mt-1 inline-block rounded-md bg-brand-soft px-2 py-0.5 text-xs font-extrabold text-brand-ink" dir="ltr">
+                                  {u.verificationCode}
+                                </span>
+                              )}
                             </div>
                           </th>
                         );
@@ -442,7 +453,7 @@ export const AqarExitComparison: React.FC<AqarExitComparisonProps> = ({
                     {/* Row 9: المساحة */}
                     <tr>
                       <td colSpan={compareUnits.length} className="pt-4 pb-1 text-xs text-muted font-bold text-center">
-                        {tx('المساحة', 'Area')}
+                        {tx('المساحة', 'Built up area')}
                       </td>
                     </tr>
                     <tr>

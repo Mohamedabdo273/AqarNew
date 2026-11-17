@@ -1,8 +1,9 @@
 import React from 'react';
-import { Heart, BadgeCheck, BedDouble, Bath, Maximize2, KeyRound, Flame } from 'lucide-react';
+import { Heart, BadgeCheck, BedDouble, Bath, Maximize2, KeyRound, Flame, Scale, Check } from 'lucide-react';
 import { RealEstateUnit } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useUnits } from '../context/UnitsContext';
+import { COMPARE_MAX, useCompare } from '../context/CompareContext';
 import {
   FREQUENCY_OPTIONS,
   cashPrice,
@@ -38,7 +39,9 @@ const full = (n: number) => Math.round(n).toLocaleString('en-US');
  */
 export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, tag, footer, noDiscount }) => {
   const { language, tx } = useLanguage();
-  const { isUnitSaved, toggleSaveUnit } = useUnits();
+  const { isUnitSaved, toggleSaveUnit, showToast } = useUnits();
+  const { isCompared, toggleCompare } = useCompare();
+  const compared = isCompared(unit.id);
   const saved = isUnitSaved(unit.id);
   const deal = !noDiscount && isDeal(unit);
   const cur = currency(language);
@@ -56,7 +59,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
   const specs = [
     unit.bedrooms > 0 && { icon: BedDouble, v: String(unit.bedrooms), l: tx('غرف', 'beds') },
     unit.bathrooms > 0 && { icon: Bath, v: String(unit.bathrooms), l: tx('حمام', 'baths') },
-    { icon: Maximize2, v: String(unit.areaM2), l: tx('المساحة', 'area'), suffix: tx('م²', 'm²') },
+    { icon: Maximize2, v: String(unit.areaM2), l: tx('المساحة', 'Built up area'), suffix: tx('م²', 'm²') },
   ].filter(Boolean) as { icon: React.ElementType; v: string; l: string; suffix?: string }[];
 
   return (
@@ -179,6 +182,23 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
             </p>
           </div>
         )}
+
+        {/* Pick any units to compare side by side; the floating "Compare (n)" button opens them. */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!toggleCompare(unit.id)) showToast(tx(`تقدر تقارن ${COMPARE_MAX} وحدات بالكتير`, `You can compare up to ${COMPARE_MAX} units`));
+            else showToast(compared ? tx('اتشالت من المقارنة', 'Removed from compare') : tx('اتضافت للمقارنة', 'Added to compare'));
+          }}
+          aria-pressed={compared}
+          className={`mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-base font-bold transition ${
+            compared ? 'border-brand bg-brand text-white' : 'border-line-strong text-ink hover:border-brand hover:text-brand'
+          }`}
+        >
+          {compared ? <Check className="w-5 h-5" /> : <Scale className="w-5 h-5" />}
+          {compared ? tx('في المقارنة', 'In compare') : tx('أضف للمقارنة', 'Add to compare')}
+        </button>
 
         {footer}
       </div>

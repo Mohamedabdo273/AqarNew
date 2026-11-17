@@ -197,7 +197,7 @@ export const ComparePage: React.FC<ComparePageProps> = ({ units, onSelectUnit, o
       value: (u) => yesNo(isNegotiable(u)),
     },
     {
-      label: tx('المساحة', 'Area'),
+      label: tx('المساحة', 'Built up area'),
       value: (u) => `${u.areaM2} ${tx('م²', 'm²')}`,
       score: (u) => u.areaM2,
       better: 'high',
@@ -275,15 +275,6 @@ export const ComparePage: React.FC<ComparePageProps> = ({ units, onSelectUnit, o
             <span>{tx('تصفّح الوحدات لإضافتها', 'Browse units to compare')}</span>
           </button>
 
-          <button
-            type="button"
-            onClick={() => onNavigate('market-comparisons')}
-            className="btn-ghost w-full sm:w-auto min-h-12 px-6"
-          >
-            <Sparkles className="w-4 h-4 text-brand" />
-            <span>{tx('استكشف مقارنات السوق الجاهزة', 'Explore Market Comparisons')}</span>
-            <ArrowRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
-          </button>
         </div>
       </div>
     );
@@ -520,30 +511,6 @@ export const ComparePage: React.FC<ComparePageProps> = ({ units, onSelectUnit, o
         </table>
       </div>
 
-      {/* Banner linking to market comparisons page */}
-      <div className="mt-10 p-5 rounded-2xl bg-paper border border-line flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-brand/10 text-brand flex items-center justify-center shrink-0">
-            <Sparkles className="w-5 h-5" />
-          </div>
-          <div>
-            <h4 className="text-sm font-bold text-ink">
-              {tx('تريد مقارنات سوقية جاهزة ومحللة؟', 'Looking for pre-analyzed market comparisons?')}
-            </h4>
-            <p className="text-xs text-ink-soft mt-0.5">
-              {tx('تصفح صفحة مقارنات السوق الجاهزة بين أهم الفرص والمناطق الاستثمارية', 'Explore curated market comparisons across prime areas and opportunities')}
-            </p>
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={() => onNavigate('market-comparisons')}
-          className="btn-ghost min-h-10 text-xs sm:text-sm px-4 shrink-0"
-        >
-          <span>{tx('صفحة مقارنات السوق الجاهزة', 'Market Comparisons Page')}</span>
-          <ArrowRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
-        </button>
-      </div>
 
       {/* Unit Picker Modal */}
       {pickerModalOpen && (

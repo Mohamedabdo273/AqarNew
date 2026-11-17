@@ -23,7 +23,6 @@ import { AdminPlatform } from './components/admin/AdminPlatform';
 import { AdminLogin } from './components/admin/AdminLogin';
 import { StatementPage } from './pages/StatementPage';
 import { ComparePage } from './pages/ComparePage';
-import { MarketComparisonsPage } from './pages/MarketComparisonsPage';
 import { VerifyPage } from './pages/VerifyPage';
 import { MobileDesignPage } from './pages/MobileDesignPage';
 import { useCompare } from './context/CompareContext';
@@ -41,7 +40,7 @@ import { useHomeRole } from './components/RoleSwitch';
 import { fetchUnit } from './services/api';
 
 /** Pages reachable by a bare hash (#sell, #contact, …). */
-const PAGES: PageId[] = ['home', 'opportunities', 'sell', 'statement', 'compare', 'market-comparisons', 'verify', 'swap', 'contact', 'about', 'rules', 'promise', 'saved', 'requests', 'offers', 'privacy', 'terms', 'admin', 'mobile-design'];
+const PAGES: PageId[] = ['home', 'opportunities', 'sell', 'statement', 'compare', 'verify', 'swap', 'contact', 'about', 'rules', 'promise', 'saved', 'requests', 'offers', 'privacy', 'terms', 'admin', 'mobile-design'];
 const THANKS: ThanksKind[] = ['sell', 'statement', 'viewing', 'swap', 'contact', 'alert'];
 
 /*
@@ -298,7 +297,6 @@ export default function App() {
           </RequireAuth>
         )}
         {activePage === 'compare' && <ComparePage units={units} onSelectUnit={openUnit} onNavigate={handleNavigate} />}
-        {activePage === 'market-comparisons' && <MarketComparisonsPage units={units} onSelectUnit={openUnit} onNavigate={handleNavigate} />}
         {activePage === 'verify' && <VerifyPage initialCode={verifyCode} onSelectUnit={openUnit} />}
         {activePage === 'statement' && (
           <RequireAuth
