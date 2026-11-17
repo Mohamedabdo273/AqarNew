@@ -95,7 +95,6 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
     contact,
     { id: 'saved', label: tx('المفضلة', 'Saved'), icon: Heart },
     { id: 'requests', label: tx('حسابي', 'My account'), icon: ClipboardList },
-    { id: 'offers', label: tx('العروض والتفاوض', 'Offers'), icon: HandCoins },
     { id: 'about', label: tx('احنا مين', 'About us'), icon: Info },
   ];
 
@@ -223,7 +222,6 @@ export const Navbar: React.FC<NavbarProps> = ({ activePage, onNavigate }) => {
                 <div className="absolute top-full mt-2 end-0 w-56 card p-2 shadow-lift z-50">
                   {[
                     { id: 'requests' as PageId, label: tx('حسابي', 'My account'), icon: ClipboardList, n: requests.length },
-                    { id: 'offers' as PageId, label: tx('العروض والتفاوض', 'Offers'), icon: HandCoins, n: 0 },
                     { id: 'about' as PageId, label: tx('احنا مين', 'About us'), icon: Info, n: 0 },
                   ].map((m) => (
                     <button
