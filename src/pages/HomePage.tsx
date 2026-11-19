@@ -44,7 +44,8 @@ import { IlloForm, IlloKeys, IlloPeople, IlloReview } from '../components/Illust
 import { useAnimatedNumber } from '../lib/useAnimatedNumber';
 import { BRAND, whatsappLink } from '../config/brand';
 import { Budget, BudgetFinder, BudgetSlider, CASH_RANGE, DEFAULT_BUDGET, MONTHLY_RANGE, fitsBudget } from '../components/BudgetFinder';
-import { PROPERTY_TYPES, PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, categoryOf, CANCELLATION_PENALTY_MIN_RATE, cancellationLoss, cashPrice, currency, isDeal, money, sellerDiscount } from '../lib/unitHelpers';
+import { CANCELLATION_PENALTY_MIN_RATE, cancellationLoss, cashPrice, currency, isDeal, money, sellerDiscount } from '../lib/unitHelpers';
+import { useUnitTypeLists } from '../lib/unitLookups';
 import { placeName, useRegions, useSubAreas } from '../lib/places';
 import { UnitSearchInput } from '../components/UnitSearchInput';
 
@@ -200,6 +201,9 @@ export const HomePage: React.FC<HomePageProps> = ({
   onRoleChange,
 }) => {
   const { language, tx, isRTL } = useLanguage();
+  // النشاط ونوع الوحدة من الـ API (GET /api/lookups).
+  const unitTypes = useUnitTypeLists();
+  const categoryOf = (u: Pick<RealEstateUnit, 'propertyType' | 'propertyCategory'>) => u.propertyCategory || unitTypes.categoryOfType(u.propertyType);
   const Arrow = isRTL ? ArrowLeft : ArrowRight;
 
   const matching = useMemo(() => units.filter((u) => fitsBudget(u, budget)), [units, budget]);
@@ -251,17 +255,19 @@ export const HomePage: React.FC<HomePageProps> = ({
     [afterRegion, cardSubArea],
   );
   const categoriesShown = useMemo(
-    () => tally(afterSubArea, (u) => categoryOf(u), PROPERTY_CATEGORIES),
-    [afterSubArea],
+    () => tally(afterSubArea, (u) => categoryOf(u), unitTypes.categories),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- categoryOf follows unitTypes
+    [afterSubArea, unitTypes],
   );
 
   const afterCategory = useMemo(
     () => (cardCategory ? afterSubArea.filter((u) => categoryOf(u) === cardCategory) : afterSubArea),
-    [afterSubArea, cardCategory],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- categoryOf follows unitTypes
+    [afterSubArea, cardCategory, unitTypes],
   );
   const typesShown = useMemo(
-    () => tally(afterCategory, (u) => u.propertyType, cardCategory ? TYPES_BY_CATEGORY[cardCategory as keyof typeof TYPES_BY_CATEGORY] ?? [] : PROPERTY_TYPES),
-    [afterCategory, cardCategory],
+    () => tally(afterCategory, (u) => u.propertyType, cardCategory ? unitTypes.typesByCategory[cardCategory] ?? [] : unitTypes.allTypes),
+    [afterCategory, cardCategory, unitTypes],
   );
 
   const shownCards = useMemo(
@@ -712,6 +718,7 @@ const HERO_COLS = ['lg:grid-cols-2', 'lg:grid-cols-3', 'lg:grid-cols-4'];
 /* Buy · sell · swap in one card that sits over the bottom of the hero band. */
 const HeroSearch: React.FC<{ units: RealEstateUnit[]; mode: HomeRole; onSearch: (s: HomeSearch) => void; onNavigate: (page: PageId) => void }> = ({ units, mode, onSearch, onNavigate }) => {
   const { language, tx } = useLanguage();
+  const unitTypes = useUnitTypeLists();
   const [query, setQuery] = useState('');
   const [region, setRegion] = useState('');
   const [subArea, setSubArea] = useState('');
@@ -803,7 +810,7 @@ const HeroSearch: React.FC<{ units: RealEstateUnit[]; mode: HomeRole; onSearch: 
                   className="field h-14"
                 >
                   <option value="">{tx('كل الأنشطة', 'All categories')}</option>
-                  {PROPERTY_CATEGORIES.map((c) => (
+                  {unitTypes.categories.map((c) => (
                     <option key={c.ar} value={c.ar}>
                       {language === 'ar' ? c.ar : c.en}
                     </option>
@@ -813,9 +820,9 @@ const HeroSearch: React.FC<{ units: RealEstateUnit[]; mode: HomeRole; onSearch: 
                   <select value={type} onChange={(e) => setType(e.target.value)} aria-label={tx('نوع الوحدة', 'Unit type')} className="field h-14">
                     {/* category is the Arabic value — show its English name in English. */}
                     <option value="">
-                      {tx(`كل أنواع ${category}`, `All ${(PROPERTY_CATEGORIES.find((c) => c.ar === category)?.en ?? category).toLowerCase()} types`)}
+                      {tx(`كل أنواع ${category}`, `All ${(unitTypes.categories.find((c) => c.ar === category)?.en ?? category).toLowerCase()} types`)}
                     </option>
-                    {(TYPES_BY_CATEGORY[category as keyof typeof TYPES_BY_CATEGORY] ?? []).map((p) => (
+                    {(unitTypes.typesByCategory[category] ?? []).map((p) => (
                       <option key={p.ar} value={p.ar}>
                         {language === 'ar' ? p.ar : p.en}
                       </option>

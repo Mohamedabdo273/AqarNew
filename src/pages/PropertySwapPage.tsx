@@ -7,7 +7,8 @@ import { UnitCard } from '../components/UnitCard';
 import { Pagination } from '../components/Pagination';
 import { Field, MoneyInput, Toggle } from '../components/sell/FormBits';
 import { BRAND, whatsappLink } from '../config/brand';
-import { PROPERTY_TYPES, buyerFee, feeOn, currency, money, monthlyInstallment, pick } from '../lib/unitHelpers';
+import { buyerFee, feeOn, currency, money, monthlyInstallment, pick } from '../lib/unitHelpers';
+import { useUnitTypeLists } from '../lib/unitLookups';
 import { placeName, useRegions } from '../lib/places';
 import { isResidential, isValidPhone } from '../lib/sellForm';
 import { errorText, sendSwap } from '../services/api';
@@ -29,6 +30,7 @@ const PAGE_SIZE = 12;
  */
 export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSelectUnit, onRequested }) => {
   const { language, tx, isRTL } = useLanguage();
+  const { allTypes } = useUnitTypeLists(); // من الـ API (GET /api/lookups)
   const { requireAuth } = useAuth();
   const [myPaid, setMyPaid] = useState(0);
   const [myMonthly, setMyMonthly] = useState(0);
@@ -167,7 +169,7 @@ export const PropertySwapPage: React.FC<PropertySwapPageProps> = ({ units, onSel
               <select id="sw-type" value={wantType} onChange={(e) => setWantType(e.target.value)} className="field">
                 <option value="residential">{tx('أي سكني', 'Any home')}</option>
                 <option value="">{tx('أي نوع', 'Any type')}</option>
-                {PROPERTY_TYPES.map((p) => (
+                {allTypes.map((p) => (
                   <option key={p.ar} value={p.ar}>
                     {language === 'ar' ? p.ar : p.en}
                   </option>

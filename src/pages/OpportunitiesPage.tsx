@@ -13,13 +13,11 @@ import {
   DELIVERY_OPTIONS,
   FINISHING_OPTIONS,
   FREQUENCY_OPTIONS,
-  PROPERTY_CATEGORIES,
-  PROPERTY_TYPES,
   isDeal,
   money,
   pick,
-  typesFor,
 } from '../lib/unitHelpers';
+import { useUnitTypeLists } from '../lib/unitLookups';
 import { FormError } from '../components/FormError';
 import { errorText, sendSearchAlert } from '../services/api';
 import { useRegions, useSubAreas } from '../lib/places';
@@ -99,6 +97,8 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
   onAlertRequested,
 }) => {
   const { language, tx, isRTL } = useLanguage();
+  // النشاط ونوع الوحدة من الـ API (GET /api/lookups)، زي فورم البيع.
+  const { categories: categoryOptions, allTypes, typesFor } = useUnitTypeLists();
   const [filters, setFilters] = useState<Filters>(() => ({ ...EMPTY_FILTERS, discounted: dealsOnly, ...preset?.filters }));
   const { user, requireAuth } = useAuth();
   const [alertPhone, setAlertPhone] = useState(user?.phone ?? '');
@@ -164,7 +164,7 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
       : []),
     ...filters.regionIds.map((v) => ({ key: `r-${v}`, label: placeLabelOf(regions, v), remove: () => pickPlaces(withoutId(filters.regionIds, v), filters.subAreaIds) })),
     ...filters.subAreaIds.map((v) => ({ key: `s-${v}`, label: placeLabelOf(subAreas, v), remove: () => pickPlaces(filters.regionIds, withoutId(filters.subAreaIds, v)) })),
-    ...filters.types.map((v) => ({ key: `t-${v}`, label: labelOf(PROPERTY_TYPES, v), remove: () => patch({ types: without(filters.types, v) }) })),
+    ...filters.types.map((v) => ({ key: `t-${v}`, label: labelOf(allTypes, v), remove: () => patch({ types: without(filters.types, v) }) })),
     ...filters.developers.map((v) => {
       const u = units.find((x) => developerKey(x) === v || x.developer === v);
       return { key: `d-${v}`, label: u ? pick(language, u.developer, u.developerEn) : v, remove: () => patch({ developers: without(filters.developers, v) }) };
@@ -322,7 +322,7 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
                   {tx(`${filters.categories.length} أنشطة`, `${filters.categories.length} categories`)}
                 </option>
               )}
-              {PROPERTY_CATEGORIES.map((c) => (
+              {categoryOptions.map((c) => (
                 <option key={c.ar} value={c.ar}>
                   {language === 'ar' ? c.ar : c.en}
                 </option>

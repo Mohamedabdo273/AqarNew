@@ -202,6 +202,18 @@ function cachedPlaces<T>(path: string): Promise<T> {
 export const fetchRegions = () => cachedPlaces<PlaceOption[]>('/locations/regions');
 export const fetchSubAreas = (regionId: number) => cachedPlaces<SubAreaOption[]>(`/locations/regions/${regionId}/sub-areas`);
 
+/** An entry of the API's option lists: the Arabic is what a unit stores, the English is the CRM's value. */
+export interface LookupOption {
+  ar: string;
+  en: string;
+}
+/** GET /api/lookups — the option lists the API validates against (categories and the unit types under each). */
+export interface UnitLookups {
+  categories: LookupOption[];
+  typesByCategory: Record<string, LookupOption[]>;
+}
+export const fetchLookups = () => cachedPlaces<UnitLookups>('/lookups');
+
 /** A developer from the catalog (GET /api/developers), the big names first. Kept by staff in the admin. */
 export interface DeveloperOption {
   id: number;

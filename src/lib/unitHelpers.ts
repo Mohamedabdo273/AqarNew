@@ -122,43 +122,50 @@ export const PROPERTY_CATEGORIES: { ar: RealEstateUnit['propertyCategory']; en: 
   { ar: 'إداري', en: 'Administrative' },
   { ar: 'فندقي', en: 'Hotel' },
   { ar: 'طبي', en: 'Medical' },
-  { ar: 'ترفيهي', en: 'Entertainment' },
 ];
 
-/** الفندقي بنفس أنواع السكني — نفس القايمة مش نسخة منها، عشان تعديل واحد يمشي على الاتنين. */
+/**
+ * الفندقي بنفس أنواع السكني — نفس القايمة مش نسخة منها، عشان تعديل واحد يمشي على الاتنين.
+ * الإنجليزي هو قيم Unit Type في Zoho CRM بالظبط (الـ CRM هو المرجع)، ولازم يفضل زي Catalog.cs في الباك إند.
+ */
 const LIVING_TYPES: { ar: RealEstateUnit['propertyType']; en: string }[] = [
+  { ar: 'شقة أرضي', en: 'Ground Apartment' },
   { ar: 'شقة', en: 'Apartment' },
-  { ar: 'استوديو', en: 'Studio' },
-  { ar: 'شاليه', en: 'Chalet' },
+  { ar: 'استوديو', en: 'Studio 1' },
   { ar: 'دوبلكس', en: 'Duplex' },
   { ar: 'تاون هاوس', en: 'Townhouse' },
-  { ar: 'توين هاوس', en: 'Twin house' },
-  { ar: 'فيلا', en: 'Villa' },
+  { ar: 'توين هاوس', en: 'Twin House' },
+  { ar: 'فيلا', en: 'Standalone Villa' },
+  { ar: 'فيلا دور واحد', en: 'One Story Villa' },
   { ar: 'بنتهاوس', en: 'Penthouse' },
-  { ar: 'أخرى', en: 'Other' },
+  { ar: 'آي فيلا', en: 'i Villa' },
+  { ar: 'سكاي فيلا', en: 'Sky Villa' },
+  { ar: 'بارك فيلا', en: 'Park Villa' },
+  { ar: 'سكاي هاوس', en: 'Sky House' },
+  { ar: 'إس فيلا', en: 'S Villa' },
+  { ar: 'سيتي فيلا', en: 'City Villa' },
+  { ar: 'لوفت', en: 'Loft' },
+  { ar: 'شاليه', en: 'Chalet 1' },
+  { ar: 'كابانا', en: 'Cabanna' },
 ];
 
 /** الأنواع تحت كل تصنيف. عدّل هنا وبس — الفلاتر والفورم بيقروا منها. */
 export const TYPES_BY_CATEGORY: Record<RealEstateUnit['propertyCategory'], { ar: RealEstateUnit['propertyType']; en: string }[]> = {
   'سكني': LIVING_TYPES,
   'تجاري': [
-    { ar: 'محل/مقر', en: 'Shop / premises' },
+    { ar: 'محل/مقر', en: 'Shop / Premises' },
     { ar: 'مخزن', en: 'Warehouse' },
-    { ar: 'مطعم/كافيه', en: 'Restaurant / cafe' },
+    { ar: 'مطعم/كافيه', en: 'Restaurant / Cafe' },
   ],
   'إداري': [
     { ar: 'مكتب', en: 'Office' },
-    { ar: 'دور إداري', en: 'Office floor' },
+    { ar: 'دور إداري', en: 'Office Floor' },
     { ar: 'مقر شركة', en: 'Company HQ' },
   ],
   'فندقي': LIVING_TYPES,
   'طبي': [
     { ar: 'عيادة', en: 'Clinic' },
     { ar: 'صيدلية', en: 'Pharmacy' },
-  ],
-  'ترفيهي': [
-    { ar: 'سينما', en: 'Cinema' },
-    { ar: 'ملاهي', en: 'Amusement park' },
   ],
 };
 

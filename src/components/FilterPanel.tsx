@@ -4,7 +4,8 @@ import { RealEstateUnit } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { Budget, BudgetFinder } from './BudgetFinder';
 import { Filters, developerKey } from '../lib/unitFilters';
-import { DELIVERY_OPTIONS, FINISHING_OPTIONS, VIEW_OPTIONS, FREQUENCY_OPTIONS, PROPERTY_CATEGORIES, typesFor, pick } from '../lib/unitHelpers';
+import { DELIVERY_OPTIONS, FINISHING_OPTIONS, VIEW_OPTIONS, FREQUENCY_OPTIONS, pick } from '../lib/unitHelpers';
+import { useUnitTypeLists } from '../lib/unitLookups';
 import { useRegions, useSubAreas } from '../lib/places';
 
 interface FilterPanelProps {
@@ -149,6 +150,8 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
 }) => {
   const { language, tx } = useLanguage();
   const [devQuery, setDevQuery] = useState('');
+  // التصنيف والنوع من الـ API (GET /api/lookups)، زي فورم البيع.
+  const { categories: categoryOptions, typesFor } = useUnitTypeLists();
 
   const developers = useMemo(() => {
     const map = new Map<string, { value: string; label: string; count: number }>();
@@ -223,7 +226,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
 
       <Section title={tx('التصنيف', 'Category')} active={f.categories.length} defaultOpen>
         <Chips
-          options={PROPERTY_CATEGORIES.map(L)}
+          options={categoryOptions.map(L)}
           selected={f.categories}
           onToggle={(v) => {
             const categories = toggle(f.categories, v);

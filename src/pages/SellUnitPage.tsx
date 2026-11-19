@@ -7,7 +7,7 @@ import { useUnits } from '../context/UnitsContext';
 import { useAuth } from '../context/AuthContext';
 import { errorText } from '../services/api';
 import { FormError } from '../components/FormError';
-import { PROPERTY_CATEGORIES, TYPES_BY_CATEGORY, CANCELLATION_PENALTY_MIN_RATE, CANCELLATION_PENALTY_RATE, DELIVERY_OPTIONS, FREQUENCY_OPTIONS, cancellationLoss, currency, money } from '../lib/unitHelpers';
+import { CANCELLATION_PENALTY_MIN_RATE, CANCELLATION_PENALTY_RATE, DELIVERY_OPTIONS, FREQUENCY_OPTIONS, cancellationLoss, currency, money } from '../lib/unitHelpers';
 import { baseName, compoundRank, useCompounds, useDeveloperCatalog, useDeveloperSearch } from '../lib/developers';
 import { EMPTY_SELL_FORM, MONTHS_PER_PAYMENT, SellForm, fitPlace, isValidPhone, netToSeller } from '../lib/sellForm';
 import { CheckBox, Field, FilePick, FilePickMany, MoneyInput, PhotoPick, SearchSelect, Select, Toggle } from '../components/sell/FormBits';
@@ -15,6 +15,7 @@ import { placeName, useRegions, useSubAreas } from '../lib/places';
 import { whatsappLink } from '../config/brand';
 import { COUNTRIES } from '../lib/countries';
 import { PhoneInput } from '../components/PhoneInput';
+import { useUnitTypeLists } from '../lib/unitLookups';
 
 interface SellUnitPageProps {
   onSubmitted: (code: string) => void;
@@ -88,6 +89,8 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
   }, [user]);
   const [errors, setErrors] = useState<string[]>([]);
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  // النشاط ونوع الوحدة من الـ API — نفس القوايم اللي بيتحقق بيها.
+  const unitTypes = useUnitTypeLists();
   const STEPS = [
     { n: 1 as const, label: tx('بياناتك', 'Your details') },
     { n: 2 as const, label: tx('الوحدة', 'The unit') },
@@ -521,7 +524,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
                 className="field"
               >
                 <option value="">{tx('اختار النشاط', 'Choose a category')}</option>
-                {PROPERTY_CATEGORIES.map((o) => (
+                {unitTypes.categories.map((o) => (
                   <option key={o.ar} value={o.ar}>
                     {language === 'ar' ? o.ar : o.en}
                   </option>
@@ -537,7 +540,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
                 className="field disabled:opacity-60"
               >
                 <option value="">{form.propertyCategory ? tx('اختار نوع الوحدة', 'Choose a unit type') : tx('اختار النشاط الأول', 'Choose the category first')}</option>
-                {(form.propertyCategory ? TYPES_BY_CATEGORY[form.propertyCategory] ?? [] : []).map((o) => (
+                {(form.propertyCategory ? unitTypes.typesByCategory[form.propertyCategory] ?? [] : []).map((o) => (
                   <option key={o.ar} value={o.ar}>
                     {language === 'ar' ? o.ar : o.en}
                   </option>
