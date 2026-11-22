@@ -85,7 +85,7 @@ export const VerifyPage: React.FC<VerifyPageProps> = ({ initialCode, onSelectUni
           value={code}
           onChange={(e) => setCode(e.target.value)}
           dir="ltr"
-          placeholder="WHD-PH-8821"
+          placeholder="D-0012"
           className={`field flex-1 num ${isRTL ? 'text-right' : 'text-left'}`}
           autoFocus={!initialCode}
         />

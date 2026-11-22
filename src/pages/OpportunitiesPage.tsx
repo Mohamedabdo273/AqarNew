@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Search, SlidersHorizontal, X, BellRing, Flame, ArrowUpDown, ChevronDown, Wallet, CalendarClock, KeyRound } from 'lucide-react';
+import { Search, SlidersHorizontal, X, BellRing, Flame, ArrowUpDown, ChevronDown, Wallet, CalendarClock, KeyRound, RotateCcw } from 'lucide-react';
 import { RealEstateUnit } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
@@ -187,10 +187,13 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
     ...(filters.noPenalties ? [{ key: 'pen', label: tx('بدون غرامات', 'No penalties'), remove: () => patch({ noPenalties: false }) }] : []),
   ];
 
+  // Back to everything: filters, search, budget and sort.
   const clearAll = () => {
     setFilters(EMPTY_FILTERS);
     onBudgetOnChange(false);
+    setSort('newest');
   };
+  const anyFilter = pills.length > 0 || filters.query.trim() !== '' || sort !== 'newest';
 
   const sorts: { key: SortKey; label: string }[] = [
     { key: 'newest', label: tx('الأحدث', 'Newest') },
@@ -370,6 +373,17 @@ export const OpportunitiesPage: React.FC<OpportunitiesPageProps> = ({
           </BudgetCell>
         </div>
 
+        {anyFilter && (
+          <button
+            type="button"
+            onClick={clearAll}
+            className="shrink-0 self-stretch inline-flex items-center gap-1.5 rounded-xl border border-danger/30 bg-danger-soft px-3 md:px-4 text-[15px] font-bold text-danger hover:bg-danger hover:text-white transition-colors"
+            aria-label={tx('امسح كل الفلاتر', 'Clear all filters')}
+          >
+            <RotateCcw className="w-4.5 h-4.5" />
+            <span className="hidden sm:inline">{tx('امسح الفلاتر', 'Clear filters')}</span>
+          </button>
+        )}
         <button onClick={() => setSheetOpen(true)} className="btn-primary shrink-0 self-stretch rounded-xl px-4 md:px-5 text-[15px]" aria-label={tx('كل الفلاتر', 'All filters')}>
           <SlidersHorizontal className="w-5 h-5" />
           <span>{tx('فلتر', 'Filter')}</span>

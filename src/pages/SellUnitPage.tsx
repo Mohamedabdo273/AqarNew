@@ -72,9 +72,15 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
   const [sendError, setSendError] = useState('');
 
   // Swap listings can be old units: not with any developer, or fully paid long ago.
-  const noDeveloper = form.developer === NO_DEVELOPER;
+  // Only in the swap form — the plain sell form has no switch to turn it back off.
+  const noDeveloper = swapMode && form.developer === NO_DEVELOPER;
   const [paidOff, setPaidOff] = useState(() => swapMode && form.contractPrice > 0 && form.paidAmount === form.contractPrice);
   const hasBalance = form.contractPrice > form.paidAmount;
+
+  // A draft saved from the swap form (no developer, address in the compound field) opened in the sell form: ask for both again.
+  useEffect(() => {
+    if (!swapMode && form.developer === NO_DEVELOPER) setForm((f) => ({ ...f, developer: '', developerId: null, compound: '', compoundId: null }));
+  }, [swapMode, form.developer]);
 
   // Listing for a swap: "open to swapping" is the point, so it's on and stays on.
   useEffect(() => {
