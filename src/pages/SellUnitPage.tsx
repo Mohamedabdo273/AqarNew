@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ShieldCheck, TrendingDown, Clock, ScrollText, Send, Check, MessageCircle, ArrowLeft, ArrowRight, Coins, EyeOff } from 'lucide-react';
+import { ShieldCheck, TrendingDown, Clock, ScrollText, Send, Check, MessageCircle, ArrowLeft, ArrowRight, Coins, EyeOff, RotateCcw } from 'lucide-react';
 import { PageId } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { SellDraft, useRequests } from '../context/RequestsContext';
@@ -440,6 +440,26 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
 
           {step === 2 && (
           <div className="space-y-7">
+          {/* Start the unit's details over in one tap. */}
+          {(form.regionId || form.developer || form.compound || form.propertyCategory || form.deliveryStatus) && (
+            <div className="flex justify-end -mb-3">
+              <button
+                type="button"
+                onClick={() =>
+                  setForm((f) => ({
+                    ...f,
+                    regionId: null, region: '', subAreaId: null, subArea: '', districtId: null, district: '',
+                    developer: '', developerId: null, compound: '', compoundId: null,
+                    propertyCategory: '', propertyType: '', deliveryStatus: '', alreadyDelivered: null, deliveryDate: '',
+                  }))
+                }
+                className="inline-flex items-center gap-1.5 rounded-full border border-danger/30 bg-danger-soft px-4 py-1.5 text-sm font-bold text-danger hover:bg-danger hover:text-white transition-colors"
+              >
+                <RotateCcw className="w-4 h-4" />
+                {tx('امسح بيانات الوحدة', 'Clear unit details')}
+              </button>
+            </div>
+          )}
           {/* 1. المنطقة والموقع جنب بعض */}
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label={tx('المنطقة', 'Area')} required htmlFor="region">

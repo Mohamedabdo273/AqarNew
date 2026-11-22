@@ -33,6 +33,7 @@ import {
   Search,
   KeyRound,
   MapPin,
+  RotateCcw,
 } from 'lucide-react';
 import { Filters, SortKey } from '../lib/unitFilters';
 import { PageId, RealEstateUnit } from '../types';
@@ -732,6 +733,17 @@ const HeroSearch: React.FC<{ units: RealEstateUnit[]; mode: HomeRole; onSearch: 
   const regions = useRegions();
   const locations = useSubAreas(region ? [Number(region)] : []);
 
+  const anyPicked = !!(query.trim() || region || subArea || category || type) || cash !== null || monthly !== null;
+  const resetSearch = () => {
+    setQuery('');
+    setRegion('');
+    setSubArea('');
+    setCategory('');
+    setType('');
+    setCash(null);
+    setMonthly(null);
+  };
+
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const filters: Partial<Filters> = {};
@@ -869,6 +881,16 @@ const HeroSearch: React.FC<{ units: RealEstateUnit[]; mode: HomeRole; onSearch: 
                     {q.label}
                   </button>
                 ))}
+                {anyPicked && (
+                  <button
+                    type="button"
+                    onClick={resetSearch}
+                    className="ms-auto inline-flex items-center gap-1.5 rounded-full border border-danger/30 bg-danger-soft px-4 py-1.5 text-sm font-bold text-danger hover:bg-danger hover:text-white transition-colors"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    {tx('امسح البحث', 'Clear search')}
+                  </button>
+                )}
               </div>
             </form>
           )}
