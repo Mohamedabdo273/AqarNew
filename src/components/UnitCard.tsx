@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, BadgeCheck, BedDouble, Bath, Maximize2, KeyRound, Flame, Scale, Check } from 'lucide-react';
+import { Heart, BadgeCheck, BedDouble, Bath, Maximize2, KeyRound, Flame, Scale, Check, CalendarDays } from 'lucide-react';
 import { RealEstateUnit } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useUnits } from '../context/UnitsContext';
@@ -12,7 +12,7 @@ import {
   isDeal,
   money,
   monthlyInstallment,
-  monthsLeft,
+  installmentsLeft,
   pick,
   savingsAmount,
   sellerDiscount,
@@ -49,11 +49,19 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
   const savings = noDiscount ? 0 : savingsAmount(unit);
   const ready = unit.deliveryStatus === 'استلام فوري';
   const frequency = FREQUENCY_OPTIONS.find((f) => f.ar === unit.installmentFrequency);
+  const published = unit.publishedAt
+    ? new Date(unit.publishedAt).toLocaleDateString(language === 'ar' ? 'ar-EG-u-nu-latn' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+    : null;
 
   const plan = [
-    { l: tx('الباقي من الأقساط', 'Rest of Installment'), v: `${money(unit.remainingAmount, language)} ${cur}` },
-    { l: tx('نوع القسط', 'Installment type'), v: (language === 'ar' ? unit.installmentFrequency : frequency?.en) || '—' },
-    { l: tx('مدة التقسيط', 'Duration'), v: monthsLeft(unit) > 0 ? tx(`${monthsLeft(unit)} شهر`, `${monthsLeft(unit)} months`) : '—' },
+    { l: tx('الباقي', 'Remaining'), v: `${money(unit.remainingAmount, language)} ${cur}` },
+    { l: tx('سعر العقد', 'Total'), v: `${money(unit.originalContractPrice, language)} ${cur}` },
+    {
+      l: tx('الأقساط الباقية', 'Rest of Installment'),
+      v: installmentsLeft(unit) > 0
+        ? `${installmentsLeft(unit)} ${(language === 'ar' ? unit.installmentFrequency : frequency?.en) || ''}`.trim()
+        : '—',
+    },
   ];
 
   const specs = [
@@ -157,11 +165,22 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
         <p className="mt-1 text-base text-muted line-clamp-1">
           {pick(language, unit.propertyType, unit.propertyTypeEn)} · {pick(language, unit.location, unit.locationEn)}
         </p>
-        {unit.verificationCode && (
-          <p className="mt-2 inline-flex self-start items-center gap-1.5 rounded-lg bg-brand-soft px-2.5 py-1 text-sm">
-            <span className="text-ink-soft">{tx('كود الوحدة', 'Unit code')}</span>
-            <span className="num font-extrabold text-brand-ink" dir="ltr">{unit.verificationCode}</span>
-          </p>
+        {(unit.verificationCode || published) && (
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            {unit.verificationCode && (
+              <p className="inline-flex items-center gap-1.5 rounded-lg bg-brand-soft px-2.5 py-1 text-sm">
+                <span className="text-ink-soft">{tx('كود الوحدة', 'Unit code')}</span>
+                <span className="num font-extrabold text-brand-ink" dir="ltr">{unit.verificationCode}</span>
+              </p>
+            )}
+            {published && (
+              <p className="inline-flex items-center gap-1.5 text-sm text-ink-soft">
+                <CalendarDays size={14} aria-hidden />
+                <span>{tx('اتنشرت', 'Published')}</span>
+                <span className="num font-semibold text-ink">{published}</span>
+              </p>
+            )}
+          </div>
         )}
 
         <ul className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-base text-ink-soft">

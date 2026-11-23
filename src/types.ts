@@ -136,6 +136,8 @@ export interface RealEstateUnit {
   propertyCategory?: PropertyCategory;
   propertyTypeEn?: string;
   originalContractPrice: number; // EGP
+  /** When it went live on the site (ISO, from the API); null for one not published yet. */
+  publishedAt?: string | null;
   currentMarketPrice: number; // EGP (shows huge savings)
   paidCashAmount: number; // What the seller wants back (0 overprice)
   remainingAmount: number; // Remaining installments to developer
