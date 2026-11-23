@@ -5,10 +5,10 @@ import { useLanguage } from '../context/LanguageContext';
 import { SellDraft, useRequests } from '../context/RequestsContext';
 import { useUnits } from '../context/UnitsContext';
 import { useAuth } from '../context/AuthContext';
-import { errorText } from '../services/api';
+import { errorText, fetchSubAreas } from '../services/api';
 import { FormError } from '../components/FormError';
 import { CANCELLATION_PENALTY_MIN_RATE, CANCELLATION_PENALTY_RATE, DELIVERY_OPTIONS, FREQUENCY_OPTIONS, cancellationLoss, currency, money } from '../lib/unitHelpers';
-import { baseName, compoundRank, useCompounds, useDeveloperCatalog, useDeveloperSearch } from '../lib/developers';
+import { baseName, compoundRank, useAllCompounds, useCompounds, useDeveloperCatalog, useDeveloperSearch } from '../lib/developers';
 import { EMPTY_SELL_FORM, MONTHS_PER_PAYMENT, SellForm, fitPlace, isValidPhone, netToSeller } from '../lib/sellForm';
 import { CheckBox, Field, FilePick, FilePickMany, MoneyInput, PhotoPick, SearchSelect, Select, Toggle } from '../components/sell/FormBits';
 import { placeName, useRegions, useSubAreas } from '../lib/places';
@@ -25,6 +25,8 @@ interface SellUnitPageProps {
   swapMode?: boolean;
 }
 
+/** Prefix of a compound option's value in the full list: its id follows. */
+const COMPOUND_ID = '#compound:';
 const DRAFT_KEY = 'wahdety_sell_quick_draft_v1';
 /** Developer name sent for a unit that isn't with any developer (an old flat, a private building) — the API knows it. */
 const NO_DEVELOPER = 'بدون مطور';
@@ -244,6 +246,8 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
   const [developerQuery, setDeveloperQuery] = useState('');
   const compoundMatches = useDeveloperSearch(developerQuery);
   const compounds = useCompounds(form.developerId);
+  // With no developer picked, the compound list holds every compound; picking one fills in its developer.
+  const allCompounds = useAllCompounds();
   // مسودة قديمة (قبل الـ ids) أو اسم مكتوب بالظبط زي اللي في القايمة: نربطه بالمطور عشان كمبونداته تظهر.
   useEffect(() => {
     if (form.developerId || !form.developer || !catalog.length) return;
@@ -261,8 +265,18 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
     return [...map.values()];
   }, [catalog, compoundMatches, units, language]);
   const compoundOptions = useMemo(() => {
-    if (!form.developer) return [];
     const map = new Map<string, { value: string; label: string; search: string }>();
+    if (!form.developer) {
+      // Every compound, labelled with its developer; the value carries its id (two developers can share a name).
+      const devs = new Map(catalog.map((d) => [d.id, d]));
+      const ranked = [...allCompounds].sort((a, b) => compoundRank(a, form.subAreaId, form.regionId, subAreas) - compoundRank(b, form.subAreaId, form.regionId, subAreas));
+      return ranked.map((c) => {
+        const d = devs.get(c.developerId);
+        const dev = d ? (language === 'ar' ? d.ar : d.en || d.ar) : '';
+        const name = language === 'ar' ? c.name : c.en || c.name;
+        return { value: `${COMPOUND_ID}${c.id}`, label: dev ? `${name} — ${dev}` : name, search: `${c.ar} ${c.en} ${d?.ar ?? ''} ${d?.en ?? ''}` };
+      });
+    }
     const ranked = [...compounds].sort((a, b) => compoundRank(a, form.subAreaId, form.regionId, subAreas) - compoundRank(b, form.subAreaId, form.regionId, subAreas));
     for (const c of ranked) map.set(baseName(c.name), { value: c.name, label: language === 'ar' ? c.name : c.en || c.name, search: `${c.ar} ${c.en}` });
     const devKey = baseName(form.developer);
@@ -270,7 +284,7 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
       if (baseName(u.developer) === devKey && u.compound && !map.has(baseName(u.compound))) map.set(baseName(u.compound), { value: u.compound, label: language === 'ar' ? u.compound : u.compoundEn || u.compound, search: u.compoundEn ?? '' });
     }
     return [...map.values()];
-  }, [compounds, units, language, form.developer, form.subAreaId, form.regionId, subAreas]);
+  }, [compounds, allCompounds, catalog, units, language, form.developer, form.subAreaId, form.regionId, subAreas]);
   const pickDeveloper = (v: string) => {
     const d = catalog.find((x) => x.ar === v);
     setForm((f) => {
@@ -278,9 +292,33 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
       return { ...f, developer: v, developerId: d?.id ?? null, compound: same ? f.compound : '', compoundId: same ? f.compoundId : null };
     });
   };
-  const pickCompound = (v: string) => {
-    const c = compounds.find((x) => x.name === v);
-    setForm((f) => ({ ...f, compound: v, compoundId: c?.id ?? null }));
+  // Picking a compound fills in its developer, area and location.
+  const pickCompound = async (v: string) => {
+    const picked = v.startsWith(COMPOUND_ID) ? allCompounds.find((x) => `${COMPOUND_ID}${x.id}` === v) : undefined;
+    const c = picked ?? compounds.find((x) => x.name === v);
+    const name = c?.name ?? v;
+    const dev = picked ? catalog.find((x) => x.id === picked.developerId) : undefined;
+    setForm((f) => ({
+      ...f,
+      compound: name,
+      compoundId: c?.id ?? null,
+      ...(dev ? { developer: dev.ar, developerId: dev.id } : {}),
+    }));
+    const region = c?.regionId ? regions.find((r) => r.id === c.regionId) : undefined;
+    if (!region) return;
+    let subArea: { id: number; ar: string } | undefined;
+    if (c?.subAreaId) {
+      try {
+        subArea = (await fetchSubAreas(region.id)).find((s) => s.id === c.subAreaId);
+      } catch {
+        subArea = undefined;
+      }
+    }
+    setForm((f) =>
+      f.compound !== name // they picked something else meanwhile
+        ? f
+        : { ...f, regionId: region.id, region: region.ar, subAreaId: subArea?.id ?? null, subArea: subArea?.ar ?? '', districtId: null, district: '' },
+    );
   };
 
   const submit = async () => {
@@ -532,10 +570,9 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
                 id="compound"
                 searchable
                 allowCustom
-                disabled={!form.developer}
                 value={form.compound}
-                onChange={pickCompound}
-                placeholder={form.developer ? tx('اختار الكمبوند', 'Choose the compound') : tx('اختار المطور الأول', 'Choose the developer first')}
+                onChange={(v) => void pickCompound(v)}
+                placeholder={form.developer ? tx('اختار الكمبوند', 'Choose the compound') : tx('اختار الكمبوند', 'Choose the compound')}
                 options={compoundOptions}
               />
             </Field>

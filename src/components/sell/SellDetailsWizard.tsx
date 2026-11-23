@@ -214,16 +214,6 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
                 </p>
               )}
             </Group>
-            <Group title={tx('أرقام إضافية', 'Extra figures')}>
-              <div className="grid sm:grid-cols-2 gap-4">
-                <Field label={tx('المقدم وقت التعاقد', 'Original down payment')} htmlFor="down">
-                  <MoneyInput id="down" value={form.downPaymentOriginal} onChange={(n) => set('downPaymentOriginal', n)} placeholder="500,000" />
-                </Field>
-                <Field label={tx('سعر نفس الوحدة من المطور النهارده', "Developer's price today")} htmlFor="market" hint={tx('مش عارفه؟ سيبه، واحنا هنجيبه', "Don't know it? Leave it — we'll find out")}>
-                  <MoneyInput id="market" value={form.currentMarketPrice} onChange={(n) => set('currentMarketPrice', n)} placeholder="9,000,000" />
-                </Field>
-              </div>
-            </Group>
           </div>
         )}
 

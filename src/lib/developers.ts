@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { CompoundOption, DeveloperOption, fetchCompounds, fetchDevelopers, searchDevelopers } from '../services/api';
+import { CompoundOption, CompoundWithDeveloper, DeveloperOption, fetchAllCompounds, fetchCompounds, fetchDevelopers, searchDevelopers } from '../services/api';
 
 /* المطورين ← الكمبوندات: القوايم جاية من الـ API (GET /api/developers…) والموظفين بيعدّلوها من الأدمن.
  * الوحدة بتتخزن بالـ id لو البائع اختار من القايمة، وبالاسم دايمًا — فاللي بيكتب اسم مش موجود بيكمّل عادي. */
@@ -39,6 +39,24 @@ export const useDeveloperCatalog = () => useList<DeveloperOption>('developers', 
 /** A developer's active compounds; empty with no developer picked from the list. */
 export const useCompounds = (developerId: number | null) =>
   useList<CompoundOption>(developerId ? `compounds:${developerId}` : null, () => fetchCompounds(developerId as number));
+
+/** Every compound with its developer, for picking the compound first. An API without the full list: asked developer by developer. */
+export const useAllCompounds = () =>
+  useList<CompoundWithDeveloper>('all-compounds', () =>
+    fetchAllCompounds().catch(async () => {
+      const devs = await fetchDevelopers();
+      const lists = await Promise.all(
+        devs
+          .filter((d) => d.compoundsCount > 0)
+          .map((d) =>
+            fetchCompounds(d.id)
+              .then((l) => l.map((c) => ({ ...c, developerId: d.id })))
+              .catch(() => [] as CompoundWithDeveloper[]),
+          ),
+      );
+      return lists.flat();
+    }),
+  );
 
 /**
  * Developer id → its compounds matching what the seller is typing, so "ميفيدا" finds إعمار.

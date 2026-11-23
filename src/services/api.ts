@@ -235,6 +235,9 @@ export interface CompoundOption {
 export const fetchDevelopers = () => cachedPlaces<DeveloperOption[]>('/developers');
 export const searchDevelopers = (q: string) => request<DeveloperOption[]>(`/developers?q=${encodeURIComponent(q)}`);
 export const fetchCompounds = (developerId: number) => cachedPlaces<CompoundOption[]>(`/developers/${developerId}/compounds`);
+export type CompoundWithDeveloper = CompoundOption & { developerId: number };
+/** Every compound with its developer (GET /developers/compounds). */
+export const fetchAllCompounds = () => cachedPlaces<CompoundWithDeveloper[]>('/developers/compounds');
 
 /** Every published unit, all pages. The listing filters and sorts on the client. */
 export async function fetchAllUnits(): Promise<RealEstateUnit[]> {
