@@ -85,6 +85,8 @@ export interface SellForm {
   acceptsCashInstallments: boolean;
   cashInstallmentNotes: string;
   eligibleForSwap: boolean;
+  /** Listed from "List your unit for a swap" (the CRM's Seller Type: Swaper); the sell form sends false. */
+  swapListing?: boolean;
   swapTargetType: string;
   // Documents
   /** أول 4 صفحات من العقد — أسماء الملفات. */

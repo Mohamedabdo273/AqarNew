@@ -87,6 +87,11 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
     if (swapMode) setForm((f) => (f.eligibleForSwap ? f : { ...f, eligibleForSwap: true }));
   }, [swapMode, form.eligibleForSwap]);
 
+  // Which page it was listed from: the CRM's Seller Type (Swaper / Seller).
+  useEffect(() => {
+    if (form.swapListing !== swapMode) setForm((f) => ({ ...f, swapListing: swapMode }));
+  }, [swapMode, form.swapListing]);
+
   // Signed in: fill the owner's name and mobile from the account, without overwriting what they typed.
   useEffect(() => {
     if (!user) return;
