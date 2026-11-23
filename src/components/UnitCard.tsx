@@ -51,7 +51,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, onOpen, fitsBudget, ta
   const frequency = FREQUENCY_OPTIONS.find((f) => f.ar === unit.installmentFrequency);
 
   const plan = [
-    { l: tx('الباقي من الأقساط', 'Total rest of installments'), v: `${money(unit.remainingAmount, language)} ${cur}` },
+    { l: tx('الباقي من الأقساط', 'Rest of Installment'), v: `${money(unit.remainingAmount, language)} ${cur}` },
     { l: tx('نوع القسط', 'Installment type'), v: (language === 'ar' ? unit.installmentFrequency : frequency?.en) || '—' },
     { l: tx('مدة التقسيط', 'Duration'), v: monthsLeft(unit) > 0 ? tx(`${monthsLeft(unit)} شهر`, `${monthsLeft(unit)} months`) : '—' },
   ];
