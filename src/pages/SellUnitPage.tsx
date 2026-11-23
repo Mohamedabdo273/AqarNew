@@ -591,8 +591,8 @@ export const SellUnitPage: React.FC<SellUnitPageProps> = ({ onSubmitted, onOpenR
                 <option key={o.ar} value={o.ar}>
                   {o.ar === 'استلام فوري'
                     ? swapMode
-                      ? tx('اتسلمت خلاص / وحدة قديمة', 'Handed over / an older unit')
-                      : tx('اتسلمت خلاص', 'Already handed over')
+                      ? tx('اتسلمت خلاص / وحدة قديمة', 'Ready to move')
+                      : tx('اتسلمت خلاص', 'Ready to move')
                     : tx(o.ar, `Delivery ${o.en}`)}
                 </option>
               ))}
