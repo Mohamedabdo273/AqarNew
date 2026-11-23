@@ -3,9 +3,9 @@ import { ArrowLeft, ArrowRight, Check, AlertTriangle, Lock, CheckCircle2 } from 
 import { FormError } from '../FormError';
 import { useLanguage } from '../../context/LanguageContext';
 import { DELIVERY_OPTIONS, FINISHING_OPTIONS, FREQUENCY_OPTIONS, fullMoney, transferFeeText } from '../../lib/unitHelpers';
-import { DETAIL_SECTIONS, MONTHS_PER_PAYMENT, SellForm, TaxBearer, TaxCategory, View, isResidential } from '../../lib/sellForm';
+import { DETAIL_SECTIONS, MONTHS_PER_PAYMENT, SellForm, isResidential } from '../../lib/sellForm';
 import { DOC_TYPE, DocType, errorText } from '../../services/api';
-import { CheckBox, Counter, Field, FilePick, Group, MoneyInput, MonthYearInput, NumberInput, Select, Toggle } from './FormBits';
+import { Counter, Field, FilePick, Group, MoneyInput, MonthYearInput, NumberInput, Select, Toggle } from './FormBits';
 
 interface SellDetailsWizardProps {
   initial: SellForm;
@@ -168,27 +168,10 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
                   }}
                 />
               </Field>
-              <Field label={tx('الواجهة', 'Facing')} htmlFor="facing">
-                <Select<View>
-                  id="facing"
-                  placeholder={tx('اختار الواجهة', 'Choose facing')}
-                  options={[
-                    { value: 'بحري صريح', label: tx('بحري صريح', 'North') },
-                    { value: 'بحري شرقي', label: tx('بحري شرقي', 'North-east') },
-                    { value: 'قبلي', label: tx('قبلي', 'South') },
-                    { value: 'شرقي', label: tx('شرقي', 'East') },
-                    { value: 'غربي', label: tx('غربي', 'West') },
-                  ]}
-                  value={form.viewOrientation}
-                  onChange={(v) => set('viewOrientation', v)}
-                />
-              </Field>
             </Group>
             <Group title={tx('مع الوحدة', 'Included')}>
               <div className="grid sm:grid-cols-3 gap-3">
                 <Toggle label={tx('جراج', 'Parking')} on={form.parkingIncluded} onChange={(v) => set('parkingIncluded', v)} />
-                <Toggle label={tx('عضوية النادي', 'Club')} on={form.clubhouseIncluded} onChange={(v) => set('clubhouseIncluded', v)} />
-                <Toggle label={tx('غرفة تخزين', 'Storage')} on={form.hasStorageRoom} onChange={(v) => set('hasStorageRoom', v)} />
               </div>
             </Group>
           </div>
@@ -257,43 +240,12 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
                 <Field label={tx('إجمالي المتأخرات والغرامات', 'Total overdue + fines')} required htmlFor="fines">
                   <MoneyInput id="fines" value={form.latePenaltiesAmount} onChange={(n) => set('latePenaltiesAmount', n)} placeholder="80,000" />
                 </Field>
-                <CheckBox checked={form.deductPenaltiesFromPrice} onChange={(v) => set('deductPenaltiesFromPrice', v)}>
-                  {tx('تتخصم من فلوسي والمشتري يسددها للمطور', 'Deduct from my payout; buyer settles it with the developer')}
-                </CheckBox>
               </Toggle>
-              <Toggle label={tx('وديعة الصيانة اتدفعت؟', 'Maintenance deposit paid?')} on={form.maintenanceDepositPaid} onChange={(v) => set('maintenanceDepositPaid', v)} />
             </Group>
 
-            <Group title={tx('الرسوم والضرايب', 'Fees & tax')}>
-              <p className="-mt-2 text-sm text-muted">{tx('مش متأكد؟ سيبها على "مش عارف" والمستشار هيراجعها من العقد.', 'Not sure? Leave "Don\'t know" and your advisor will check the contract.')}</p>
+            <Group title={tx('رسوم التنازل', 'Transfer fee')}>
               {/* Not the seller's choice any more: the developer's transfer fee is always the buyer's. */}
               <p className="rounded-xl bg-paper px-4 py-3 text-sm text-ink-soft">{transferFeeText(tx)}</p>
-              <Field label={tx('نوع الوحدة ضريبياً', 'Tax category')} htmlFor="taxcat">
-                <Select<TaxCategory>
-                  id="taxcat"
-                  options={[
-                    { value: '', label: tx('مش عارف', "Don't know") },
-                    { value: 'residential_exempt', label: tx('سكني (معفي)', 'Residential (exempt)') },
-                    { value: 'commercial_vat', label: tx('تجاري / إداري', 'Commercial (VAT)') },
-                    { value: 'business_tax', label: tx('مملوكة لشركة', 'Company-owned') },
-                  ]}
-                  value={form.taxCategory}
-                  onChange={(v) => set('taxCategory', v)}
-                />
-              </Field>
-              <Field label={tx('الضريبة على مين؟', 'Tax paid by')} htmlFor="taxby">
-                <Select<TaxBearer>
-                  id="taxby"
-                  options={[
-                    { value: 'حسب القانون', label: tx('حسب القانون', 'By law') },
-                    { value: 'بائع', label: tx('أنا', 'Me') },
-                    { value: 'مشتري', label: tx('المشتري', 'Buyer') },
-                    { value: 'معفى', label: tx('معفاة', 'Exempt') },
-                  ]}
-                  value={form.taxBearer}
-                  onChange={(v) => set('taxBearer', v)}
-                />
-              </Field>
             </Group>
           </div>
         )}
@@ -318,32 +270,11 @@ export const SellDetailsWizard: React.FC<SellDetailsWizardProps> = ({ initial, s
               onChange={(v) => set('negotiable', v)}
             />
             <Toggle
-              label={tx('تقبل الكاش على دفعتين؟', 'Accept cash in two payments?')}
-              hint={tx('مثلاً جزء عند التوقيع والباقي بشيك بعد شهرين', 'e.g. part on signing, rest by cheque in 60 days')}
-              on={form.acceptsCashInstallments}
-              onChange={(v) => set('acceptsCashInstallments', v)}
-            >
-              <textarea
-                value={form.cashInstallmentNotes}
-                onChange={(e) => set('cashInstallmentNotes', e.target.value)}
-                rows={2}
-                placeholder={tx('مثلاً: 60% عند التوقيع و40% بشيك بعد شهرين', 'e.g. 60% on signing, 40% cheque in 60 days')}
-                className="field h-auto py-3 resize-none"
-              />
-            </Toggle>
-            <Toggle
               label={tx('تقبل تبدّل وحدتك؟', 'Open to swapping?')}
               hint={tx('بوحدة تانية تدفع أو تاخد الفرق', 'For another unit, settling the difference')}
               on={form.eligibleForSwap}
               onChange={(v) => set('eligibleForSwap', v)}
-            >
-              <input
-                value={form.swapTargetType}
-                onChange={(e) => set('swapTargetType', e.target.value)}
-                placeholder={tx('عاوز إيه بدالها؟ مثلاً: شقة أصغر في زايد', 'What do you want instead?')}
-                className="field"
-              />
-            </Toggle>
+            />
           </Group>
         )}
 

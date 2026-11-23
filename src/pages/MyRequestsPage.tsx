@@ -198,7 +198,7 @@ export const MyRequestsPage: React.FC<MyRequestsPageProps> = ({ code, onOpenRequ
             setLookupError('');
           }}
           dir="ltr"
-          placeholder={tx('أدخل كود الطلب — مثلاً WHD-12345', 'Enter request code — e.g. WHD-12345')}
+          placeholder={tx('أدخل كود الطلب — مثلاً A12', 'Enter request code — e.g. A12')}
           className={`field flex-1 ${isRTL ? 'text-right' : 'text-left'}`}
         />
         <button className="btn-ghost h-13" aria-label={tx('دوّر', 'Find')} disabled={searching}>
